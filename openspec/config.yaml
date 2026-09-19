@@ -1,0 +1,63 @@
+schema: spec-driven
+
+# Project context (shown to AI when creating artifacts)
+context: |
+  DEC (Design Engineer's Calculator) is a cloud web service for automating
+  engineering calculations with a verified normative base (SP/GOST/SNiP), a
+  transparent ("white box") calculation engine, and GOST-compliant report generation.
+
+  Tech stack:
+  - Backend: Python 3.12, FastAPI, Pydantic
+  - Calculation engine: Python (NumPy/SciPy); architecture ready to hot-swap hot
+    paths to C/C++ later
+  - Database: PostgreSQL with full-text search (pg_trgm, GIN indexes)
+  - Frontend: React + TypeScript
+  - Transparent output: MathJax + React
+  - Report generation: python-docx (MVP, .docx), reportlab (.pdf, later)
+  - Infrastructure: Docker locally, later Yandex Cloud / VK Cloud / Cloud.ru
+  - Testing: pytest (backend), Vitest + React Testing Library (frontend),
+    Playwright (E2E), >= 95% branch coverage
+
+  Domain: design engineering. Users are structural/design engineers (novice and
+  experienced), norm-control specialists, and expert reviewers. The MVP reference
+  calculation is "beam deflection check" per SP 16.13330 (steel structures).
+
+  Conventions:
+  - Language: English for all specs, agents, skills, and commit messages.
+  - Commits: Conventional Commits.
+  - Branching: planning on the Specs branch; then create develop from main and merge
+    Specs into develop; main is frozen until the MVP. Development branches are
+    feature/<task>/<zone> where zone is backend/frontend (Akim) or data/ml/infra (Egor).
+  - Team: two developers, Akim (frontend/backend, engine, report generator) and Egor
+    (normative pipeline, NLP/RAG, DevOps, ML). Ask who is working before development.
+    Zones do not overlap except specs.
+  - Lint/type checks: backend ruff + mypy; frontend eslint + tsc.
+  - No ML in the calculation path (explicitly rejected). Normative data is entered
+    manually for MVP; NLP/RAG auto-parsing is a future goal.
+  - No code comments unless required.
+
+# Per-artifact rules
+rules:
+  proposal:
+    - "Keep the proposal focused on what and why; state the problem and the outcome."
+    - "Include a 'Non-goals' section."
+  specs:
+    - "Write each requirement as 'The system SHALL ...' with at least one '#### Scenario:'."
+    - "Record non-functional requirements (performance, security, accessibility) explicitly."
+  design:
+    - "Name the component boundary where Python hot paths can later be swapped to C/C++."
+  tasks:
+    - "Each task must be completable in one session."
+    - "Each task must state its zone sub-branch: feature/<task>/backend or feature/<task>/frontend (Akim), or feature/<task>/data, feature/<task>/ml, feature/<task>/infra (Egor)."
+    - "Include the DOR checklist and DOD/Go-No-Go criteria for the change."
+
+# Per-operation guidance
+operations:
+  apply:
+    guidance:
+      - "Implement on a dedicated branch only, never on develop/main."
+      - "Run lint and type checks before marking tasks complete."
+  archive:
+    guidance:
+      - "Confirm the tester GO verdict and >= 95% branch coverage before archiving."
+      - "Confirm ui-ux-tester approval when UI changed."
