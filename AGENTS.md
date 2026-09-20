@@ -62,6 +62,8 @@ Every task in this project MUST be recorded in specs through OpenSpec. There is 
 - The branch plan is part of the change proposal (in `tasks.md`), so it is also
   reflected in the specs via OpenSpec.
 - Do not implement on `develop`/`main` directly.
+- Repo-meta files (agent entry files, agent settings, `.editorconfig`, `agent-docs/`) are
+  not product changes and need no OpenSpec change; they are still committed on a branch.
 
 ## 3. DOR — Definition of Ready
 
@@ -101,7 +103,8 @@ A task is done only when ALL of the following hold:
 
 Two developers work on this project: **Akim** and **Egor**.
 
-- Before starting any development, ask which developer is working: Akim or Egor.
+- Before starting any development, ask which developer is working: Akim or Egor,
+  unless the agent's entry file already names the developer (`CLAUDE.md`: Akim).
 - Responsibility zones MUST NOT overlap (the only shared artifact is SPECS).
 - Specs extended by developers MUST complement each other, never contradict.
 - Code MUST NOT overlap across zones, so git branches merge without conflicts.
@@ -143,6 +146,9 @@ Zone-to-agent mapping:
   - Backend: `pytest` (unit + integration), coverage via `coverage.py`.
   - Frontend: `Vitest` + React Testing Library; E2E via Playwright.
   - Coverage target: >= 95% branch coverage.
+- **Domain constraints**: calculation code and norm references follow
+  `agent-docs/domain-constraints.md` (pure, deterministic, explicit units, primary-source
+  citations only).
 - **Code style**: no comments unless required; follow existing patterns; run lint and
   type checks before declaring done:
   - Backend: `ruff` (lint) + `mypy` (types).
@@ -150,9 +156,14 @@ Zone-to-agent mapping:
 
 ## 8. Where agents live
 
-- Kilo Code: `.kilo/agent/*.md` (canonical), `.kilo/command/*.md`, `.kilo/skills/*/SKILL.md`.
+- Kilo Code: `.kilo/agent/*.md` (canonical), `.kilo/skills/*/SKILL.md`,
+  `.kilocode/skills/*/SKILL.md`, `.kilocode/workflows/*.md`. Kilo reads `AGENTS.md` natively.
 - Claude Code: mirror under `.claude/agents/*.md`, `.claude/commands/`, `.claude/skills/`.
-- Keep both mirrors in sync when adding or changing agents.
+  Claude Code does not read `AGENTS.md`; `CLAUDE.md` imports it and adds nothing that
+  contradicts it. Claude-only settings live in `.claude/settings.json`.
+- Keep both mirrors in sync when adding or changing agents. Exception: agents that need
+  Claude-specific frontmatter (`model`, `tools`) may exist in `.claude/agents/` only,
+  and are listed in `CLAUDE.md`.
 
 ## 9. Required skills
 
