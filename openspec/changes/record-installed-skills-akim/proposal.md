@@ -11,10 +11,12 @@ not stored in the repository, so the specs are the only shared record.
 
 ## What Changes
 
-- Adds one requirement to the `development-process` capability: installed skills are
-  recorded per developer with name, source, install scope, and date.
-- Records the fifteen skills Akim installed on 2026-09-20 as scenario data: seven
-  required skills and eight of the 16 optional skills from `AGENTS.md` section 9.
+- Adds a requirement to the `development-process` capability: installed skills are
+  recorded per developer with name, source, install scope, and date, each developer in
+  a requirement of their own.
+- Adds the requirement "Installed skills of Akim" with the fifteen skills Akim installed
+  on 2026-09-20: seven required skills and eight of the 16 optional skills from
+  `AGENTS.md` section 9. It is verified against the skills CLI lock file.
 - Adds a non-functional requirement: the record holds only public identifiers, never
   local paths, tokens, or credentials.
 
