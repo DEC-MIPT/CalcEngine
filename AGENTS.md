@@ -137,6 +137,8 @@ Zone-to-agent mapping:
 | `ui-ux-tester` | Visual testing, control/button behavior, accessibility. |
 | `ui-ux-designer` | Visual design, design system, layouts. |
 | `spec-keeper` | Keeps OpenSpec specs actual, creates new agents/skills as the project grows. |
+| `spec-reviewer` | Read-only review of a spec or change for completeness, testability, and OpenSpec format; reports gaps, never edits. |
+| `norm-traceability-checker` | Read-only check that each calculation requirement names its norm source, edition, and clause; does not verify correctness. |
 
 ## 7. Conventions
 
