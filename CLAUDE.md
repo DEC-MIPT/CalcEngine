@@ -56,11 +56,14 @@ TBD, see planned change `bootstrap-dev-environment`: tests (`pytest`, `vitest`,
 `playwright`), lint and types (`ruff`, `mypy`, `eslint`, `tsc`), build, `docker`.
 Do not invent or run commands from this list; none of them is set up yet.
 
-## Subagents (Claude Code only)
+## Subagents (also mirrored in `.kilo/agent/`)
 
 - `spec-reviewer` — read-only review of a spec or change for completeness,
   testability, and OpenSpec format.
 - `norm-traceability-checker` — read-only check that every calculation requirement
   names its norm source and edition. It does not verify clause correctness.
+
+The Kilo mirrors carry no `model` or `tools`, so "read-only" is enforced by the
+prompt there, and by `tools` only in `.claude/agents/`. Keep the bodies identical.
 
 `docs/` is untracked by design (`.gitignore`); do not `@import` from it.
