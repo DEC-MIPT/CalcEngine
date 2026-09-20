@@ -4,16 +4,17 @@
 
 The `development-process` spec requires that any newly installed skill is recorded in
 the specs with the installing developer, and `AGENTS.md` section 9 repeats it. On
-2026-09-20 Akim installed the required project skills on a fresh machine and nothing
-records it yet, so the team cannot tell which skills each developer has. Skills are
-installed per machine and are not stored in the repository, so the specs are the only
-shared record.
+2026-09-20 Akim installed the required project skills and eight further skills named
+by the project's agents on a fresh machine, and nothing records it yet, so the team
+cannot tell which skills each developer has. Skills are installed per machine and are
+not stored in the repository, so the specs are the only shared record.
 
 ## What Changes
 
 - Adds one requirement to the `development-process` capability: installed skills are
   recorded per developer with name, source, install scope, and date.
-- Records the seven skills Akim installed on 2026-09-20 as scenario data.
+- Records the fifteen skills Akim installed on 2026-09-20 as scenario data: seven
+  required skills and eight of the 16 optional skills from `AGENTS.md` section 9.
 - Adds a non-functional requirement: the record holds only public identifiers, never
   local paths, tokens, or credentials.
 
@@ -23,7 +24,9 @@ shared record.
 - Recording Egor's skills; he records his own in a separate change.
 - Recording skills that were not installed with `npx skills` (for example the
   `docx` and `skill-creator` skills provided by the claude.ai sync).
-- Recording the 16 optional skills from `AGENTS.md` section 9 that are not installed.
+- Recording the eight optional skills that were not installed: `code-architecture-review`,
+  `code-reviewer`, `devops-cicd`, `devops-engineer`, `docs-generator`, `flask-python`,
+  `sqlite-database-expert`, `ui-ux-design`.
 - Changing the existing "Skill availability check" requirement.
 - Automating the record (no script or hook).
 - Vetting the skills' content or security.

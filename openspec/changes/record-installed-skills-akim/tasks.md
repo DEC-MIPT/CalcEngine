@@ -6,7 +6,7 @@ sub-branch applies. Developer: Akim.
 
 ## 1. Record the installation
 
-- [x] 1.1 Verify on disk that the seven skills are installed and visible to Claude Code (done 2026-09-20)
+- [x] 1.1 Verify on disk that the fifteen skills are installed and visible to Claude Code (done 2026-09-20)
 - [x] 1.2 Write the delta spec for `development-process` with the record and the content rule
 - [x] 1.3 Run `openspec validate record-installed-skills-akim --strict` (passed 2026-09-20)
 - [ ] 1.4 Run the `spec-reviewer` subagent on this change and resolve blockers
