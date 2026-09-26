@@ -1,0 +1,47 @@
+# Research docs and project passport — intentionally untracked
+docs/*
+!docs/decisions/
+!docs/decisions/**
+!docs/reports/
+!docs/reports/**
+Справочник студента/
+
+# Skills CLI cache (regenerable via skills-lock.json)
+.agents/
+.claude/skills/find-skills
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+.env.*
+!.env.example
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+build/
+coverage/
+
+# Docker (local overrides)
+docker-compose.override.yml
+
+# Claude Code (personal settings)
+.claude/settings.local.json
+
+# ML artifacts
+ml/models/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
