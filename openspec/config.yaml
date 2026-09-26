@@ -19,8 +19,9 @@ context: |
     Playwright (E2E), >= 95% branch coverage
 
   Domain: design engineering. Users are structural/design engineers (novice and
-  experienced), norm-control specialists, and expert reviewers. The MVP reference
-  calculation is "beam deflection check" per SP 16.13330 (steel structures).
+  experienced), norm-control specialists, and expert reviewers. The MVP domains are
+  shallow foundations first and internal water supply second. Norm editions for both
+  are unverified until checked against the source texts.
 
   Conventions:
   - Language: English for all specs, agents, skills, and commit messages.
