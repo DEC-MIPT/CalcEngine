@@ -1,5 +1,9 @@
 # Research docs and project passport — intentionally untracked
-docs/
+docs/*
+!docs/decisions/
+!docs/decisions/**
+!docs/reports/
+!docs/reports/**
 Справочник студента/
 
 # Skills CLI cache (regenerable via skills-lock.json)
