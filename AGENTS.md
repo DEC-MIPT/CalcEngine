@@ -48,9 +48,12 @@ Every task in this project MUST be recorded in specs through OpenSpec. There is 
 
 ### Branching rules
 
-- **Planning phase**: work happens on the `Specs` branch.
-- **After planning is complete**: commit and push `Specs`, then create `develop` from
-  `main` and merge `Specs` into `develop`.
+- **All work happens in the `develop` branch only.** The bootstrap is done:
+  `develop` was created from `main` and contains the former `Specs` /
+  `Specs-onboarding` work. The `Specs*` branches are historical and no longer used.
+- **A sub-branch of `develop` is a task branch** — exactly the branch a developer
+  (Akim or Egor) is currently working on. Create it from `develop` and merge it back
+  into `develop` when the task is done.
 - **`main` is frozen until MVP**: nothing is merged into `main` until there is a
   working prototype in `develop` (that prototype is the MVP).
 - Every task gets its own branch AND a zone sub-branch from `develop`. Zone
@@ -61,9 +64,23 @@ Every task in this project MUST be recorded in specs through OpenSpec. There is 
   - Fixes use `fix/<task>/<zone>`.
 - The branch plan is part of the change proposal (in `tasks.md`), so it is also
   reflected in the specs via OpenSpec.
-- Do not implement on `develop`/`main` directly.
+- Do not implement directly on `develop`/`main`; implement on the task sub-branch
+  and merge it into `develop`.
 - Repo-meta files (agent entry files, agent settings, `.editorconfig`, `agent-docs/`) are
   not product changes and need no OpenSpec change; they are still committed on a branch.
+
+### Session start
+
+Before starting a development session, an agent MUST check the state of commits on
+`develop` and its remote:
+
+- Run `git fetch --all` and inspect the commits that arrived on `origin/develop`
+  and `origin/main` since the last session.
+- If anything important arrived (new changes, merges, spec updates), warn the
+  developer about it before doing anything else.
+- Remind the developer to run `git pull` (and `git fetch --all`) so the local
+  `develop` is up to date before starting work.
+- Check `git status` for uncommitted or untracked work left by previous sessions.
 
 ## 3. DOR — Definition of Ready
 

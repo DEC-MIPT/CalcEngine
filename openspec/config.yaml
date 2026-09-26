@@ -26,9 +26,13 @@ context: |
   Conventions:
   - Language: English for all specs, agents, skills, and commit messages.
   - Commits: Conventional Commits.
-  - Branching: planning on the Specs branch; then create develop from main and merge
-    Specs into develop; main is frozen until the MVP. Development branches are
-    feature/<task>/<zone> where zone is backend/frontend (Akim) or data/ml/infra (Egor).
+  - Branching: all work happens on the develop branch only (created from main,
+    containing the former Specs/Specs-onboarding work); a sub-branch of develop is
+    the task branch a developer (Akim or Egor) is currently working on; main is
+    frozen until the MVP. Development branches are feature/<task>/<zone> where zone
+    is backend/frontend (Akim) or data/ml/infra (Egor). Before a development
+    session, check commits on develop and its remote (git fetch --all), warn about
+    important changes, and remind the developer to run git pull.
   - Team: two developers, Akim (frontend/backend, engine, report generator) and Egor
     (normative pipeline, NLP/RAG, DevOps, ML). Ask who is working before development.
     Zones do not overlap except specs.

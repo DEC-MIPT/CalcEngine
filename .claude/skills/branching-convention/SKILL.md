@@ -1,16 +1,28 @@
 ---
 name: branching-convention
-description: Branching convention for DEC. Planning happens on Specs, development on develop with zone sub-branches, and main stays frozen until the MVP. Use when creating branches for any task.
+description: Branching convention for DEC. All work happens on develop; every task is a sub-branch of develop for the developer (Akim or Egor) working on it, and main stays frozen until the MVP. Use when creating branches for any task.
 ---
 
 # Branching Convention
 
 ## Repository flow
 
-- Planning happens on the `Specs` branch.
-- When planning is done: commit and push `Specs`, create `develop` from `main`, and
-  merge `Specs` into `develop`.
+- All work happens on the `develop` branch only. `develop` was created from `main`
+  and contains the former `Specs` / `Specs-onboarding` work; the `Specs*` branches
+  are historical and no longer used.
+- A sub-branch of `develop` is a task branch — exactly the branch a developer
+  (Akim or Egor) is currently working on. Create it from `develop` and merge it
+  back into `develop` when the task is done.
 - Nothing is merged into `main` until a working prototype (the MVP) exists in `develop`.
+
+## Session start
+
+Before starting a development session, check the state of commits on `develop` and
+its remote: run `git fetch --all`, inspect the commits that arrived on `origin/develop`
+and `origin/main` since the last session, and warn the developer about anything
+important before doing other work. Remind the developer to run `git pull` (and
+`git fetch --all`) so the local `develop` is up to date, and check `git status` for
+uncommitted or untracked work left by previous sessions.
 
 ## Development branches
 
