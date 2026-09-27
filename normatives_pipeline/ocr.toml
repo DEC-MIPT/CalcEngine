@@ -1,0 +1,18 @@
+# Конфиг двухстадийного чтения формулы (детекция + распознавание + коррекция).
+
+[detect]
+left_indent = 60
+up_margin = 5
+down_margin = 30
+pad = 4
+
+[recognize]
+resolution = 600
+
+[correct]
+replacements = [
+  ["\\mathrm{in}", "II"],
+  ["\\mathrm{i}", "II"],
+  ["\\bar{1}", "1"],
+  ["\\mathrm{t g}", "\\mathrm{tg}"],
+]

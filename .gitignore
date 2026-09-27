@@ -40,6 +40,16 @@ docker-compose.override.yml
 # ML artifacts
 ml/models/
 
+# Research notebook artifacts (generated page images and formula crops)
+normatives_pipeline/research/pages/
+normatives_pipeline/research/crops/
+
+# Research datasets (im2latex-100k etc.)
+normatives_pipeline/research/data/
+
+# Downloaded normative documents (full texts are not redistributed)
+norm-docs/
+
 # OS / editor
 .DS_Store
 .idea/

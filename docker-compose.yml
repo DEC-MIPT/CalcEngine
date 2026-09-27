@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: dec-postgres
+    environment:
+      POSTGRES_USER: dec
+      POSTGRES_PASSWORD: dec
+      POSTGRES_DB: dec
+    ports:
+      - "5433:5432"
+    volumes:
+      - dec_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dec -d dec"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  dec_pgdata:
