@@ -95,7 +95,17 @@ See `proposal.md` (Why) for the motivation. Two facts shape this design:
    of the pre-commit hook, since a test suite is too slow for every commit.
    `pre-commit`'s config format is shared at the repo root, but its backend-specific
    hook only inspects `backend/`, so it does not require Egor's agreement the way
-   editing his `pyproject.toml` would.
+   editing his `pyproject.toml` would. Confirmed 2026-09-28: neither `pre-commit` nor
+   `detect-secrets` was installed anywhere in the checkout; both are added to
+   `backend/requirements-dev.txt` (same reproducible path as the other backend dev
+   tools) — `detect-secrets` for the bare `scan` CLI (task 4.2), `pre-commit` for the
+   hook runner itself; `.pre-commit-config.yaml`'s own `detect-secrets` hook gets a
+   separate, pre-commit-managed environment from the pinned `rev`. `.env.example`
+   (task 4.3) names its two variables `DEC_APP_DATABASE_URL` and
+   `DEC_NORMATIVES_DATABASE_URL` — Akim's own interim choice, since neither
+   `backend-layered-architecture` decision 4 nor its (still pending) task 2.1 fixes a
+   literal variable name for the two databases it names; task 4.4's config/`.env.example`
+   cross-check, once unblocked, is what will confirm or correct this naming.
 
 6. **Import-contract check: `import-linter`.** Added as a backend dev dependency now;
    its `[tool.importlinter]` "layers" contract, naming
