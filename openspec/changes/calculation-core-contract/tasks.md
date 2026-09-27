@@ -66,7 +66,7 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 ## 8. Close
 
 - [ ] 8.1 (spec) After 1.2-1.6 pass, confirm the final version of the change is on `develop`
-- [ ] 8.2 (spec) Confirm WP1 task 2.1 (`retarget-mvp-domain`) is closed: the WP1 engine and output deltas match this contract
+- [x] 8.2 (spec) Confirm WP1 task 2.1 (`retarget-mvp-domain`) is closed: the WP1 engine and output deltas match this contract (2026-09-27; `docs/decisions/retarget-mvp-domain-akim-review.md`)
 - [ ] 8.3 (spec) `spec-keeper` syncs the deltas and archives the change, after `retarget-mvp-domain` is archived
 
 ## Dependencies

@@ -20,8 +20,8 @@ Executor tags: **[Akim]** engine/backend zone, **[Egor]** catalog/data zone, **[
 
 ## 2. Engine-facing scenarios (Akim)
 
-- [ ] 2.1 [Akim] Review the `calculation-engine` delta and the `transparent-output` example; confirm they match the future `calculation-core-contract`
-- [ ] 2.2 [Akim] Review the `web-platform` and `user-accounts` dedup; confirm no requirement lost its owner
+- [x] 2.1 [Akim] Review the `calculation-engine` delta and the `transparent-output` example; confirm they match the future `calculation-core-contract` (2026-09-27: three mismatches fixed in both deltas, `spec-reviewer` READY; see `docs/decisions/retarget-mvp-domain-akim-review.md`)
+- [x] 2.2 [Akim] Review the `web-platform` and `user-accounts` dedup; confirm no requirement lost its owner (2026-09-27: no requirement lost its owner; two minor duplicates listed in the same file)
 
 ## 3. Catalog and data (Egor)
 
@@ -39,10 +39,10 @@ Found by the grep sweep on 2026-09-26. Not edited by this draft; the owner decid
 
 ## 5. Validate and close
 
-- [ ] 5.1 [Akim] Run `openspec validate retarget-mvp-domain --strict` and `openspec validate --all --strict`
+- [x] 5.1 [Akim] Run `openspec validate retarget-mvp-domain --strict` and `openspec validate --all --strict` (2026-09-27: valid; 17/17)
 - [ ] 5.2 [Agent: spec-reviewer] Review the change; resolve blockers
 - [ ] 5.3 [Agent: norm-traceability-checker] Confirm no norm reference is unmarked
-- [ ] 5.4 [Akim] Run the keyword grep over `openspec/` excluding `archive/`; expected hits only in files listed in section 4
+- [x] 5.4 [Akim] Run the keyword grep over `openspec/` excluding `archive/`; expected hits only in files listed in section 4 (2026-09-27: nine hits, all in files of tasks 4.1-4.3; see `docs/decisions/retarget-mvp-domain-akim-review.md`)
 - [ ] 5.5 [Agent: tester] Issue the verdict (see DOD)
 - [ ] 5.6 [Egor] Merge to `Specs` after 5.1-5.5 pass
 - [ ] 5.7 [Agent: spec-keeper] Sync the deltas into `openspec/specs/` and archive the change
