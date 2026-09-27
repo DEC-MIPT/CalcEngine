@@ -9,7 +9,7 @@
 
 | Item | State | Blocks |
 |---|---|---|
-| First calculation type(s) of `foundations-shallow` | **Open**: the in-scope list is TBD (`retarget-mvp-domain` task 3.1, Egor and the PM); questions in `first-calculation-type-egor-pm.md` | Everything below; WP2 task 7.1 (pilot) |
+| First calculation type(s) of `foundations-shallow` | **Agreed** 2026-09-27 (Egor and the PM, `first-calculation-type-egor-pm.md`, questions 1-2): R, formula 5.7 of СП 22.13330.2016. Egor still has to write it into `foundations-shallow`'s in-scope list (`retarget-mvp-domain` task 3.1) | WP2 task 7.1 (pilot), until task 3.1 is done |
 | Coefficient table 5.5 of СП 22.13330.2016 (if the type is R) | **Open**: tables are extracted but not stored in Egor's pipeline; `normatives-formula-contract-review-egor.md`, question 7 | The pilot run of R; WP2 task 7.1 |
 | Bibliographic record of the guide | Filled (section 2) | Source citation of every example |
 | 3 worked examples per calculation type | Filled (section 3), 3 of 5 found; `tolerance`/`tolerance_kind`/`tolerance_source` still open | WP4 tasks 2.1-2.4; step 5 (first slice) |
@@ -43,9 +43,11 @@ not a reference example and must not be admitted to the suite.
   refined width). `Metodrekomendacii_po_RGR_Osnovaniya_i_fundamenty.pdf` has 5 more
   (pages 11-12, 14, 19, 21) and can serve as a second source later if more than 3
   examples are wanted. Well above the required 3.
-- Agreed by Egor and the PM on: Egor confirmed the candidate in
-  `first-calculation-type-egor-pm.md`, question 2, before this count was checked. PM
-  answer is still open (same file, question 2, "Answer (PM)").
+- Agreed by Egor and the PM on: 2026-09-27. Egor confirmed the candidate in
+  `first-calculation-type-egor-pm.md`, question 2, before this count was checked; the
+  PM approved verbally to Akim the same day (no repository access yet, recorded on her
+  behalf; same file, question 2, "Answer (PM)"). Both questions 1 and 2 are now
+  answered by both.
 
 ## 2. Source record
 
