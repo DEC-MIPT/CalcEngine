@@ -25,6 +25,12 @@ def output_config() -> dict:
 
 
 @lru_cache(maxsize=1)
+def search_config() -> dict:
+    with PARSER_TOML.open("rb") as fh:
+        return tomllib.load(fh)["search"]
+
+
+@lru_cache(maxsize=1)
 def formula_manifest() -> list[dict]:
     with FORMULAS_TOML.open("rb") as fh:
         return tomllib.load(fh).get("formula", [])

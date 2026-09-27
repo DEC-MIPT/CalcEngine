@@ -216,18 +216,28 @@ def extract_cross_refs(pages: list[str], clauses: list[Clause]) -> list[CrossRef
     return out
 
 
+def _table_caption(page, bbox: tuple) -> str:
+    top = bbox[1]
+    crop = page.within_bbox((0, max(0, top - 60), page.width, top))
+    collapsed = re.sub(r"\s+", "", crop.extract_text() or "")
+    m = re.search(r"[Тт]аблиц[а-я]*(\d+(?:\.\d+)?)", collapsed)
+    return m.group(1) if m else ""
+
+
 def extract_tables(path: Path, max_pages: int | None = None) -> list[Table]:
     out: list[Table] = []
     with pdfplumber.open(path) as pdf:
         pages = pdf.pages if max_pages is None else pdf.pages[:max_pages]
         for page_no, page in enumerate(pages, start=1):
-            for tbl in page.extract_tables():
+            for tbl in page.find_tables():
                 rows = tuple(
                     tuple("" if cell is None else str(cell).strip() for cell in row)
-                    for row in tbl
+                    for row in tbl.extract()
                 )
-                if rows:
-                    out.append(Table(number="", rows=rows, page=page_no))
+                if not rows:
+                    continue
+                number = _table_caption(page, tbl.bbox)
+                out.append(Table(number=number, rows=rows, page=page_no))
     return out
 
 

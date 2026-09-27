@@ -80,3 +80,15 @@ def test_numbering_schemes(corpus_pages: dict[str, list[str]]) -> None:
     clauses = extractors.extract_clauses(p45)
     unnumbered, _ = extractors.extract_unnumbered_formulas(p45, clauses)
     assert len(unnumbered) > 0
+
+
+def test_tables_extracted_with_numbers() -> None:
+    path = NORM_DOCS / "СП 22.13330.2016.pdf"
+    if not path.exists():
+        pytest.skip(f"нет файла: {path}")
+    tables = extractors.extract_tables(path)
+    assert len(tables) > 0
+    numbered = {t.number for t in tables if t.number}
+    assert "5.5" in numbered
+    t55 = next(t for t in tables if t.number == "5.5")
+    assert len(t55.rows) >= 20

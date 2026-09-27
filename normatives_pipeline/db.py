@@ -11,9 +11,7 @@ from psycopg2.extras import (  # type: ignore[import-untyped]
     execute_values,
 )
 
-from .config import output_config
-
-DB_URL = os.environ.get("DEC_DATABASE_URL", "postgresql://dec:dec@localhost:5433/dec")
+from .config import output_config, search_config
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS document (
@@ -70,19 +68,38 @@ CREATE TABLE IF NOT EXISTS cross_ref (
     url TEXT NOT NULL DEFAULT ''
 );
 
+CREATE TABLE IF NOT EXISTS coefficient (
+    id SERIAL PRIMARY KEY,
+    document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
+    table_number TEXT NOT NULL DEFAULT '',
+    page INT,
+    row_index INT NOT NULL,
+    col_index INT NOT NULL,
+    value TEXT NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_clause_doc ON clause(document_id);
 CREATE INDEX IF NOT EXISTS idx_formula_doc ON formula(document_id);
 CREATE INDEX IF NOT EXISTS idx_notation_doc ON notation_entry(document_id);
 CREATE INDEX IF NOT EXISTS idx_crossref_doc ON cross_ref(document_id);
+CREATE INDEX IF NOT EXISTS idx_coefficient_doc ON coefficient(document_id);
+CREATE INDEX IF NOT EXISTS idx_coefficient_table ON coefficient(document_id, table_number);
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+DROP INDEX IF EXISTS idx_clause_search;
+DROP INDEX IF EXISTS idx_formula_search;
 CREATE INDEX IF NOT EXISTS idx_clause_search ON clause
-    USING gin (to_tsvector('simple', search_text));
+    USING gin (search_text gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_formula_search ON formula
-    USING gin (to_tsvector('simple', search_text));
+    USING gin (search_text gin_trgm_ops);
 """
 
 
 def connect() -> Any:
-    return psycopg2.connect(DB_URL, cursor_factory=RealDictCursor)
+    url = os.environ.get("DEC_DATABASE_URL")
+    if not url:
+        raise RuntimeError("DEC_DATABASE_URL не задан")
+    return psycopg2.connect(url, cursor_factory=RealDictCursor)
 
 
 def init_schema(conn: Any) -> None:
@@ -177,40 +194,60 @@ def insert_cross_refs(conn: Any, doc_id: int, rows: list[tuple]) -> None:
     conn.commit()
 
 
-def _tsquery_variants(lemmas: str) -> tuple[str, str]:
-    tokens = [t for t in lemmas.split() if t]
-    return (" & ".join(tokens), " | ".join(tokens))
+def insert_coefficients(conn: Any, doc_id: int, rows: list[tuple]) -> None:
+    with conn.cursor() as cur:
+        execute_values(
+            cur,
+            """
+            INSERT INTO coefficient
+                (document_id, table_number, page, row_index, col_index, value)
+            VALUES %s
+            """,
+            [(doc_id, *row) for row in rows],
+        )
+    conn.commit()
 
 
-def _fts_search(conn: Any, table: str, alias: str, cols: str, lemmas: str, k: int) -> list[dict]:
-    and_q, or_q = _tsquery_variants(lemmas)
+def fetch_coefficients(conn: Any, doc_id: int, table_number: str) -> list[dict]:
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT table_number, page, row_index, col_index, value
+            FROM coefficient
+            WHERE document_id = %s AND table_number = %s
+            ORDER BY row_index, col_index
+            """,
+            (doc_id, table_number),
+        )
+        return [dict(row) for row in cur.fetchall()]
+
+
+def _trgm_search(
+    conn: Any, table: str, alias: str, cols: str, query: str, k: int
+) -> list[dict]:
+    threshold = search_config()["similarity_threshold"]
     sql = f"""
         SELECT d.id AS document_id, d.designation, {cols},
-               ts_rank(to_tsvector('simple', {alias}.search_text),
-                       to_tsquery('simple', %s)) AS rank
+               similarity({alias}.search_text, %s) AS rank
         FROM {table} {alias}
         JOIN document d ON d.id = {alias}.document_id
-        WHERE to_tsvector('simple', {alias}.search_text) @@ to_tsquery('simple', %s)
+        WHERE similarity({alias}.search_text, %s) > %s
         ORDER BY rank DESC
         LIMIT %s
     """
-    for q in (and_q, or_q):
-        with conn.cursor() as cur:
-            cur.execute(sql, (q, q, k))
-            rows = [dict(row) for row in cur.fetchall()]
-        if rows:
-            return rows
-    return []
+    with conn.cursor() as cur:
+        cur.execute(sql, (query, query, threshold, k))
+        return [dict(row) for row in cur.fetchall()]
 
 
 def search_formulas(conn: Any, lemmas: str, k: int = 5) -> list[dict]:
-    cols = "f.number, f.clause_number, f.latex, f.expression, f.raw_text, f.page"
-    return _fts_search(conn, "formula", "f", cols, lemmas, k)
+    cols = "f.number, f.clause_number, f.latex, f.expression, f.raw_text, f.page, d.edition"
+    return _trgm_search(conn, "formula", "f", cols, lemmas, k)
 
 
 def search_clauses(conn: Any, lemmas: str, k: int = 5) -> list[dict]:
     cols = "c.number, c.title, c.page"
-    return _fts_search(conn, "clause", "c", cols, lemmas, k)
+    return _trgm_search(conn, "clause", "c", cols, lemmas, k)
 
 
 def fetch_notation(conn: Any, doc_id: int, formula_number: str) -> list[dict]:
@@ -241,13 +278,24 @@ def fetch_cross_refs(conn: Any, doc_id: int, clause_number: str) -> list[dict]:
         return [dict(row) for row in cur.fetchall()]
 
 
+def _formula_locator(formula: dict) -> str:
+    cfg = output_config()
+    number = formula.get("number") or ""
+    clause = formula.get("clause_number") or ""
+    if "#" in number or not number:
+        return f"{cfg['clause_prefix']} {clause}" if clause else "unverified"
+    return f"{cfg['formula_prefix']} ({number})"
+
+
 def build_formula_payload(conn: Any, formula: dict) -> dict:
     cfg = output_config()
 
     norm_ref = {
-        "designation": formula.get("designation", ""),
-        "clause": formula.get("clause_number") or "",
-        "formula": formula.get("number", ""),
+        "document": formula.get("designation", ""),
+        "edition": formula.get("edition") or "unverified",
+        "clause": _formula_locator(formula),
+        "status": "unverified",
+        "provenance": "machine-extracted",
     }
     norm_ref = {k: norm_ref[k] for k in cfg["norm_ref_keys"]}
 
@@ -268,6 +316,7 @@ def build_formula_payload(conn: Any, formula: dict) -> dict:
 
     payload = {
         "norm_ref": norm_ref,
+        "formula_id": formula.get("number", ""),
         "latex": formula.get("latex") or "",
         "symbols": symbols,
         "expression": formula.get("expression", ""),

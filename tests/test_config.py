@@ -20,6 +20,7 @@ def test_parser_config_maps() -> None:
 
 def test_output_config_keys() -> None:
     cfg = output_config()
-    assert cfg["formula_keys"] == ["norm_ref", "latex", "symbols", "expression", "cross_refs"]
+    assert cfg["formula_keys"] == ["norm_ref", "formula_id", "latex", "symbols", "expression", "cross_refs"]
+    assert cfg["norm_ref_keys"] == ["document", "edition", "clause", "status", "provenance"]
     assert "id" in cfg["symbol_keys"]
     assert cfg["default_symbol_kind"]

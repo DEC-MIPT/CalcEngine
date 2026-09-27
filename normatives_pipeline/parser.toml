@@ -78,10 +78,15 @@ formula_label = 'формула'
 "\uf074" = "\\zeta"
 
 [output]
-formula_keys = ["norm_ref", "latex", "symbols", "expression", "cross_refs"]
-norm_ref_keys = ["designation", "clause", "formula"]
+formula_keys = ["norm_ref", "formula_id", "latex", "symbols", "expression", "cross_refs"]
+norm_ref_keys = ["document", "edition", "clause", "status", "provenance"]
 symbol_keys = ["id", "latex", "meaning", "unit", "kind"]
 default_symbol_kind = "input"
+clause_prefix = "п."
+formula_prefix = "форм."
+
+[search]
+similarity_threshold = 0.1
 
 [parser.cyr_map]
 "а" = "a"

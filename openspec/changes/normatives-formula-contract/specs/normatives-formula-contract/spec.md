@@ -23,11 +23,15 @@ representation.
 - **THEN** its id is `gamma_c1` and its latex is `\gamma_{c1}`
 
 ### Requirement: Traceability reference
-The system SHALL attach a normative reference to each formula payload.
+The system SHALL attach the agreed `NormRef` to each formula payload.
 
 #### Scenario: NormRef
 - **WHEN** a formula is returned
-- **THEN** it carries `designation`, `clause`, and `formula` identifying its source
+- **THEN** its `norm_ref` carries `document`, `edition`, `clause`, `status`, and `provenance`
+
+#### Scenario: Internal id outside NormRef
+- **WHEN** a formula has a synthetic internal id (e.g. `13.8#1`)
+- **THEN** it is carried in the payload field `formula_id`, not in `norm_ref`
 
 ### Requirement: Inspectable return
 The system SHALL expose the payload through a query function whose return value is the

@@ -7,9 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class NormRef:
-    designation: str
+    document: str
+    edition: str
     clause: str
-    formula: str = ""
+    status: str
+    provenance: str
 
 
 @dataclass(frozen=True)

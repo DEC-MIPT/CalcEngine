@@ -17,7 +17,6 @@ def query(query: str, k: int = 5) -> dict:
 
     conn = db.connect()
     try:
-        db.init_schema(conn)
         formulas = db.search_formulas(conn, lemmas, k=k)
         clauses = db.search_clauses(conn, lemmas, k=k)
         payloads = [db.build_formula_payload(conn, f) for f in formulas]
@@ -52,9 +51,8 @@ def main(argv: list[str] | None = None) -> int:
     print("=== Формулы ===")
     for f in result["formulas"]:
         nr = f["norm_ref"]
-        clause = nr["clause"] or "—"
         print(
-            f"  {nr['designation']} формула {nr['formula']} (пункт {clause})"
+            f"  {nr['document']} {nr['clause']} [{nr['status']}, {nr['provenance']}]"
         )
         for s in f["symbols"]:
             print(f"       {s['latex']} — {s['meaning']}")

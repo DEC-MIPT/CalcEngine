@@ -103,10 +103,21 @@ def ingest(path: Path, force: bool = False) -> int:
         ref_rows = [(r.clause, r.ref_type, r.value, r.url) for r in cross_refs]
         db.insert_cross_refs(conn, doc_id, ref_rows)
 
+        tables = extractors.extract_tables(path)
+        coeff_rows = [
+            (t.number, t.page, ri, ci, value)
+            for t in tables
+            for ri, row in enumerate(t.rows)
+            for ci, value in enumerate(row)
+            if value
+        ]
+        db.insert_coefficients(conn, doc_id, coeff_rows)
+
         print(
             f"[ingested] {designation}: пунктов {len(clauses)}, формул {len(formulas)} "
             f"({len(numbered)} нумерованных, {len(unnumbered)} синтетических), "
-            f"обозначений {len(notation_rows)}, ссылок {len(ref_rows)}"
+            f"обозначений {len(notation_rows)}, ссылок {len(ref_rows)}, "
+            f"таблиц {len(tables)}, ячеек {len(coeff_rows)}"
         )
         return 0
     finally:

@@ -40,10 +40,13 @@ def test_build_formula_payload_shape(conn) -> None:
 
     assert list(payload.keys()) == output_config()["formula_keys"]
     assert payload["norm_ref"] == {
-        "designation": designation,
-        "clause": "5.3",
-        "formula": "5.1",
+        "document": designation,
+        "edition": "unverified",
+        "clause": "форм. (5.1)",
+        "status": "unverified",
+        "provenance": "machine-extracted",
     }
+    assert payload["formula_id"] == "5.1"
     assert payload["symbols"][0]["id"] == "gamma_c1"
     assert payload["symbols"][0]["latex"] == "\\gamma_{c1}"
     assert payload["symbols"][0]["kind"] == "input"
@@ -58,3 +61,20 @@ def test_query_returns_structure(conn) -> None:
     assert set(result) == {"query", "lemmas", "formulas", "clauses"}
     assert isinstance(result["formulas"], list)
     assert isinstance(result["clauses"], list)
+
+
+def test_coefficients_roundtrip(conn) -> None:
+    designation = "TEST-КОЭФФ"
+    db.delete_document(conn, designation)
+    doc_id = db.upsert_document(conn, designation, title="test")
+    db.insert_coefficients(conn, doc_id, [("5.5", 42, 2, 1, "0,01")])
+
+    rows = db.fetch_coefficients(conn, doc_id, "5.5")
+    assert len(rows) == 1
+    assert rows[0]["table_number"] == "5.5"
+    assert rows[0]["page"] == 42
+    assert rows[0]["row_index"] == 2
+    assert rows[0]["col_index"] == 1
+    assert rows[0]["value"] == "0,01"
+
+    db.delete_document(conn, designation)
