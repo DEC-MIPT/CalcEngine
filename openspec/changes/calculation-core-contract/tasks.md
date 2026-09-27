@@ -2,8 +2,9 @@
 
 Owner: Akim. Egor confirms `NormRef` only.
 
-Branch: the spec work stays on the `Specs` line (`Specs-onboarding` now, merged into
-`Specs` after review). Implementation after apply uses
+Branch: spec work is done on a short-lived sub-branch of `develop` and merged into
+`develop` as soon as it is ready (`AGENTS.md`, Branching rules; the `Specs*` branches
+are historical). Implementation after apply uses
 `feature/calculation-core-contract/backend` (engine, report) and
 `feature/calculation-core-contract/frontend` (transparent output), both Akim's zone.
 
@@ -64,7 +65,7 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 
 ## 8. Close
 
-- [ ] 8.1 (spec) Merge to `Specs` after 1.2-1.6 pass
+- [ ] 8.1 (spec) After 1.2-1.6 pass, confirm the final version of the change is on `develop`
 - [ ] 8.2 (spec) Confirm WP1 task 2.1 (`retarget-mvp-domain`) is closed: the WP1 engine and output deltas match this contract
 - [ ] 8.3 (spec) `spec-keeper` syncs the deltas and archives the change, after `retarget-mvp-domain` is archived
 

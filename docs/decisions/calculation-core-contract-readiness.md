@@ -163,7 +163,7 @@ No norm value.
 
 | Item | Owner | Blocks |
 |---|---|---|
-| `tester` verdict for the spec change (task 1.6) | `tester` agent | GO, merge to `Specs` (8.1) |
+| `tester` verdict for the spec change (task 1.6) | `tester` agent | GO; final version on `develop` (8.1) |
 | WP1 archived first; WP1 task 2.1 closed (task 8.2) | Egor / Akim | Archive (8.3) |
 | `backend-layered-architecture` sync: task 6.2 wording (B5), decision 7, "formulas in YAML vs code" (task 7.2) | Akim and Egor (WP5) | Nothing in this change; runs after apply |
 | Base `report-generator` names GOST R 21.101-2020, which the Rosstandart register lists as replaced by GOST R 21.101-2026 from 2026-04-01; handed over in `design.md` "Handoff to WP3" (task 7.3 done) | Egor (WP3) | Nothing in this change |

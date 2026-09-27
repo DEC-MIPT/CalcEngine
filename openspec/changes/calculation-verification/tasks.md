@@ -2,8 +2,10 @@
 
 Owner: Akim. Zone tags: an implementation task belongs to the `backend` sub-branch unless it says (spec) or (engineer, no code). Egor reviews the shared files only (section 4).
 
-Branch: the spec work stays on the `Specs` line (`Specs-onboarding` now). Implementation
-after apply uses `feature/calculation-verification/backend` (Akim's zone).
+Branch: spec work is done on a short-lived sub-branch of `develop` and merged into
+`develop` as soon as it is ready (`AGENTS.md`, Branching rules; the `Specs*` branches
+are historical). Implementation after apply uses `feature/calculation-verification/backend`
+(Akim's zone).
 
 Marker **[blocked: typical calculation]**: the task waits for the engineer's definition of a
 "typical calculation". `calculation-core-contract` is re-checked and `NormRef` is agreed
@@ -68,7 +70,7 @@ Depends on `retarget-mvp-domain` for the list of calculation types of `foundatio
 
 ## 6. Close
 
-- [ ] 6.1 Merge to `Specs` after 1.1-1.5 pass
+- [ ] 6.1 After 1.1-1.5 pass, confirm the final version of the change is on `develop`
 - [ ] 6.2 `spec-keeper` syncs the deltas and archives the change after GO; the open items in section 3 must be done or moved to a follow-up change first
 
 ## Dependencies
