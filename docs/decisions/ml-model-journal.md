@@ -175,8 +175,9 @@ API (Entry 4) — это первичный канал, с него и начи�
 
 Дополнение: сформулирован черновик сообщения научному руководителю с просьбой выйти на
 представителей официальных источников за доступом к историческим СП, плюс ориентиры по
-ценам (ГОСТ ~100–500 ₽/документ через Стандартинформ; подписка на фонд — договорная;
-право на архив СП — договорное). Полный текст (на русском) — в
+ценам (точный прайс — Приказ Росстандарта №117 от 28.01.2019,
+`standards.ru/i/pricelist_2019.pdf`; ГОСТ — десятки–сотни ₽/документ; подписка на фонд —
+договорная; право на архив СП — договорное). Полный текст (на русском) — в
 `ml-model-journal-rus.md`, Запись 7.
 
 ## Entry 8 — Архивный скан: пример получен (СНиП 2.02.01-83*)
@@ -252,3 +253,22 @@ measured, not hidden. Practical policy: prefer digital-born documents (native te
 e.g. faufcc current СП) for the baseline; reserve OCR for the historical track; report
 residual error per entity type (CER / extraction F1 / exec_rate) and gate every
 machine-derived value behind `human-verified`.
+
+## Entry 10 — Session summary (2026-09-27)
+
+Progress on hypotheses H1–H12 (definitions: `docs/01-гипотезы-ландшафт-пайплайна.md`):
+
+- **Result (tested):** H1 — faufcc СП register has a clean JSON API; current СП resolve
+  automatically, but no historical editions ("single source of truth" partly falsified);
+  H2 — current СП downloadable legally (5 docs); archive/redistribution unresolved (advisor
+  request drafted); H3 — current docs covered, historical ≈ 0; H4 — format heterogeneity
+  confirmed (text-PDF vs scan-with-OCR); H7 — changes NOT machine-readable in free sources
+  (pravo has no СП orders); H10 — universal collector layers implemented, extraction
+  adapters not yet; H12 — desk-research reinforced (no interviews).
+- **Theoretical only:** H9 — OCR/ML error-propagation note (Entry 9), no empirical F1.
+- **No result:** H5, H6, H8, H11 (entity extraction, exec_rate, change→calc linking,
+  methodologist chronometry).
+
+Session artifacts: layered collector `normatives_pipeline/` (`sources.toml`, faufcc+pravo
+active, fgiscs disabled), journal (EN+RU), `.gitignore` (`norm-base/`). Next:
+`normatives-parser` — closes H4/H5/H6.
