@@ -14,9 +14,9 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 - [x] 1.1 Write proposal, design, and spec deltas for `calculation-engine`, `transparent-output`, `report-generator`, `security` (2026-09-26)
 - [x] 1.1a Resolve the first review pass of `spec-reviewer` and `norm-traceability-checker` (2026-09-26; see `docs/decisions/calculation-core-contract-readiness.md`)
 - [x] 1.2 Run `openspec validate calculation-core-contract --strict` and `openspec validate --all --strict` (passed 2026-09-26, 13/13)
-- [x] 1.3 Egor confirms the `NormRef` shape and answers the open questions in `design.md` (section "NormRef"); recorded in `design.md` (2026-09-26, accepted on Akim's word; Egor's written confirmation is not yet in the repository)
+- [x] 1.3 Egor confirms the `NormRef` shape and answers the open questions in `design.md` (section "NormRef"); recorded in `design.md` (2026-09-26, accepted on Akim's word; Egor confirmed all eight answers in writing on 2026-09-27 in `docs/decisions/normref-questions-egor.md`, commit `a1a896c`)
 - [x] 1.3a Sync `design.md` resolutions into the delta specs and tasks: `norm_refs` list on a step, `Source` (`NormRef` list or `EngineerRule`), `engineer_rules` in the envelope (2026-09-26)
-- [x] 1.4 Run `spec-reviewer` on this change and resolve blockers (2026-09-26, four passes, 0 blockers, re-run after the `NormRef` sync: 0 blockers, 2 major (warning structure fixed; written confirmation pending); see `docs/decisions/calculation-core-contract-readiness.md`)
+- [x] 1.4 Run `spec-reviewer` on this change and resolve blockers (2026-09-26, four passes, 0 blockers, re-run after the `NormRef` sync: 0 blockers, 2 major (warning structure fixed; written confirmation, since given in commit `a1a896c`); see `docs/decisions/calculation-core-contract-readiness.md`)
 - [x] 1.5 Run `norm-traceability-checker` and confirm that no requirement fixes a norm value (2026-09-26, two passes, no norm value fixed)
 - [ ] 1.6 `tester` issues the verdict for the spec change (see DOD)
 
@@ -83,15 +83,15 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 - [x] Each task is small enough for one session
 - [x] Acceptance and Go/No-Go criteria written (below)
 - [x] Branches defined (above)
-- [x] Dependencies satisfied: `NormRef` agreed with Egor (task 1.3; accepted on Akim's word, written confirmation pending, see the DOD)
+- [x] Dependencies satisfied: `NormRef` agreed with Egor (task 1.3; his written agreement is in `docs/decisions/normref-questions-egor.md`, commit `a1a896c`)
 
 ## DOD and Go / No-Go
 
 - GO is declared only by the `tester` agent (`AGENTS.md` section 4).
 - For the spec phase: `openspec validate --all --strict` passes; `spec-reviewer` reports
   no blockers; `norm-traceability-checker` confirms no norm value is fixed; Egor's
-  agreement is recorded in `docs/decisions/normref-questions-egor.md` (on Akim's word;
-  his own written text is not attached).
+  agreement is recorded in his own words in `docs/decisions/normref-questions-egor.md`
+  (commit `a1a896c`).
 - For implementation: all tests of sections 2-6 pass with >= 95% branch coverage;
   `ui-ux-tester` confirms the frontend tasks 3.4, 3.5, and 5.4; the delta specs match the
   implementation.

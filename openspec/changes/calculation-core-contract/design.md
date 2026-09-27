@@ -64,11 +64,11 @@ See `proposal.md` (Non-goals).
 ## NormRef (agreed with Egor)
 
 This section records the shared interface from roadmap section 3 and Akim's answers to
-the eight open questions. The shape is recorded as agreed with Egor (task 1.3, closed 2026-09-26 on Akim's word;
-the answers are recorded in `docs/decisions/normref-questions-egor.md` on Akim's word;
-Egor's own written text is not in the repository, and a link to it is added here when it
-exists). Egor owns the catalog side (WP3, `norm-source-traceability`). The delta
-specs use this shape (`norm_refs`, `Source`, `engineer_rules`).
+the eight open questions. Egor agreed to the shape and to all eight resolutions in
+writing in `docs/decisions/normref-questions-egor.md` (commit `a1a896c`, 2026-09-27);
+task 1.3 was first closed on 2026-09-26 on Akim's word. Egor owns the catalog side
+(WP3, `norm-source-traceability`). The delta specs use this shape (`norm_refs`,
+`Source`, `engineer_rules`).
 
     NormRef {
       document:   string                       # designation as printed in the document; always concrete
@@ -113,8 +113,8 @@ specs use this shape (`norm_refs`, `Source`, `engineer_rules`).
    consumer of `NormRef` and into the traceability metric. It is visible in the envelope
    and in the report as engineer-set. This is also Akim's reading of
    `agent-docs/domain-constraints.md` ("implementer" is the software developer, not the
-   design engineer who fills the parameter data); Egor's agreement covers this
-   reading, .
+   design engineer who fills the parameter data); Egor confirmed this reading in
+   writing (answer 3).
 4. **`unverified` is a union value in `edition` and `clause`. `document` is never
    `unverified`:** it is always a concrete designation. A parameter whose document is
    unknown has no source, and schema validation fails (WP3 requirement 1). The synthetic
@@ -126,7 +126,8 @@ specs use this shape (`norm_refs`, `Source`, `engineer_rules`).
    `edition`. A step is verified only when every one of its references is `verified`, and
    it counts as unverified in `unverified_step_count` when any of them is not. The "clause
    set" that a stored result is pinned to (WP3 requirement 3) is the set of all locators
-   of all references of all steps.
+   of all references of all steps. The locator syntax is Egor's (answer 5): the loader
+   normalizes it and the catalog resolves it; the engine keeps it opaque.
 6. **`document` is a designation string,** as printed in the document, not a key into
    `dec_normatives`. It reads well in the parameter YAML, in the `dec_app` columns, and in
    the report, and needs no foreign key across the two databases (B3). The catalog
@@ -140,9 +141,12 @@ specs use this shape (`norm_refs`, `Source`, `engineer_rules`).
    the catalog when the result is shown; it is not stored.
 8. **`edition` is an opaque string** that identifies one exact text version: the year of
    the edition, plus a marker for the amendments applied, when there are any (written
-   `<YYYY>` or `<YYYY>+<amendment>` in examples). It is compared for equality only. The
-   exact syntax is Egor's decision, made from the real documents; this change does not
-   fix it, because no edition is checked against a primary source.
+   `<YYYY>` or `<YYYY>+<amendment>` in examples). It is compared for equality only. Egor
+   set the syntax in answer 8: `<YYYY>` for an edition without amendments and
+   `<YYYY>+<N>` with amendment No. N applied; the catalog also keeps the amendment number
+   as a separate field `amendment_no` of `Revision`. The engine depends on the string only
+   through equality, so this change carries the syntax by reference and names no real
+   edition.
 
 Effects on the other requirements of this change, applied to the deltas on 2026-09-26:
 
