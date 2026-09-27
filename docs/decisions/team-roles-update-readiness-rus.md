@@ -7,9 +7,11 @@
 
 ## Итоговый статус
 
-**READY FOR TEAM DISCUSSION**
+**GO (tester, 2026-09-27) — готово к архивации**
 
-Технически готово, ждёт согласия Егора. После третьего прохода `spec-reviewer`: 0 блокеров, 0 major и 0 новых minor, `openspec validate --all --strict` проходит, 14/14. Egor ещё не согласился. Это отдельное условие дорожной карты, поэтому это не «готово к архивации»: change остаётся открытым, пока Egor его не подтвердит (задача A1.4) и часть B не применена или её отсрочка не записана (задача A2.3).
+Егор подтвердил change (коммит `243a6b9`, задача A1.4), часть B применена (коммит `75e0eac`, задачи B2–B8), шестой проход `spec-reviewer` — READY for DOR (раздел 10), `tester` объявил GO по пути без кода (раздел 11). Осталось: A2.2 (финальная версия в `develop`) и A2.3 (`spec-keeper` синхронизирует и архивирует).
+
+История: до 2026-09-27 статус был READY FOR TEAM DISCUSSION, change ждал согласия Егора (третий проход: 0 блокеров, 0 major, validate 14/14).
 
 | Критерий дорожной карты (3.7) | Состояние | Основание |
 |---|---|---|
@@ -201,3 +203,25 @@ DOR сейчас нигде не определён ни в спеке, ни в 
 | 2 | Minor | В «Status» `CLAUDE.md` осталось «ответы Егора ожидаются» | Исправлено: теперь сказано, что Егор подтвердил change и спековые change'и могут получить вердикт `tester` |
 
 Осталось: A2.1 (вердикт `tester`), A2.2, A2.3 (архивация).
+
+## 11. Вердикт tester (задача A2.1)
+
+```
+Verdict: GO
+Change: team-roles-update (WP7), develop @ 455cb74, 2026-09-27
+tests: N/A. The change has no code. It has specs, docs and shared process files only, so there is nothing executable to test.
+coverage: N/A. The change has no code, so there is no changed code to measure branch coverage on.
+UI/UX: N/A. The change has no code and no UI.
+
+Conditions:
+- No code: pass. Every file the commits touch is on the allowed list. Commits b3d9f51, 6755ac6, c0415f9, 243a6b9 and 30198ca touch only openspec/** and docs/**. 75e0eac touches AGENTS.md, CLAUDE.md, openspec/config.yaml and tasks.md. Merge 455cb74 has no tree diff against 75e0eac. No commit touches .claude/settings.json or .gitignore.
+- Validation: pass. "Change 'team-roles-update' is valid"; --all: "Totals: 17 passed, 0 failed (17 items)". Both exit 0.
+- Review: pass. Section 10, sixth pass: 0 blockers, 0 major, 2 minor, READY for DOR. Both minor fixes are at HEAD. Since 30198ca, the only edit in the change directory is tasks.md (B2-B8 ticked, each with a note), part of the Part B commit that the sixth pass covers.
+- Acknowledgement: pass. Commit 243a6b9 is authored by Egor; in docs/decisions/team-roles-update-egor.md, the answer to question 1 reads "I acknowledge the change as the second developer (task A1.4)."
+
+Open after verdict: A2.2, A2.3 (archive).
+```
+
+Вердикт записан Акимом по отчёту агента `tester` (оставлен на английском, как выдан). Это первый вердикт по пути GO без кода, который задаёт этот change. Описание агента `tester` (`.claude/agents/tester.md`) по-прежнему говорит только о гейте тестов и покрытия; его выравнивание — задача 4.1 `calculation-verification`. После записи в заметке к A1.4 в `tasks.md` цитата Егора исправлена дословно («as the second developer»); tester отметил пропущенное слово как косметику.
+
+Часть B применена (B2–B8), архивацию она больше не блокирует. Дальше: A2.2 (финальная версия в `develop`), затем A2.3 — `spec-keeper` переносит дельту в `openspec/specs/development-process/spec.md` и архивирует change.
