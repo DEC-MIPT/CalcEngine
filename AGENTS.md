@@ -69,6 +69,14 @@ Every task in this project MUST be recorded in specs through OpenSpec. There is 
   and merge it into `develop`.
 - Repo-meta files (agent entry files, agent settings, `.editorconfig`, `agent-docs/`) are
   not product changes and need no OpenSpec change; they are still committed on a branch.
+- **No-code documents merge into `develop` as soon as they are ready, not held for the
+  rest of the task.** A change to `openspec/**` (specs and changes), `AGENTS.md`, or any
+  other no-code document (`docs/**`, `agent-docs/**`) is the team's shared state: the
+  other developer reads `develop`, not a task sub-branch. As soon as that document change
+  is in the form it should have on `develop` (a validated OpenSpec change, an agreed
+  `AGENTS.md` edit, a decision record), merge the sub-branch into `develop`, even if the
+  code part of the task is still in progress. Do not let doc-only work sit unmerged on a
+  sub-branch waiting for the rest of the task.
 
 ### Session start
 
