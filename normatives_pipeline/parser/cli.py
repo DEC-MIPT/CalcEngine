@@ -39,9 +39,6 @@ def main() -> int:
     values = [1.25, 1.0, 1.1, 0.5, 1.0, 2.0, 18.0, 3.0, 1.5, 9.0, 1.0, 2.0, 25.0]
     print(f"надёжное: R = {round(f(*values), 2)} кПа (символы: {', '.join(s.name for s in bound.symbols)})")
 
-    naive = formula_code.alternative_parse_latex(bound.latex.split("=")[1].strip())
-    print(f"parse_latex (менее валидно): {naive}")
-
     print(f"latex-only (менее валидно): {formula_code.alternative_latex_only(bound.latex)[:60]}...")
     print(f"codegen (менее валидно): {formula_code.alternative_codegen(bound.expr)[:60]}...")
     return 0
