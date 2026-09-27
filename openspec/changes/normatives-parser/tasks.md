@@ -11,7 +11,7 @@ Branch: `feature/normative-parser/ml` (Egor, ml zone).
 
 ## 2. Formula path (reliable + alternatives)
 
-- [ ] 2.1 [Egor] Formula extraction (regex on text layer; `pix2tex` for images)
+- [ ] 2.1 [Egor] Formula extraction (regex on text layer; DocLayout-YOLO + pix2text for formulas)
 - [ ] 2.2 [Egor] Output format: structured JSON (LaTeX + SymPy + notation) — reliable
 - [ ] 2.3 [Egor] Alternatives eval: LaTeX-only, raw model string, direct codegen
 - [ ] 2.4 [Egor] SymPy `parse_latex` → `lambdify` executor (validation, H6)

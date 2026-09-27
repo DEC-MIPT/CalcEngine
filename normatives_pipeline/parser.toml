@@ -88,6 +88,11 @@ formula_prefix = "форм."
 [search]
 similarity_threshold = 0.1
 
+[formula_ocr]
+dpi = 400
+conf = 0.25
+imgsz = 1024
+
 [parser.cyr_map]
 "а" = "a"
 "б" = "b"

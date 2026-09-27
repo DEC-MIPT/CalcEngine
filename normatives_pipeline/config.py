@@ -9,7 +9,6 @@ import tomllib
 
 PARSER_TOML = Path(__file__).parent / "parser.toml"
 FORMULAS_TOML = Path(__file__).parent / "formulas.toml"
-OCR_TOML = Path(__file__).parent / "ocr.toml"
 
 
 @lru_cache(maxsize=1)
@@ -31,12 +30,12 @@ def search_config() -> dict:
 
 
 @lru_cache(maxsize=1)
-def formula_manifest() -> list[dict]:
-    with FORMULAS_TOML.open("rb") as fh:
-        return tomllib.load(fh).get("formula", [])
+def formula_ocr_config() -> dict:
+    with PARSER_TOML.open("rb") as fh:
+        return tomllib.load(fh)["formula_ocr"]
 
 
 @lru_cache(maxsize=1)
-def ocr_config() -> dict:
-    with OCR_TOML.open("rb") as fh:
-        return tomllib.load(fh)
+def formula_manifest() -> list[dict]:
+    with FORMULAS_TOML.open("rb") as fh:
+        return tomllib.load(fh).get("formula", [])

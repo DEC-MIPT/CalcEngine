@@ -1,14 +1,15 @@
-"""Обогащение формул: OCR → latex + expression (машиночитаемый кандидат)."""
+"""Обогащение формул: детекция + распознавание → latex + expression (кандидат)."""
 
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
+import numpy as np
 import pdfplumber
 
-from . import db
-from .ocr import correct, detect, recognize
+from . import db, formula_ocr
+from .config import formula_ocr_config
 from .validation import canonical_latex
 
 DEFAULT_PILOT = Path("norm-docs/СП 22.13330.2016.pdf")
@@ -31,20 +32,27 @@ def enrich(path: Path) -> int:
         doc_id = int(row["id"])
 
         formulas = db.fetch_formulas(conn, doc_id)
+        by_page: dict[int, list[dict]] = {}
+        for f in formulas:
+            by_page.setdefault(f["page"], []).append(f)
+
         filled = 0
+        dpi = int(formula_ocr_config()["dpi"])
         with pdfplumber.open(path) as pdf:
-            for f in formulas:
-                page = pdf.pages[f["page"] - 1]
-                bbox = detect.detect_formula_bbox(page.chars, f["number"])
-                if bbox is None:
-                    continue
-                image = recognize.render_crop(page, bbox)
-                latex = correct.correct_latex(recognize.recognize_latex(image))
-                if not latex:
-                    continue
-                expression = str(canonical_latex(latex))
-                db.update_formula(conn, int(f["id"]), latex, expression)
-                filled += 1
+            for page_no, page_formulas in by_page.items():
+                page = pdf.pages[page_no - 1]
+                img_rgb = np.array(page.to_image(resolution=dpi).original)
+                img_bgr = img_rgb[..., ::-1]
+                crops = formula_ocr.detect_formulas(img_bgr)
+                for i, (_, crop) in enumerate(crops):
+                    if i >= len(page_formulas):
+                        break
+                    latex = formula_ocr.recognize_crop(crop)
+                    if not latex:
+                        continue
+                    expression = str(canonical_latex(latex))
+                    db.update_formula(conn, int(page_formulas[i]["id"]), latex, expression)
+                    filled += 1
         print(f"[enriched] {designation}: заполнено {filled}/{len(formulas)} формул")
         return 0
     finally:
