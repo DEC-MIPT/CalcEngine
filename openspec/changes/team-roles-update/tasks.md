@@ -16,7 +16,7 @@ is not done by `/opsx:apply`.
 - [x] A1.1 Write `proposal.md`, `design.md`, and the delta spec for `development-process`
 - [x] A1.2 Run `openspec validate team-roles-update --strict` and `openspec validate --all --strict` (passed 2026-09-26, 14/14; re-run 2026-09-27 after the "no code" path list edit, 17/17; see `docs/decisions/team-roles-update-readiness.md`, section 9)
 - [x] A1.3 Run the `spec-reviewer` subagent and resolve blockers and major findings (2026-09-26: three passes, the third with 0 blockers and 0 major; 2026-09-27: pass 4 after the "no code" path list edit, 2 major, fixed; pass 5: 0 blockers, 0 major, READY for DOR; see `docs/decisions/team-roles-update-readiness.md`, section 9)
-- [ ] A1.4 Get Egor's acknowledgement as second developer (a commit or comment by Egor that names this change)
+- [x] A1.4 Get Egor's acknowledgement as second developer (a commit or comment by Egor that names this change) (2026-09-27: commit `243a6b9` by Egor, answer to question 1 in `docs/decisions/team-roles-update-egor.md`: "I acknowledge the change as second developer (task A1.4)"; his answer to question 2 moved agent settings back under the normal gate, applied to the delta and `design.md` decision 2 afterwards)
 
 ### A2. Close
 
@@ -29,7 +29,7 @@ is not done by `/opsx:apply`.
 Requires Egor's agreement before each edit. The exact current and target text is in
 `proposal.md`, section "Follow-up changes to shared files".
 
-- [ ] B1 Get Egor's agreement on the list of shared-file edits
+- [x] B1 Get Egor's agreement on the list of shared-file edits (2026-09-27: commit `243a6b9`, `docs/decisions/team-roles-update-egor.md` question 4: B2-B7 agreed; question 5: apply Part B right after the answers, in one commit, before archive)
 - [ ] B2 `openspec/config.yaml:36-38`: "two developers" becomes a three-person team with the PM role
 - [ ] B3 `openspec/config.yaml`: add the note that `openspec validate` is structural and the DOR needs a `spec-reviewer` report
 - [ ] B4 `AGENTS.md` section 5: three-person team, PM row in the zone table, PM has no agent
