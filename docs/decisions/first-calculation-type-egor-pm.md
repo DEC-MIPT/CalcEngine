@@ -39,7 +39,7 @@ given (meeting or message), as proposed in `team-roles-update-egor.md`, question
 
 **Answer (Egor).** Agree with the rule: the first type must be covered by at least 3 worked examples in the guide, rest on documents my pipeline can deliver as pilot data, and be accepted by the PM.
 
-**Answer (PM).**
+**Answer (PM).** Approved verbally to Akim, 2026-09-27. Yesenia has no repository access yet, so this is recorded on her behalf.
 
 ### 2. Which type? (Egor and the PM)
 
@@ -60,7 +60,7 @@ given (meeting or message), as proposed in `team-roles-update-egor.md`, question
 
 **Answer (Egor).** I confirm R (formula 5.7, clause 5.6.7, СП 22.13330.2016) as the candidate: it is already in the registry (`formulas.toml`) and the СП is ingested. Note the dependency on coefficient table 5.5 (see the formula-contract review, question 7).
 
-**Answer (PM).**
+**Answer (PM).** Approved verbally to Akim, 2026-09-27. Yesenia has no repository access yet, so this is recorded on her behalf.
 
 ### 3. Pilot normative data for that type (Egor)
 
