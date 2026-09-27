@@ -5,7 +5,8 @@ The system SHALL keep the developers' responsibility zones non-overlapping: Akim
 frontend/backend, the calculation engine, and the report generator; Egor owns the
 normative-document pipeline, NLP/RAG parsing, DevOps, and ML/DL/NLP. Specs are the only
 shared artifact. The team also has a product manager (PM), a role that owns scope,
-pricing, and legal questions and has no code zone.
+pricing, and legal questions and has no code zone. A PM decision is recorded by a
+developer as a dated entry in a tracked file under `docs/decisions/`.
 
 #### Scenario: No zone overlap
 - **WHEN** a task is assigned for implementation
@@ -16,6 +17,12 @@ pricing, and legal questions and has no code zone.
 - **WHEN** a decision on scope, pricing, or a legal question is needed
 - **THEN** its owner is the PM, and no developer records it as settled without the PM's
   approval
+
+#### Scenario: PM approval recorded
+- **WHEN** a developer records a PM decision
+- **THEN** the record is a dated entry in a tracked file under `docs/decisions/` that
+  names the decision, restates the PM's words, and says where they were given (a meeting
+  or a message); the PM does not need to commit
 
 #### Scenario: PM has no code zone
 - **WHEN** a task is assigned for implementation
@@ -63,9 +70,9 @@ The system SHALL archive a change only after a GO verdict and after the spec-kee
 syncs specs. For a change with code, GO requires that tests pass with >= 95% coverage,
 UI/UX is confirmed where the interface changed, and validation passed. A change has no
 code when it adds or edits no file outside `openspec/`, `docs/`, `agent-docs/`, the
-agent tool directories `.claude/`, `.kilo/`, and `.kilocode/` (agent and skill
-definitions and agent settings), and the repository documents `AGENTS.md`, `CLAUDE.md`,
-`README.md`, and `.editorconfig`. For a change
+agent and skill definitions under `.claude/`, `.kilo/`, and `.kilocode/`, and the
+repository documents `AGENTS.md`, `CLAUDE.md`, `README.md`, and `.editorconfig`. Agent
+settings (for example `.claude/settings.json`) are not on this list. For a change
 with no code, GO SHALL require that `openspec validate --strict` passes, that the
 `spec-reviewer` report has no blocker and no major finding, and that the developer who did not author the
 change has acknowledged it in a tracked commit or comment that names the change; the

@@ -26,8 +26,9 @@ what it does not say. Do not restate `AGENTS.md` here.
   `backend-layered-architecture` still names it. The MVP domains are shallow
   foundations, then internal water supply. Build on the active changes, not on the
   placeholder.
-- No spec-only change can reach GO until `team-roles-update` is acknowledged by Egor;
-  his answers are awaited in `docs/decisions/team-roles-update-egor.md`.
+- Egor acknowledged `team-roles-update` on 2026-09-27, and its Part B put the code-free
+  GO path into `AGENTS.md` section 4, so spec-only changes can now get their `tester`
+  verdict.
 - Norm editions for the MVP domain come from the team and are `unverified` until
   checked against source texts.
 
@@ -80,4 +81,6 @@ Do not invent or run commands from this list; none of them is set up yet.
 The Kilo mirrors carry no `model` or `tools`, so "read-only" is enforced by the
 prompt there, and by `tools` only in `.claude/agents/`. Keep the bodies identical.
 
-`docs/` is untracked by design (`.gitignore`); do not `@import` from it.
+`docs/` is untracked by design (`.gitignore`), except `docs/decisions/` and
+`docs/reports/`, which git tracks and the team uses as its written channel; do not
+`@import` from `docs/`.
