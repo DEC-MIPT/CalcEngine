@@ -1,8 +1,9 @@
 # Tasks
 
-Branch: planning phase, so the work stays on the `Specs` line (`Specs-onboarding` now,
-merged into `Specs` after review). There is no code, so no `feature/<task>/<zone>`
-sub-branch applies. Developer: Akim.
+Branch: there is no code; the work is done on a short-lived sub-branch of `develop` in
+Akim's zone (`feature/record-installed-skills-akim/backend`) and merged into `develop` as
+soon as it is ready (`AGENTS.md`, Branching rules; the `Specs*` branches are
+historical). Developer: Akim.
 
 ## 1. Record the installation
 
@@ -16,7 +17,7 @@ sub-branch applies. Developer: Akim.
 
 ## 2. Close the change
 
-- [ ] 2.1 Merge to `Specs` after 1.3-1.7 pass
+- [ ] 2.1 After 1.3-1.7 pass, confirm the final version of the change is on `develop`
 - [ ] 2.2 `spec-keeper` syncs the delta into `openspec/specs/development-process/spec.md` and archives the change
 
 ## Dependencies

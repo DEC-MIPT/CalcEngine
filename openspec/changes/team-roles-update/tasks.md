@@ -1,8 +1,9 @@
 # Tasks
 
-Branch: planning phase, so the work stays on the `Specs` line (`Specs-onboarding` now,
-merged into `Specs` after review). There is no code, so no `feature/<task>/<zone>`
-sub-branch applies. Author: Akim. Second developer (acknowledges): Egor.
+Branch: there is no code; the work is done on a short-lived sub-branch of `develop` in
+Akim's zone (`feature/team-roles-update/backend`) and merged into `develop` as soon as
+it is ready (`AGENTS.md`, Branching rules; the `Specs*` branches are historical).
+Author: Akim. Second developer (acknowledges): Egor.
 
 Part A is the spec delta: Akim drafts it and Egor reviews it as the second developer.
 Part B edits shared files and is applied together, by hand, only after both agree; it
@@ -20,7 +21,7 @@ is not done by `/opsx:apply`.
 ### A2. Close
 
 - [ ] A2.1 `tester` issues the verdict; this change has no code, so it records tests, coverage, and UI/UX as N/A with the reason (it is the first change to use the path it defines)
-- [ ] A2.2 Merge to `Specs` after A1.2-A1.4 and A2.1 pass
+- [ ] A2.2 After A1.2-A1.4 and A2.1 pass, confirm the final version of the change is on `develop`
 - [ ] A2.3 After Part B is applied (B8 passed) or Egor has recorded in a tracked commit or comment that Part B is deferred and until when, `spec-keeper` syncs the delta into `openspec/specs/development-process/spec.md` and archives the change
 
 ## B. Shared files follow-up (applied together after both agree)
@@ -74,7 +75,7 @@ stays as an extra condition.
 ## Dependencies
 
 - A1.2-A1.3 need A1.1. A1.4 needs the review to have no blocker and no major finding.
-- A2.1 (`tester` verdict) needs A1.2-A1.4. A2.2 (merge to `Specs`) needs A2.1.
+- A2.1 (`tester` verdict) needs A1.2-A1.4. A2.2 (final version on `develop`) needs A2.1.
 - A2.3 (archive) needs A2.2 and either B8 or Egor's recorded deferral of Part B. If Part B is deferred, B2-B8 move to a follow-up change and leave this list.
 - Part B needs B1 (Egor's agreement). Section C needs the archive (A2.3) and does not gate it.
 
