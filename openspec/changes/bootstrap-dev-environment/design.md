@@ -68,7 +68,12 @@ See `proposal.md` (Why) for the motivation. Two facts shape this design:
    target is a single command that exits 0 on a clean checkout (this change's own goal,
    see `proposal.md`); a shell script needs no new build tool (`make`, `nox`, `tox`).
    Documented in `CLAUDE.md`'s "Commands that exist today" once it works, per that
-   file's own instruction not to invent commands that are not set up yet.
+   file's own instruction not to invent commands that are not set up yet. Confirmed
+   2026-09-28: `frontend/check.sh` runs `tsc -b`, not `tsc --noEmit` as first assumed
+   here — the Vite `react-ts` scaffold's root `tsconfig.json` is solution-style
+   (`"files": []`, only `references`), so a bare `tsc --noEmit` silently checks
+   nothing; `tsc -b` follows the references and each one already sets `noEmit: true`,
+   so it type-checks without emitting.
 
 4. **Frontend project skeleton: Vite + React + TypeScript.** `frontend/` is scaffolded
    with Vite's `react-ts` template. Rationale: Create React App is unmaintained and the
