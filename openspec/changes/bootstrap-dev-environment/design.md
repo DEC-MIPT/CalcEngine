@@ -56,11 +56,17 @@ See `proposal.md` (Why) for the motivation. Two facts shape this design:
    spec update (see Open Questions).
 
 3. **One command per zone, as a shell script.** `backend/check.sh` runs `ruff check`,
-   `mypy`, then `pytest --cov=app --cov-branch --cov-fail-under=95`, in that order, and
-   stops at the first failure. `frontend/check.sh` runs `eslint`, `tsc --noEmit`, then
-   `vitest run --coverage`. Rationale: the target is a single command that exits 0 on a
-   clean checkout (this change's own goal, see `proposal.md`); a shell script needs no
-   new build tool (`make`, `nox`, `tox`).
+   `mypy`, then `pytest`, in that order, and stops at the first failure. The coverage
+   gate (`--cov=app --cov-branch --cov-fail-under=95`) only runs when `backend/app/`
+   exists; before that, `pytest` runs plain, the same deferred pattern as the
+   import-contract check (decision 6) and the config/`.env.example` check (decision 5).
+   Confirmed 2026-09-27: `pytest --cov=app` against a nonexistent `app/` does not
+   vacuously pass at 100% as first assumed here — `pytest-cov` reports "Module app was
+   never imported" and 0% coverage, which fails the 95% gate, so an unconditional gate
+   would keep `check.sh` red until `backend-layered-architecture` lands. `frontend/
+   check.sh` runs `eslint`, `tsc --noEmit`, then `vitest run --coverage`. Rationale: the
+   target is a single command that exits 0 on a clean checkout (this change's own goal,
+   see `proposal.md`); a shell script needs no new build tool (`make`, `nox`, `tox`).
    Documented in `CLAUDE.md`'s "Commands that exist today" once it works, per that
    file's own instruction not to invent commands that are not set up yet.
 
@@ -118,3 +124,13 @@ See `proposal.md` (Why) for the motivation. Two facts shape this design:
   deferred; no spec or task depends on which one is used.
 - ESLint flat config (`eslint.config.js`) vs the legacy `.eslintrc` format for the
   frontend: an implementation detail of task 2.1.
+- **How the base `development-process` "Test gate with >= 95% branch coverage" and
+  "Go/No-Go verdict and archive" requirements apply to a zone this change leaves
+  without an `app/` package to measure (the backend zone, until
+  `backend-layered-architecture` lands).** `backend/check.sh` (decision 3) does not run
+  a coverage gate while `backend/app/` does not exist, so it produces no coverage
+  number for that zone; whether that reads as satisfying the base requirements, as an
+  exception the team needs to agree on, or as a reason to hold this change's own
+  implementation-phase `tester` verdict until `backend/app/` exists, is not decided
+  here. Not resolved by this change: needs a team decision (recorded in
+  `docs/decisions/`) or a separate spec change, before task 7.1's `tester` verdict.
