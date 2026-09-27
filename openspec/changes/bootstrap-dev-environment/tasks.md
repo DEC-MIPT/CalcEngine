@@ -84,15 +84,43 @@ can be implemented; until then it is not started, not stubbed as a no-op.
 
 ## 4. Pre-commit and secrets (backend)
 
-- [ ] 4.1 Add root `.pre-commit-config.yaml` with the `detect-secrets` hook, per
+- [x] 4.1 Add root `.pre-commit-config.yaml` with the `detect-secrets` hook, per
   `design.md` decision 5; verify `pre-commit run --all-files` passes on a clean
-  checkout
-- [ ] 4.2 Generate `.secrets.baseline` via `detect-secrets scan`; verify it exists and
-  hand-review it for a real secret before committing
-- [ ] 4.3 Add root `.env.example` listing the environment variables already known from
+  checkout (2026-09-28: neither `pre-commit` nor `detect-secrets` was installed
+  anywhere in the checkout — added both to `backend/requirements-dev.txt`, installed
+  into `backend/.venv`; `.pre-commit-config.yaml` runs the `Yelp/detect-secrets`
+  hook (`rev: v1.5.0`) against `.secrets.baseline`. `backend/.venv/bin/pre-commit run
+  --all-files` → `Passed`, exit 0, once the baseline (4.2) existed. Verified the gate
+  is real: a staged file with a fake AWS key not in the baseline made it fail
+  (`Failed`, exit 1, "Potential secrets about to be committed"); removed after the
+  check. See `docs/reports/WP6-code-journal.md`)
+- [x] 4.2 Generate `.secrets.baseline` via `detect-secrets scan`; verify it exists and
+  hand-review it for a real secret before committing (2026-09-28:
+  `backend/.venv/bin/detect-secrets scan --exclude-files 'package-lock\.json' >
+  .secrets.baseline` (the lockfile's SHA-512 hashes are the one predictable noise
+  source; everything else is git-tracked-only by `detect-secrets`' own default, so
+  `node_modules`/`.venv`/`dist`/`coverage` never entered the scan). 11 findings across
+  10 files, all hand-reviewed, none a real secret: the repeated "Basic Auth
+  Credentials"/"Secret Keyword" hits are the single shared `dec:dec` local-only
+  Postgres dev credential already used across `docker-compose.yml`,
+  `tests/conftest.py`, and several `docs/decisions/`/`docs/reports/` files (confirmed
+  by reading each flagged line); the "Base64 High Entropy String" in
+  `normatives_pipeline/research/research.ipynb` is a base64 PNG image output
+  (confirmed via the notebook's own JSON); the "Hex High Entropy String" in
+  `skills-lock.json` is a skill content hash. Regenerated once more after 4.3 added
+  `.env.example`'s own placeholder credential (see 4.3))
+- [x] 4.3 Add root `.env.example` listing the environment variables already known from
   `backend-layered-architecture` decision 4 (the `dec_app` and `dec_normatives`
   connection strings); verify the file lists at least these, each with a placeholder
-  value, no real credential
+  value, no real credential (2026-09-28: `backend-layered-architecture` decision 4
+  names the two databases but fixes no variable name — its task 2.1 (`core/config.py`)
+  is still pending — so this task picks `DEC_APP_DATABASE_URL` and
+  `DEC_NORMATIVES_DATABASE_URL` as Akim's interim choice, noted in the file itself and
+  in `design.md` decision 5, pending confirmation once task 2.1 lands. Both values are
+  `postgresql://<user>:changeme@localhost:5433/<db>` placeholders, no real credential —
+  `changeme` tripped `detect-secrets`' Basic Auth detector on the `dec_normatives` line,
+  same as the team's existing `dec:dec` convention; folded into the 4.2 baseline after
+  hand-review)
 - [ ] 4.4 [blocked: WP5] Add a local pre-commit hook comparing
   `backend/app/core/config.py`'s Pydantic settings fields against `.env.example` keys;
   verify a field missing from `.env.example` fails `pre-commit run`

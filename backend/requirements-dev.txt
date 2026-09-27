@@ -4,3 +4,5 @@ mypy
 pytest
 pytest-cov
 import-linter
+pre-commit>=4.6.2
+detect-secrets>=1.5.0
