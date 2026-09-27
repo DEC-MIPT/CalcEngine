@@ -27,10 +27,21 @@ See `proposal.md` (Non-goals).
    `openspec/changes/retarget-mvp-domain/tasks.md` (task 1.4) already treats the PM
    this way. The specs name the role only.
 2. **"No code" is defined by paths.** A change has no code when it adds or edits no
-   file outside `openspec/`, `docs/`, `agent-docs/`, and the agent and skill
-   definitions (`.claude/`, `.kilo/`, `.kilocode/`). Anything else, including
-   migrations, config, and test files, is code and uses the normal gate. A path rule
-   is checkable from the diff and does not depend on the author's opinion.
+   file outside `openspec/`, `docs/`, `agent-docs/`, the agent tool directories
+   `.claude/`, `.kilo/`, and `.kilocode/` (agent and skill definitions and agent
+   settings), and the repository documents `AGENTS.md`, `CLAUDE.md`, `README.md`, and
+   `.editorconfig`. Anything else, including migrations, config, and test files, is code
+   and uses the normal gate. A path rule is checkable from the diff and does not depend
+   on the author's opinion. Where the list comes from: `AGENTS.md` (Branching rules)
+   lists `AGENTS.md` among no-code documents ("A change to `openspec/**` (specs and
+   changes), `AGENTS.md`, or any other no-code document", `AGENTS.md:73-74`) and names
+   `.editorconfig`, agent settings, and agent entry files (which covers `CLAUDE.md`) as
+   repo-meta (`AGENTS.md:70`). `README.md` is not named there; this change adds it as a
+   prose document with no behavior. Without these files, Part B of this change would
+   itself count as code. `.gitignore` stays off the list: it decides what gets
+   committed, secrets included, so a change to it takes the normal gate. The list was
+   extended by Akim on 2026-09-27 (review minor 8) and is part of what Egor
+   acknowledges.
 3. **The second developer is whoever did not author the change.** If Akim authored it,
    Egor acknowledges it; if Egor authored it, Akim does. This holds for either agent
    tool. The acknowledgement is a tracked artifact (a commit or a review comment that

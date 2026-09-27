@@ -13,8 +13,8 @@ is not done by `/opsx:apply`.
 ### A1. Draft and validate
 
 - [x] A1.1 Write `proposal.md`, `design.md`, and the delta spec for `development-process`
-- [ ] A1.2 Run `openspec validate team-roles-update --strict` and `openspec validate --all --strict`
-- [ ] A1.3 Run the `spec-reviewer` subagent and resolve blockers and major findings
+- [x] A1.2 Run `openspec validate team-roles-update --strict` and `openspec validate --all --strict` (passed 2026-09-26, 14/14; re-run 2026-09-27 after the "no code" path list edit, 17/17; see `docs/decisions/team-roles-update-readiness.md`, section 9)
+- [x] A1.3 Run the `spec-reviewer` subagent and resolve blockers and major findings (2026-09-26: three passes, the third with 0 blockers and 0 major; 2026-09-27: pass 4 after the "no code" path list edit, 2 major, fixed; pass 5: 0 blockers, 0 major, READY for DOR; see `docs/decisions/team-roles-update-readiness.md`, section 9)
 - [ ] A1.4 Get Egor's acknowledgement as second developer (a commit or comment by Egor that names this change)
 
 ### A2. Close
@@ -29,7 +29,7 @@ Requires Egor's agreement before each edit. The exact current and target text is
 `proposal.md`, section "Follow-up changes to shared files".
 
 - [ ] B1 Get Egor's agreement on the list of shared-file edits
-- [ ] B2 `openspec/config.yaml:31-33`: "two developers" becomes a three-person team with the PM role
+- [ ] B2 `openspec/config.yaml:36-38`: "two developers" becomes a three-person team with the PM role
 - [ ] B3 `openspec/config.yaml`: add the note that `openspec validate` is structural and the DOR needs a `spec-reviewer` report
 - [ ] B4 `AGENTS.md` section 5: three-person team, PM row in the zone table, PM has no agent
 - [ ] B5 `AGENTS.md` section 3: add the `spec-reviewer` item to the DOR and the "validate is structural" sentence
@@ -81,8 +81,8 @@ stays as an extra condition.
 ## DOR checklist
 
 - [x] `proposal.md`, `specs/…`, `design.md`, `tasks.md` exist
-- [ ] `openspec validate --strict` passes (task A1.2)
-- [ ] `spec-reviewer` report with no blocker and no major finding (task A1.3)
+- [x] `openspec validate --strict` passes (task A1.2)
+- [x] `spec-reviewer` report with no blocker and no major finding (task A1.3)
 - [x] Functional requirements and scenarios recorded
 - [x] Non-functional requirements: not applicable (process change, no code); recorded here
 - [x] Each task is small enough for one session
