@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
-from sympy import Expr, Symbol, lambdify
-from sympy.parsing.latex import parse_latex
+from sympy import Expr, Symbol, lambdify  # type: ignore[import-untyped]
+from sympy.parsing.latex import parse_latex  # type: ignore[import-untyped]
 
 
 @dataclass(frozen=True)

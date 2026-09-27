@@ -14,6 +14,7 @@ def read_pages(path: Path) -> list[str]:
         capture_output=True,
         text=True,
         timeout=120,
+        check=False,
     )
     return result.stdout.split("\f")
 

@@ -3,6 +3,9 @@
 Development journal for Egor's data/ML zone. One entry per source probe, model
 evaluation/selection, and hypothesis test (with its correction). English only.
 
+Tag convention: `[ML]` — model-based tasks (OCR/ViT, embeddings, RAG models); untagged —
+deterministic methods (regex/parsing/indexes/lemmatization). Regex is NOT ML.
+
 ## Entry 1 — Source probe: access mode per registry (2026-09-27)
 
 Hypotheses under test: H1 (registry non-uniformity), H3 (registry discovery).
@@ -320,3 +323,218 @@ Performance / format:
 - The text layer garbles formulas: Greek letters/subscripts become box chars (, ) in
   pdftotext. So text-layer formula extraction is unreliable — need image OCR (pix2tex) or an
   explicit symbol table.
+
+## Entry 14 — RAG: embeddings vs TF-IDF (recall@k on СП clauses)
+
+Corpus: 635 clauses of СП 22.13330.2016 (text > 30 chars). 5 ground-truth queries (natural
+phrase → clause number). Metric recall@1/3/5 (exact number match).
+
+| Model | recall@1 | recall@3 | recall@5 |
+|---|---|---|---|
+| cointegrated/rubert-tiny2 (312-dim) | 20% | 20% | 20% |
+| intfloat/multilingual-e5-small (384-dim) | 60% | 60% | 60% |
+| TF-IDF (lexical baseline) | 60% | 60% | 60% |
+
+Findings:
+1. rubert-tiny2 is too weak for this task (20%) — a tiny model, 312 dims.
+2. multilingual-e5-small matches TF-IDF but does NOT beat the lexical baseline.
+3. For exact-term queries (the realistic normative-search case), lexical search (pg_trgm /
+   TF-IDF) is competitive or better: domain vocabulary is repetitive, queries are exact terms.
+Limitation: the eval uses exact-term queries (favoring lexical). A fair semantic comparison
+needs paraphrase queries + a separate ground truth (next step).
+Decision: MVP search is lexical (pg_trgm); embeddings go on top as a semantic layer (hybrid)
+with a stronger model or fine-tuning.
+
+## Entry 15 — NLP: pix2tex on formula (5.7) — domain gap (OCR)
+
+Controlled test: formula (5.7) rendered to an image (matplotlib), run through pix2tex (ViT,
+trained on English academic math).
+
+Input: `R = \frac{\gamma_{c1}\gamma_{c2}}{k}[M_\gamma k_z b \gamma_{II} + M_q d_1 \gamma'_{II} + (M_q-1)d_b\gamma'_{II} + M_c c_{II}]`
+
+pix2tex output:
+`R = \frac{\underline{v_{c1} y_{c2}}}{k}[M_\gamma k_z b V_{II} + M_q q_1 V'_{II} + (M_q-1)d_b V'_{II} + M_c C_{II}]`
+
+Errors:
+- Greek γ read as v/y/V (three different Latin letters!) — `\gamma_{c1}→v_{c1}`,
+  `\gamma_{c2}→y_{c2}`, `\gamma_{II}→V_{II}`;
+- `d_1 → q_1`; `c_{II} → C_{II}` (case); spurious `\underline{}`.
+- BUT the structure is preserved: fraction, brackets, subscripts, primes — correct.
+
+Conclusion: pix2tex preserves formula structure but breaks Greek symbols (γ→v/y/V) and case.
+Russian engineering formulas need a symbol post-corrector (map γ↔v/y/V, case normalization)
+or domain fine-tuning. Confirms H9/H10.
+
+## Entry 16 — RAG: ё-normalization is mandatory
+
+Same query with and without «ё» on the 647-clause-heading corpus of СП 22.13330.2016:
+
+- `расчётные значения характеристик грунтов формула` → 0.704 (5.3)
+- `расчетные значения характеристик грунтов формула` → 0.835 (5.3)
+
+~16% drop purely from ё/е: the TF-IDF tokenizer treats «расчётные» and «расчетные» as
+different tokens, so only the shared words («значения», «характеристик», «грунтов») match,
+lowering cosine. Users typically type «е» (without ё), while norms use «ё» rarely and
+inconsistently.
+
+Rule (mandatory for all search, lexical and embeddings):
+- lowercase;
+- ё → е (both query and document);
+- strip replacement chars (□) from text before indexing.
+
+## Entry 17 — RAG: formula indexing + lemmatization (morphology)
+
+The raw formula text is useless (square glyphs). Formulas are indexed as separate items with
+an enriched search_text = `формула <N>` + clause heading + notation meanings on the page
+(+ latex). Formula→clause association is by `(page, line)`: a formula gets the nearest
+preceding clause heading on the same page.
+
+Without lemmatization the query `расчётные значения характеристик грунтов формула` did not
+surface formula (5.1) at the top: «расчетные» (query) ≠ «расчетных» (in heading 5.3.16), so
+cosine dropped. With pymorphy3 (lemmatization), formula (5.1) became the top hit:
+
+- formula 5.1 (clause 5.3.16) — 0.435; then 6.41, 6.42, 6.43, 5.33.
+- clauses: 5.3 / 5.3.15 / 5.3.2 — correct.
+
+Conclusion: Russian search needs lemmatization (morphology), not just ё-normalization;
+otherwise inflection («расчетные/расчетных/расчетными») breaks accuracy. Formulas must be
+separate index items linked to their clause via NormRef.
+
+## Entry 18 — RAG: reading the PDF per query is itself slow (speed/convenience)
+
+The current demo search re-reads the PDF (`pdftotext`), re-extracts clauses/formulas/notation,
+re-lemmatizes ~1400 texts (pymorphy3) and re-builds TF-IDF on every query. The bottleneck is
+not the ranking search itself but the «read and process the document» step per query — this
+contradicts the instant-response requirement.
+
+Relates to the speed/convenience hypothesis: the passport working hypothesis (sheet 3, A92) —
+«cut a typical calculation from 2–4 hours to 20 minutes», the pipeline acceptance criterion —
+«load < 2 sec»; the engineer pain point from problem interviews — «finding the current edition
+of a norm takes up to 30–40 min».
+
+Conclusion: search must run over a **pre-built** store (structure + index built in offline
+ingestion when the document is received), and the query path must only normalize+lemmatize the
+query string and look it up in the ready index. Reading the PDF at query time is prohibited —
+that is exactly why it «runs slowly».
+
+## Entry 19 — H4/H10: СП 45.13330.2017 — formulas WITHOUT numbers
+
+The query «условие успешного погружения опускных колодцев» found clause 13.8, but it did not
+return a formula and did not print the «где…» block. Reason: in this document the formula is
+not numbered:
+
+```
+13.8 Для успешного погружения опускных колодцев должны соблюдать следующее условие:
+    G + Gп ≥ КпΣТ,
+где G – собственный вес колодца (с учетом взвешивания в воде);
+    Gп – дополнительная пригрузка колодца;
+    Кп = 1,15–1,25 – коэффициент условий работы при погружении;
+    ΣТ – силы трения стен колодца по грунту.
+```
+
+There is no `(13.x)` marker at the end of the line. The formula extractor is keyed on `(N.N)`
+→ the whole document matched 1 line → «formulas 1». The «где…» block in
+`extract_formula_notation` is also attached only to found (numbered) formulas, so it was lost.
+
+Contrast: in СП 22.13330.2016 formulas are numbered `(5.1)`, `(5.7)`; in СП 45 they are often
+unnumbered and inline. Confirms H4 (non-uniform formats) and H10 (per-document adapters needed;
+one universal parser does not work).
+
+Fix direction: detect a formula by structure (formula line + following «где…» block), not by
+number; use the clause number or a synthetic id as the number.
+
+## Entry 20 — H5/H6: the text layer is unusable for math
+
+Checking formula (5.7) in СП 22.13330.2016 — `pdftotext -layout` produces a fragmented layout
+where the numerator/subscripts/denominator are scattered across lines and Greek is PUA-encoded:
+
+    26: '              \uf067 \uf067'                 # γ γ (numerator)
+    27: 'R = c1 c2 \uf05bM k b\uf067 + M d \uf067\uf0a2 + (M − 1)d \uf067\uf0a2 + M c \uf05d,'   # body + c1,c2
+    28: '(5.7)'
+    29: '\uf067 z \uf049\uf049 q 1 \uf049\uf049 q b \uf049\uf049 c \uf049\uf049'  # subscripts γ,z,II,q,1,II,q,b,II,c,II
+    30: 'k'                                      # denominator
+
+(`\uf067`=γ, `\uf05b`=[, `\uf05d`=], `\uf049`=I, `\uf0a2`='). The symbol order is non-linear —
+rebuilding the expression from text without coordinate-based layout analysis is impossible.
+
+Conclusion: the text layer works for clauses/notation/search, but **not** for an executable
+formula expression.
+
+## Entry 21 — OCR (pix2tex) on a real formula: fails on this PDF
+
+Rendering the formula (5.7) region → pix2tex (two attempts, different crops, 300 and 400 dpi)
+produces garbage: the model reads the surrounding text («При расчете деформаций…») as a table,
+not the formula. On a synthetic clean render (Entry 15) the structure survived; on the real
+degraded PDF (PUA fonts, mixed with the heading) it fails.
+
+MVP conclusion: auto-extracting `expression` from THIS PDF via pix2tex is unstable. The MVP path
+is a deterministic **formula registry** (`formulas.toml`): expression+latex+symbols are written
+once exactly (0 errors), and the pipeline delivers them automatically. OCR (Nougat/MathPix, better
+rendering) is scaling to thousands of formulas LATER, not an MVP blocker.
+
+## Entry 22 — OCR: two-stage pipeline (detect + recognize) — the structure is read
+
+Built a decomposed two-stage pipeline (separate modules + a separate `ocr.toml` config):
+(1) `ocr/detect.py` — formula-region detection from character coordinates (the `(N.N)` marker +
+an x-indent filter), (2) `ocr/recognize.py` — pix2tex on the clean crop.
+
+Result on (5.7) from the real PDF: **the formula structure is recovered** —
+`R=\frac{...}{...}[M_\gamma b + M_q d \gamma' + (M_q-1)d c]` (fraction, brackets, subscripts,
+primes). But: (a) detection still captures the inline heading «…вычисляемого по формуле» (the
+formula sits right next to text), (b) symbols are misread (γ→`*`, k→`L`, II→`1`, b→`b1`,
+d_b→`d_c`, c_II→`c_n`).
+
+Conclusion: the CNN/ViT path works on **structure**. For an exact `expression` we need (1) precise
+detection (separate the inline heading) and (2) symbol post-correction / fine-tuning. Confirms H9:
+pure automation without a human does not reach 99.9%.
+
+## Entry 23 — [ML: pix2tex/ViT OCR] formula (5.7) read ~98%
+
+Precise detection (the formula is centered, the heading is above — separated by coordinates) plus
+pix2tex produced a breakthrough: formula (5.7) is read almost fully.
+
+- **[ML] pix2tex (ViT)** returned the correct structure and almost all symbols:
+  `R=\frac{\gamma_{c1}\gamma_{c2}}{k}\bigl[M_\gamma k_z b \gamma_{II} + M_q d_1 \gamma'_{II} + (M_q-1)d_b \gamma'_{II} + M_c c_{II}\bigr]`
+- **[not ML] deterministic correction** (a config replacement map in `ocr.toml`): the only
+  systematic OCR error — Roman «II» is read as `\mathrm{in}`/`\mathrm{i}` → replace with `II`;
+  plus `\bar{1}` → `1`.
+
+Remaining differences from ground truth are cosmetic: `\bigl/\bigr` vs `[]`, the prime order
+(`\gamma_{II}^{\prime}` vs `\gamma'_{II}`), a trailing «, (5.7)» (the number marker stayed in the crop).
+
+Key takeaway: pix2tex previously produced garbage because the crop captured the heading; once
+detection became precise (character coordinates), ViT read the formula almost without errors.
+**ML here is only pix2tex; detection and correction are deterministic (regex/coordinates).**
+
+## Entry 24 — [ML: pix2tex/ViT] overfit on (5.7); generalization fails
+
+Cross-check on UNSEEN formulas: 5.1, 5.9, 5.10 — fail (garbage). (5.7) worked because detection and
+correction were tuned to its layout (a centered formula with the heading above). Other formulas are
+different: 5.1 — small inline; 5.9 — complex multi-line; 5.10 — the «где…» block right after it leaks
+into the crop.
+
+Conclusion: a single detection+correction config does not generalize (H10). We need either a stronger
+layout model (Nougat, reads a whole page) or fine-tuning on a golden dataset (formula → LaTeX) via
+HuggingFace Trainer.
+
+## Entry 25 — [ML: Nougat] out-of-the-box failure on a Russian normative PDF
+
+Nougat (`facebook/nougat-base`, ViT+BART, trained on English academic papers) on the СП 22.13330.2016
+page with formula (5.7) collapsed into hallucination — it endlessly repeats «The β-function». Classic
+domain shift: Cyrillic + engineering formulas are outside its training distribution.
+
+Conclusion: Nougat is unusable on Russian normative PDFs without fine-tuning. Fine-tuning on a golden
+dataset («formula → LaTeX») is the right path, but it needs a dataset (hundreds of examples), not the
+2 formulas in the manifest. A GPU is available (CUDA, 1 device) and HF Trainer is ready — the blocker
+is labelling the golden dataset.
+
+## Entry 26 — [ML: small local LLMs] they do not replace OCR; useful for «text → structure» and labelling
+
+Evaluation of small local LLMs (`Qwen2.5-3B`, `Llama-3.2-3B`, `Gemma-2-2B`) for formula reading:
+- reading a formula **from an image** — NO (a text LLM cannot see an image; a small VLM is weak at math);
+- turning extracted text+notation into structure (`id`/`latex`/`expression` via a JSON schema) — YES;
+- semi-auto golden-dataset labelling (the LLM proposes «formula → LaTeX», a human confirms) — YES.
+
+Decision: small LLMs are a «text → structure» post-processor and a labelling assistant, not an OCR
+replacement. Matches the personal hypothesis (`02-личная-исследовательская-гипотеза.md`): an LLM with
+a structurally-constrained JSON output.
