@@ -82,3 +82,47 @@ normalized edit-distance similarity (difflib ratio after LaTeX canonicalization)
 First run: mean similarity 0.764 — 5.5 (simple) 0.939; 5.1 0.682; 5.7 (complex R-formula) 0.671.
 Weak spot: complex subscripts — `\gamma_{II}` → `\mathrm{\tiny I I}`, `k_z` → `k_{\varepsilon}`.
 This is exactly what fine-tuning + the golden set must fix (Entry 5).
+
+## Entry 8 — Semantic formula comparison via latex2sympy2 (2026-09-27)
+
+The difflib string similarity (Entry 7) penalized cosmetic LaTeX differences (`\big` vs `\left`,
+`_{_{\gamma}}` double subscripts, `\mathrm{I}` vs `I`, redundant `{}`). Replaced it with a
+semantic round-trip: light preprocessing (`normalize_latex`) → `latex2sympy2` → SymPy expression
+equality.
+
+Result: formulas 5.5 and 5.7 are now `equal=True` (exact semantic match), not similarity
+0.939/0.671. `sympy.parse_latex` is NOT usable here — it mangles `\mathrm{tg}` → `g*t`,
+`\mathrm{I}` → `I*mathrm`, `\gamma_{II}` → `gamma_{I*I}`; `latex2sympy2` handles these correctly
+(keeps `\mathrm{tg}` as a symbol, preserves multi-char subscripts).
+
+## Entry 9 — Dependency resolution: one antlr4, drop the dead weight (2026-09-27)
+
+`latex2sympy2` pins `antlr4==4.7.2`, conflicting with `omegaconf` (4.9, via pix2text's text-OCR)
+and `sympy.parse_latex` (4.11). Resolution, without a separate venv and without losing quality:
+
+- dropped `sympy.parse_latex` (`alternative_parse_latex` in `formula_code.py` — the "less valid"
+  path; the MVP runs the deterministic registry, not `parse_latex`);
+- dropped `texify` (already broken on transformers);
+- bypassed `omegaconf` by importing `pix2text.latex_ocr.LatexOCR` directly (a small shim) instead
+  of `from pix2text import LatexOCR` — `latex_ocr.py` only needs `cnocr.utils`, not the text-OCR
+  chain that pulls `omegaconf`.
+
+Result: a single antlr4 (4.7.2); `LatexOCR` (mfr-1.5) + `latex2sympy2` both work. Also raised the
+page render DPI from 300 to 400 — recognition is excellent there.
+
+## Entry 10 — Direction correction: OCR fills, registry verifies (2026-09-27)
+
+ML journal Entry 21 declared the hand registry (`formulas.toml`) as the MVP formula path because
+pix2tex was unstable. That direction is now reversed: the research OCR (pix2text mfr-1.5 +
+DocLayout-YOLO + DPI 400) reads formulas well — the pilots 5.5 and 5.7 match semantically with no
+errors — so auto-extraction scales, while filling the registry by hand for hundreds of formulas is
+infeasible.
+
+New model:
+- OCR is the primary source: it fills `latex` (and a candidate `expression`) for every formula with
+  `provenance=machine-extracted`, `status=unverified`;
+- the registry is the human-verified subset — only formulas that must be 100% correct enter it.
+
+Verification flow (open question for Akim, `formula-verification-akim.md`): on the user side, the
+engineer sees the normative excerpt + the extracted LaTeX + notation and marks "верно"/"косяк"
+(fixing on error). On the pilots there were no errors.
