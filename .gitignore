@@ -40,6 +40,9 @@ docker-compose.override.yml
 # ML artifacts
 ml/models/
 
+# Downloaded normative documents (local research corpus; not committed — C5)
+norm-base/
+
 # OS / editor
 .DS_Store
 .idea/
