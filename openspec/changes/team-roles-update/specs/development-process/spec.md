@@ -62,8 +62,10 @@ acknowledgement required by "Go/No-Go verdict and archive" is that review.
 The system SHALL archive a change only after a GO verdict and after the spec-keeper
 syncs specs. For a change with code, GO requires that tests pass with >= 95% coverage,
 UI/UX is confirmed where the interface changed, and validation passed. A change has no
-code when it adds or edits no file outside `openspec/`, `docs/`, `agent-docs/`, and the
-agent and skill definitions under `.claude/`, `.kilo/`, and `.kilocode/`. For a change
+code when it adds or edits no file outside `openspec/`, `docs/`, `agent-docs/`, the
+agent tool directories `.claude/`, `.kilo/`, and `.kilocode/` (agent and skill
+definitions and agent settings), and the repository documents `AGENTS.md`, `CLAUDE.md`,
+`README.md`, and `.editorconfig`. For a change
 with no code, GO SHALL require that `openspec validate --strict` passes, that the
 `spec-reviewer` report has no blocker and no major finding, and that the developer who did not author the
 change has acknowledged it in a tracked commit or comment that names the change; the
