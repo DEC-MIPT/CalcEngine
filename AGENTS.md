@@ -25,8 +25,9 @@ follow it before acting.
 - **Infrastructure**: Docker locally, with groundwork for deployment to a Russian
   cloud host (Yandex Cloud / VK Cloud / Cloud.ru) later.
 - **Monetization**: B2B 30 000 ₽/mo (10 seats), B2C 3 000 ₽/mo, 14-day trial.
-- **Normative data**: manual monitoring for now (one pilot file); NLP/RAG auto-parsing
-  is a future, non-MVP goal. No ML in the calculation path (explicitly rejected).
+- **Normative data**: NLP/RAG auto-parsing of norms (collector, regex baseline parser,
+  embeddings retrieval on CPU) is part of the MVP; a generative-LLM extraction step is
+  deferred. No ML in the calculation path (explicitly rejected).
 
 ## 2. Methodology: Spec-Driven Development (SDD) via OpenSpec
 

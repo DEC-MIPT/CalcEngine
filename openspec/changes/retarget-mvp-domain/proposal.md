@@ -40,17 +40,20 @@ in both `web-platform` and `user-accounts`.
 - `user-accounts`: becomes the only owner of the subscription limits and of
   authorization.
 - New capability `foundations-shallow`: scope only (what is in, what is out).
-- `openspec/config.yaml`: the domain sentence in the context is retargeted.
+- `openspec/config.yaml`: the domain sentence in the context is retargeted, and
+  "NLP/RAG auto-parsing = future" is replaced with ML-in-MVP.
+- `AGENTS.md` and both `data-engineer.md` mirrors (non-OpenSpec files): drop
+  "NLP/RAG auto-parsing = future/non-MVP" in the same fold.
 
 ## Non-goals
 
-DRAFT — PM approval pending. The PM meeting list is not in the repository, so this list
-is the example list from roadmap section 3.1.
+ML-in-MVP (PM-approved): the normative pipeline — collector, regex baseline parser, and
+embeddings retrieval on CPU — is part of the MVP; no ML runs in the calculation path.
 
 Before the defense the project does not deliver:
 
 - Billing or payment integration.
-- NLP/RAG parsing of norms inside the product.
+- Generative-LLM structured extraction from norms (deferred; needs GPU/budget).
 - PDF report output.
 - A multi-tenant audit trail.
 

@@ -130,9 +130,11 @@ be `unverified`, and no field may be null.
      named milestone.*
   2. Explicit out-of-scope list for the first domain. *WHEN a user asks for a case on
      the list THEN the system refuses and names the limit.*
-  3. Non-goals before the defense (billing integration, NLP in the product, PDF,
-     multi-tenant audit trail, and others; the PM approves the list). *WHEN a proposal
-     touches a non-goal THEN product-vision is amended first.*
+  3. Non-goals before the defense (billing integration, generative-LLM structured
+     extraction from norms, PDF, multi-tenant audit trail, and others; the PM approves
+     the list). ML-in-MVP is in scope: the normative pipeline parses norms into the
+     database; no ML in the calculation path. *WHEN a proposal touches a non-goal THEN
+     product-vision is amended first.*
   4. A norm reference in a spec is either verified against the source text or marked
      `source: unverified`. *WHEN a spec gives an example reference THEN it uses a
      synthetic placeholder.*
@@ -369,7 +371,7 @@ a change meets the DOR. The cheapest moment for WP1–WP3 is now.
 | 3 | Update `backend-layered-architecture` | Akim and DE | — | Steps 1 and 2 |
 | 4 | `bootstrap-dev-environment` | Akim (tooling), Egor (Docker and CI) | The two halves run in parallel | Step 3 (import contract), type-checker choice |
 | 5 | First vertical slice: one calculation type of the first domain, from input model to engine, trace, UI and DOCX, with reference examples | Akim, with data from DE | DE: pilot normative data for that calculation type | Steps 2–4 plus at least one reference example |
-| later | Second domain; accounts and tenant isolation (A10); deployment; NLP as a research chapter | — | — | Step 5 |
+| later | Second domain; accounts and tenant isolation (A10); deployment; generative-LLM extraction from norms | — | — | Step 5 |
 
 - **Critical path:** step 0 → `retarget-mvp-domain` → `calculation-core-contract`
   (with `norm-source-traceability`) → `calculation-verification` →

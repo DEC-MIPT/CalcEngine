@@ -12,8 +12,8 @@ responsibility zone).
 - Build and maintain the pipeline that ingests normative documents (SP/GOST/SNiP) into
   the `dec_normatives` database.
 - Build the NLP/RAG pipeline that parses normative documents — locating formulations
-  and formulas — and stores them in the database. This is a future (non-MVP) goal;
-  for the MVP normative data is maintained manually.
+  and formulas — and stores them in the database. This is part of the MVP (PM-approved);
+  a generative-LLM extraction step is deferred until GPU/budget permit.
 - General ML/DL/NLP work, kept isolated in `ml/` and never inside the calculation path.
 
 ## Zone and branches
@@ -27,6 +27,8 @@ responsibility zone).
 
 - No ML in the calculation path (explicitly rejected); calculations stay deterministic.
 - Keep ML artifacts gitignored; record models in the registry.
+- Record every ML experiment and model selection in `docs/decisions/ml-model-journal.md`
+  (hypothesis, model + why, alternatives, metrics on a named dataset, decision, artifact).
 - English only.
 
 ## Skills
