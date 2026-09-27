@@ -168,3 +168,41 @@ number printed in the document (no invented clause or formula numbers).
 - The search rules of entries 16-17 (lower case, ё→е in query and document,
   lemmatization) are product behavior; they could become a requirement of
   `normatives-catalog` or `normatives-parser`.
+
+## Check of commit `b44d6f3` (2026-09-27)
+
+Akim checked the code on `develop` (merge `02a33de`) against your answers above:
+`normatives_pipeline/db.py`, `parser.toml` `[output]`, `search.py`, `docker-compose.yml`,
+and the spec and tasks of `normatives-formula-contract`. Tests were not run by Akim (your
+zone).
+
+Closed:
+
+- Findings 1-3, 6: `norm_ref` carries `document`, `edition`, `clause`, `status`,
+  `provenance`; parser output is `status = "unverified"`, `provenance =
+  "machine-extracted"`; an unknown edition is `unverified`.
+- Finding 4 and question 10: one locator per reference (`форм. (N)`, or `п. X` for a
+  formula without a number); the internal id is the payload field `formula_id`; an
+  unknown clause is `unverified`.
+- Finding 8: the spec requires the agreed `NormRef` and has a scenario for `formula_id`.
+- Question 8 (part): `search.query()` no longer runs DDL; a missing `DEC_DATABASE_URL`
+  raises an error.
+- Question 9: search uses `pg_trgm` (`similarity`).
+- Question 7 (part): a `coefficient` table stores table cells, with the table number taken
+  from the caption.
+
+Still open:
+
+| # | What | Evidence | Why it matters | Proposal |
+|---|---|---|---|---|
+| 11 | Coefficients have no `NormRef` | `coefficient` holds `table_number`, `page`, `row_index`, `col_index`, `value`; no edition, status, or provenance, and no function builds a `NormRef` for a value | Your answer to question 7: "each value with its own `NormRef`". The engine and the report need it for every coefficient of R | Build a `NormRef` per value (`document`, `edition`, `clause` = the table in your grammar, `status`, `provenance`), the same way as for formulas |
+| 12 | Verification state is not stored | `status` and `provenance` are constants in `build_formula_payload`; no column holds them; formulas from the hand-entered registry `formulas.toml` also come out `machine-extracted` | The parameters layer rejects `machine-extracted` (your answer 2), so nothing, including the pilot R and its table, can pass the gate. There is no place to record that a person checked a formula or a value | Store `status` and `provenance` per formula and per coefficient, and define the step that sets `human-verified` (who, how it is recorded) |
+| 13 | `NormRef` keys still come from config | `build_formula_payload` filters by `norm_ref_keys` from `parser.toml` | Finding 5: one config line can drop `status` or `provenance`; the spec now fixes the five fields, the code does not | Build the five fields unconditionally; keep config for extra payload fields only |
+| 14 | Tasks 4.1 and 4.2 are still in the change | `openspec/changes/normatives-formula-contract/tasks.md`, section 4 | Your answer to question 3: "I remove tasks 4.1 and 4.2" | Remove them; Akim adds the consuming side to his own change |
+| 15 | `document` can be an empty string | `formula.get("designation", "")` | A `NormRef` without a document is not a reference (answer 4) | Treat a missing document as an ingestion error |
+
+Expected and not a finding: the database is still `dec` with one user (question 5: you
+move to `dec_normatives` and add `dec_app` when the backend needs it); a read-only role
+does not exist yet (question 8).
+
+**Answer (11-15).**
