@@ -53,14 +53,14 @@ Marker **[blocked: NormRef]**: the task needs the `NormRef` shape agreed with Eg
 - [ ] 6.1 [blocked: NormRef] Define the envelope with `result_id`, `engine_version`, `input_hash`, `norm_refs`, `verdict`, `verdict_reason`, `warnings`, `trace`, `unverified_step_count`; `outputs`; test the refused envelope (empty `trace` and `outputs`, `unverified_step_count` 0, `verdict_reason` names the bound, `norm_refs` contains the bound's `NormRef` and every warning's `NormRef`) (backend)
 - [ ] 6.2 Implement `input_hash` per `design.md` decision 6; test that identical inputs and parameters give identical hashes, and that a different input, calculation type, or resolved parameter set each gives a different hash (backend)
 - [ ] 6.3 [blocked: NormRef] Print the accountability block and the engineer responsibility statement in the report (backend)
-- [ ] 6.4 Add the signature-block report setting; test the section order with the block enabled and disabled (backend)
-- [ ] 6.5 (backend, no code) Check GOST R 21.101 (edition unverified) from its primary source text and decide the default of the signature-block setting; until then the requirement stays `unverified`
+- [ ] 6.4 Add the signature-block report setting, enabled by default, with the developer and normative control lines and an optional checker line; test the default, and the section order with the block enabled and disabled (backend)
+- [x] 6.5 (backend, no code) Check GOST R 21.101 (edition unverified) from its primary source text and decide the default of the signature-block setting; the edition stays `unverified` until the normative pipeline confirms it (2026-09-27; checked against GOST R 21.101-2026, clause 4.1.7 and Annex E; default enabled; see `design.md` decision 10)
 
 ## 7. Pilot and sync
 
 - [ ] 7.1 Use one in-scope calculation type of `foundations-shallow` (from WP1) as the pilot for the contract tests, once WP1 names it (backend)
 - [ ] 7.2 After apply of this change, sync `backend-layered-architecture` (WP5): reword task 6.2 so the engine receives parameters as typed arguments (B5); update `design.md` decision 7 to name the pure function as the C/C++ boundary; settle the open question "formulas in YAML vs in code" from this change's `design.md`. The change owners (Akim and Egor) edit it; this change does not
-- [ ] 7.3 Record for WP3 that `report-generator` names GOST R 21.101-2020 with an unchecked edition
+- [x] 7.3 Record for WP3 that `report-generator` names GOST R 21.101-2020 with an unchecked edition (2026-09-27; `design.md`, section "NormRef", "Handoff to WP3")
 
 ## 8. Close
 

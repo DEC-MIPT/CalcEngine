@@ -39,7 +39,8 @@ roadmap (`docs/audit/03-verified-roadmap.md`, section 3.2, WP2) records:
   instead of being assumed correct.
 - `report-generator`: adds a result accountability block with the envelope fields and a
   statement that the design engineer is responsible for the result; resolves the
-  signature-field contradiction without deciding whether signatures are mandatory;
+  signature-field contradiction with a signature block that holds the developer and
+  normative control lines, enabled by default (GOST R 21.101-2026, edition unverified);
   references in the report come from the steps and carry their status.
 - `security`: "Input validation" is kept and gains a statement that separates it from
   the engine's applicability check.
@@ -47,12 +48,13 @@ roadmap (`docs/audit/03-verified-roadmap.md`, section 3.2, WP2) records:
 ## Non-goals
 
 - Fixing any norm value: no tolerance, bound, coefficient, unit value, rounding rule, or
-  clause number. These are data that the engineer fills from a primary source.
+  clause number in calculation data. These are data that the engineer fills from a
+  primary source. The only clauses this change cites are the GOST R 21.101-2026 (edition
+  unverified) sources of the report's signature block, which were read from the
+  standard's text.
 - Finalizing `NormRef`: its shape is agreed with Egor (see `design.md`).
 - Choosing how the declarative input model generates API and form validation (C10 stays
   a design note).
-- Deciding whether signature fields are mandatory; that needs GOST R 21.101 (edition
-  unverified), which is not yet checked.
 - Editing `backend-layered-architecture`; its sync is a task for WP5.
 - Verification against reference examples (WP4) and norm provenance and pinning (WP3).
 - PDF output.

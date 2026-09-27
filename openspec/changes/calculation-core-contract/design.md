@@ -49,6 +49,17 @@ See `proposal.md` (Non-goals).
 9. **Rounding data at run time:** each output quantity is returned in the envelope's
    `outputs` with its value, unit, `rounding_rule`, and `rounding_source`, so the UI and
    the report read the rule and its source from the envelope, not from the type contract.
+10. **Signature block (task 6.5).** The report is a calculation, and GOST R 21.101-2026
+    (edition unverified), clause 4.1.7, formats calculations as text documents. Annex E,
+    instructions for columns 10-13, makes the signatures of the developer and of the
+    person responsible for normative control mandatory and allows a checker line. The
+    signature block therefore holds the developer and normative control lines, the
+    checker line is optional, and the setting is enabled by default. Disabling it stays
+    possible, for example for a draft that does not go into project documentation.
+    Source check: the text was read from a copy of the official edition, and the edition
+    was matched to the Rosstandart register entry (in force from 2026-04-01, replaces
+    GOST R 21.101-2020). The edition stays `unverified` under
+    `agent-docs/domain-constraints.md` until the normative pipeline confirms it.
 
 ## NormRef (to be confirmed with data engineer — needs Egor confirmation)
 
@@ -100,6 +111,20 @@ Open questions for Egor:
 7. Is a `NormRef` stored in a result immutable once pinned (WP3 requirement 3)?
 8. What format does `edition` use: a year, a full designation, or an amendment number?
 
+Handoff to WP3 (`norm-source-traceability`, Egor). This is a record for WP3, not a
+question that task 1.3 must answer:
+
+- The base spec `report-generator`, requirement "GOST-compliant report assembly", names
+  GOST R 21.101-2020 as settled. That edition has not been checked against the source
+  text, so under `agent-docs/domain-constraints.md` it is `unverified`.
+- The Rosstandart register lists GOST R 21.101-2026 as in force from 2026-04-01,
+  replacing GOST R 21.101-2020 (order No. 129-ст of 2026-02-12). The base requirement
+  therefore names a replaced edition.
+- This change writes "GOST R 21.101-2026 (edition unverified)" in its own text and does
+  not edit the base requirement. After this change archives, the capability names the same
+  document both ways until WP3 either confirms the edition from the source text or marks
+  it `unverified` in that requirement.
+
 ## Design note: declarative input model (C10)
 
 This is a note, not a requirement. The team intends one declarative input model per
@@ -127,7 +152,8 @@ later design and is not fixed here.
     evaluator, which changes where a step's `expression` comes from. This is an open
     question for WP5 and is not decided here.
 - **`report-generator` "GOST-compliant report assembly"** names GOST R 21.101-2020; that
-  edition is not checked against the source text. Recorded for WP3; not edited here.
+  edition is not checked against the source text. Handed to WP3 in section "NormRef"
+  (task 7.3); not edited here.
 - **`retarget-mvp-domain` (WP1)** removes "Deterministic verified calculation" and
   modifies "Detailed calculation display"; this change touches neither, and WP1 archives
   first. WP1 task 2.1 (Akim confirms the WP1 engine and output deltas match this
@@ -148,6 +174,6 @@ later design and is not fixed here.
 
 - `NormRef` changes after agreement ripple through three specs. Mitigation: all three
   refer to it by name and never restate its fields.
-- The signature-block default stays open until GOST R 21.101 (edition unverified) is
-  checked. Mitigation: it
-  is one setting, so the decision changes a default, not the report structure.
+- The signature-block rule rests on an edition that is still `unverified` (decision 10).
+  Mitigation: it is one setting, so a correction after the normative pipeline confirms
+  the edition changes a default or a line, not the report structure.
