@@ -1,5 +1,19 @@
 # Tasks
 
+Lead: Akim (moved from Egor 2026-09-28, since `backend/` is Akim's responsibility zone
+per `AGENTS.md` section 5; see `docs/decisions/backend-layered-architecture-lead-change.md`).
+Akim decides and implements sections 1-3, 5-6 (backend scaffold, config, `dec_app`,
+parameters layer, calculation engine) on his own. Egor's agreement or execution is
+still needed where this change crosses his zones (normative pipeline, ML/DL/NLP,
+DevOps): section 4 (normative database/ingestion, pending the location question in
+task 9.3), section 7 (ML zone — his zone by `AGENTS.md` section 5, not Akim's, even
+though the directory sits at repo root), section 8 (Docker/local env — DevOps), and
+section 9's still-open items 9.3, 9.6 (Egor alone), 9.7. Branch:
+`feature/backend-layered-architecture/backend` (Akim, from `develop`) for sections
+1-3, 5-6; Egor uses his own zone branches
+(`feature/backend-layered-architecture/{data,ml,infra}`) for sections 4, 7, 8 once
+their open items are settled.
+
 ## 1. Scaffold layered directory structure
 
 - [ ] 1.1 Create `backend/app` with empty `api`, `schemas`, `models`, `repositories`, `services`, `parameters`, `engine`, `reporting`, `core`, `db`, `worker` packages

@@ -17,11 +17,15 @@ what it does not say. Do not restate `AGENTS.md` here.
   exist. What the pipeline means for Akim's work: `docs/reports/egor-branches-analysis.md`.
 - Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
   (WP2), `calculation-verification` (WP4), `bootstrap-dev-environment` (WP6, spec
-  phase GO, implementation not started), `record-installed-skills-akim`. Led by Egor,
-  with Akim's parts: `retarget-mvp-domain` (WP1), `backend-layered-architecture` (WP5,
-  not yet retargeted). Egor: `normatives-collector`, `normatives-parser`,
-  `normatives-formula-contract`. Planned, not created: `norm-source-traceability`
-  (WP3).
+  phase GO, implementation not started), `record-installed-skills-akim`,
+  `backend-layered-architecture` (WP5, not yet retargeted; lead moved from Egor to
+  Akim 2026-09-28, since `backend/` is his zone — `docs/decisions/
+  backend-layered-architecture-lead-change.md`; sections 1-3, 5-6 are his to decide
+  and implement, Egor's agreement or execution is still needed for section 4, section
+  7 (his ML zone), section 8 (his DevOps zone), and section 9's open items 9.3/9.6/9.7).
+  Led by Egor, with Akim's parts: `retarget-mvp-domain` (WP1). Egor:
+  `normatives-collector`, `normatives-parser`, `normatives-formula-contract`. Planned,
+  not created: `norm-source-traceability` (WP3).
 - The base specs in `openspec/specs/` still describe the placeholder domain (beam
   deflection, SP 16.13330) until `retarget-mvp-domain` is archived, and
   `backend-layered-architecture` still names it. The MVP domains are shallow
