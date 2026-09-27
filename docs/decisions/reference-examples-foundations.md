@@ -9,7 +9,7 @@
 
 | Item | State | Blocks |
 |---|---|---|
-| First calculation type(s) of `foundations-shallow` | **Open**: the in-scope list is TBD (`retarget-mvp-domain` task 3.1, Egor and the PM) | Everything below; WP2 task 7.1 (pilot) |
+| First calculation type(s) of `foundations-shallow` | **Open**: the in-scope list is TBD (`retarget-mvp-domain` task 3.1, Egor and the PM); questions in `first-calculation-type-egor-pm.md` | Everything below; WP2 task 7.1 (pilot) |
 | Bibliographic record of the guide | Open | Source citation of every example |
 | 3 worked examples per calculation type | Open | WP4 tasks 2.1-2.4; step 5 (first slice) |
 | Invariants specific to shallow foundations | Open | WP4 task 2.11 |
@@ -24,7 +24,7 @@ PM.
 
 - Proposed type(s): `<name as in the guide>`
 - Worked examples of it in the guide: `<count>`, pages `<pages>`
-- Agreed by Egor and the PM on: `<date>`, recorded in: `<tracked file or commit>`
+- Agreed by Egor and the PM on: `<date>`, recorded in `first-calculation-type-egor-pm.md` (questions 1-3)
 
 ## 2. Source record
 
