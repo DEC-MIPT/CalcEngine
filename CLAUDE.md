@@ -9,17 +9,18 @@ what it does not say. Do not restate `AGENTS.md` here.
 
 ## Status (2026-09-27)
 
-- No application code on `develop`: `backend/`, `frontend/`, `params/`, `ml/`,
-  `docker-compose.yml` do not exist. Egor's pipeline code is on his branches
-  (`feature/normative-collector/data`, `feature/normative-parser/ml`), not yet merged.
-- Egor's pipeline (on his branches) runs a local PostgreSQL `dec-postgres` on port 5433
-  and keeps a hand-entered formula registry (`normatives_pipeline/formulas.toml`); what
-  it means for Akim's work: `docs/reports/egor-branches-analysis.md`.
+- Application code on `develop`: only Egor's normative pipeline (`normatives_pipeline/`,
+  merged 2026-09-27, `02a33de`), with the root `pyproject.toml` (ruff exclude, pytest,
+  branch coverage), `tests/`, and `docker-compose.yml` (PostgreSQL `dec-postgres` on
+  port 5433, database `dec`). His collector is still on
+  `feature/normative-collector/data`. `backend/`, `frontend/`, `params/`, `ml/` do not
+  exist. What the pipeline means for Akim's work: `docs/reports/egor-branches-analysis.md`.
 - Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
   (WP2), `calculation-verification` (WP4), `team-roles-update` (WP7),
   `record-installed-skills-akim`. Led by Egor, with Akim's parts:
   `retarget-mvp-domain` (WP1), `backend-layered-architecture` (WP5, not yet
-  retargeted). Egor: `normatives-collector`, `normatives-parser`. Planned, not
+  retargeted). Egor: `normatives-collector`, `normatives-parser`,
+  `normatives-formula-contract`. Planned, not
   created: `norm-source-traceability` (WP3), `bootstrap-dev-environment` (WP6).
 - The base specs in `openspec/specs/` still describe the placeholder domain (beam
   deflection, SP 16.13330) until `retarget-mvp-domain` is archived, and
@@ -55,7 +56,7 @@ Edit these only when the user explicitly says so; otherwise show a diff.
 - `AGENTS.md`, `.gitignore`, `README.md`, `.kilo/**`, `.kilocode/**`,
   `.claude/agents/*` other than the two subagents added for Claude Code.
 - Anything in Egor's zones: normative pipeline, NLP/RAG, ML, DevOps.
-- The root `pyproject.toml` (shared with Egor's pipeline once his branch is merged).
+- The root `pyproject.toml` (shared with Egor's pipeline).
 
 ## Language
 
@@ -66,10 +67,15 @@ Edit these only when the user explicitly says so; otherwise show a diff.
 
 - `openspec validate --all --strict` — validate all specs and changes (read-only).
 - `openspec list`, `openspec status --change <name>`, `openspec show <item>`.
+- Egor's pipeline (his zone): `.venv/bin/python -m normatives_pipeline.search --json
+  "<query>"` with `DEC_DATABASE_URL` set, as in
+  `docs/decisions/normatives-pilot-usage-akim.md`. Its PostgreSQL is defined in
+  `docker-compose.yml`. Ingestion and the pipeline's `pytest` are Egor's to run.
 
-TBD, see planned change `bootstrap-dev-environment`: tests (`pytest`, `vitest`,
-`playwright`), lint and types (`ruff`, `mypy`, `eslint`, `tsc`), build, `docker`.
-Do not invent or run commands from this list; none of them is set up yet.
+TBD, see planned change `bootstrap-dev-environment`: Akim's backend and frontend tooling
+(`pytest` for the backend, `vitest`, `playwright`, `ruff`, `mypy`, `eslint`, `tsc`,
+build). Do not invent or run commands from this list; none of them is set up for Akim's
+zone yet.
 
 ## Subagents (also mirrored in `.kilo/agent/`)
 
