@@ -16,12 +16,12 @@ what it does not say. Do not restate `AGENTS.md` here.
   `feature/normative-collector/data`. `backend/`, `frontend/`, `params/`, `ml/` do not
   exist. What the pipeline means for Akim's work: `docs/reports/egor-branches-analysis.md`.
 - Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
-  (WP2), `calculation-verification` (WP4), `record-installed-skills-akim`. Led by Egor,
-  with Akim's parts:
-  `retarget-mvp-domain` (WP1), `backend-layered-architecture` (WP5, not yet
-  retargeted). Egor: `normatives-collector`, `normatives-parser`,
-  `normatives-formula-contract`. Planned, not
-  created: `norm-source-traceability` (WP3), `bootstrap-dev-environment` (WP6).
+  (WP2), `calculation-verification` (WP4), `bootstrap-dev-environment` (WP6, spec
+  phase GO, implementation not started), `record-installed-skills-akim`. Led by Egor,
+  with Akim's parts: `retarget-mvp-domain` (WP1), `backend-layered-architecture` (WP5,
+  not yet retargeted). Egor: `normatives-collector`, `normatives-parser`,
+  `normatives-formula-contract`. Planned, not created: `norm-source-traceability`
+  (WP3).
 - The base specs in `openspec/specs/` still describe the placeholder domain (beam
   deflection, SP 16.13330) until `retarget-mvp-domain` is archived, and
   `backend-layered-architecture` still names it. The MVP domains are shallow
@@ -49,6 +49,29 @@ what it does not say. Do not restate `AGENTS.md` here.
 - Do not write application code, tests for unspecified behavior, or migrations
   without a change that meets the DOR (`AGENTS.md` section 3) and passes
   `openspec validate --strict`.
+
+## Code journal
+
+- Once implementation starts on a WP (writing actual code, not spec artifacts), keep a
+  running journal at `docs/reports/WP<N>-code-journal.md` (one file per WP; English
+  filename, Russian content, matching the existing `docs/reports/` convention). It
+  records execution, not planning: it does not replace `tasks.md`'s checklist, and
+  does not gate anything by itself.
+- Create the file at the first implementation task of the WP, before starting it.
+- One row per `tasks.md` subtask (its own numbering, e.g. `2.1`), appended right after
+  that subtask is finished, as a Markdown table with exactly these five columns, in
+  Russian:
+
+  | Задача | Подзадача | Описание | Критерий успешности | Результат выполнения |
+  |---|---|---|---|---|
+
+  - Задача: the `tasks.md` section number and name (e.g. "2. Backend tooling").
+  - Подзадача: the subtask id (e.g. `2.1`).
+  - Описание: what `tasks.md` asked for, in Akim's own words.
+  - Критерий успешности: how done is verified, from that subtask's own text (a
+    command, a test, an observable behavior).
+  - Результат выполнения: what actually happened — command output, files created or
+    changed, and any deviation from the plan.
 
 ## Do not change without agreement
 
