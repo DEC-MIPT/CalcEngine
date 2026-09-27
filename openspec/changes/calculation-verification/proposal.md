@@ -3,8 +3,7 @@
 ## Why
 
 The only quality gate in the project is branch coverage. Coverage shows that code ran,
-not that the result is right. The verified roadmap (`docs/audit/03-verified-roadmap.md`,
-section 3.4, WP4) records:
+not that the result is right:
 
 - **A3 (High):** "99.9% accuracy" (`calculation-engine/spec.md:54-60`) names no quantity,
   no reference, and no population, so it cannot be measured. The audit's "<= 0.1%" was

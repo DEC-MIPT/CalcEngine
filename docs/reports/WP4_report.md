@@ -8,7 +8,7 @@
 
 Проверки:
 
-- `spec-reviewer` на `calculation-verification`: 0 блокеров, 10 major, 5 minor; замечания, закрываемые внутри change, исправлены. Повторно на этот change не запускался.
+- `spec-reviewer` на `calculation-verification`: 0 блокеров, 10 major, 5 minor; замечания, закрываемые внутри change, исправлены. ~~Повторно на этот change не запускался.~~ Закрыто 2026-09-27: три свежих прохода по текущему тексту, проход 3 — 0 блокеров, 0 major; вердикт GO от `tester` по спековой фазе (задача 1.5). См. `docs/decisions/calculation-verification-readiness-rus.md`.
 - `spec-reviewer` на `calculation-core-contract` после синхронизации NormRef (с перекрёстной проверкой зависимостей WP4): 0 блокеров, 2 major, 13 minor; вердикт READY for DOR. Замечания по формулировкам исправлены, кроме двух пунктов (см. «Что не закрыто»).
 - `norm-traceability-checker`: ни одно требование не фиксирует значение нормы, допуск, редакцию или пункт. С тех пор нормативных значений не добавлялось.
 
