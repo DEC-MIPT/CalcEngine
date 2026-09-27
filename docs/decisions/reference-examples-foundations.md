@@ -10,6 +10,7 @@
 | Item | State | Blocks |
 |---|---|---|
 | First calculation type(s) of `foundations-shallow` | **Open**: the in-scope list is TBD (`retarget-mvp-domain` task 3.1, Egor and the PM); questions in `first-calculation-type-egor-pm.md` | Everything below; WP2 task 7.1 (pilot) |
+| Coefficient table 5.5 of СП 22.13330.2016 (if the type is R) | **Open**: tables are extracted but not stored in Egor's pipeline; `normatives-formula-contract-review-egor.md`, question 7 | The pilot run of R; WP2 task 7.1 |
 | Bibliographic record of the guide | Open | Source citation of every example |
 | 3 worked examples per calculation type | Open | WP4 tasks 2.1-2.4; step 5 (first slice) |
 | Invariants specific to shallow foundations | Open | WP4 task 2.11 |
@@ -21,6 +22,15 @@ The guide must hold at least 3 worked examples of the type (WP4 decision 1: N = 
 makes the suite invalid). Propose the type(s) from what the guide actually covers; the
 decision goes into `foundations-shallow` "In-scope calculation types" through Egor and the
 PM.
+
+Preliminary candidate: the design soil resistance of the base R, formula 5.7, clause
+5.6.7 of СП 22.13330.2016 (numbers from Egor's `formulas.toml`, `unverified`). The
+formula is in Egor's registry and the SP is ingested; check first that the guide has at
+least 3 worked examples of R.
+
+Egor's test `tests/test_formula_code.py` computes R = 143.75 kPa from arbitrary input
+values. It checks the formula-to-code binding only; it has no source citation, so it is
+not a reference example and must not be admitted to the suite.
 
 - Proposed type(s): `<name as in the guide>`
 - Worked examples of it in the guide: `<count>`, pages `<pages>`

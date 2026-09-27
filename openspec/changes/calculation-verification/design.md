@@ -30,7 +30,8 @@ See `proposal.md` (Non-goals).
    foundations, with worked calculation examples. Its `origin` category is `textbook`
    (of `manual calculation`, `textbook`, `norm application`). The engineer fills the
    bibliographic record of the guide, and the numeric references, after this change is
-   applied. This design names no title, year, or page.
+   applied. This design names no title, year, or page. The engineer is Akim (decided
+   2026-09-27); what he fills is listed in `docs/decisions/reference-examples-foundations.md`.
 3. **Tolerance is data.** Each expected output carries its own `tolerance` and
    `tolerance_source`. The spec fixes no number. The audit's "<= 0.1%" is not used.
 4. **Latency split by replacement.** The existing requirement "Non-functional —
