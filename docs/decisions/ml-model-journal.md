@@ -290,3 +290,33 @@ Candidate ready models for the parser (formula → code, tables, RAG):
 Risk (domain shift): pix2tex/Nougat are trained on English/Western academic math; Russian
 СНиП use Cyrillic variable names and subscripts (N₀, γ_c, φ_II) — the domain gap must be
 measured (H9/H10), not assumed away.
+
+## Entry 12 — Decision: collector paused until historical-data access
+
+The collector (`feature/normative-collector/data`) is paused until access to historical СП
+editions is obtained (via the advisor → ФАУ ФЦС / Минстрой / Росстандарт). Historical
+traceability is the killer feature; without it the product has no differentiator. Moving to
+the parser (calculation extraction), which does not depend on the historical track.
+
+## Entry 13 — Parser: baseline and formula → code (first runs)
+
+Run on pilot СП 22.13330.2016 (222 pages, text-PDF):
+- layer — text (not scan); clauses 647 (regex); formula numbers 124; notation entries 729;
+  tables 1 (first 15 pages, for speed).
+
+Formula (5.7) → executable code:
+- **reliable** (explicit symbol table + deterministic expression) → `lambdify` → R = 143.75
+  kPa. Works.
+- **less-valid** — naive `parse_latex`: silent error — `\gamma_{c1}` → `c*1`, `\gamma_{II}`
+  → `I*I` (imaginary unit squared). Confirms the domain shift (H9/H10): multi-char/roman
+  subscripts of Russian notation break the naive LaTeX parser.
+- Conclusion: the reliable path is NOT naive `parse_latex` but an explicit symbol table (or a
+  structured AST), because subscripts must be mapped deliberately.
+
+Performance / format:
+- pdfplumber `extract_text` — 60 s for 222 pages; `pdftotext` (poppler) — ~1 s. Text via
+  pdftotext (subprocess); pdfplumber only for tables (also slow, ~0.23 s/page → needs
+  targeted page selection).
+- The text layer garbles formulas: Greek letters/subscripts become box chars (, ) in
+  pdftotext. So text-layer formula extraction is unreliable — need image OCR (pix2tex) or an
+  explicit symbol table.
