@@ -19,7 +19,7 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 - [x] 1.3a Sync `design.md` resolutions into the delta specs and tasks: `norm_refs` list on a step, `Source` (`NormRef` list or `EngineerRule`), `engineer_rules` in the envelope (2026-09-26)
 - [x] 1.4 Run `spec-reviewer` on this change and resolve blockers (2026-09-26, four passes, 0 blockers, re-run after the `NormRef` sync: 0 blockers, 2 major (warning structure fixed; written confirmation, since given in commit `a1a896c`); see `docs/decisions/calculation-core-contract-readiness.md`)
 - [x] 1.5 Run `norm-traceability-checker` and confirm that no requirement fixes a norm value (2026-09-26, two passes, no norm value fixed)
-- [ ] 1.6 `tester` issues the verdict for the spec change (see DOD)
+- [x] 1.6 `tester` issues the verdict for the spec change (see DOD) (2026-09-27: **GO**, spec phase; validation, spec-reviewer pass 8 (0 blockers, 0 major, 1 minor fixed), norm-traceability-checker re-check, and Egor's written NormRef agreement all pass; implementation sections 2-6 remain open and are not covered; see `docs/decisions/calculation-core-contract-readiness.md`, section "Tester verdict")
 
 ## 2. Requirement 1: pure calculation function (backend)
 

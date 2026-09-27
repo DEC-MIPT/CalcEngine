@@ -277,10 +277,12 @@ later design and is not fixed here.
 - The pilot (task 7.1) may need coefficient tables. The candidate first type, R by
   formula 5.7 of СП 22.13330.2016 (`unverified`), takes coefficients from a table.
   Egor added table storage on 2026-09-27 (`b44d6f3`, starting with table 5.5 of
-  СП 22.13330.2016), but the stored cells carry no `NormRef` and no verification state
-  yet (`docs/decisions/normatives-formula-contract-review-egor.md`, question 11; the
-  same gap as question 12 above); until then he takes `M_γ`, `M_q`, `M_c` for the pilot
-  from a manually verified copy of table 5.5 in the registry (his answer to question 7).
+  СП 22.13330.2016, `unverified`), but the stored cells carry no `NormRef` and no
+  verification state yet (`docs/decisions/normatives-formula-contract-review-egor.md`,
+  question 11; the same gap as question 12 above); until then he takes `M_γ`, `M_q`,
+  `M_c` for the pilot from his own manually transcribed copy of that table in the
+  registry (his answer to question 7), which is a stopgap for the pilot, not a
+  primary-source check.
   Mitigation: only task 7.1 depends on it, and it starts when the table data is
   available with its `NormRef`; the other tasks of this change do not use a real
   calculation type.
