@@ -16,8 +16,9 @@ the first backend and frontend code meet the DOD, without touching Egor's zone.
 
 ## What Changes
 
-- Adds a single backend command that runs lint (`ruff`), type checks, and tests with
-  branch coverage, exiting 0 on a clean checkout. The type checker is `mypy`, not `ty`
+- Adds a single backend command that runs lint (`ruff`), type checks, and tests,
+  exiting 0 on a clean checkout; the tests gate on branch coverage once `backend/app/`
+  exists to measure, per `design.md` decision 3. The type checker is `mypy`, not `ty`
   (`AGENTS.md` section 7 and `openspec/config.yaml` already name `mypy`; the pipeline's
   code already carries `mypy`-specific annotations).
 - Adds a single frontend command that runs `eslint`, `tsc`, and `vitest` the same way.
@@ -55,8 +56,11 @@ None.
 - `development-process`: adds requirements naming the concrete backend and frontend
   tooling commands, the deferred import-contract check, and the pre-commit secret scan
   with the `.env.example` requirement. The existing "Test gate with >= 95% branch
-  coverage" requirement is referenced, not restated or changed: this change supplies
-  the command that lets it be checked, it does not change the threshold.
+  coverage" and "Go/No-Go verdict and archive" requirements are referenced, not
+  restated or changed: this change supplies the command that lets the gate be checked,
+  it does not redefine the gate itself. How that gate reads on this change's own
+  backend zone — which this change deliberately leaves without an `app/` package to
+  measure (see Non-goals) — is not resolved here; see `design.md`'s Open Questions.
 
 ## Impact
 

@@ -4,9 +4,11 @@
 
 ### Requirement: Backend tooling command
 The system SHALL provide a single command for the backend zone that runs lint
-(`ruff`), static type checking (`mypy`), and the test suite with branch coverage,
-configured in its own `backend/pyproject.toml`, separate from the normative pipeline's
-tooling and coverage number.
+(`ruff`), static type checking (`mypy`), and the test suite, configured in its own
+`backend/pyproject.toml`, separate from the normative pipeline's tooling and coverage
+number. The test suite run SHALL gate on branch coverage once the backend zone has an
+`app/` package to measure; before that, the command runs the test suite without a
+coverage gate.
 
 #### Scenario: Clean checkout
 - **WHEN** the backend command runs on a clean checkout
@@ -17,9 +19,14 @@ tooling and coverage number.
 - **THEN** the command exits non-zero and names the failing check
 
 #### Scenario: Coverage below threshold
-- **WHEN** branch coverage for the backend zone is below 95%
+- **WHEN** `backend/app/` exists and branch coverage for the backend zone is below 95%
 - **THEN** the command exits non-zero, per the "Test gate with >= 95% branch coverage"
   requirement
+
+#### Scenario: Coverage gate not yet applicable
+- **WHEN** `backend/app/` does not exist yet
+- **THEN** the command runs the test suite without a coverage gate, and the absence of
+  a coverage number does not fail the command
 
 ### Requirement: Frontend tooling command
 The system SHALL provide a single command for the frontend zone that runs `eslint`,

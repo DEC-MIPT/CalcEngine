@@ -18,21 +18,33 @@ can be implemented; until then it is not started, not stubbed as a no-op.
 
 ## 2. Backend tooling (backend)
 
-- [ ] 2.1 Add `backend/pyproject.toml` with `[tool.ruff]`, `[tool.mypy]`,
+- [x] 2.1 Add `backend/pyproject.toml` with `[tool.ruff]`, `[tool.mypy]`,
   `[tool.pytest.ini_options]`, `[tool.coverage.run]`/`[tool.coverage.report]`, per
   `design.md` decisions 1 and 3; verify `ruff check backend/` and `mypy backend/` run
-  without a config error on an empty tree
-- [ ] 2.2 Add `backend/requirements.txt` (empty for now) and
+  without a config error on an empty tree (2026-09-27: `ruff check backend/` passes,
+  exit 0; `mypy backend/` exits 2 for "no .py files", not a config error — config
+  validity confirmed separately via `mypy --config-file=backend/pyproject.toml -c
+  "x: int = 1"`, exit 0; see `docs/reports/WP6-code-journal.md`)
+- [x] 2.2 Add `backend/requirements.txt` (empty for now) and
   `backend/requirements-dev.txt` (`ruff`, `mypy`, `pytest`, `pytest-cov`,
   `import-linter`); verify `pip install -r backend/requirements-dev.txt` succeeds in a
-  fresh `.venv`
-- [ ] 2.3 Add `backend/tests/` with one smoke test asserting the venv and pytest
-  config work; verify `pytest backend/tests` collects and passes it
-- [ ] 2.4 Add `backend/check.sh` running `ruff check`, `mypy`, then `pytest
-  --cov=app --cov-branch --cov-fail-under=95` in order, per `design.md` decision 3;
-  verify it exits 0 on a clean checkout with only the smoke test present (coverage of
-  an empty `app/` package is vacuously 100%; this becomes a meaningful gate once
-  `backend-layered-architecture` adds `backend/app`)
+  fresh `.venv` (2026-09-27: all 19 packages installed in a fresh `backend/.venv`, no
+  errors)
+- [x] 2.3 Add `backend/tests/` with one smoke test asserting the venv and pytest
+  config work; verify `pytest backend/tests` collects and passes it (2026-09-27:
+  `test_smoke.py` added, `1 passed` from both the repo root and `backend/`)
+- [x] 2.4 Add `backend/check.sh` running `ruff check`, `mypy`, then `pytest`, per
+  `design.md` decision 3; verify it exits 0 on a clean checkout with only the smoke
+  test present. The coverage gate (`--cov=app --cov-branch --cov-fail-under=95`) only
+  runs when `backend/app/` exists — confirmed 2026-09-27 that an unconditional gate
+  against a nonexistent `app/` reports 0% coverage and fails, not "vacuously 100%" as
+  first assumed here; `check.sh` runs plain `pytest` until `backend-layered-architecture`
+  adds `backend/app`, then the gate becomes active with no further script change.
+  Verified: `backend/check.sh` exits 0 on the current tree (`ruff check .` →
+  `All checks passed!`; `mypy .` → `Success: no issues found in 1 source file`;
+  `pytest` → `1 passed`); a deliberate unused-import violation made it exit 1
+  (`ruff` F401), confirming the gate is real. Evidence:
+  `docs/reports/WP6-code-journal.md` row 2.4
 
 ## 3. Frontend tooling (frontend)
 
@@ -81,8 +93,13 @@ can be implemented; until then it is not started, not stubbed as a no-op.
 ## 7. Close
 
 - [ ] 7.1 `tester` issues the full verdict: both `check.sh` scripts pass, `pre-commit
-  run --all-files` passes, coverage >= 95% in each zone (trivial on the smoke tests
-  alone), delta spec matches the implementation (see DOD)
+  run --all-files` passes, frontend coverage >= 95% (trivial on the smoke test alone);
+  the delta spec matches the implementation. Backend coverage is not gated while
+  `backend/app/` does not exist (`design.md` decision 3), so `backend/check.sh` produces
+  no coverage number to check — how this reads against the base "Test gate" and
+  "Go/No-Go verdict" requirements is an open question (`design.md`, Open Questions),
+  not resolved by this change; resolve it (team decision recorded in
+  `docs/decisions/`, or a follow-up spec change) before this task is checked off
 - [ ] 7.2 Reviewed by Egor or the orchestrator before merge to `develop`
   (`development-process` "Review before merge"; this change is not code-free)
 - [ ] 7.3 `spec-keeper` syncs the delta into
@@ -115,13 +132,18 @@ can be implemented; until then it is not started, not stubbed as a no-op.
 - For the spec phase: `openspec validate --all --strict` passes; a `spec-reviewer`
   report on the current version of the change lists no blocker and no major finding.
 - For implementation: `backend/check.sh` and `frontend/check.sh` each exit 0 on a
-  clean checkout; `pre-commit run --all-files` passes; branch coverage is >= 95% in
-  each zone (the smoke tests alone make this trivial, since no application code exists
+  clean checkout; `pre-commit run --all-files` passes; frontend branch coverage is
+  >= 95% (the smoke test alone makes this trivial, since no application code exists
   yet); the delta spec matches the implementation; reviewed before merge (task 7.2).
+  Backend coverage is not gated while `backend/app/` does not exist (`design.md`
+  decision 3); whether that is acceptable for this change's own GO, or holds the GO
+  until `backend/app/` exists, is the open question in `design.md` and must be
+  resolved before task 7.1 is checked off — this DOD does not presuppose an answer.
   Tasks 4.4 and 5.1 (`[blocked: WP5]`) are not required for this change's own GO; they
   are picked up once `backend-layered-architecture` unblocks them, in a follow-up
   change or task.
 - NO-GO: validation fails; an unresolved blocker; either `check.sh` exits non-zero on a
-  clean checkout; coverage below 95%; `pre-commit run --all-files` fails; a root
-  `pyproject.toml`, `tests/`, or any other file in the pipeline's zone is touched.
+  clean checkout; frontend coverage below 95%; `pre-commit run --all-files` fails; a
+  root `pyproject.toml`, `tests/`, or any other file in the pipeline's zone is touched;
+  or task 7.1's open question (backend coverage applicability) is unresolved.
 - Archive (task 7.3) happens only after GO.
