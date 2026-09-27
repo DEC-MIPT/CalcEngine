@@ -82,6 +82,13 @@ Before starting a development session, an agent MUST check the state of commits 
   `develop` is up to date before starting work.
 - Check `git status` for uncommitted or untracked work left by previous sessions.
 
+Before starting a session, an agent MUST also read the current state of
+`docs/decisions/` (tracked in git). These files are the team's written channel:
+answers, confirmations, and review outcomes (for example
+`normref-questions-egor*.md`, `*-readiness*.md`) may have been added or updated
+since the last session. A decision or confirmation recorded there can change what
+is blocked, agreed, or ready, so treat it as required context before acting.
+
 ## 3. DOR — Definition of Ready
 
 A task is ready for implementation only when ALL of the following hold:
@@ -161,6 +168,9 @@ Zone-to-agent mapping:
 
 - **Language**: all specs, agents, skills, and commit messages are in English.
 - **Commits**: Conventional Commits (`feat:`, `fix:`, `chore:`, `test:`, `docs:`).
+- **Never commit, merge, or push without the working developer's explicit consent.**
+  Prepare and show the changes (diff) and the intended commit message, then wait for
+  approval before running `git commit`, `git merge`, or `git push`.
 - **Testing**:
   - Backend: `pytest` (unit + integration), coverage via `coverage.py`.
   - Frontend: `Vitest` + React Testing Library; E2E via Playwright.

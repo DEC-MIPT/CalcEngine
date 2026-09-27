@@ -14,4 +14,4 @@ runs after this validation and does not replace it.
 #### Scenario: Method bound is not a schema bound
 - **WHEN** a request passes schema validation but an input is outside the method's range
 - **THEN** the request reaches the engine, and the engine refuses the calculation under
-  "Applicability check with three outcomes", naming the bound and its `norm_ref`
+  "Applicability check with three outcomes", naming the bound and its `NormRef` list

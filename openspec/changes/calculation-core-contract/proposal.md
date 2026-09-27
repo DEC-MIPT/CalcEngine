@@ -75,6 +75,6 @@ None.
 - Affects four specs after archive. No code, no migrations.
 - Depends on `retarget-mvp-domain` (WP1) for the domain name only; the first domain is
   `foundations-shallow` there, and the contract itself is domain-neutral.
-- `NormRef` is shared with WP3 (`norm-source-traceability`, Egor) and must be agreed
-  before implementation of requirements that carry it.
+- `NormRef` is shared with WP3 (`norm-source-traceability`, Egor) and is agreed
+  (design.md, section "NormRef").
 - After apply, `backend-layered-architecture` needs a sync (WP5).
