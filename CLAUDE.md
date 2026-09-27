@@ -7,14 +7,24 @@ what it does not say. Do not restate `AGENTS.md` here.
 @AGENTS.md
 @agent-docs/domain-constraints.md
 
-## Status
+## Status (2026-09-27)
 
-- Spec-only, no code yet. The repository holds OpenSpec specs, one active change
-  (`backend-layered-architecture`), and agent/skill definitions. `backend/`,
-  `frontend/`, `params/`, `ml/`, `docker-compose.yml` do not exist.
-- The specs still target a placeholder domain (beam deflection, SP 16.13330). The
-  confirmed MVP domain is shallow foundations and internal water supply. Do not
-  build on the placeholder; a change to retarget the domain is planned.
+- No application code on `develop`: `backend/`, `frontend/`, `params/`, `ml/`,
+  `docker-compose.yml` do not exist. Egor's pipeline code is on his branches
+  (`feature/normative-collector/data`, `feature/normative-parser/ml`), not yet merged.
+- Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
+  (WP2), `calculation-verification` (WP4), `team-roles-update` (WP7),
+  `record-installed-skills-akim`. Led by Egor, with Akim's parts:
+  `retarget-mvp-domain` (WP1), `backend-layered-architecture` (WP5, not yet
+  retargeted). Egor: `normatives-collector`, `normatives-parser`. Planned, not
+  created: `norm-source-traceability` (WP3), `bootstrap-dev-environment` (WP6).
+- The base specs in `openspec/specs/` still describe the placeholder domain (beam
+  deflection, SP 16.13330) until `retarget-mvp-domain` is archived, and
+  `backend-layered-architecture` still names it. The MVP domains are shallow
+  foundations, then internal water supply. Build on the active changes, not on the
+  placeholder.
+- No spec-only change can reach GO until `team-roles-update` is acknowledged by Egor;
+  his answers are awaited in `docs/decisions/team-roles-update-egor.md`.
 - Norm editions for the MVP domain come from the team and are `unverified` until
   checked against source texts.
 
