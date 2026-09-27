@@ -44,7 +44,8 @@ Every task in this project MUST be recorded in specs through OpenSpec. There is 
    and issues the GO / NO-GO verdict.
 6. **UI/UX check** — the `ui-ux-tester` agent verifies visuals and control behavior.
 7. **Review & merge** — after GO, the change is reviewed (by the other developer or
-   the orchestrator) and its branches are merged to `develop`.
+   the orchestrator) and its branches are merged to `develop`. For a change with no
+   code, the second developer's acknowledgement is the review.
 8. **Archive** — the `spec-keeper` agent syncs specs and archives the change.
 
 ### Branching rules
@@ -69,6 +70,15 @@ Every task in this project MUST be recorded in specs through OpenSpec. There is 
   and merge it into `develop`.
 - Repo-meta files (agent entry files, agent settings, `.editorconfig`, `agent-docs/`) are
   not product changes and need no OpenSpec change; they are still committed on a branch.
+  A change that includes agent settings is still not code-free for GO (section 4).
+- **No-code documents merge into `develop` as soon as they are ready, not held for the
+  rest of the task.** A change to `openspec/**` (specs and changes), `AGENTS.md`, or any
+  other no-code document (`docs/**`, `agent-docs/**`) is the team's shared state: the
+  other developer reads `develop`, not a task sub-branch. As soon as that document change
+  is in the form it should have on `develop` (a validated OpenSpec change, an agreed
+  `AGENTS.md` edit, a decision record), merge the sub-branch into `develop`, even if the
+  code part of the task is still in progress. Do not let doc-only work sit unmerged on a
+  sub-branch waiting for the rest of the task.
 
 ### Session start
 
@@ -96,6 +106,9 @@ A task is ready for implementation only when ALL of the following hold:
 
 - An OpenSpec change proposal exists with `proposal.md`, `specs/…`, `design.md`,
   and `tasks.md` created and validated (`openspec validate`).
+- A `spec-reviewer` report on the current version of the change lists no blocker and
+  no major finding. `openspec validate` checks structure only, so passing it alone
+  does not make a change ready.
 - Functional requirements are recorded as OpenSpec requirements/scenarios.
 - Non-functional requirements (performance, security, accessibility, coverage) are
   recorded explicitly.
@@ -117,16 +130,36 @@ A task is done only when ALL of the following hold:
 - `openspec validate` passes and the delta spec matches the implementation.
 - The `spec-keeper` agent synced specs and archived the change.
 
+The coverage, test, and UI/UX items apply to a change with code. A change with no code
+takes the code-free path below instead.
+
 ### Go / No-Go rules
 
-- **GO** — tests pass with >= 95% coverage, UI/UX check passed, validation passed.
+- **GO for a change with code** — tests pass with >= 95% coverage, UI/UX check passed,
+  validation passed.
+- **GO for a change with no code** — `openspec validate --strict` passes, the
+  `spec-reviewer` report lists no blocker and no major finding, and the developer who
+  did not author the change has acknowledged it in a tracked commit or comment that
+  names the change. The `tester` records `tests: N/A`, `coverage: N/A`, and
+  `UI/UX: N/A`, each with the reason that the change has no code.
+- **No code** means the change adds or edits no file outside `openspec/`, `docs/`,
+  `agent-docs/`, the agent and skill definitions under `.claude/`, `.kilo/`, and
+  `.kilocode/`, and `AGENTS.md`, `CLAUDE.md`, `README.md`, `.editorconfig`. Agent
+  settings (for example `.claude/settings.json`) and `.gitignore` are not on the list.
 - **NO-GO** — any of: test failure, coverage < 95%, unvalidated OpenSpec artifacts,
-  UI/UX defects blocking the user flow, or security findings.
-- Only the `tester` agent (with `ui-ux-tester` confirmation) declares GO.
+  UI/UX defects blocking the user flow, or security findings; for a change with no
+  code, also a missing acknowledgement, an open blocker or major review finding, or a
+  verdict without the N/A record.
+- Only the `tester` agent (with `ui-ux-tester` confirmation where UI changed) declares
+  GO.
 
 ## 5. Team & responsibility zones
 
-Two developers work on this project: **Akim** and **Egor**.
+The team is three people: two developers, **Akim** and **Egor**, and a product manager
+(**PM**). The PM owns scope, pricing, and legal decisions, has no code zone and no
+branch, and has no agent unless a later change adds one. A PM decision is recorded by a
+developer as a dated entry in a tracked file under `docs/decisions/` (the decision, the
+PM's words, and where they were given).
 
 - Before starting any development, ask which developer is working: Akim or Egor,
   unless the agent's entry file already names the developer (`CLAUDE.md`: Akim).
@@ -134,10 +167,11 @@ Two developers work on this project: **Akim** and **Egor**.
 - Specs extended by developers MUST complement each other, never contradict.
 - Code MUST NOT overlap across zones, so git branches merge without conflicts.
 
-| Developer | Responsibility zones |
+| Member | Responsibility zones |
 |---|---|
 | **Akim** | frontend/backend, calculation engine, report generator |
 | **Egor** | normative-document pipeline, NLP/RAG parsing of normatives into the DB, DevOps, ML/DL/NLP |
+| **PM** | scope, pricing, and legal decisions; no code zone |
 
 Zone-to-agent mapping:
 

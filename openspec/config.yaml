@@ -33,9 +33,13 @@ context: |
     is backend/frontend (Akim) or data/ml/infra (Egor). Before a development
     session, check commits on develop and its remote (git fetch --all), warn about
     important changes, and remind the developer to run git pull.
-  - Team: two developers, Akim (frontend/backend, engine, report generator) and Egor
-    (normative pipeline, NLP/RAG, DevOps, ML). Ask who is working before development.
-    Zones do not overlap except specs.
+  - Team: three people. Two developers, Akim (frontend/backend, engine, report
+    generator) and Egor (normative pipeline, NLP/RAG, DevOps, ML), and a PM who owns
+    scope, pricing, and legal decisions and has no code zone. Ask which developer is
+    working before development. Developer zones do not overlap except specs.
+  - Readiness: `openspec validate` checks structure only; a change is ready (DOR) only
+    when a `spec-reviewer` report on its current version lists no blocker and no major
+    finding.
   - Lint/type checks: backend ruff + mypy; frontend eslint + tsc.
   - No ML in the calculation path (explicitly rejected). NLP/RAG auto-parsing of norms
     (collector, regex baseline parser, embeddings retrieval on CPU) is part of the MVP.

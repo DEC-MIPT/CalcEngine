@@ -4,11 +4,22 @@
 The system SHALL structure the report with the sections required for project
 documentation: a title block with the organization stamp (основная надпись), the input
 data as a table, the calculation trace with formulas and normative references, the
-conclusion, the result accountability block, and a signature block for the developer
-and the checker. Whether the signature block is mandatory is `unverified` and needs
-verification against GOST R 21.101 (edition unverified). Until it is verified, the signature block SHALL be
-controlled by one report setting, and the default of that setting is decided after the
-verification, not by this spec.
+conclusion, the result accountability block, and, when enabled, a signature block. The
+signature block SHALL contain a line for the developer (Разраб.) and a line for the
+person responsible for normative control (Н. контр.), each with a surname, a signature,
+and a date; a line for the checker (Пров.) is optional and, when present, has the same
+three fields. The signature block SHALL be controlled by one report setting whose
+default is enabled.
+
+Source: GOST R 21.101-2026 (edition unverified). Clause 4.1.7: calculations are
+formatted according to the requirements for text documents. Annex E, instructions for
+columns 10-13: the signatures of the developer and of the person responsible for
+normative control are mandatory, and a checker line is allowed in place of a position.
+
+#### Scenario: Default signature block
+- **WHEN** a report is generated without changing the signature-block setting
+- **THEN** it contains the signature block with the developer line and the normative
+  control line
 
 #### Scenario: Complete report sections
 - **WHEN** a report is generated with the signature block enabled

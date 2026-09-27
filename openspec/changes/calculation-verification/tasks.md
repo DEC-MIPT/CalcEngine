@@ -2,19 +2,22 @@
 
 Owner: Akim. Zone tags: an implementation task belongs to the `backend` sub-branch unless it says (spec) or (engineer, no code). Egor reviews the shared files only (section 4).
 
-Branch: the spec work stays on the `Specs` line (`Specs-onboarding` now). Implementation
-after apply uses `feature/calculation-verification/backend` (Akim's zone).
+Branch: spec work is done on a short-lived sub-branch of `develop` and merged into
+`develop` as soon as it is ready (`AGENTS.md`, Branching rules; the `Specs*` branches
+are historical). Implementation after apply uses `feature/calculation-verification/backend`
+(Akim's zone).
 
 Marker **[blocked: typical calculation]**: the task waits for the engineer's definition of a
 "typical calculation". `calculation-core-contract` is re-checked and `NormRef` is agreed
-(on Akim's word), so no task waits for it.
+in writing by Egor (`docs/decisions/normref-questions-egor.md`, commit `a1a896c`), so no
+task waits for it.
 
 ## 1. Spec readiness
 
 - [x] 1.1 (spec) Run `openspec validate calculation-verification --strict` and `openspec validate --all --strict`
 - [x] 1.2 (spec) Run `spec-reviewer` on this change and resolve blockers
 - [x] 1.3 (spec) Run `norm-traceability-checker` and confirm that no requirement fixes a norm value or tolerance
-- [ ] 1.4 (spec) Akim confirms the proposed points in `design.md`: decision 7 (how a difference is declared) and decision 9 (reproducibility below 100% is NO-GO)
+- [x] 1.4 (spec) Akim confirms the proposed points in `design.md`: decision 7 (how a difference is declared) and decision 9 (reproducibility below 100% is NO-GO) (2026-09-27, both confirmed as proposed)
 - [ ] 1.5 (spec) `tester` issues the verdict for the spec change (see DOD)
 
 ## 2. Ready to implement now
@@ -30,7 +33,7 @@ Depends on `retarget-mvp-domain` for the list of calculation types of `foundatio
 
 ### Requirement 2: `calculation-engine` accuracy and latency
 
-- [ ] 2.6 (spec) Confirm that the REMOVED "performance and accuracy" requirement and the ADDED accuracy and latency requirements pass `openspec validate --strict`
+- [x] 2.6 (spec) Confirm that the REMOVED "performance and accuracy" requirement and the ADDED accuracy and latency requirements pass `openspec validate --strict` (2026-09-27: the `calculation-engine` delta has REMOVED "Non-functional — performance and accuracy" and ADDED "Calculation accuracy" and "Calculation latency"; `openspec validate calculation-verification --strict` passes)
 
 ### Requirement 4: invariant tests (backend)
 
@@ -59,7 +62,7 @@ Depends on `retarget-mvp-domain` for the list of calculation types of `foundatio
 ## 4. Shared files: needs Egor review (not applied)
 
 - [ ] 4.1 (spec) Agree with Egor the changes to `.claude/agents/tester.md` (its GO rule, lines 16-19) and its Kilo mirror, the `test-process` skill, and the `development-process` delta in this change. Both agent files stay identical. Do not apply before Egor agrees
-- [ ] 4.2 (spec) Check that the `development-process` delta of this change and the `team-roles-update` delta do not contradict each other
+- [x] 4.2 (spec) Check that the `development-process` delta of this change and the `team-roles-update` delta do not contradict each other (2026-09-27: no contradiction. This change ADDS "Correctness gate for calculation changes"; `team-roles-update` MODIFIES "Non-overlapping developer responsibility zones", "Planning before implementation", "Review before merge", and "Go/No-Go verdict and archive" and ADDS "Shared decisions are tracked", so no requirement is touched by both. The correctness gate applies only to a change with calculation code, so it never meets the code-free GO path of `team-roles-update`; for a change with code it is an extra GO condition next to the coverage gate. The GO wording in `tester.md` must still list both gates when task 4.1 and `team-roles-update` Part B are applied)
 
 ## 5. Follow-up, not in this change
 
@@ -67,7 +70,7 @@ Depends on `retarget-mvp-domain` for the list of calculation types of `foundatio
 
 ## 6. Close
 
-- [ ] 6.1 Merge to `Specs` after 1.1-1.5 pass
+- [ ] 6.1 After 1.1-1.5 pass, confirm the final version of the change is on `develop`
 - [ ] 6.2 `spec-keeper` syncs the deltas and archives the change after GO; the open items in section 3 must be done or moved to a follow-up change first
 
 ## Dependencies

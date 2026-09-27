@@ -1,24 +1,24 @@
 # Readiness review: `calculation-core-contract` (WP2)
 
-- Date: 2026-09-26
+- Date: 2026-09-26; updated 2026-09-27 (tasks 6.5 and 7.3, reviewer passes 5-7, checker pass 3; Egor's written `NormRef` agreement; formula path and pipeline risks)
 - Change: `openspec/changes/calculation-core-contract/`
 - Owner: Akim. Egor (data engineer) confirms `NormRef` only.
 - Criteria: `docs/audit/03-verified-roadmap.md`, section 3.2, "Ready when".
 
 ## Final status
 
-**READY FOR EGOR CONFIRMATION (NormRef)**
+**READY FOR TESTER VERDICT**
 
-Two of the three roadmap criteria are met: validation passes, `spec-reviewer` reports no blockers, and `norm-traceability-checker` confirms that no requirement fixes a norm value. One roadmap criterion is still open: the `NormRef` agreement with Egor (task 1.3).
+All roadmap criteria are met: `NormRef` is agreed with Egor in writing, validation passes, `spec-reviewer` reports no blockers, and `norm-traceability-checker` confirms that no requirement fixes a norm value.
 
-This is not full DOR and not GO. Besides task 1.3, the `tester` verdict (task 1.6) is still open. Tasks marked `[blocked: NormRef]` (R2–R5 implementation) cannot start until task 1.3 closes.
+This is not GO. The `tester` verdict (task 1.6) is still open. No implementation task waits for `NormRef` any more; the `[blocked: NormRef]` markers were removed.
 
 | Roadmap criterion (3.2) | State | Evidence |
 |---|---|---|
-| `NormRef` is agreed with DE | **Open** | `design.md`, section "NormRef", marked "to be confirmed with data engineer — needs Egor confirmation"; 8 open questions; task 1.3 |
-| Validate passes | Met | `openspec validate --all --strict`: 13/13, final run below |
-| `spec-reviewer` reports no blockers | Met | 4 passes, 0 blockers in every pass; final pass: 0 major, 2 minor (both fixed after the pass) |
-| `norm-traceability-checker` confirms no norm value is fixed | Met | 2 passes, "No requirement fixes a norm value"; grep after later fixes: no hits |
+| `NormRef` is agreed with DE | Met | Egor agreed to all eight resolutions in his own words in `docs/decisions/normref-questions-egor.md` (commit `a1a896c`, 2026-09-27); task 1.3; `design.md`, section "NormRef" |
+| Validate passes | Met | `openspec validate --all --strict`: 17/17 on 2026-09-27, see section 1 |
+| `spec-reviewer` reports no blockers | Met | 7 passes, 0 blockers in every pass; pass 7 (formula path and pipeline risks): 0 major, 0 minor in this change |
+| `norm-traceability-checker` confirms no norm value is fixed | Met | 3 passes, "No requirement fixes a norm value"; pass 3 confirms the new signature-block rule names document, edition, and clause |
 
 ## 1. `openspec validate --all --strict`
 
@@ -41,11 +41,11 @@ Before the review:
 Totals: 13 passed, 0 failed (13 items)
 ```
 
-After every round of fixes, and after the final edits, the result was identical: 13 passed, 0 failed (13 items).
+After every round of fixes, and after the final edits, the result was identical: 13 passed, 0 failed (13 items). Re-run on 2026-09-27 after tasks 6.5 and 7.3 and after the pass 5 fixes: 13 passed, 0 failed (13 items). Re-run on 2026-09-27 after merging `develop` (new changes from Egor and WP4, WP7) and after recording Egor's written `NormRef` agreement: 17 passed, 0 failed (17 items).
 
 ## 2. `spec-reviewer` report
 
-The reviewer ran four times. Each pass checked the fixes of the previous one and looked for new issues. No finding was downgraded or dropped.
+The reviewer ran seven times. Each pass checked the fixes of the previous one and looked for new issues. No finding was downgraded or dropped.
 
 ### Pass 1: 0 blockers, 3 major, 5 minor
 
@@ -90,7 +90,37 @@ All three pass 3 findings were resolved. The verdict was "READY for DOR on spec 
 | — | Minor | Task 6.1 does not test `norm_refs` of a refused envelope | Fixed after the pass |
 | — | Minor | The SHALL text of "Trace display consumes typed steps and warnings" does not name `outputs` | Fixed after the pass |
 
-Both pass 4 minors were text-only edits made after the last reviewer run. Validation was re-run and passed. A fifth reviewer pass was not run.
+Both pass 4 minors were text-only edits made after the reviewer run. Validation was re-run and passed.
+
+### Pass 5 (2026-09-27, after tasks 6.5 and 7.3): 0 blockers, 0 major, 3 minor
+
+Scope: the task 7.3 handoff in `design.md` and the task 6.5 signature-block rule in
+`report-generator`, `design.md` decision 10, `proposal.md`, and `tasks.md`. The reviewer
+confirmed that the three scenarios of "GOST report structure" are testable and agree with
+its SHALL text, and that no text still calls the default undecided. It listed the
+tracked base-spec edition conflict again for visibility (see section 3, pass 1), not as
+a new finding.
+
+| # | Sev. | Finding | Outcome |
+|---|---|---|---|
+| 1 | Minor | The optional checker line has no defined content | Fixed: when present, it has the same three fields (surname, signature, date) |
+| 2 | Minor | The opening list names the signature block as required, two sentences before it becomes conditional | Fixed: "and, when enabled, a signature block" |
+| 3 | Minor | Task 6.5 says "the requirement stays `unverified`", which reads as the requirement being unready | Fixed: "the edition stays `unverified` until the normative pipeline confirms it" |
+
+All three were text-only edits made after the pass. Validation was re-run and passed.
+Verdict: ready for the reviewed edits; full DOR still blocked by tasks 1.3 and 1.6.
+
+### Pass 6 (2026-09-27, Egor's written `NormRef` agreement): 0 blockers, 0 major, 1 minor
+
+Scope: the edit that replaced "agreed on Akim's word" with Egor's written answers (commit `a1a896c`) in `tasks.md` 1.3, 1.4, the DOR and DOD, and `design.md` "NormRef" (intro, resolutions 3, 5, 8). The reviewer checked every claim against Egor's answers: no overstatement, no norm value or real edition introduced.
+
+| # | Sev. | Finding | Outcome |
+|---|---|---|---|
+| 1 | Minor | Resolution 8 did not name `amendment_no`, which Egor's answer 8 names | Fixed before commit `9eb75ae` |
+
+### Pass 7 (2026-09-27, formula path and pipeline risks): 0 blockers, 0 major, 0 minor
+
+Scope: after reading Egor's branches (`docs/reports/egor-branches-analysis.md`): `design.md` "Consistency with other specs" (the pipeline's formula registry and `normatives-formula-contract`; WP1 task 2.1 closed), resolution 5 (open item on the locator of a formula printed without a number), two new risks (executing an `expression` from data; coefficient tables for the pilot), and task 7.2 (its inputs). The reviewer verified the facts against Egor's branch and the decision files, found no decision taken for Egor's zone or WP5, and confirmed that formula 5.7 of СП 22.13330.2016 is marked `unverified`. Its one minor finding was about `backend-layered-architecture` section 9 (owners and closing criterion) and was fixed there.
 
 ## 3. `norm-traceability-checker` report
 
@@ -119,6 +149,21 @@ The fixes from reviewer passes 2–4 (`outputs`, hash scenarios, `norm_refs`) ca
 
 No norm value.
 
+### Pass 3 (2026-09-27, after tasks 6.5 and 7.3)
+
+- **PASS** on norm values: no coefficient, limit, tolerance, rounding value, or other
+  numeric norm value is fixed. The new signature-block rule is a document-formatting
+  rule, not a calculation value.
+- The new rule in `report-generator` "GOST report structure" states document, edition,
+  and clause (GOST R 21.101-2026, clause 4.1.7, Annex E instructions for columns 10-13)
+  and marks the edition `unverified`. `design.md` decision 10 keeps it `unverified` until
+  the normative pipeline confirms it.
+- **Major, tracked, not a defect of this change:** the base `report-generator` still
+  names GOST R 21.101-2020 without a marker, so after archive the capability cites the
+  same document with two editions. Handed to WP3 (task 7.3).
+- **Minor:** `proposal.md` Non-goals cited GOST R 21.101-2026 without "(edition
+  unverified)". Fixed after the pass.
+
 ## 4. `{{FIRST_DOMAIN}}` check
 
 - The change contains no `{{FIRST_DOMAIN}}`.
@@ -130,9 +175,16 @@ No norm value.
 
 | Item | Owner | Blocks |
 |---|---|---|
-| `NormRef` shape and the 8 questions in `design.md` (task 1.3) | Egor | Roadmap criterion; R2–R5 implementation tasks |
-| `tester` verdict for the spec change (task 1.6) | `tester` agent | GO, merge to `Specs` (8.1) |
-| WP1 archived first; WP1 task 2.1 closed (task 8.2) | Egor / Akim | Archive (8.3) |
-| GOST R 21.101 primary-source check; signature-block default (task 6.5) | Akim | Task 6.4 default only |
+| `tester` verdict for the spec change (task 1.6) | `tester` agent | GO; final version on `develop` (8.1) |
+| WP1 archived first (WP1 task 2.1 closed on 2026-09-27, task 8.2 done; `retarget-mvp-domain-akim-review.md`) | Egor | Archive (8.3) |
 | `backend-layered-architecture` sync: task 6.2 wording (B5), decision 7, "formulas in YAML vs code" (task 7.2) | Akim and Egor (WP5) | Nothing in this change; runs after apply |
-| Base `report-generator` names GOST R 21.101-2020 unchecked (task 7.3) | Egor (WP3) | Nothing in this change |
+| Base `report-generator` names GOST R 21.101-2020, which the Rosstandart register lists as replaced by GOST R 21.101-2026 from 2026-04-01; handed over in `design.md` "Handoff to WP3" (task 7.3 done) | Egor (WP3) | Nothing in this change |
+| GOST R 21.101-2026 edition used for the signature block stays `unverified` (task 6.5 done, `design.md` decision 10) | Egor (normative pipeline) | Nothing in this change; a correction changes one setting or line |
+
+## 6. Closed since 2026-09-26
+
+| Task | Outcome |
+|---|---|
+| 1.3 (written confirmation) | Egor answered all eight `NormRef` questions in his own words in `docs/decisions/normref-questions-egor.md` (commit `a1a896c`, 2026-09-27) and agreed to each resolution. His answers add the locator syntax (answer 5) and the `edition` syntax with a separate `amendment_no` in the catalog (answer 8); `design.md` resolutions 5 and 8 reference them. Resolution 3 records his confirmation of the "implementer" reading |
+| 7.3 | `design.md`, section "NormRef", block "Handoff to WP3": the base `report-generator` names GOST R 21.101-2020 as settled; the Rosstandart register lists GOST R 21.101-2026 (order No. 129-ст of 2026-02-12, in force from 2026-04-01) as its replacement |
+| 6.5 | Checked against GOST R 21.101-2026 (text from a copy of the official edition, kept untracked in `docs/NTD/`). Clause 4.1.7: calculations are formatted as text documents. Annex E, columns 10-13: the developer's and the normative controller's signatures are mandatory, a checker line is allowed. The signature block holds the developer and normative control lines, the checker line is optional, the setting is enabled by default. Recorded in `report-generator` "GOST report structure", `design.md` decision 10, and task 6.4 |

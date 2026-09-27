@@ -149,3 +149,55 @@ Verdict: **READY for DOR**. Blocker 0, major 0, new minor 0. `openspec validate 
 Five older minors remain open on purpose: PM approval form; definition of "author"; the "no code" path list (`AGENTS.md`, `CLAUDE.md`, `.gitignore`, `README.md`, `.editorconfig` are not on it); no mechanical check for untracked citations; terse tasks B2-B7 and C1.
 
 What still needs Egor: the shared-file edits in section 4, and his acknowledgement of the change. Two of those minors touch his decisions: the "no code" path list and the PM approval form.
+
+## 9. Update 2026-09-27: "no code" path list, fourth pass
+
+Trigger: `AGENTS.md` (Branching rules, commit `e484a42`) now names `AGENTS.md` a no-code document, while the delta's "no code" path list left it out. Old minor 8 became a direct contradiction.
+
+Edits:
+
+- `specs/development-process/spec.md` ("Go/No-Go verdict and archive") and `design.md` decision 2: the list now covers everything under `.claude/`, `.kilo/`, `.kilocode/` (agent and skill definitions and agent settings) and the repository documents `AGENTS.md`, `CLAUDE.md`, `README.md`, `.editorconfig`. `.gitignore` stays off the list. The design states which of these `AGENTS.md` names and that `README.md` is added by this change.
+- `proposal.md` and task B2: `openspec/config.yaml:31-33` became `:36-38` (the file changed since); the quoted current text is updated.
+- Task A1.2 checked (validate re-run: 17/17). The DOR item for validate checked.
+- Questions for Egor (A1.4, B1, the path list, the PM approval form, Part B timing): `docs/decisions/team-roles-update-egor.md` and `-rus.md`.
+
+`openspec validate --all --strict`: 17 passed, 0 failed (17 items).
+
+### Fourth pass: 0 blockers, 2 major, 3 minor
+
+| # | Sev. | Finding | Outcome |
+|---|---|---|---|
+| 1 | Major | `design.md` decision 2 said all four repository documents are ones `AGENTS.md` already treats as repo-meta or no-code; `README.md` is not in `AGENTS.md`, and `CLAUDE.md` is covered only as an "agent entry file" | Fixed: the design names what `AGENTS.md` says for each file and states that `README.md` is added here |
+| 2 | Major | A1.2 and A1.3 cited a fourth pass that this file did not record | Fixed: this section records it; A1.3 stays open until the fifth pass |
+| 3 | Minor | DOR items for validate and review unchecked while A1.2 and A1.3 were checked | Fixed: the validate item is checked; the review item follows A1.3 |
+| 4 | Minor | The list limited `.claude/`, `.kilo/`, `.kilocode/` to agent and skill definitions, narrower than "agent settings" in `AGENTS.md` | Fixed: agent settings are on the list; the questions file asks Egor to confirm, because settings can hold hooks that run commands |
+| 5 | Minor | `docs/reports/WP7_report.md` stops at the third pass | Not changed: this file is the readiness record the tasks cite |
+
+Checks that passed: the scenario "Change touches code" reads correctly with the longer list; every "Current text" cell of the shared-files table matches `openspec/config.yaml`, `AGENTS.md`, and `CLAUDE.md` today.
+
+### Fifth pass: 0 blockers, 0 major, 0 minor
+
+Verdict: **READY for DOR**. The pass first reported one blocker: that `AGENTS.md` does not name itself a no-code document. `AGENTS.md:73-74` reads "A change to `openspec/**` (specs and changes), `AGENTS.md`, or any other no-code document", so the finding was withdrawn on re-check. `design.md` decision 2 now quotes that sentence with its line numbers and cites `AGENTS.md:70` for repo-meta. The reviewer confirmed that fixes 1-4 of the fourth pass hold, that the path list is the same in the delta, the design, this section, and question 2 of `team-roles-update-egor.md`, that A1.2 is justified and A1.3 was correctly open, and that the questions file names the waiting tasks correctly. Task A1.3 and the DOR review item are checked.
+
+What still needs Egor: the answers in `docs/decisions/team-roles-update-egor.md` (A1.4, B1, the path list including agent settings, the PM approval form, Part B timing).
+
+## 10. Update 2026-09-27: Egor's answers, Part B, sixth pass
+
+Egor answered `docs/decisions/team-roles-update-egor.md` (commit `243a6b9`): he acknowledged the change (A1.4), agreed to the "no code" path list except agent settings, which he put back under the normal gate because hooks run shell commands, agreed to the PM approval form, agreed to B2-B7, and asked for Part B right after, in one commit, before archive.
+
+Edits:
+
+- Delta: "Non-overlapping developer responsibility zones" gains how a PM decision is recorded and the scenario "PM approval recorded"; "Go/No-Go verdict and archive" drops agent settings from the no-code list. `design.md` decisions 1 and 2 match.
+- Tasks A1.4 and B1-B8 checked. Part B applied to `openspec/config.yaml`, `AGENTS.md` (sections 2, 3, 4, 5, and one clause in "Branching rules"), and `CLAUDE.md`.
+- `openspec validate --all --strict`: 17 passed, 0 failed.
+
+### Sixth pass: 0 blockers, 0 major, 2 minor
+
+Verdict: **READY for DOR**. The delta, `design.md`, and `tasks.md` agree; Part B restates the delta's path list, the three GO conditions, the N/A record, the DOR review rule, and the PM role without overstatement; every edit matches Egor's literal answers; the A1.4 acknowledgement stays valid, because the only later edits are the ones he asked for and the DOD requires acknowledgement, not a re-acknowledgement.
+
+| # | Sev. | Finding | Outcome |
+|---|---|---|---|
+| 1 | Minor | `AGENTS.md` "Branching rules" still called agent settings repo-meta without a caveat, while section 4 now treats them as code for GO | Fixed: the bullet adds "A change that includes agent settings is still not code-free for GO (section 4)" |
+| 2 | Minor | `CLAUDE.md` "Status" still said Egor's answers were awaited | Fixed: it now says Egor acknowledged the change and that spec-only changes can get their `tester` verdict |
+
+Left: A2.1 (`tester` verdict), A2.2, A2.3 (archive).

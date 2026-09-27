@@ -30,7 +30,8 @@ See `proposal.md` (Non-goals).
    foundations, with worked calculation examples. Its `origin` category is `textbook`
    (of `manual calculation`, `textbook`, `norm application`). The engineer fills the
    bibliographic record of the guide, and the numeric references, after this change is
-   applied. This design names no title, year, or page.
+   applied. This design names no title, year, or page. The engineer is Akim (decided
+   2026-09-27); what he fills is listed in `docs/decisions/reference-examples-foundations.md`.
 3. **Tolerance is data.** Each expected output carries its own `tolerance` and
    `tolerance_source`. The spec fixes no number. The audit's "<= 0.1%" is not used.
 4. **Latency split by replacement.** The existing requirement "Non-functional —
@@ -50,10 +51,10 @@ See `proposal.md` (Non-goals).
    produced with. `input_hash` covers the type, the inputs in base units, and the
    identity of the resolved parameter set, so it stands for "inputs plus edition" in the
    envelope. `result_id` is never compared (it is assigned by the service layer).
-7. **Declaring an intended difference.** Proposed, for review: the change lists the
-   corpus entry identifier, the old and new values, and the reason in a "Declared result
-   differences" section of its `proposal.md`. The build fails for a difference that is not
-   declared there.
+7. **Declaring an intended difference.** Confirmed by Akim on 2026-09-27 (task 1.4):
+   the change lists the corpus entry identifier, the old and new values, and the reason
+   in a "Declared result differences" section of its `proposal.md`. The build fails for a
+   difference that is not declared there.
 8. **Invariants: structure only.** Each invariant has an identifier, a statement, and the
    quantities it involves. Determinism and unit-change consistency are shared by all
    types and are referenced, not restated. Invariants specific to foundations are for the
@@ -61,7 +62,8 @@ See `proposal.md` (Non-goals).
 9. **Reproducibility over the reference examples.** The metric is computed on the
    reference suite, which exists without the regression corpus, so it is not blocked.
    A rate below 100% means the "Pure calculation function" contract is broken, so it is
-   NO-GO. This threshold is a proposal for review.
+   NO-GO. Confirmed by Akim on 2026-09-27 (task 1.4): the threshold follows from that
+   contract and is not a tunable value.
 10. **Deviation is reported per quantity.** No aggregate percentage is computed, because
     quantities have different units and tolerances.
 11. **Property-test tool and runner** are decided in `bootstrap-dev-environment`. No
@@ -87,12 +89,14 @@ that domain.
 
 ## Dependencies on `calculation-core-contract`
 
-Re-checked on 2026-09-26 after `NormRef` was agreed (on Akim's word; written
-confirmation is not in the repository). Re-check again if that change alters an item:
+Re-checked on 2026-09-26 after `NormRef` was agreed on Akim's word, and on 2026-09-27
+after Egor agreed in writing (`docs/decisions/normref-questions-egor.md`, commit
+`a1a896c`); his answers change none of the items below. Re-check again if that change
+alters an item:
 
 | Item | Used by | Status |
 |---|---|---|
-| `NormRef` fields, the meaning of `status`, `EngineerRule`, `norm_refs` list on a step | metric "traceability completeness" | agreed with Egor (2026-09-26, on Akim's word; the same evidence gap as in core-contract task 1.3; questions in `docs/decisions/normref-questions-egor.md`); written confirmation not yet in the repository |
+| `NormRef` fields, the meaning of `status`, `EngineerRule`, `norm_refs` list on a step | metric "traceability completeness" | agreed with Egor in writing (`docs/decisions/normref-questions-egor.md`, commit `a1a896c`, 2026-09-27; core-contract task 1.3) |
 | Definition of "verified" (`normatives-catalog` "Norm reference status") | metric "traceability completeness" | in the unarchived `retarget-mvp-domain`, draft; the field `status = verified` is now defined by `NormRef` |
 | Trace step fields (`step_id`, `expression`, `substitutions`, `result`, `norm_refs`) | metric "traceability completeness" | defined in `calculation-core-contract` |
 | Envelope fields `outputs`, `verdict`, `norm_refs`, `engineer_rules`, `unverified_step_count` | reference comparison, regression, traceability | defined in `calculation-core-contract` |

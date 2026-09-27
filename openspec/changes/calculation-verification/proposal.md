@@ -33,8 +33,8 @@ section 3.4, WP4) records:
 ## Dependencies
 
 `calculation-core-contract` (WP2) is the source of the result envelope and of `NormRef`.
-`NormRef` is agreed with Egor (2026-09-26, on Akim's word; written confirmation is not in
-the repository). Two parts of this change use it: requirement 3 (regression corpus,
+`NormRef` is agreed with Egor: first on Akim's word (2026-09-26), then in Egor's own
+words in `docs/decisions/normref-questions-egor.md` (commit `a1a896c`, 2026-09-27). Two parts of this change use it: requirement 3 (regression corpus,
 which compares result envelopes) and the metric "traceability completeness". The
 meaning of "verified" is the field `status` of `NormRef`; the wider rule sits in the
 requirement "Norm reference status" of `retarget-mvp-domain` (draft, unarchived).

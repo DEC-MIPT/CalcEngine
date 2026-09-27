@@ -7,14 +7,28 @@ what it does not say. Do not restate `AGENTS.md` here.
 @AGENTS.md
 @agent-docs/domain-constraints.md
 
-## Status
+## Status (2026-09-27)
 
-- Spec-only, no code yet. The repository holds OpenSpec specs, one active change
-  (`backend-layered-architecture`), and agent/skill definitions. `backend/`,
-  `frontend/`, `params/`, `ml/`, `docker-compose.yml` do not exist.
-- The specs still target a placeholder domain (beam deflection, SP 16.13330). The
-  confirmed MVP domain is shallow foundations and internal water supply. Do not
-  build on the placeholder; a change to retarget the domain is planned.
+- No application code on `develop`: `backend/`, `frontend/`, `params/`, `ml/`,
+  `docker-compose.yml` do not exist. Egor's pipeline code is on his branches
+  (`feature/normative-collector/data`, `feature/normative-parser/ml`), not yet merged.
+- Egor's pipeline (on his branches) runs a local PostgreSQL `dec-postgres` on port 5433
+  and keeps a hand-entered formula registry (`normatives_pipeline/formulas.toml`); what
+  it means for Akim's work: `docs/reports/egor-branches-analysis.md`.
+- Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
+  (WP2), `calculation-verification` (WP4), `team-roles-update` (WP7),
+  `record-installed-skills-akim`. Led by Egor, with Akim's parts:
+  `retarget-mvp-domain` (WP1), `backend-layered-architecture` (WP5, not yet
+  retargeted). Egor: `normatives-collector`, `normatives-parser`. Planned, not
+  created: `norm-source-traceability` (WP3), `bootstrap-dev-environment` (WP6).
+- The base specs in `openspec/specs/` still describe the placeholder domain (beam
+  deflection, SP 16.13330) until `retarget-mvp-domain` is archived, and
+  `backend-layered-architecture` still names it. The MVP domains are shallow
+  foundations, then internal water supply. Build on the active changes, not on the
+  placeholder.
+- Egor acknowledged `team-roles-update` on 2026-09-27, and its Part B put the code-free
+  GO path into `AGENTS.md` section 4, so spec-only changes can now get their `tester`
+  verdict.
 - Norm editions for the MVP domain come from the team and are `unverified` until
   checked against source texts.
 
@@ -41,6 +55,7 @@ Edit these only when the user explicitly says so; otherwise show a diff.
 - `AGENTS.md`, `.gitignore`, `README.md`, `.kilo/**`, `.kilocode/**`,
   `.claude/agents/*` other than the two subagents added for Claude Code.
 - Anything in Egor's zones: normative pipeline, NLP/RAG, ML, DevOps.
+- The root `pyproject.toml` (shared with Egor's pipeline once his branch is merged).
 
 ## Language
 
@@ -66,4 +81,6 @@ Do not invent or run commands from this list; none of them is set up yet.
 The Kilo mirrors carry no `model` or `tools`, so "read-only" is enforced by the
 prompt there, and by `tools` only in `.claude/agents/`. Keep the bodies identical.
 
-`docs/` is untracked by design (`.gitignore`); do not `@import` from it.
+`docs/` is untracked by design (`.gitignore`), except `docs/decisions/` and
+`docs/reports/`, which git tracks and the team uses as its written channel; do not
+`@import` from `docs/`.

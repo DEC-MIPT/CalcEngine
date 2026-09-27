@@ -79,7 +79,7 @@ These files are shared with Egor. They are NOT edited by this change and NOT app
 
 | File | Current text | Needed edit |
 |---|---|---|
-| `openspec/config.yaml:31-33` | "Team: two developers, Akim (...) and Egor (...). Ask who is working before development." | Three-person team: Akim, Egor, and a PM with no code zone; the PM owns scope, pricing, and legal decisions. Keep the "ask who is working" rule for Akim and Egor. |
+| `openspec/config.yaml:36-38` | "Team: two developers, Akim (...) and Egor (...). Ask who is working before development. Zones do not overlap except specs." | Three-person team: Akim, Egor, and a PM with no code zone; the PM owns scope, pricing, and legal decisions. Keep the "ask who is working" rule for Akim and Egor. |
 | `openspec/config.yaml` (Conventions) | no note on validate | One line: `openspec validate` is structural; readiness also needs a `spec-reviewer` report with no blocker and no major finding. |
 | `AGENTS.md` section 5 (intro, tables) | "Two developers work on this project" | Three-person team; add a PM row to the zone table (scope, pricing, legal; no code zone); say the PM has no agent unless a later change adds one. |
 | `AGENTS.md` section 3 (DOR) | no `spec-reviewer` item | Add: a `spec-reviewer` report with no blocker and no major finding exists; add one sentence that `openspec validate` is structural. |

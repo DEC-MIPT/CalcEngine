@@ -25,12 +25,31 @@ See `proposal.md` (Non-goals).
    legal questions. The PM writes no code and owns no branch, so the zone rules and the
    `feature/<task>/<zone>` scheme are unchanged. The existing `[PM]` executor tag in
    `openspec/changes/retarget-mvp-domain/tasks.md` (task 1.4) already treats the PM
-   this way. The specs name the role only.
+   this way. The specs name the role only. A PM decision is recorded by a developer as
+   a dated entry in a tracked file under `docs/decisions/` (the decision, the PM's words,
+   and where they were given); the PM does not need to commit. Proposed by Akim and
+   agreed by Egor on 2026-09-27 (`docs/decisions/team-roles-update-egor.md`, question 3;
+   review minor 6).
 2. **"No code" is defined by paths.** A change has no code when it adds or edits no
-   file outside `openspec/`, `docs/`, `agent-docs/`, and the agent and skill
-   definitions (`.claude/`, `.kilo/`, `.kilocode/`). Anything else, including
-   migrations, config, and test files, is code and uses the normal gate. A path rule
-   is checkable from the diff and does not depend on the author's opinion.
+   file outside `openspec/`, `docs/`, `agent-docs/`, the agent and skill definitions
+   under `.claude/`, `.kilo/`, and `.kilocode/`, and the repository documents
+   `AGENTS.md`, `CLAUDE.md`, `README.md`, and `.editorconfig`. Anything else, including
+   migrations, config, test files, and agent settings, is code and uses the normal gate.
+   A path rule is checkable from the diff and does not depend on the author's opinion.
+   Where the list comes from: `AGENTS.md` (Branching rules) lists `AGENTS.md` among
+   no-code documents ("A change to `openspec/**` (specs and changes), `AGENTS.md`, or any
+   other no-code document", `AGENTS.md:73-74`) and names `.editorconfig` and agent entry
+   files (which covers `CLAUDE.md`) as repo-meta (`AGENTS.md:70`). `README.md` is not
+   named there; this change adds it as a prose document with no behavior. Without these
+   files, Part B of this change would itself count as code. Two files stay off the list
+   on purpose: `.gitignore` decides what gets committed, secrets included; agent
+   settings (for example `.claude/settings.json`) can hold permissions and hooks, and a
+   hook runs shell commands. A change to either takes the normal gate. `AGENTS.md`
+   still calls agent settings repo-meta, which only means that a settings edit needs no
+   OpenSpec change of its own; when a change does include one, the change is not
+   code-free. The list was extended by Akim on 2026-09-27 (review minor 8); Egor agreed
+   and moved agent settings back under the normal gate
+   (`docs/decisions/team-roles-update-egor.md`, question 2).
 3. **The second developer is whoever did not author the change.** If Akim authored it,
    Egor acknowledges it; if Egor authored it, Akim does. This holds for either agent
    tool. The acknowledgement is a tracked artifact (a commit or a review comment that
