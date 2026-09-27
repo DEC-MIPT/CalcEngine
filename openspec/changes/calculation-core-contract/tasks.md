@@ -60,7 +60,7 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 ## 7. Pilot and sync
 
 - [ ] 7.1 Use one in-scope calculation type of `foundations-shallow` (from WP1) as the pilot for the contract tests, once WP1 names it (backend)
-- [ ] 7.2 (spec) After apply of this change, sync `backend-layered-architecture` (WP5): reword task 6.2 so the engine receives parameters as typed arguments (B5); update `design.md` decision 7 to name the pure function as the C/C++ boundary; settle the open question "formulas in YAML vs in code" from this change's `design.md`. The change owners (Akim and Egor) edit it; this change does not
+- [ ] 7.2 (spec) After apply of this change, sync `backend-layered-architecture` (WP5): reword task 6.2 so the engine receives parameters as typed arguments (B5); update `design.md` decision 7 to name the pure function as the C/C++ boundary; settle the open question "formulas in YAML vs in code" from this change's `design.md`, taking as input Egor's formula registry (`normatives_pipeline/formulas.toml`), the change `normatives-formula-contract`, and the answers in `docs/decisions/normatives-formula-contract-review-egor.md` (questions 1-2 and 5-10), and fix the safe parsing of `expression` named in `design.md` "Risks". The change owners (Akim and Egor) edit it; this change does not
 - [x] 7.3 (spec) Record for WP3 that `report-generator` names GOST R 21.101-2020 with an unchecked edition (2026-09-27; `design.md`, section "NormRef", "Handoff to WP3")
 
 ## 8. Close

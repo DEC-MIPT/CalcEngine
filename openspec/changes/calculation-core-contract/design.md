@@ -127,7 +127,11 @@ task 1.3 was first closed on 2026-09-26 on Akim's word. Egor owns the catalog si
    it counts as unverified in `unverified_step_count` when any of them is not. The "clause
    set" that a stored result is pinned to (WP3 requirement 3) is the set of all locators
    of all references of all steps. The locator syntax is Egor's (answer 5): the loader
-   normalizes it and the catalog resolves it; the engine keeps it opaque.
+   normalizes it and the catalog resolves it; the engine keeps it opaque. Open with Egor:
+   the locator of a formula that the document prints without a number
+   (`docs/decisions/normatives-formula-contract-review-egor.md`, question 10). Until it is
+   settled, such a locator names the clause and never a number the document does not
+   print (`agent-docs/domain-constraints.md`).
 6. **`document` is a designation string,** as printed in the document, not a key into
    `dec_normatives`. It reads well in the parameter YAML, in the `dec_app` columns, and in
    the report, and needs no foreign key across the two databases (B3). The catalog
@@ -211,14 +215,21 @@ later design and is not fixed here.
   - "No hardcoding" says formulas are not written in code but read from configuration or
     a parameter file. If formulas live in YAML, the engine becomes an expression
     evaluator, which changes where a step's `expression` comes from. This is an open
-    question for WP5 and is not decided here.
+    question for WP5 and is not decided here. Since 2026-09-27 the pipeline side has a
+    concrete proposal, not yet on `develop`: a hand-entered formula registry
+    (`normatives_pipeline/formulas.toml`, with `expression` strings built from a symbol
+    table) and the change `normatives-formula-contract` (a formula payload the backend
+    queries). Its reference field does not yet match `NormRef`, and the owner of the
+    registry is not settled; see `docs/decisions/normatives-formula-contract-review-egor.md`
+    (questions 1-2) and task 7.2.
 - **`report-generator` "GOST-compliant report assembly"** names GOST R 21.101-2020; that
   edition is not checked against the source text. Handed to WP3 in section "NormRef"
   (task 7.3); not edited here.
 - **`retarget-mvp-domain` (WP1)** removes "Deterministic verified calculation" and
   modifies "Detailed calculation display"; this change touches neither, and WP1 archives
   first. WP1 task 2.1 (Akim confirms the WP1 engine and output deltas match this
-  contract) is still open and must close before this change archives.
+  contract) closed on 2026-09-27 after three WP1 scenarios were aligned with this
+  contract (`docs/decisions/retarget-mvp-domain-akim-review.md`; task 8.2).
 
 ## Non-functional requirements
 
@@ -239,3 +250,17 @@ later design and is not fixed here.
 - The signature-block rule rests on an edition that is still `unverified` (decision 10).
   Mitigation: it is one setting, so a correction after the normative pipeline confirms
   the edition changes a default or a line, not the report structure.
+- If formulas come from data (see "Consistency with other specs"), the engine turns an
+  `expression` string into executable code. SymPy's `sympify` and `parse_expr` use
+  `eval`, and `lambdify` generates code, so an unchecked string is code execution, and a
+  `machine-extracted` formula could reach the calculation path. Mitigation, to be fixed
+  when task 7.2 settles where formulas live: expressions are parsed against a whitelist
+  of symbols and operations, never passed to `eval`-based parsing as is, and only values
+  that pass the `provenance` gate of the parameters layer (resolution 2) reach the
+  engine.
+- The pilot (task 7.1) may need coefficient tables. The candidate first type, R by
+  formula 5.7 of СП 22.13330.2016 (`unverified`), takes coefficients from a table, and
+  the pipeline does not store tables yet
+  (`docs/decisions/normatives-formula-contract-review-egor.md`, question 7). Mitigation:
+  only task 7.1 depends on it, and it starts when the table data is available with its
+  `NormRef`; the other tasks of this change do not use a real calculation type.

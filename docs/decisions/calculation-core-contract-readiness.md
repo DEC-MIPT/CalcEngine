@@ -1,6 +1,6 @@
 # Readiness review: `calculation-core-contract` (WP2)
 
-- Date: 2026-09-26; updated 2026-09-27 (tasks 6.5 and 7.3, reviewer pass 5, checker pass 3; Egor's written `NormRef` agreement)
+- Date: 2026-09-26; updated 2026-09-27 (tasks 6.5 and 7.3, reviewer passes 5-7, checker pass 3; Egor's written `NormRef` agreement; formula path and pipeline risks)
 - Change: `openspec/changes/calculation-core-contract/`
 - Owner: Akim. Egor (data engineer) confirms `NormRef` only.
 - Criteria: `docs/audit/03-verified-roadmap.md`, section 3.2, "Ready when".
@@ -17,7 +17,7 @@ This is not GO. The `tester` verdict (task 1.6) is still open. No implementation
 |---|---|---|
 | `NormRef` is agreed with DE | Met | Egor agreed to all eight resolutions in his own words in `docs/decisions/normref-questions-egor.md` (commit `a1a896c`, 2026-09-27); task 1.3; `design.md`, section "NormRef" |
 | Validate passes | Met | `openspec validate --all --strict`: 17/17 on 2026-09-27, see section 1 |
-| `spec-reviewer` reports no blockers | Met | 5 passes, 0 blockers in every pass; pass 5 (after tasks 6.5 and 7.3): 0 major, 3 minor (all fixed after the pass) |
+| `spec-reviewer` reports no blockers | Met | 7 passes, 0 blockers in every pass; pass 7 (formula path and pipeline risks): 0 major, 0 minor in this change |
 | `norm-traceability-checker` confirms no norm value is fixed | Met | 3 passes, "No requirement fixes a norm value"; pass 3 confirms the new signature-block rule names document, edition, and clause |
 
 ## 1. `openspec validate --all --strict`
@@ -45,7 +45,7 @@ After every round of fixes, and after the final edits, the result was identical:
 
 ## 2. `spec-reviewer` report
 
-The reviewer ran five times. Each pass checked the fixes of the previous one and looked for new issues. No finding was downgraded or dropped.
+The reviewer ran seven times. Each pass checked the fixes of the previous one and looked for new issues. No finding was downgraded or dropped.
 
 ### Pass 1: 0 blockers, 3 major, 5 minor
 
@@ -109,6 +109,18 @@ a new finding.
 
 All three were text-only edits made after the pass. Validation was re-run and passed.
 Verdict: ready for the reviewed edits; full DOR still blocked by tasks 1.3 and 1.6.
+
+### Pass 6 (2026-09-27, Egor's written `NormRef` agreement): 0 blockers, 0 major, 1 minor
+
+Scope: the edit that replaced "agreed on Akim's word" with Egor's written answers (commit `a1a896c`) in `tasks.md` 1.3, 1.4, the DOR and DOD, and `design.md` "NormRef" (intro, resolutions 3, 5, 8). The reviewer checked every claim against Egor's answers: no overstatement, no norm value or real edition introduced.
+
+| # | Sev. | Finding | Outcome |
+|---|---|---|---|
+| 1 | Minor | Resolution 8 did not name `amendment_no`, which Egor's answer 8 names | Fixed before commit `9eb75ae` |
+
+### Pass 7 (2026-09-27, formula path and pipeline risks): 0 blockers, 0 major, 0 minor
+
+Scope: after reading Egor's branches (`docs/reports/egor-branches-analysis.md`): `design.md` "Consistency with other specs" (the pipeline's formula registry and `normatives-formula-contract`; WP1 task 2.1 closed), resolution 5 (open item on the locator of a formula printed without a number), two new risks (executing an `expression` from data; coefficient tables for the pilot), and task 7.2 (its inputs). The reviewer verified the facts against Egor's branch and the decision files, found no decision taken for Egor's zone or WP5, and confirmed that formula 5.7 of СП 22.13330.2016 is marked `unverified`. Its one minor finding was about `backend-layered-architecture` section 9 (owners and closing criterion) and was fixed there.
 
 ## 3. `norm-traceability-checker` report
 
