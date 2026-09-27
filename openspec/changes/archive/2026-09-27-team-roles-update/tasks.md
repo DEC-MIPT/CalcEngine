@@ -21,8 +21,8 @@ is not done by `/opsx:apply`.
 ### A2. Close
 
 - [x] A2.1 `tester` issues the verdict; this change has no code, so it records tests, coverage, and UI/UX as N/A with the reason (it is the first change to use the path it defines) (2026-09-27: **GO** on `develop` @ `455cb74`; tests, coverage, UI/UX: N/A, no code; recorded in `docs/decisions/team-roles-update-readiness.md`, section 11)
-- [ ] A2.2 After A1.2-A1.4 and A2.1 pass, confirm the final version of the change is on `develop`
-- [ ] A2.3 After Part B is applied (B8 passed) or Egor has recorded in a tracked commit or comment that Part B is deferred and until when, `spec-keeper` syncs the delta into `openspec/specs/development-process/spec.md` and archives the change
+- [x] A2.2 After A1.2-A1.4 and A2.1 pass, confirm the final version of the change is on `develop` (2026-09-27: the change directory on `develop` @ `fcdd989` is identical to the reviewed and GO version plus the A2.1 record)
+- [x] A2.3 After Part B is applied (B8 passed) or Egor has recorded in a tracked commit or comment that Part B is deferred and until when, `spec-keeper` syncs the delta into `openspec/specs/development-process/spec.md` and archives the change (2026-09-27: synced with the archive workflow, four requirements replaced and one added, each checked against the delta; `openspec validate --all --strict` 18/18; archived as `openspec/changes/archive/2026-09-27-team-roles-update/`)
 
 ## B. Shared files follow-up (applied together after both agree)
 

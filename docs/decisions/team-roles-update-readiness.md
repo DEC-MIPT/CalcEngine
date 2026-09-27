@@ -1,7 +1,7 @@
 # Readiness review: `team-roles-update` (WP7)
 
 - Date: 2026-09-26
-- Change: `openspec/changes/team-roles-update/`
+- Change: `openspec/changes/archive/2026-09-27-team-roles-update/` (archived 2026-09-27; was `openspec/changes/team-roles-update/`)
 - Author: Akim. Egor is the second developer and must agree, because the change touches shared files.
 - Criteria: `docs/audit/03-verified-roadmap.md`, section 3.7, "Ready when": Egor agrees, and validate passes.
 
@@ -225,3 +225,10 @@ Open after verdict: A2.2, A2.3 (archive).
 Recorded by Akim from the `tester` agent's report. It is the first verdict on the code-free GO path, which this change defines. The `tester` agent definition (`.claude/agents/tester.md`) still describes only the test-and-coverage gate; aligning it is task 4.1 of `calculation-verification`. After recording, the A1.4 note in `tasks.md` was corrected to quote Egor exactly ("as the second developer"); the tester flagged the missing word as cosmetic.
 
 Part B is applied (B2-B8), so it no longer blocks archive. Next: A2.2 (the final version is on `develop`), then A2.3, `spec-keeper` syncs the delta into `openspec/specs/development-process/spec.md` and archives the change.
+
+## 12. Archive (tasks A2.2, A2.3)
+
+- A2.2: the change directory on `develop` @ `fcdd989` was the reviewed and GO version plus the A2.1 record.
+- A2.3, 2026-09-27: the delta was synced into `openspec/specs/development-process/spec.md` with the archive workflow. Four requirements were replaced ("Non-overlapping developer responsibility zones", "Planning before implementation", "Review before merge", "Go/No-Go verdict and archive") and one was added ("Shared decisions are tracked"); each was checked against the delta, and the seven other requirements are unchanged. `openspec validate --all --strict`: 17 passed, 0 failed (the change left the active list). The change moved to `openspec/changes/archive/2026-09-27-team-roles-update/`.
+- Other active changes with `development-process` deltas (`calculation-verification`, `record-installed-skills-akim`) only add requirements with other names, so the archive does not conflict with them.
+- Hand-off (section C of the change's `tasks.md`, not tasks of this change): C1, the untracked "passport" citations in `backend-layered-architecture`; C2, align `record-installed-skills-akim` with the code-free path (Egor's acknowledgement, `spec-reviewer`, `tester` verdict with the N/A fields).
