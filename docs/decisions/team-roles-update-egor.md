@@ -38,7 +38,7 @@ commit.
   specs and designs cite only git-tracked sources (norm documents excepted).
 - **Your side.** Read the delta `openspec/changes/team-roles-update/specs/development-process/spec.md`.
 
-**Answer.**
+**Answer.** I acknowledge the change as the second developer (task A1.4).
 
 ### 2. The "no code" path list
 
@@ -60,7 +60,7 @@ commit.
   gate, say so and the list goes back to agent and skill definitions only.
 - **Your side.** Agree, or name files to add or remove.
 
-**Answer.**
+**Answer.** I accept the list with one change: agent settings (`.claude/settings.json`) go under the normal gate, because they can hold permissions and hooks and a hook runs shell commands. Everything else stays as proposed.
 
 ### 3. The form of a PM approval (review minor 6)
 
@@ -74,7 +74,7 @@ commit.
   (non-goals, B2C limit) needs exactly this.
 - **Your side.** Agree, or propose another form.
 
-**Answer.**
+**Answer.** I agree with the form of a PM approval: a dated entry under `docs/decisions/` naming the decision, restating the PM's words, and saying where they were given (meeting or message).
 
 ### 4. Edits to shared files (task B1)
 
@@ -91,7 +91,7 @@ shared files". Answer per line: agree, change (how), or reject.
 | B6 | `AGENTS.md` sections 4 and 2 (step 7) | the code-free GO path and the `tester` N/A record; for a code-free change the second developer's acknowledgement is the review |
 | B7 | `CLAUDE.md:69` | reword "`docs/` is untracked by design": `docs/decisions/` and `docs/reports/` are tracked (Akim's file, shown for information) |
 
-**Answer.**
+**Answer.** B2 agree; B3 agree; B4 agree; B5 agree; B6 agree; B7 agree (shown for information).
 
 ### 5. When is Part B applied? (task A2.3)
 
@@ -102,4 +102,4 @@ shared files". Answer per line: agree, change (how), or reject.
   while `AGENTS.md`, which calls itself the single source of truth, still states the old
   ones. Task A2.3 therefore gates the archive on Part B or on your recorded deferral.
 
-**Answer.**
+**Answer.** Apply Part B right after these answers, in one commit, before the change is archived.

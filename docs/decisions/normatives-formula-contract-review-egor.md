@@ -40,7 +40,7 @@ Payload `norm_ref` today (`parser.toml`: `norm_ref_keys = ["designation", "claus
 
 ### 1. Do you agree to findings 1-8?
 
-**Answer.**
+**Answer.** Agree to all eight. My payload diverges from the `NormRef` I already agreed to. Fix: `norm_ref` carries `document`, `edition`, `clause` (one locator, canonical grammar), `status`, `provenance`; the parser emits `provenance = "machine-extracted"` and `status = "unverified"` (with `edition = "unverified"` until checked); the internal id `13.8#1` moves to a separate payload field (`formula_id`) outside `NormRef`; `designation` is renamed to `document`; missing values become the literal `unverified` (never an empty string); the `NormRef` fields are fixed in the spec, and config selects only extra fields. (Finding 9, empty `unit`: keep it visible as missing; the engineer fills it before a type is registered.)
 
 ### 2. Where does the engine get formulas from?
 
@@ -61,7 +61,7 @@ vs in code" (`calculation-core-contract` task 7.2, WP5).
 - **Your side.** Agree, or describe the path you intended, and name the owner of the
   registry.
 
-**Answer.**
+**Answer.** Agree. The pipeline writes formulas into `dec_normatives`; the parameters layer reads them, applies the `provenance` gate, and passes resolved parameters to the engine; the backend does not import pipeline code. The hand-entered registry `normatives_pipeline/formulas.toml` stays the MVP path for executable expressions, and I (Egor, data zone) own it.
 
 ### 3. Tasks 4.1 and 4.2 are in Akim's zone
 
@@ -70,7 +70,7 @@ They assign backend and frontend work to Akim and name the branch
 leave them out of this change until question 2 is settled; Akim adds the consuming side
 to his own change.
 
-**Answer.**
+**Answer.** Agree. Remove tasks 4.1 and 4.2 from this change. Akim adds the consuming side to his own change.
 
 ### 4. Merge to `develop`
 
@@ -79,7 +79,7 @@ The change and its documents for Akim (`normatives-pilot-usage-akim.md`,
 documents be merged into `develop` as soon as they are ready. Can you merge them after
 answering questions 1-3?
 
-**Answer.**
+**Answer.** Yes. I merge the change and the Akim-facing documents (`normatives-pilot-usage-akim.md`, `normatives-postgres-storage.md`) into `develop` after these answers.
 
 ## Storage and search
 
@@ -97,7 +97,7 @@ requirement 5) adds separate database roles per zone.
 - **Your side.** Is `dec` meant to become `dec_normatives`? Can the compose file create
   both databases and a role per zone?
 
-**Answer.**
+**Answer.** `dec` becomes `dec_normatives`. The compose file should create both `dec_app` and `dec_normatives` in one instance with a role per zone; for the MVP I keep `dec_normatives` and add `dec_app` when the backend needs it.
 
 ### 6. Revisions
 
@@ -109,7 +109,7 @@ plans the models `Document`, `Revision`, `Clause`, `Formula`, `Coefficient`.
 - **Your side.** Is the current schema provisional until `norm-source-traceability`
   (WP3)? When will revisions appear?
 
-**Answer.**
+**Answer.** Yes, the current schema is provisional until `norm-source-traceability` (WP3). Revisions (`Revision` with `amendment_no`, additive storage) appear in WP3.
 
 ### 7. Coefficient tables
 
@@ -120,7 +120,7 @@ not stored. The candidate first type, R by formula 5.7 of СП 22.13330.2016 (fr
 - **Your side.** When and in what form will coefficient tables be stored, each value with
   its `NormRef`? Without them the pilot cannot run R.
 
-**Answer.**
+**Answer.** `extract_tables` already extracts tables; I add persistence now (this iteration), starting with table 5.5 of СП 22.13330.2016, each value with its own `NormRef` (`document`, `edition`, `clause` = the table cell, `status = "unverified"`, `provenance = "machine-extracted"` until checked). Until then the R pilot can take `M_γ`, `M_q`, `M_c` from a manually verified table 5.5 in the registry.
 
 ### 8. A read-only query API for the backend
 
@@ -133,7 +133,7 @@ when `DEC_DATABASE_URL` is not set.
   fallback.
 - **Your side.** Agree, or propose another split.
 
-**Answer.**
+**Answer.** Agree. Schema changes run only at ingestion; the backend gets a read-only function and a read-only role; a missing `DEC_DATABASE_URL` is an error, not a silent localhost fallback.
 
 ### 9. Lexical search: `pg_trgm` or `tsvector`?
 
@@ -143,7 +143,7 @@ pre-lemmatized text.
 
 - **Your side.** Which one is the decision? The other spec needs to follow it.
 
-**Answer.**
+**Answer.** `pg_trgm` is the decision (journal entry 14). I align the spec and the code to `pg_trgm` + GIN and drop the `tsvector` path.
 
 ### 10. Locator of a formula without a number
 
@@ -156,7 +156,7 @@ number printed in the document (no invented clause or formula numbers).
   outside `NormRef`.
 - **Your side.** Agree, or give the syntax you want.
 
-**Answer.**
+**Answer.** Agree. Locate a formula without a number by its clause in the canonical grammar; never invent a number the document does not print. The internal id stays outside `NormRef`.
 
 ## For information (no answer needed)
 

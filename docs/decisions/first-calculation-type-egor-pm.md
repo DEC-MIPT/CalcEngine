@@ -37,7 +37,7 @@ given (meeting or message), as proposed in `team-roles-update-egor.md`, question
   PM's decision on scope.
 - **Your side.** Agree, or change the rule.
 
-**Answer (Egor).**
+**Answer (Egor).** Agree with the rule: the first type must be covered by at least 3 worked examples in the guide, rest on documents my pipeline can deliver as pilot data, and be accepted by the PM.
 
 **Answer (PM).**
 
@@ -54,7 +54,7 @@ given (meeting or message), as proposed in `team-roles-update-egor.md`, question
 - **Your side.** Confirm or reject the proposed type. After confirmation, Egor writes it
   into "In-scope calculation types" of `foundations-shallow` (task 3.1).
 
-**Answer (Egor).**
+**Answer (Egor).** I confirm R (formula 5.7, clause 5.6.7, СП 22.13330.2016) as the candidate: it is already in the registry (`formulas.toml`) and the СП is ingested. Note the dependency on coefficient table 5.5 (see the formula-contract review, question 7).
 
 **Answer (PM).**
 
@@ -80,4 +80,4 @@ given (meeting or message), as proposed in `team-roles-update-egor.md`, question
 - **Your side.** Name the documents and editions the pipeline will deliver for the type,
   marked `unverified` until checked against the primary text.
 
-**Answer (Egor).**
+**Answer (Egor).** R rests on СП 22.13330.2016 only. The 5-document pilot list of task 1.2 is the five downloaded documents (СП 22.13330.2016, СП 24.13330.2021, СП 45.13330.2017, СП 30.13330.2020, СП 31.13330.2021; СП 32.13330.2018 has no registry file). Table 5.5 (M_γ, M_q, M_c) is stored starting this iteration, each value with its `NormRef`, `unverified` until checked.
