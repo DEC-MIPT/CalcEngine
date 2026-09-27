@@ -49,15 +49,26 @@ See `proposal.md` (Non-goals).
 9. **Rounding data at run time:** each output quantity is returned in the envelope's
    `outputs` with its value, unit, `rounding_rule`, and `rounding_source`, so the UI and
    the report read the rule and its source from the envelope, not from the type contract.
+10. **Signature block (task 6.5).** The report is a calculation, and GOST R 21.101-2026
+    (edition unverified), clause 4.1.7, formats calculations as text documents. Annex E,
+    instructions for columns 10-13, makes the signatures of the developer and of the
+    person responsible for normative control mandatory and allows a checker line. The
+    signature block therefore holds the developer and normative control lines, the
+    checker line is optional, and the setting is enabled by default. Disabling it stays
+    possible, for example for a draft that does not go into project documentation.
+    Source check: the text was read from a copy of the official edition, and the edition
+    was matched to the Rosstandart register entry (in force from 2026-04-01, replaces
+    GOST R 21.101-2020). The edition stays `unverified` under
+    `agent-docs/domain-constraints.md` until the normative pipeline confirms it.
 
 ## NormRef (agreed with Egor)
 
 This section records the shared interface from roadmap section 3 and Akim's answers to
-the eight open questions. The shape is recorded as agreed with Egor (task 1.3, closed 2026-09-26 on Akim's word;
-the answers are recorded in `docs/decisions/normref-questions-egor.md` on Akim's word;
-Egor's own written text is not in the repository, and a link to it is added here when it
-exists). Egor owns the catalog side (WP3, `norm-source-traceability`). The delta
-specs use this shape (`norm_refs`, `Source`, `engineer_rules`).
+the eight open questions. Egor agreed to the shape and to all eight resolutions in
+writing in `docs/decisions/normref-questions-egor.md` (commit `a1a896c`, 2026-09-27);
+task 1.3 was first closed on 2026-09-26 on Akim's word. Egor owns the catalog side
+(WP3, `norm-source-traceability`). The delta specs use this shape (`norm_refs`,
+`Source`, `engineer_rules`).
 
     NormRef {
       document:   string                       # designation as printed in the document; always concrete
@@ -102,8 +113,8 @@ specs use this shape (`norm_refs`, `Source`, `engineer_rules`).
    consumer of `NormRef` and into the traceability metric. It is visible in the envelope
    and in the report as engineer-set. This is also Akim's reading of
    `agent-docs/domain-constraints.md` ("implementer" is the software developer, not the
-   design engineer who fills the parameter data); Egor's agreement covers this
-   reading, .
+   design engineer who fills the parameter data); Egor confirmed this reading in
+   writing (answer 3).
 4. **`unverified` is a union value in `edition` and `clause`. `document` is never
    `unverified`:** it is always a concrete designation. A parameter whose document is
    unknown has no source, and schema validation fails (WP3 requirement 1). The synthetic
@@ -115,7 +126,8 @@ specs use this shape (`norm_refs`, `Source`, `engineer_rules`).
    `edition`. A step is verified only when every one of its references is `verified`, and
    it counts as unverified in `unverified_step_count` when any of them is not. The "clause
    set" that a stored result is pinned to (WP3 requirement 3) is the set of all locators
-   of all references of all steps.
+   of all references of all steps. The locator syntax is Egor's (answer 5): the loader
+   normalizes it and the catalog resolves it; the engine keeps it opaque.
 6. **`document` is a designation string,** as printed in the document, not a key into
    `dec_normatives`. It reads well in the parameter YAML, in the `dec_app` columns, and in
    the report, and needs no foreign key across the two databases (B3). The catalog
@@ -129,9 +141,12 @@ specs use this shape (`norm_refs`, `Source`, `engineer_rules`).
    the catalog when the result is shown; it is not stored.
 8. **`edition` is an opaque string** that identifies one exact text version: the year of
    the edition, plus a marker for the amendments applied, when there are any (written
-   `<YYYY>` or `<YYYY>+<amendment>` in examples). It is compared for equality only. The
-   exact syntax is Egor's decision, made from the real documents; this change does not
-   fix it, because no edition is checked against a primary source.
+   `<YYYY>` or `<YYYY>+<amendment>` in examples). It is compared for equality only. Egor
+   set the syntax in answer 8: `<YYYY>` for an edition without amendments and
+   `<YYYY>+<N>` with amendment No. N applied; the catalog also keeps the amendment number
+   as a separate field `amendment_no` of `Revision`. The engine depends on the string only
+   through equality, so this change carries the syntax by reference and names no real
+   edition.
 
 Effects on the other requirements of this change, applied to the deltas on 2026-09-26:
 
@@ -156,6 +171,20 @@ Wording clash, settled by resolution 1: `agent-docs/domain-constraints.md` and t
 deltas (`retarget-mvp-domain`: `normatives-catalog` "Norm reference status",
 `transparent-output` "Detailed calculation display") use the marker `source: unverified`.
 That marker is the display form of a `NormRef` with `status = unverified`.
+
+Handoff to WP3 (`norm-source-traceability`, Egor). This is a record for WP3, not a
+question that task 1.3 must answer:
+
+- The base spec `report-generator`, requirement "GOST-compliant report assembly", names
+  GOST R 21.101-2020 as settled. That edition has not been checked against the source
+  text, so under `agent-docs/domain-constraints.md` it is `unverified`.
+- The Rosstandart register lists GOST R 21.101-2026 as in force from 2026-04-01,
+  replacing GOST R 21.101-2020 (order No. 129-ст of 2026-02-12). The base requirement
+  therefore names a replaced edition.
+- This change writes "GOST R 21.101-2026 (edition unverified)" in its own text and does
+  not edit the base requirement. After this change archives, the capability names the same
+  document both ways until WP3 either confirms the edition from the source text or marks
+  it `unverified` in that requirement.
 
 ## Design note: declarative input model (C10)
 
@@ -184,7 +213,8 @@ later design and is not fixed here.
     evaluator, which changes where a step's `expression` comes from. This is an open
     question for WP5 and is not decided here.
 - **`report-generator` "GOST-compliant report assembly"** names GOST R 21.101-2020; that
-  edition is not checked against the source text. Recorded for WP3; not edited here.
+  edition is not checked against the source text. Handed to WP3 in section "NormRef"
+  (task 7.3); not edited here.
 - **`retarget-mvp-domain` (WP1)** removes "Deterministic verified calculation" and
   modifies "Detailed calculation display"; this change touches neither, and WP1 archives
   first. WP1 task 2.1 (Akim confirms the WP1 engine and output deltas match this
@@ -206,6 +236,6 @@ later design and is not fixed here.
 
 - `NormRef` changes after agreement ripple through three specs. Mitigation: all three
   refer to it by name and never restate its fields.
-- The signature-block default stays open until GOST R 21.101 (edition unverified) is
-  checked. Mitigation: it
-  is one setting, so the decision changes a default, not the report structure.
+- The signature-block rule rests on an edition that is still `unverified` (decision 10).
+  Mitigation: it is one setting, so a correction after the normative pipeline confirms
+  the edition changes a default or a line, not the report structure.
