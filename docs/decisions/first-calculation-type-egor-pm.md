@@ -46,6 +46,11 @@ given (meeting or message), as proposed in `team-roles-update-egor.md`, question
 - **Proposal.** Akim reads the guide and proposes the type(s) in section 1 of
   `reference-examples-foundations.md`, with the number of worked examples and their
   pages. Proposed type: `<pending: Akim fills from the guide>`.
+- **Preliminary candidate.** The design soil resistance of the base R, formula 5.7,
+  clause 5.6.7 of СП 22.13330.2016 (numbers from Egor's `formulas.toml`, `unverified`).
+  It is already in Egor's formula registry and the SP is ingested. It becomes the
+  proposal only if the guide has at least 3 worked examples of it; it also needs
+  question 3 (coefficient table).
 - **Your side.** Confirm or reject the proposed type. After confirmation, Egor writes it
   into "In-scope calculation types" of `foundations-shallow` (task 3.1).
 
@@ -55,10 +60,23 @@ given (meeting or message), as proposed in `team-roles-update-egor.md`, question
 
 ### 3. Pilot normative data for that type (Egor)
 
-- **Question.** The collector and parser work on a pilot corpus (`normatives-collector`
-  design: a 5-document pilot; `normatives-parser` design: the pilot SP). Does it include
-  the norm documents that the chosen type rests on? If not, can they be added, and
-  when? Step 5 needs them for the chosen type.
+- **What is there now** (your records; editions `unverified` until checked against the
+  primary text):
+  - Pilot SP of the parser: СП 22.13330.2016 "Основания зданий и сооружений", the
+    shallow-foundation pilot; already ingested into Postgres (647 clauses, 124 formulas,
+    141 notation entries; `docs/decisions/normatives-postgres-storage.md` on
+    `feature/normative-parser/ml`).
+  - Downloaded corpus (`ml-model-journal.md`, entry 4, current editions only):
+    СП 22.13330.2016, СП 24.13330.2021, СП 45.13330.2017 (foundations), СП 30.13330.2020,
+    СП 31.13330.2021 (water); СП 32.13330.2018 has no file in the registry. Your note for
+    Akim also mentions a scanned СНиП, not named.
+  - `normatives-collector` task 1.2 (the 5-document pilot list) is still open.
+- **Question.** Does the chosen type rest on СП 22.13330.2016 only, or does it also need
+  another document (for example СП 24 or СП 45)? If another one is needed, when will it be
+  ingested? Is the 5-document pilot list of task 1.2 the five downloaded documents above?
+  If the type is R: its coefficients `M_γ`, `M_q`, `M_c` come from table 5.5, and
+  tables are not stored yet. When will that table be available, each value with its
+  `NormRef` (see `normatives-formula-contract-review-egor.md`, question 7)?
 - **Your side.** Name the documents and editions the pipeline will deliver for the type,
   marked `unverified` until checked against the primary text.
 
