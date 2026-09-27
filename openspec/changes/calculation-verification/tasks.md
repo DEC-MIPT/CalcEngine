@@ -18,7 +18,7 @@ task waits for it.
 - [x] 1.2 (spec) Run `spec-reviewer` on this change and resolve blockers
 - [x] 1.3 (spec) Run `norm-traceability-checker` and confirm that no requirement fixes a norm value or tolerance
 - [x] 1.4 (spec) Akim confirms the proposed points in `design.md`: decision 7 (how a difference is declared) and decision 9 (reproducibility below 100% is NO-GO) (2026-09-27, both confirmed as proposed)
-- [ ] 1.5 (spec) `tester` issues the verdict for the spec change (see DOD)
+- [x] 1.5 (spec) `tester` issues the verdict for the spec change (see DOD) (2026-09-27: **GO**, spec phase; three `spec-reviewer` rounds (fixed a stale DOD wording and an untracked-citation major), validation, and an independent norm-value spot-check all pass; implementation sections 2-3 remain open and are not covered; see `docs/decisions/calculation-verification-readiness.md`)
 
 ## 2. Ready to implement now
 
@@ -94,8 +94,10 @@ Depends on `retarget-mvp-domain` for the list of calculation types of `foundatio
 ## DOD and Go / No-Go
 
 - GO is declared only by the `tester` agent (`AGENTS.md` section 4).
-- For the spec phase: `openspec validate --all --strict` passes; `spec-reviewer` reports
-  no blockers; `norm-traceability-checker` confirms no norm value or tolerance is fixed.
+- For the spec phase: `openspec validate --all --strict` passes; a `spec-reviewer`
+  report on the current version of the change lists no blocker and no major finding
+  (`openspec/specs/development-process/spec.md`, "Planning before implementation");
+  `norm-traceability-checker` confirms no norm value or tolerance is fixed.
 - For implementation: sections 2 and 3 pass with >= 95% branch
   coverage; the reference suite is within tolerance; metrics are attached; the delta specs
   match the implementation.
