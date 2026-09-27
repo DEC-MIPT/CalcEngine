@@ -48,14 +48,39 @@ can be implemented; until then it is not started, not stubbed as a no-op.
 
 ## 3. Frontend tooling (frontend)
 
-- [ ] 3.1 Scaffold `frontend/` with Vite's `react-ts` template, per `design.md`
-  decision 4; verify `npm install && npm run build` succeeds
-- [ ] 3.2 Add ESLint and `tsc` configuration for the scaffold; verify `npx eslint .`
-  and `npx tsc --noEmit` both run and exit 0 on the untouched scaffold
-- [ ] 3.3 Add Vitest configuration and one smoke test (renders the scaffold's default
-  component); verify `npx vitest run` passes
-- [ ] 3.4 Add `frontend/check.sh` running `eslint`, `tsc --noEmit`, then `vitest run
+- [x] 3.1 Scaffold `frontend/` with Vite's `react-ts` template, per `design.md`
+  decision 4; verify `npm install && npm run build` succeeds (2026-09-28: `npm create
+  vite@latest frontend -- --template react-ts`, then `npm install && npm run build`;
+  builds `dist/` cleanly, exit 0)
+- [x] 3.2 Add ESLint and `tsc` configuration for the scaffold; verify `npx eslint .`
+  and `npx tsc --noEmit` both run and exit 0 on the untouched scaffold (2026-09-28:
+  current `create-vite react-ts` ships `oxlint`, not ESLint, by default — removed it
+  (`.oxlintrc.json`, the `oxlint` dependency) and added `eslint`/`typescript-eslint`/
+  `eslint-plugin-react-hooks`/`eslint-plugin-react-refresh` with a flat
+  `eslint.config.js`, per `design.md`'s own open question that the config format is an
+  implementation detail; `npx eslint .` exits 0. `npx tsc --noEmit` also exits 0 but
+  was found to silently no-op: the scaffold's root `tsconfig.json` is solution-style
+  (`"files": []`, only `references`), so plain `tsc --noEmit` checks nothing — confirmed
+  by appending a deliberate type error and getting exit 0 anyway. `npx tsc -b` (build
+  mode, which follows the references; each referenced config already sets
+  `noEmit: true`) does real checking — confirmed catching the same deliberate error,
+  exit 2. `frontend/check.sh` (3.4) and this task's own verification use `tsc -b`, not
+  the literal `tsc --noEmit` in this task's own text)
+- [x] 3.3 Add Vitest configuration and one smoke test (renders the scaffold's default
+  component); verify `npx vitest run` passes (2026-09-28: `vitest`,
+  `@vitest/coverage-v8`, `@testing-library/react`, `@testing-library/jest-dom`, `jsdom`
+  added; `vite.config.ts` gets a `test` block (`jsdom`, setup file, v8 coverage,
+  branches threshold 95 per the DOD's frontend coverage gate); `src/test/setup.ts`
+  imports `@testing-library/jest-dom/vitest`; `src/App.test.tsx` renders `<App />` and
+  asserts the "Get started" heading; `npx vitest run` — 1 passed, exit 0)
+- [x] 3.4 Add `frontend/check.sh` running `eslint`, `tsc --noEmit`, then `vitest run
   --coverage`, per `design.md` decision 3; verify it exits 0 on a clean checkout
+  (2026-09-28: script runs `eslint .`, `tsc -b` (see 3.2 on why `-b` not
+  `--noEmit`), `vitest run --coverage`, `set -euo pipefail` so it stops at the first
+  failure; exits 0 on the current tree — coverage 100% branches on the smoke test
+  alone; a deliberate unused-var violation made it exit 1 at the `eslint` step,
+  confirming the stop-at-first-failure behavior. Evidence:
+  `docs/reports/WP6-code-journal.md`)
 
 ## 4. Pre-commit and secrets (backend)
 
