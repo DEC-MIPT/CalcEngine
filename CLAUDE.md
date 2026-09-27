@@ -16,8 +16,8 @@ what it does not say. Do not restate `AGENTS.md` here.
   `feature/normative-collector/data`. `backend/`, `frontend/`, `params/`, `ml/` do not
   exist. What the pipeline means for Akim's work: `docs/reports/egor-branches-analysis.md`.
 - Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
-  (WP2), `calculation-verification` (WP4), `team-roles-update` (WP7),
-  `record-installed-skills-akim`. Led by Egor, with Akim's parts:
+  (WP2), `calculation-verification` (WP4), `record-installed-skills-akim`. Led by Egor,
+  with Akim's parts:
   `retarget-mvp-domain` (WP1), `backend-layered-architecture` (WP5, not yet
   retargeted). Egor: `normatives-collector`, `normatives-parser`,
   `normatives-formula-contract`. Planned, not
@@ -27,9 +27,11 @@ what it does not say. Do not restate `AGENTS.md` here.
   `backend-layered-architecture` still names it. The MVP domains are shallow
   foundations, then internal water supply. Build on the active changes, not on the
   placeholder.
-- Egor acknowledged `team-roles-update` on 2026-09-27, and its Part B put the code-free
-  GO path into `AGENTS.md` section 4, so spec-only changes can now get their `tester`
-  verdict.
+- `team-roles-update` (WP7) is archived (2026-09-27,
+  `openspec/changes/archive/2026-09-27-team-roles-update/`): the PM role and the
+  code-free GO path are in `openspec/specs/development-process/spec.md` and `AGENTS.md`
+  section 4, so spec-only changes can get their `tester` verdict.
+- Session state for continuing the work: `docs/reports/session-state-2026-09-27.md`.
 - Norm editions for the MVP domain come from the team and are `unverified` until
   checked against source texts.
 
