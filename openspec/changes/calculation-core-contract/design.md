@@ -61,55 +61,112 @@ See `proposal.md` (Non-goals).
     GOST R 21.101-2020). The edition stays `unverified` under
     `agent-docs/domain-constraints.md` until the normative pipeline confirms it.
 
-## NormRef (to be confirmed with data engineer — needs Egor confirmation)
+## NormRef (agreed with Egor)
 
-This section records the shared interface from roadmap section 3 as the starting point.
-It is not final. Egor owns the catalog side (WP3, `norm-source-traceability`), and the
-shape is agreed with him before any requirement that carries `NormRef` is implemented.
+This section records the shared interface from roadmap section 3 and Akim's answers to
+the eight open questions. The shape is recorded as agreed with Egor (task 1.3, closed 2026-09-26 on Akim's word;
+the answers are recorded in `docs/decisions/normref-questions-egor.md` on Akim's word;
+Egor's own written text is not in the repository, and a link to it is added here when it
+exists). Egor owns the catalog side (WP3, `norm-source-traceability`). The delta
+specs use this shape (`norm_refs`, `Source`, `engineer_rules`).
 
-    NormRef {document, edition, clause, status, provenance}
+    NormRef {
+      document:   string                       # designation as printed in the document; always concrete
+      edition:    string | unverified
+      clause:     string | unverified          # one locator: a clause, a table, or a formula
+      status:     verified | unverified
+      provenance: human-verified | machine-extracted
+    }
+    Invariant: status = verified implies edition and clause are concrete.
 
-- `edition` and `clause` may hold the literal `unverified`.
+    EngineerRule {engineer, rationale}
+
+    Step.norm_refs: NormRef[]                  # at least one
+    Source = NormRef[] (at least one) | EngineerRule
+
 - No field may be null.
+- `unverified` is a reserved literal: a union in code, a string in serialization.
 - The meaning of verified and unverified is owned by the `normatives-catalog`
   requirement "Norm reference status" (WP1). This change only carries the value.
-- Where a rule comes from the engineer instead of a norm (a rounding rule, a validated
-  range), this change writes "a `NormRef` or the engineer". How the engineer case is
-  encoded is an open question for Egor (see below).
-- Wording clash to reconcile: `agent-docs/domain-constraints.md` and the WP1 deltas
-  (`retarget-mvp-domain`: `normatives-catalog` "Norm reference status",
-  `transparent-output` "Detailed calculation display") use the literal marker
-  `source: unverified`. This interface uses the fields `status` and `provenance`. The
-  agreement must state how the two map (for example, `source: unverified` is how a
-  `NormRef` with an unverified `status` is displayed), so that both changes use one
-  vocabulary.
+- Wherever this change names a source, it means a `Source`: one or more `NormRef`, or an
+  `EngineerRule`. An `EngineerRule` is allowed only for a `rounding_source` and for the
+  source of a validated range. The bounds of the method's range and the sources of trace
+  steps are `NormRef` lists only.
+
+### Resolutions
+
+1. **`status` is the verification status only** (`verified` or `unverified`). The
+   document status (in force, superseded, withdrawn; WP3 requirement 2) is not a field of
+   `NormRef`: it changes over time, and a pinned reference must not. It is read from the
+   catalog by `(document, edition)` when it is shown. The marker `source: unverified`
+   (`domain-constraints.md`, WP1) is how a `NormRef` with `status = unverified` is
+   displayed; the data lives in the fields, the marker is a display form. A named edition
+   that nobody has checked is `status = unverified` with a concrete `edition`.
+2. **`provenance` values are final for the MVP:** `human-verified` and
+   `machine-extracted`. `provenance` says where the value came from; `status` says
+   whether the reference was checked against the source text. A `machine-extracted`
+   value has `status = unverified` until a person checks it, and then becomes
+   `human-verified`. The parameters layer rejects `machine-extracted` values, so they
+   never reach the engine (WP3 requirement 4).
+3. **A rule set by the engineer is a separate source type**, `EngineerRule`, not a
+   `NormRef` with a reserved `document`. A reserved document would leak into every
+   consumer of `NormRef` and into the traceability metric. It is visible in the envelope
+   and in the report as engineer-set. This is also Akim's reading of
+   `agent-docs/domain-constraints.md` ("implementer" is the software developer, not the
+   design engineer who fills the parameter data); Egor's agreement covers this
+   reading, .
+4. **`unverified` is a union value in `edition` and `clause`. `document` is never
+   `unverified`:** it is always a concrete designation. A parameter whose document is
+   unknown has no source, and schema validation fails (WP3 requirement 1). The synthetic
+   placeholder `<NORM-DOC-PLACEHOLDER>` is allowed only in spec examples and tests, as in
+   WP1.
+5. **`clause` holds one locator** (a clause, a table, or a formula), as an opaque
+   string. A step that rests on several clauses, tables, or documents carries several
+   `NormRef` in `norm_refs`; two references of one document repeat `document` and
+   `edition`. A step is verified only when every one of its references is `verified`, and
+   it counts as unverified in `unverified_step_count` when any of them is not. The "clause
+   set" that a stored result is pinned to (WP3 requirement 3) is the set of all locators
+   of all references of all steps.
+6. **`document` is a designation string,** as printed in the document, not a key into
+   `dec_normatives`. It reads well in the parameter YAML, in the `dec_app` columns, and in
+   the report, and needs no foreign key across the two databases (B3). The catalog
+   resolves `(document, edition)` uniquely and normalizes spelling. For `status =
+   verified` the pipeline checks that the pair exists in `dec_normatives`.
+7. **A `NormRef` in a stored result is immutable.** Its values are copied into the
+   `dec_app` columns and never change. In the catalog and in `params/`, a change (for
+   example `unverified` to `verified`) creates a new version of the reference: new runs
+   take the new one, old results keep the old one. The `status` in a stored result is the
+   status at the time of the calculation. The flag "edition superseded" is computed from
+   the catalog when the result is shown; it is not stored.
+8. **`edition` is an opaque string** that identifies one exact text version: the year of
+   the edition, plus a marker for the amendments applied, when there are any (written
+   `<YYYY>` or `<YYYY>+<amendment>` in examples). It is compared for equality only. The
+   exact syntax is Egor's decision, made from the real documents; this change does not
+   fix it, because no edition is checked against a primary source.
+
+Effects on the other requirements of this change, applied to the deltas on 2026-09-26:
+
+- The typed trace step field `norm_ref` becomes `norm_refs`, a list of at least one
+  `NormRef`.
+- `rounding_source` and the source of the validated range are a `Source`; each bound of
+  the method's range carries a `NormRef` list.
+- The envelope's `norm_refs` is the set of all `NormRef` used; `EngineerRule` sources are
+  listed in the envelope's `engineer_rules` and are not part of it.
+- The traceability metric of `calculation-verification` counts the steps whose
+  references are all `verified`, over the steps of non-refused envelopes, and counts
+  engineer-set sources separately.
 
 Engineer-set rules and `domain-constraints.md`: that file says "Rounding and tolerance
 rules come from the norm, not from the implementer." This change reads "implementer" as
 the software developer, who never chooses a rule; the engine never chooses one either.
 The design engineer who fills the parameter data is a different actor and may set a rule
-where the norm gives none, with the rule recorded as engineer-set and visible in the
-envelope and the report. This reading is Akim's; Egor confirms it together with the
-encoding (question 3), and until then tasks 4.3 and 5.1 stay blocked.
+where the norm gives none, with the rule recorded as an `EngineerRule` and visible in the
+envelope and the report.
 
-Open questions for Egor:
-
-1. Is `status` the verification status (verified or unverified), the document status
-   (in force, superseded, withdrawn; WP3 requirement 2), or are these two fields? How
-   does it map to the `source: unverified` marker used in `domain-constraints.md` and
-   WP1?
-2. Are the `provenance` values `human-verified` and `machine-extracted` (WP3 requirement
-   4) final, and does the engine or the parameters layer reject `machine-extracted`?
-3. Is an engineer-set source allowed for a rounding rule or a validated range (see the
-   reading of `domain-constraints.md` above), and if so, how is it encoded: a `NormRef`
-   with a reserved document value, or a separate source type?
-4. Is `unverified` a string literal in `edition` and `clause`, or an enum value with the
-   field typed as a union? What does `document` hold when the document itself is unknown?
-5. What does `clause` hold: one clause, or a clause plus a table or formula number? Can
-   one step cite several clauses?
-6. Is `document` a designation string or a key into `dec_normatives`?
-7. Is a `NormRef` stored in a result immutable once pinned (WP3 requirement 3)?
-8. What format does `edition` use: a year, a full designation, or an amendment number?
+Wording clash, settled by resolution 1: `agent-docs/domain-constraints.md` and the WP1
+deltas (`retarget-mvp-domain`: `normatives-catalog` "Norm reference status",
+`transparent-output` "Detailed calculation display") use the marker `source: unverified`.
+That marker is the display form of a `NormRef` with `status = unverified`.
 
 Handoff to WP3 (`norm-source-traceability`, Egor). This is a record for WP3, not a
 question that task 1.3 must answer:
@@ -163,7 +220,8 @@ later design and is not fixed here.
 
 - Performance: unchanged; the existing "Non-functional — performance and accuracy"
   requirement applies. Its "99.9% accuracy" figure has no measurable definition yet;
-  making it measurable is deferred to WP4 (`calculation-verification`).
+  making it measurable is deferred to WP4 (`calculation-verification`), which replaces
+  that requirement; this line is stale once WP4 archives.
 - Determinism: bit for bit on the same platform (see "Pure calculation function").
 - Accessibility: warnings and refusals are readable without colour (see
   `transparent-output`).

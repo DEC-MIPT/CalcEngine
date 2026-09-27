@@ -37,8 +37,8 @@ context: |
     (normative pipeline, NLP/RAG, DevOps, ML). Ask who is working before development.
     Zones do not overlap except specs.
   - Lint/type checks: backend ruff + mypy; frontend eslint + tsc.
-  - No ML in the calculation path (explicitly rejected). Normative data is entered
-    manually for MVP; NLP/RAG auto-parsing is a future goal.
+  - No ML in the calculation path (explicitly rejected). NLP/RAG auto-parsing of norms
+    (collector, regex baseline parser, embeddings retrieval on CPU) is part of the MVP.
   - No code comments unless required.
 
 # Per-artifact rules

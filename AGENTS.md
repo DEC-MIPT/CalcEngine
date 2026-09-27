@@ -25,8 +25,9 @@ follow it before acting.
 - **Infrastructure**: Docker locally, with groundwork for deployment to a Russian
   cloud host (Yandex Cloud / VK Cloud / Cloud.ru) later.
 - **Monetization**: B2B 30 000 ₽/mo (10 seats), B2C 3 000 ₽/mo, 14-day trial.
-- **Normative data**: manual monitoring for now (one pilot file); NLP/RAG auto-parsing
-  is a future, non-MVP goal. No ML in the calculation path (explicitly rejected).
+- **Normative data**: NLP/RAG auto-parsing of norms (collector, regex baseline parser,
+  embeddings retrieval on CPU) is part of the MVP; a generative-LLM extraction step is
+  deferred. No ML in the calculation path (explicitly rejected).
 
 ## 2. Methodology: Spec-Driven Development (SDD) via OpenSpec
 
@@ -81,6 +82,13 @@ Before starting a development session, an agent MUST check the state of commits 
 - Remind the developer to run `git pull` (and `git fetch --all`) so the local
   `develop` is up to date before starting work.
 - Check `git status` for uncommitted or untracked work left by previous sessions.
+
+Before starting a session, an agent MUST also read the current state of
+`docs/decisions/` (tracked in git). These files are the team's written channel:
+answers, confirmations, and review outcomes (for example
+`normref-questions-egor*.md`, `*-readiness*.md`) may have been added or updated
+since the last session. A decision or confirmation recorded there can change what
+is blocked, agreed, or ready, so treat it as required context before acting.
 
 ## 3. DOR — Definition of Ready
 
@@ -161,6 +169,9 @@ Zone-to-agent mapping:
 
 - **Language**: all specs, agents, skills, and commit messages are in English.
 - **Commits**: Conventional Commits (`feat:`, `fix:`, `chore:`, `test:`, `docs:`).
+- **Never commit, merge, or push without the working developer's explicit consent.**
+  Prepare and show the changes (diff) and the intended commit message, then wait for
+  approval before running `git commit`, `git merge`, or `git push`.
 - **Testing**:
   - Backend: `pytest` (unit + integration), coverage via `coverage.py`.
   - Frontend: `Vitest` + React Testing Library; E2E via Playwright.

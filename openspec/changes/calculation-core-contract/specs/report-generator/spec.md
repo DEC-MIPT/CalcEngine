@@ -32,14 +32,14 @@ normative control are mandatory, and a checker line is allowed in place of a pos
 
 ### Requirement: Automatic normative references in report
 The system SHALL automatically include normative clause references in the generated
-report without manual insertion. Each reference is taken from the `norm_ref` of its
+report without manual insertion. Each reference is taken from the `norm_refs` of its
 trace step and is printed with its status; a reference that is not verified is printed
 as unverified.
 
 #### Scenario: References present
 - **WHEN** a report is generated
 - **THEN** normative clause references appear automatically in the calculation trace,
-  each with the status of its step's `norm_ref`
+  each with the status of the `norm_refs` of its step
 
 ## ADDED Requirements
 
@@ -47,14 +47,14 @@ as unverified.
 The system SHALL print, in every report, the fields of the result envelope defined by
 the `calculation-engine` capability: `result_id`, `engine_version`, `input_hash`, the
 `outputs` with their rounding rule and its source, the `norm_refs` with their status,
-the `verdict` and its `verdict_reason`, every warning, and `unverified_step_count`. The block SHALL also state that the design engineer, not
+the `engineer_rules` with the engineer and the rationale, the `verdict` and its `verdict_reason`, every warning, and `unverified_step_count`. The block SHALL also state that the design engineer, not
 the system, is responsible for the result and for its use in project documentation.
 
 #### Scenario: Envelope fields on the report
 - **WHEN** a report is generated
 - **THEN** it shows `result_id`, `engine_version`, `input_hash`, the `outputs` with
-  their rounding rule and its source, the `norm_refs` with their status, the `verdict` and `verdict_reason`, the warnings, and
-  `unverified_step_count`
+  their rounding rule and its source, the `norm_refs` with their status, the `engineer_rules`, the `verdict` and
+  `verdict_reason`, the warnings, and `unverified_step_count`
 
 #### Scenario: Engineer responsibility statement
 - **WHEN** a report is generated

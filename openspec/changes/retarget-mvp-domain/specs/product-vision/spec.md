@@ -28,9 +28,10 @@ milestone name).
 
 ### Requirement: Non-goals before the defense
 The system SHALL treat the following as non-goals before the defense: billing or
-payment integration, NLP/RAG parsing of norms inside the product, PDF report output,
-and a multi-tenant audit trail. DRAFT — the PM approves this list; it is the example
-list from the verified roadmap, not the PM's meeting list.
+payment integration, generative-LLM structured extraction from norms, PDF report
+output, and a multi-tenant audit trail. ML-in-MVP is in scope: the normative pipeline
+(collector, regex baseline parser, embeddings retrieval on CPU) parses norms into the
+database; no ML runs in the calculation path.
 
 #### Scenario: Proposal touches a non-goal
 - **WHEN** a change proposal adds behavior that falls under a non-goal
@@ -52,3 +53,14 @@ capability and are not restated here.
 - **WHEN** a customer subscribes to a B2B or B2C plan
 - **THEN** the plan limits and features are those defined in `user-accounts`, and this
   spec states no limit of its own
+
+### Requirement: No machine learning in the calculation path
+The system SHALL NOT use machine learning for calculations; calculation algorithms
+must be deterministic and verified. NLP/RAG auto-parsing of norms (collector, regex
+baseline parser, embeddings retrieval on CPU) is part of the MVP and runs outside the
+calculation path.
+
+#### Scenario: Deterministic calculation
+- **WHEN** the same inputs are provided twice
+- **THEN** the calculation produces identical results, and no ML model influences the
+  arithmetic or the normative references

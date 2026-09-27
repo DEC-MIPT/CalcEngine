@@ -1,3 +1,11 @@
+## REMOVED Requirements
+
+### Requirement: Manual normative maintenance for MVP
+**Reason**: Contradicts ML-in-MVP: normative data is parsed by the NLP/RAG pipeline
+with a human-in-the-loop verification gate, not maintained manually as the only path.
+**Migration**: Replaced by the pipeline (`normatives-collector`, `normatives-parser`)
+and the provenance gate in `norm-source-traceability`.
+
 ## MODIFIED Requirements
 
 ### Requirement: Binding a normative to a calculation type

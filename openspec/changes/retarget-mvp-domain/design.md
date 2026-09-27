@@ -42,6 +42,11 @@ See `proposal.md` (Non-goals).
 5. **Placeholders in the scope capability.** The in-scope calculation type names and the
    out-of-scope list are marked for Egor and the PM to fill. The draft does not invent
    them.
+6. **ML-in-MVP (PM-approved).** The normative pipeline (collector, regex baseline parser,
+   embeddings retrieval on CPU) is part of the MVP; no ML runs in the calculation path;
+   generative-LLM structured extraction is deferred. The fold touches `product-vision`,
+   `normatives-catalog`, `openspec/config.yaml`, `AGENTS.md`, and both `data-engineer.md`
+   mirrors.
 
 ## Assumptions
 
