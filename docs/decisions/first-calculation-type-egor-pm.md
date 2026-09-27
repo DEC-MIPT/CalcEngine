@@ -45,7 +45,11 @@ given (meeting or message), as proposed in `team-roles-update-egor.md`, question
 
 - **Proposal.** Akim reads the guide and proposes the type(s) in section 1 of
   `reference-examples-foundations.md`, with the number of worked examples and their
-  pages. Proposed type: `<pending: Akim fills from the guide>`.
+  pages. Proposed type: design soil resistance of the base, R (formula 5.7, clause
+  5.6.7, СП 22.13330.2016). Confirmed against a guide: 5 distinct worked examples in
+  `Calc_OiF_Linkovskiy.pdf` (Линовский, Якушкина, 2023), pages 7-8, 16, 21-23; 5 more
+  in a second guide. 3 of the first 5 are turned into reference-example cards in
+  `reference-examples-foundations.md`, section 3.
 - **Preliminary candidate.** The design soil resistance of the base R, formula 5.7,
   clause 5.6.7 of СП 22.13330.2016 (numbers from Egor's `formulas.toml`, `unverified`).
   It is already in Egor's formula registry and the SP is ingested. It becomes the
