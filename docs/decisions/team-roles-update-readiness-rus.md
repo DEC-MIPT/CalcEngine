@@ -1,7 +1,7 @@
 # Проверка готовности: `team-roles-update` (WP7)
 
 - Дата: 2026-09-26
-- Change: `openspec/changes/team-roles-update/`
+- Change: `openspec/changes/archive/2026-09-27-team-roles-update/` (архивирован 2026-09-27; был `openspec/changes/team-roles-update/`)
 - Автор: Akim. Egor — второй разработчик и должен согласиться, так как change затрагивает общие файлы.
 - Критерии: `docs/audit/03-verified-roadmap.md`, раздел 3.7, «Готово, когда»: Egor согласен, валидация проходит.
 
@@ -225,3 +225,10 @@ Open after verdict: A2.2, A2.3 (archive).
 Вердикт записан Акимом по отчёту агента `tester` (оставлен на английском, как выдан). Это первый вердикт по пути GO без кода, который задаёт этот change. Описание агента `tester` (`.claude/agents/tester.md`) по-прежнему говорит только о гейте тестов и покрытия; его выравнивание — задача 4.1 `calculation-verification`. После записи в заметке к A1.4 в `tasks.md` цитата Егора исправлена дословно («as the second developer»); tester отметил пропущенное слово как косметику.
 
 Часть B применена (B2–B8), архивацию она больше не блокирует. Дальше: A2.2 (финальная версия в `develop`), затем A2.3 — `spec-keeper` переносит дельту в `openspec/specs/development-process/spec.md` и архивирует change.
+
+## 12. Архивация (задачи A2.2, A2.3)
+
+- A2.2: каталог change в `develop` @ `fcdd989` — это проверенная версия с GO плюс запись A2.1.
+- A2.3, 2026-09-27: дельта перенесена в `openspec/specs/development-process/spec.md` через процедуру архивации. Заменены четыре требования («Non-overlapping developer responsibility zones», «Planning before implementation», «Review before merge», «Go/No-Go verdict and archive») и добавлено одно («Shared decisions are tracked»); каждое сверено с дельтой, остальные семь требований не изменились. `openspec validate --all --strict`: 17 passed, 0 failed (change ушёл из списка активных). Change перенесён в `openspec/changes/archive/2026-09-27-team-roles-update/`.
+- Другие активные change с дельтами `development-process` (`calculation-verification`, `record-installed-skills-akim`) только добавляют требования с другими именами, поэтому архивация с ними не конфликтует.
+- Передача дальше (раздел C `tasks.md` change, это не его задачи): C1 — неотслеживаемые ссылки на «паспорт» в `backend-layered-architecture`; C2 — привести `record-installed-skills-akim` к пути без кода (подтверждение Егора, `spec-reviewer`, вердикт `tester` с полями N/A).
