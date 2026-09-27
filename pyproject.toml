@@ -1,0 +1,12 @@
+[tool.ruff]
+extend-exclude = ["normatives_pipeline/research"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["normatives_pipeline"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
