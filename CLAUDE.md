@@ -12,6 +12,9 @@ what it does not say. Do not restate `AGENTS.md` here.
 - No application code on `develop`: `backend/`, `frontend/`, `params/`, `ml/`,
   `docker-compose.yml` do not exist. Egor's pipeline code is on his branches
   (`feature/normative-collector/data`, `feature/normative-parser/ml`), not yet merged.
+- Egor's pipeline (on his branches) runs a local PostgreSQL `dec-postgres` on port 5433
+  and keeps a hand-entered formula registry (`normatives_pipeline/formulas.toml`); what
+  it means for Akim's work: `docs/reports/egor-branches-analysis.md`.
 - Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
   (WP2), `calculation-verification` (WP4), `team-roles-update` (WP7),
   `record-installed-skills-akim`. Led by Egor, with Akim's parts:
@@ -51,6 +54,7 @@ Edit these only when the user explicitly says so; otherwise show a diff.
 - `AGENTS.md`, `.gitignore`, `README.md`, `.kilo/**`, `.kilocode/**`,
   `.claude/agents/*` other than the two subagents added for Claude Code.
 - Anything in Egor's zones: normative pipeline, NLP/RAG, ML, DevOps.
+- The root `pyproject.toml` (shared with Egor's pipeline once his branch is merged).
 
 ## Language
 
