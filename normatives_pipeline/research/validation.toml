@@ -1,0 +1,20 @@
+# Эталонные формулы (ground truth) из СП 22.13330.2016 для оценки pipeline.
+# page — номер страницы PDF (1-based); latex — каноничный эталон.
+
+[[formula]]
+number = "5.1"
+page = 29
+clause = "5.3.16"
+latex = "X = \\frac{X_n}{\\gamma_g}"
+
+[[formula]]
+number = "5.5"
+page = 38
+clause = "5.5.10"
+latex = "\\Delta h \\leq a (\\mathrm{tg}\\,\\varphi_I + c_I / p)"
+
+[[formula]]
+number = "5.7"
+page = 40
+clause = "5.6.7"
+latex = "R = \\frac{\\gamma_{c1}\\gamma_{c2}}{k}\\left[M_{\\gamma} k_z b \\gamma_{II} + M_q d_1 \\gamma'_{II} + (M_q - 1) d_b \\gamma'_{II} + M_c c_{II}\\right]"
