@@ -95,7 +95,10 @@ named later change, not by this one.
 3. **Parameters in YAML, for engineer-set values only** — `params/**/*.yaml` holds
    values the norm does not give and the engineer sets instead (rounding rules,
    validated ranges: `calculation-core-contract`'s `EngineerRule`, whose `engineer` and
-   `rationale` are required), one file per calculation type
+   `rationale` are required). `calculation-core-contract` also allows a validated
+   range's `Source` to be a `NormRef` list, for a norm-given range; that case is not
+   engineer-set and has no home in this loader, the same gap as the norm-given method
+   bounds below. One file per calculation type
    (`<params root>/<calculation-type>.yaml`, the root passed to the loader as an
    argument), validated by Pydantic schemas in the `parameters` layer, and passed to
    `engine` as typed arguments.

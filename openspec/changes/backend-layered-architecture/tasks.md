@@ -72,7 +72,7 @@ Which task or check verifies each requirement of the spec delta. Requirements ma
 |---|---|
 | Layered architecture | task 1.1 (the eleven packages exist) |
 | Strict dependency direction | after apply: `bootstrap-dev-environment` task 5.1 (`import-linter`: a "layers" contract with siblings as independent layers, forbidden contracts for `api`/`worker` and for `engine`, with indirect imports allowed for the `api` rule since it reaches `repositories` only through `services`, and the `ml/` rule once `ml/` exists); the text of that task is updated to say so (2026-09-28) |
-| No layer mixing | no code in this change can violate it (no endpoint returns data); the first endpoint that returns data carries the ORM-isolation test |
+| No layer mixing | after apply: no code in this change can violate it (no endpoint returns data); the first endpoint that returns data carries the ORM-isolation test |
 | No hardcoding | tasks 2.1 (database URL) and 5.1 (a formula or coefficient key is rejected) |
 | Engineer-set parameters stored in YAML | task 5.1 |
 | Health endpoint | task 1.2 |
@@ -96,7 +96,7 @@ Stale text in files this change does not own; listed for their owners, not edite
 ## DOR checklist
 
 - [x] `proposal.md`, `specs/…`, `design.md`, `tasks.md` exist, including a "Non-goals" section on `proposal.md`
-- [ ] `openspec validate --strict` passes and a `spec-reviewer` report on the current version lists no blocker and no major finding (2026-09-28: the third pass found 0 blockers and 3 major, M1-M3, recorded in `docs/decisions/backend-layered-architecture-readiness.md`; M1-M3 and the quick minor findings were then addressed; this box stays unchecked until a fourth pass confirms it on the current text)
+- [x] `openspec validate --strict` passes and a `spec-reviewer` report on the current version lists no blocker and no major finding (2026-09-28: fourth pass, 0 blockers, 0 major, 3 minor, verdict READY for DOR; recorded in `docs/decisions/backend-layered-architecture-readiness.md`)
 - [x] Functional requirements and scenarios recorded, consistent with `design.md`; each requirement is mapped to a task or a named later check ("Requirement coverage" above)
 - [x] Non-functional requirements recorded explicitly (`design.md`, "Non-functional requirements"; the secrets and coverage requirements are also in the spec)
 - [x] Each task is small enough for one session (Akim's own judgement, 2026-09-28; not a reviewer confirmation)

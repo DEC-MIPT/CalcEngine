@@ -279,3 +279,35 @@ m7 and m8 (stale text in files this change does not own) are listed in `tasks.md
 "Follow-ups outside this change". The norm-method-bounds gap (m11) is recorded there too.
 
 A fourth `spec-reviewer` pass is needed before READY.
+
+## Fourth pass, 2026-09-28
+
+- Reviewer: `spec-reviewer` subagent, run by Akim on the current text. Read-only;
+  `openspec validate` was run by the caller separately (passed).
+- Verdict: **READY for DOR.** 0 blockers, 0 major, 3 minor.
+- Re-verified independently against the current files (not by trusting this log): the
+  dependency-direction table, the `import-linter` contracts named in
+  `bootstrap-dev-environment` tasks.md, the `schemas`-mediated typed values in `design.md`
+  decision 2, and the "Requirement coverage" table are all in place. m15 is closed:
+  `backend-layered-architecture-split-egor-ack.md` exists and `tasks.md` cites it, no
+  stale "requested, not yet given" text remains. m14 is closed: each task (1.1-1.3,
+  2.1-2.2, 3.1-3.2, 5.1, 6.1) is plausibly one-session scope, including the largest,
+  task 5.1. The branching-model text in `tasks.md` (`feature/backend-core/backend`,
+  merge only when the whole feature is done) reads consistently with the
+  `development-process` spec and the current `AGENTS.md` section 2.
+
+**Minor, addressed in this pass:**
+- "No layer mixing" in the "Requirement coverage" table now carries the same "after
+  apply" tag as "Strict dependency direction", so a reader does not miss that this
+  requirement has no verification task in this change's own GO.
+- `design.md` decision 3 now notes that a norm-given validated range
+  (`calculation-core-contract`'s `Source = NormRef[]` case) is not engineer-set and has
+  no home in this loader either, the same gap already disclosed for norm-given method
+  bounds.
+
+**Minor, left open (not blocking):** `reporting` and `worker` get no task beyond the
+task 1.1 scaffold in this change (m5, carried since the third pass; no requirement
+demands behavior from them yet).
+
+DOR is met: `openspec validate --strict` passes and this pass found no blocker or major
+finding.
