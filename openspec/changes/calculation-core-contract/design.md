@@ -207,6 +207,12 @@ later design and is not fixed here.
   and a scenario that split the roles: schema validation first, at the API; method
   applicability second, in the engine (C2).
 - **`backend-architecture` (active change `backend-layered-architecture`):**
+  - **Update 2026-09-28:** WP5 was revised and split. Its task 6.2 and the placeholder
+    pilot moved to this change's task 7.1; decision 7 now names the pure function as the
+    C/C++ boundary; "No hardcoding" now says formulas and coefficients come from
+    `dec_normatives`, not from a parameter file, and `params/**/*.yaml` holds only
+    engineer-set values. Of the points below, only the safe parsing of `expression` and
+    the pipeline verification state for the `provenance` gate stay open (task 7.2).
   - "Parameters stored in YAML" says the parameters layer passes parameters to the
     engine as typed arguments. This agrees with "Pure calculation function".
   - Task 6.2 ("reference implementation reading parameters from the parameters layer")

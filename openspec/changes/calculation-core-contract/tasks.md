@@ -23,7 +23,7 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 
 ## 2. Requirement 1: pure calculation function (backend)
 
-- [ ] 2.1 Define the calculation function signature `(typed inputs, resolved parameters) -> result envelope` and the calculation type registry (backend)
+- [ ] 2.1 Define the calculation function signature `(typed inputs, resolved parameters) -> result envelope` and specify what the calculation type registry must hold; the registry itself (`Calculator` interface and lookup by calculation-type name) is `backend-layered-architecture` task 6.1, which this task extends, not redefines (backend)
 - [ ] 2.2 Test: run a calculation with the filesystem and the network patched to raise; it completes (backend)
 - [ ] 2.3 Test: two runs with identical inputs give envelopes equal except `result_id` (backend)
 - [ ] 2.4 Assign `result_id` in the service layer when a result is stored (backend)
@@ -40,7 +40,7 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 
 - [ ] 4.1 Add unit-carrying value types and the base-unit declaration per quantity in the calculation type contract
 - [ ] 4.2 Add boundary conversion of inputs and outputs; test that a non-base input shows in the trace in its base unit
-- [ ] 4.3 Add `rounding_rule` and `rounding_source` (a `NormRef` list or an `EngineerRule`) per output quantity and return them in the envelope's `outputs`; test that a type without them cannot be registered
+- [ ] 4.3 Add `rounding_rule` and `rounding_source` (a `NormRef` list or an `EngineerRule`) per output quantity and return them in the envelope's `outputs`; test that a type without them cannot be registered (this extends the registry of `backend-layered-architecture` task 6.1)
 
 ## 5. Requirement 4: applicability check with three outcomes
 
@@ -59,8 +59,8 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 
 ## 7. Pilot and sync
 
-- [ ] 7.1 Use one in-scope calculation type of `foundations-shallow` (from WP1) as the pilot for the contract tests, once WP1 names it (backend)
-- [ ] 7.2 (spec) After apply of this change, sync `backend-layered-architecture` (WP5): reword task 6.2 so the engine receives parameters as typed arguments (B5); update `design.md` decision 7 to name the pure function as the C/C++ boundary; settle the open question "formulas in YAML vs in code" from this change's `design.md`, taking as input Egor's formula registry (`normatives_pipeline/formulas.toml`), the change `normatives-formula-contract`, and the answers in `docs/decisions/normatives-formula-contract-review-egor.md` (questions 1-2 and 5-10), and fix the safe parsing of `expression` named in `design.md` "Risks". The change owners (Akim and Egor) edit it; this change does not
+- [ ] 7.1 Use one in-scope calculation type of `foundations-shallow` (from WP1) as the pilot for the contract tests, once WP1 names it (backend). Since 2026-09-28 this also carries WP5's old tasks 5.2 and 6.2 (moved here when `backend-layered-architecture` was split): the pilot's engineer-set parameter file under `params/`, validated by WP5's `parameters/param_schemas.py` (no formula or coefficient in it), and the pilot reference implementation under `engine/` as a pure function receiving typed inputs and resolved parameters, registered in WP5's `Calculator` registry; verify: the file validates against the engineer-set schema and contains no formula or coefficient key, and calling the implementation with the same inputs and resolved parameters always returns the same result, with no I/O-performing import (file, network, database client) in the module
+- [ ] 7.2 (spec) Remaining sync with `backend-layered-architecture` (WP5) after apply of this change: fix the safe parsing of `expression` named in `design.md` "Risks", and the pipeline verification state for the `provenance` gate (`normatives-formula-contract-review-egor.md`, questions 5-10, 12). Done 2026-09-28 in WP5: the engine is a pure function receiving typed arguments (former B5, its task 6.2 moved to task 7.1 above), decision 7 names the pure function as the C/C++ boundary, and "formulas in YAML vs in code" is settled (`dec_normatives` through the `provenance` gate; `params/**/*.yaml` holds only engineer-set values, WP5 `design.md` decision 3). The change owners (Akim and Egor) edit it; this change does not
 - [x] 7.3 (spec) Record for WP3 that `report-generator` names GOST R 21.101-2020 with an unchecked edition (2026-09-27; `design.md`, section "NormRef", "Handoff to WP3")
 
 ## 8. Close
@@ -73,6 +73,7 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 
 - `retarget-mvp-domain` (WP1) archives first; this change needs only its domain name.
 - Task 1.3 (`NormRef` agreed with Egor) is closed; no task waits for it.
+- `backend-layered-architecture` (WP5) is applied first: task 7.1 needs its `parameters/param_schemas.py`, `schemas/parameters.py` and the calculator registry (its task 6.1), and tasks 2.1 and 4.3 extend that registry. WP5 needs nothing from this change, since `Calculator` is generic over the types.
 - Task 7.2 runs after this change is applied.
 
 ## DOR checklist

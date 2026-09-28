@@ -50,6 +50,11 @@ verify and does not run.
 - **WHEN** a layer imports a layer it must not depend on
 - **THEN** the backend command fails and names the offending import
 
+#### Scenario: Forbidden import
+- **WHEN** an `api` or `worker` module imports `repositories` or `models`, or an
+  `engine` module imports anything from the application other than `schemas` and `core`
+- **THEN** the backend command fails and names the offending import
+
 #### Scenario: Layered structure not yet present
 - **WHEN** the layered directory structure from `backend-layered-architecture` does not
   exist yet
