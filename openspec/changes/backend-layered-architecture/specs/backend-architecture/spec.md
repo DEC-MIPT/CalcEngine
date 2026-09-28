@@ -140,12 +140,18 @@ The system SHALL define, in the calculation engine, a `Calculator` interface and
 registry in which a calculator is registered and looked up by calculation-type name. A
 calculator SHALL take typed inputs and resolved parameters and return a result, as a
 pure function. The interface SHALL be generic over the input, parameter, and result
-types, so the engine does not import them.
+types, so the engine does not import them. Registering a second calculator under a name
+that is already registered SHALL fail with a `DECError` and leave the first one in place.
 
 #### Scenario: Register and look up a calculator
 - **WHEN** a calculator is registered under a calculation-type name
 - **THEN** looking up that name returns it, and looking up an unregistered name fails
   with a `DECError`
+
+#### Scenario: Register a name twice
+- **WHEN** a calculator is registered under a name that is already registered
+- **THEN** the registration fails with a `DECError`, and looking up that name still
+  returns the first calculator
 
 ### Requirement: Transactional application database
 The system SHALL provide a SQLAlchemy engine and session factory for the transactional
