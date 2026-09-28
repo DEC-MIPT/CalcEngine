@@ -20,7 +20,10 @@ def load_parameters(calculation_type: str, params_root: Path) -> ParameterFileSc
             f"no parameter file for calculation type {calculation_type!r} at {path}"
         )
 
-    raw = yaml.safe_load(path.read_text()) or {}
+    try:
+        raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError as exc:
+        raise ParameterValidationError(str(exc)) from exc
 
     try:
         return ParameterFileSchema.model_validate(raw)

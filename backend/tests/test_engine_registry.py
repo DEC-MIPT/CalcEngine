@@ -1,6 +1,6 @@
 import pytest
 
-from app.core.exceptions import DECError
+from app.core.exceptions import AlreadyRegisteredError, DECError
 from app.engine.base import Calculator
 from app.engine.registry import CalculatorRegistry
 
@@ -25,6 +25,17 @@ def test_unregistered_name_raises_a_dec_error() -> None:
 
     with pytest.raises(DECError):
         registry.get("missing")
+
+
+def test_registering_a_name_twice_raises_a_dec_error() -> None:
+    registry = CalculatorRegistry()
+    first = DoublingCalculator()
+    registry.register("doubling", first)
+
+    with pytest.raises(AlreadyRegisteredError):
+        registry.register("doubling", DoublingCalculator())
+
+    assert registry.get("doubling") is first
 
 
 def test_calculator_interface_cannot_be_instantiated() -> None:

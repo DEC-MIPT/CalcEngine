@@ -36,6 +36,11 @@ def test_missing_engineer_fields_are_rejected_with_a_dec_error(
         load_parameters(calculation_type, FIXTURES_DIR)
 
 
+def test_malformed_yaml_is_rejected_with_a_dec_error() -> None:
+    with pytest.raises(ParameterValidationError):
+        load_parameters("malformed", FIXTURES_DIR)
+
+
 def test_missing_file_raises_a_dec_error() -> None:
     with pytest.raises(DECError):
         load_parameters("does_not_exist", FIXTURES_DIR)
