@@ -25,7 +25,7 @@ can be implemented; until then it is not started, not stubbed as a no-op.
   without a config error on an empty tree (2026-09-27: `ruff check backend/` passes,
   exit 0; `mypy backend/` exits 2 for "no .py files", not a config error — config
   validity confirmed separately via `mypy --config-file=backend/pyproject.toml -c
-  "x: int = 1"`, exit 0; see `docs/reports/WP6-code-journal.md`)
+  "x: int = 1"`, exit 0; see `docs/akim/reports/WP6-code-journal.md`)
 - [x] 2.2 Add `backend/requirements.txt` (empty for now) and
   `backend/requirements-dev.txt` (`ruff`, `mypy`, `pytest`, `pytest-cov`,
   `import-linter`); verify `pip install -r backend/requirements-dev.txt` succeeds in a
@@ -45,7 +45,7 @@ can be implemented; until then it is not started, not stubbed as a no-op.
   `All checks passed!`; `mypy .` → `Success: no issues found in 1 source file`;
   `pytest` → `1 passed`); a deliberate unused-import violation made it exit 1
   (`ruff` F401), confirming the gate is real. Evidence:
-  `docs/reports/WP6-code-journal.md` row 2.4
+  `docs/akim/reports/WP6-code-journal.md` row 2.4
 
 ## 3. Frontend tooling (frontend)
 
@@ -81,7 +81,7 @@ can be implemented; until then it is not started, not stubbed as a no-op.
   failure; exits 0 on the current tree — coverage 100% branches on the smoke test
   alone; a deliberate unused-var violation made it exit 1 at the `eslint` step,
   confirming the stop-at-first-failure behavior. Evidence:
-  `docs/reports/WP6-code-journal.md`)
+  `docs/akim/reports/WP6-code-journal.md`)
 
 ## 4. Pre-commit and secrets (backend)
 
@@ -94,7 +94,7 @@ can be implemented; until then it is not started, not stubbed as a no-op.
   --all-files` → `Passed`, exit 0, once the baseline (4.2) existed. Verified the gate
   is real: a staged file with a fake AWS key not in the baseline made it fail
   (`Failed`, exit 1, "Potential secrets about to be committed"); removed after the
-  check. See `docs/reports/WP6-code-journal.md`)
+  check. See `docs/akim/reports/WP6-code-journal.md`)
 - [x] 4.2 Generate `.secrets.baseline` via `detect-secrets scan`; verify it exists and
   hand-review it for a real secret before committing (2026-09-28:
   `backend/.venv/bin/detect-secrets scan --exclude-files 'package-lock\.json' >
@@ -104,7 +104,7 @@ can be implemented; until then it is not started, not stubbed as a no-op.
   10 files, all hand-reviewed, none a real secret: the repeated "Basic Auth
   Credentials"/"Secret Keyword" hits are the single shared `dec:dec` local-only
   Postgres dev credential already used across `docker-compose.yml`,
-  `tests/conftest.py`, and several `docs/decisions/`/`docs/reports/` files (confirmed
+  `tests/conftest.py`, and several `docs/decisions/`/`docs/akim/reports/` files (confirmed
   by reading each flagged line); the "Base64 High Entropy String" in
   `normatives_pipeline/research/research.ipynb` is a base64 PNG image output
   (confirmed via the notebook's own JSON); the "Hex High Entropy String" in

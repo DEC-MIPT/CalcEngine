@@ -272,8 +272,8 @@ text, which the repository does not track.
 #### Scenario: Rationale in a design
 - **WHEN** a `design.md` or a `proposal.md` gives a rationale for a decision
 - **THEN** the rationale cites a tracked file (for example under `openspec/`,
-  `agent-docs/`, `docs/decisions/`, or `docs/reports/`) or restates the reasoning in
-  the text, and does not cite an untracked external document
+  `agent-docs/`, or `docs/decisions/`) or restates the reasoning in the text, and does
+  not cite an untracked external document
 
 #### Scenario: Untracked citation found
 - **WHEN** the `spec-reviewer` finds a citation of an untracked external document as the

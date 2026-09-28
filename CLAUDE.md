@@ -14,7 +14,8 @@ what it does not say. Do not restate `AGENTS.md` here.
   branch coverage), `tests/`, and `docker-compose.yml` (PostgreSQL `dec-postgres` on
   port 5433, database `dec`). His collector is still on
   `feature/normative-collector/data`. `backend/`, `frontend/`, `params/`, `ml/` do not
-  exist. What the pipeline means for Akim's work: `docs/reports/egor-branches-analysis.md`.
+  exist. What the pipeline means for Akim's work: `docs/akim/reports/egor-branches-analysis.md`
+  (untracked, Akim's own zone, see below).
 - Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
   (WP2), `calculation-verification` (WP4), `bootstrap-dev-environment` (WP6, spec
   phase GO, implementation not started), `record-installed-skills-akim`,
@@ -62,7 +63,8 @@ what it does not say. Do not restate `AGENTS.md` here.
   `openspec/changes/archive/2026-09-27-team-roles-update/`): the PM role and the
   code-free GO path are in `openspec/specs/development-process/spec.md` and `AGENTS.md`
   section 4, so spec-only changes can get their `tester` verdict.
-- Session state for continuing the work: `docs/reports/session-state-2026-09-27.md`.
+- Session state for continuing the work: `docs/akim/reports/session-state-2026-09-27.md`
+  (untracked).
 - Norm editions for the MVP domain come from the team and are `unverified` until
   checked against source texts.
 
@@ -84,10 +86,11 @@ what it does not say. Do not restate `AGENTS.md` here.
 ## Code journal
 
 - Once implementation starts on a WP (writing actual code, not spec artifacts), keep a
-  running journal at `docs/reports/WP<N>-code-journal.md` (one file per WP; English
-  filename, Russian content, matching the existing `docs/reports/` convention). It
-  records execution, not planning: it does not replace `tasks.md`'s checklist, and
-  does not gate anything by itself.
+  running journal at `docs/akim/reports/WP<N>-code-journal.md` (one file per WP; English
+  filename, Russian content). This directory is untracked (2026-09-28, Akim's own zone,
+  not pushed to `origin`) — the journal is a personal working record, not the team's
+  written channel; that is `docs/decisions/`. It records execution, not planning: it
+  does not replace `tasks.md`'s checklist, and does not gate anything by itself.
 - Create the file at the first implementation task of the WP, before starting it.
 - One row per `tasks.md` subtask (its own numbering, e.g. `2.1`), appended right after
   that subtask is finished, as a Markdown table with exactly these five columns, in
@@ -143,6 +146,7 @@ zone yet.
 The Kilo mirrors carry no `model` or `tools`, so "read-only" is enforced by the
 prompt there, and by `tools` only in `.claude/agents/`. Keep the bodies identical.
 
-`docs/` is untracked by design (`.gitignore`), except `docs/decisions/` and
-`docs/reports/`, which git tracks and the team uses as its written channel; do not
-`@import` from `docs/`.
+`docs/` is untracked by design (`.gitignore`), except `docs/decisions/`, which git
+tracks and the team uses as its written channel; do not `@import` from `docs/`.
+`docs/akim/` (plan, code journals, personal notes) is Akim's own zone and stays
+untracked on purpose (2026-09-28), not pushed to `origin`.

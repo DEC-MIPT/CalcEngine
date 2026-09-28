@@ -44,7 +44,7 @@ Branch: `feature/backend-core/backend` (Akim, from `develop`), merged only when 
 
 ## 9. Reconciliation with the normative pipeline (closed items)
 
-Found 2026-09-27 by reading Egor's branch `feature/normative-parser/ml` (commit `6daf2ef`); details in `docs/reports/egor-branches-analysis.md`, questions to Egor in `docs/decisions/normatives-formula-contract-review-egor.md`. The open items 9.3, 9.6, 9.7 moved out (below); the closed ones stay here as the record of what Egor confirmed.
+Found 2026-09-27 by reading Egor's branch `feature/normative-parser/ml` (commit `6daf2ef`); details in `docs/akim/reports/egor-branches-analysis.md` (untracked, Akim's own zone), questions to Egor in `docs/decisions/normatives-formula-contract-review-egor.md`. The open items 9.3, 9.6, 9.7 moved out (below); the closed ones stay here as the record of what Egor confirmed.
 
 - [x] 9.1 One database or two: the pipeline uses one database `dec`; decision 4 plans `dec_app` and `dec_normatives` (question 5) (2026-09-27: two, confirmed by Egor; `dec` becomes `dec_normatives`, `dec_app` added when the backend needs it; the rename is old task 9.6, moved out; design.md decision 4)
 - [x] 9.2 Lexical search: GIN + `pg_trgm` or `to_tsvector('simple')` over lemmatized text, as the pipeline does now (question 9); `pgvector` stays for later retrieval (2026-09-27: `pg_trgm` + GIN, confirmed by Egor and already in his code; design.md decision 4; implemented by the normative-catalog change, moved out)
