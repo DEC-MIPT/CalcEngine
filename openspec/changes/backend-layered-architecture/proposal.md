@@ -8,33 +8,42 @@ that prevents hardcoding and layer mixing. The passport defines the tech stack
 an explicit contract, business logic leaks into routes, ORM objects leak into the API,
 and normative coefficients get hardcoded in Python.
 
-We also need two dedicated storages that must stay isolated from the calculation path:
-(1) a normative document database we fill incrementally as we work with SP/GOST/SNiP
-documents, and (2) an ML model storage used only to study how ML could later enter the
-project (document parsing/RAG), never inside the calculation path.
-
 ## What Changes
 
 - Introduces a new capability `backend-architecture` that fixes the layer layout and
-  the two storages.
+  the dependency direction between layers.
 - Layers: ORM models, schemas, repositories, services, API routes, parameters,
   calculation engine, reporting, core (config/exceptions/logging/security), db, worker.
-- Normative parameters are stored in `.yaml` files, never hardcoded in code.
-- A dedicated normative database `dec_normatives` (separate from the transactional
-  `dec_app`) holds documents, revisions, clauses, formulas, and coefficients, with
-  full-text search and a manual ingestion loader for the MVP.
-- An isolated `ml/` zone holds model artifacts and a registry for R&D, with no import
-  relationship to the application and no role in the calculation path.
+- Engineer-set values the norm does not fix (rounding rules, validated ranges) are
+  stored in `.yaml` files; formulas and coefficients the norm gives come from the
+  normative database. Neither is ever hardcoded in code.
+- A minimal runnable backend: `GET /health`, fail-fast configuration from environment
+  variables, a `DECError` hierarchy, the `dec_app` transactional database session and
+  migration tree, and the `Calculator` interface with its registry.
+- Split out on 2026-09-28 into planned changes, not part of this one: the normative
+  database `dec_normatives` with ingestion and full-text search, the isolated `ml/`
+  zone, Docker, and the pilot calculation. See `tasks.md`, "Moved out of this change".
+
+## Non-goals
+
+- No ML in the calculation path (explicitly rejected by the passport).
+- This change builds no normative database, no ingestion, no search, and no NLP/RAG
+  parsing: the normative pipeline (`normatives_pipeline/`, Egor's zone) owns parsing,
+  and the backend's reading side is a planned change (`normative-catalog-backend`).
+- This change builds no `ml/` zone and no Docker configuration (Egor's zones).
+- No cloud provisioning — local only.
 
 ## Capabilities
 
 ### New Capabilities
-- `backend-architecture`: the layered backend layout, parameter-as-YAML rule, the
-  normative document database, and the isolated ML model storage.
+- `backend-architecture`: the layered backend layout and dependency direction, the
+  engineer-set-values-in-YAML rule, the health endpoint, fail-fast configuration, the
+  error hierarchy, and the calculator registry.
 
 ## Impact
 
-- Affects: `backend/` directory layout, Docker/PostgreSQL setup (two databases),
-  `.gitignore` (ML artifacts), and future implementation structure.
+- Affects: `backend/` directory layout and `params/` (engineer-set values).
 - No existing code is modified; this establishes the skeleton contract for all
   backend work.
+- Sections that moved out touch `docker-compose.yml`, `.gitignore` (ML artifacts), and
+  the normative pipeline's zone; they are decided in their own changes.
