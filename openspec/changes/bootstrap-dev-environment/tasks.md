@@ -127,10 +127,20 @@ can be implemented; until then it is not started, not stubbed as a no-op.
 
 ## 5. Import contract (backend)
 
-- [ ] 5.1 [blocked: WP5] Add an `[tool.importlinter]` "layers" contract to
-  `backend/pyproject.toml`, naming `backend-layered-architecture`'s layer packages, and
-  wire it into `backend/check.sh`; verify a test case with a deliberate upward import
-  fails the check, per this change's "Import contract check" requirement
+- [ ] 5.1 [blocked: WP5] Add `[tool.importlinter]` contracts to `backend/pyproject.toml`,
+  naming `backend-layered-architecture`'s layer packages and encoding its total layer
+  order (`design.md` decision 2), and wire them into `backend/check.sh`: a "layers"
+  contract (`api | worker`, `services`, `engine | parameters | reporting`,
+  `repositories`, `db`, `models | schemas`, `core`; siblings as independent layers, or an
+  independence contract if the installed `import-linter` does not accept `|`), a
+  forbidden contract that `api` and `worker` do not import `repositories` or `models`
+  (indirect imports allowed, since `api` reaches `repositories` through `services`), a
+  forbidden contract that `engine` imports from the application only `schemas` and
+  `core`, and, once `ml/` exists, the two `ml/` directions. Updated 2026-09-28 (WP5
+  third `spec-reviewer` pass, finding M1): this task verifies WP5's dependency-direction
+  requirement after WP5 is applied. Verify: a test case with a deliberate upward import,
+  one with `api` importing `repositories`, and one with `engine` importing `parameters`
+  each fail the check, per this change's "Import contract check" requirement
 
 ## 6. Documentation (backend)
 
