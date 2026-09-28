@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from app.core.exceptions import DECError
+from app.core.exceptions import DECError, ParameterValidationError
 from app.parameters.loader import load_parameters
 from app.schemas.parameters import RoundingRule, ValidatedRange
 
@@ -28,9 +28,12 @@ def test_unknown_key_is_rejected_with_a_dec_error() -> None:
         load_parameters("unknown_key", FIXTURES_DIR)
 
 
-def test_missing_engineer_fields_are_rejected_with_a_dec_error() -> None:
-    with pytest.raises(DECError):
-        load_parameters("missing_rationale", FIXTURES_DIR)
+@pytest.mark.parametrize("calculation_type", ["missing_rationale", "missing_engineer"])
+def test_missing_engineer_fields_are_rejected_with_a_dec_error(
+    calculation_type: str,
+) -> None:
+    with pytest.raises(ParameterValidationError):
+        load_parameters(calculation_type, FIXTURES_DIR)
 
 
 def test_missing_file_raises_a_dec_error() -> None:
