@@ -206,3 +206,38 @@ move to `dec_normatives` and add `dec_app` when the backend needs it); a read-on
 does not exist yet (question 8).
 
 **Answer (11-15).**
+
+Agreed to all five.
+
+- **11 — a `NormRef` per coefficient value.** Agreed. Every stored coefficient value gets
+  its own `NormRef` with the five agreed fields: `document`, `edition`, `clause` (the table
+  locator in the canonical grammar, e.g. `табл. 5.5`), `status`, `provenance`. The
+  `coefficient` table gains those fields; a value that a person has not checked is
+  `status = "unverified"`, `provenance = "machine-extracted"`. I start with table 5.5 of
+  СП 22.13330.2016 for the R pilot. A coefficient with no `document` is an ingestion error,
+  the same rule as 15.
+- **12 — verification state is stored.** Agreed. `status` and `provenance` become stored
+  values for every formula and every coefficient, and `build_formula_payload` reads them
+  instead of using constants. The step that writes `human-verified` is the user-side
+  verification action (the engineer marks "верно"/"косяк"), which is the open product/UI
+  decision in `formula-verification-akim.md`; I do not invent it here. Until that is
+  settled the pipeline stores `provenance = "machine-extracted"`, `status = "unverified"`
+  for OCR output. Entries of the hand registry `formulas.toml` are the verified subset
+  (research journal, entry 10) and are stored as `human-verified`; the value comes from the
+  stored column, not from a constant. This makes `human-verified` reachable for the pilot R
+  and its table 5.5, so the `provenance` gate is not empty.
+- **13 — fix the five fields in code.** Agreed. `build_formula_payload` builds `document`,
+  `edition`, `clause`, `status`, `provenance` unconditionally; `norm_ref_keys` no longer
+  decides the fixed set, and config selects only extra payload fields.
+- **14 — remove tasks 4.1, 4.2.** Agreed. Removed from
+  `openspec/changes/normatives-formula-contract/tasks.md` with this answer; the consuming
+  side goes to your change.
+- **15 — missing `document`.** Agreed. A formula or coefficient without a document is an
+  ingestion error; the payload is never built from an empty string.
+
+Note on 11-12: the OCR direction (research journal, entries 10-12) makes OCR the primary
+source and the hand registry the verified subset. That is exactly why the verification
+state has to be a stored value and not a constant, and why `human-verified` is written by
+the verification action, not by ingestion.
+
+Applied on `feature/normative-parser/ml`; answers 1-10 above stay as they were.

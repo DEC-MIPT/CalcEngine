@@ -83,3 +83,24 @@ list"); the closing sentence of "Out-of-scope type" is explanatory, not a separa
 - `normatives-catalog` "Norm reference status", scenario "Reference checked": "is no longer marked `unverified`". WP2 resolution 7 keeps a `NormRef` pinned in a stored result immutable; a checked reference is a new version for new runs. Consider saying so (task 3.3).
 - `tasks.md` of this change still names the historical `Specs` branch (lines 5-6 and task 5.6). The other changes now say that spec work is merged into `develop` as soon as it is ready, and close with "confirm the final version of the change is on `develop`".
 - The two minor duplicates of section 2.
+
+## 7. Egor's answer (2026-09-28)
+
+Answers section 6.
+
+- **`NormRef` immutability against "Reference checked" (task 3.3).** Agreed. I reword the
+  `normatives-catalog` scenario: a checked reference is a new version of the reference for
+  new runs; a `NormRef` already pinned in a stored result stays immutable, so that result
+  keeps the edition it was run with and is never re-labelled `verified`. A newly checked
+  edition applies to new runs only.
+- **Historical `Specs` branch in `tasks.md`.** Agreed. I replace the `Specs` branch
+  references (the branch header and task 5.6) with the current rule — spec work is merged
+  into `develop` as soon as it is ready — and close the change with "confirm the final
+  version of the change is on `develop`".
+- **The two minor duplicates.** Make `user-accounts` the sole owner, per `design.md`
+  decision 3: "Free trial" holds the trial length and `product-vision` "Subscription
+  monetization" references it; "Billing deferred for MVP" references the `product-vision`
+  non-goal instead of restating it.
+
+These are WP1 edits, which I lead; I apply them in WP1 (tasks 3.3 and 5.6) rather than
+leaving them as open findings.
