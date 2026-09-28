@@ -7,7 +7,7 @@ what it does not say. Do not restate `AGENTS.md` here.
 @AGENTS.md
 @agent-docs/domain-constraints.md
 
-## Status (2026-09-27)
+## Status (2026-09-28)
 
 - Application code on `develop`: only Egor's normative pipeline (`normatives_pipeline/`,
   merged 2026-09-27, `02a33de`), with the root `pyproject.toml` (ruff exclude, pytest,
@@ -20,12 +20,30 @@ what it does not say. Do not restate `AGENTS.md` here.
   phase GO, implementation not started), `record-installed-skills-akim`,
   `backend-layered-architecture` (WP5, not yet retargeted; lead moved from Egor to
   Akim 2026-09-28, since `backend/` is his zone — `docs/decisions/
-  backend-layered-architecture-lead-change.md`; sections 1-3, 5-6 are his to decide
-  and implement, Egor's agreement or execution is still needed for section 4, section
-  7 (his ML zone), section 8 (his DevOps zone), and section 9's open items 9.3/9.6/9.7).
-  Led by Egor, with Akim's parts: `retarget-mvp-domain` (WP1). Egor:
+  backend-layered-architecture-lead-change.md`). WP5 was split on 2026-09-28 and Egor
+  acknowledged the split the same day (`docs/decisions/
+  backend-layered-architecture-split-egor{,-ack}.md`): it now holds only Akim's
+  scaffold, config, `DECError`, `dec_app` session and migrations, parameters layer for
+  engineer-set values, and `Calculator` registry (tasks 1.1-3.2, 5.1, 6.1). Moved out:
+  the `normatives/` package and the parameters layer's reading of formulas (item 9.3) go
+  to planned `normative-catalog-backend` (Akim and Egor); ML (`ml/`, item 9.7) to
+  planned `ml-model-storage` (Egor); Docker/DevOps (item 9.6) to Egor's infra change.
+  None of the three moved changes exists yet. WP5's task 3.x verify clauses run on a
+  `dec_app` database created by hand on `dec-postgres`. Item 9.3 is still open: Egor
+  wants the normative code to stay in `normatives_pipeline/`, not a second loader in
+  `backend/normatives/`; it is the first decision of `normative-catalog-backend`.
+  Led by Egor, with Akim's parts: `retarget-mvp-domain` (WP1; Akim's review tasks are
+  done, Egor applies the follow-ups in WP1 tasks 3.3 and 5.6). Egor:
   `normatives-collector`, `normatives-parser`, `normatives-formula-contract`. Planned,
   not created: `norm-source-traceability` (WP3).
+- `normatives-formula-contract`: Egor agreed to Akim's findings 11-15 on 2026-09-28
+  (`docs/decisions/normatives-formula-contract-review-egor.md`). The five `NormRef`
+  fields are fixed in code, `status` and `provenance` are stored per formula and per
+  coefficient, and the consuming backend and frontend tasks (old 4.1-4.2) left that
+  change: Akim adds them to his own change. The code is on `feature/normative-parser/ml`
+  (which also moves `normatives_pipeline/` to a `src/` layout), not on `develop`. Open
+  for Akim: the user-side verification action that sets `human-verified`
+  (`formula-verification-akim.md`).
 - The base specs in `openspec/specs/` still describe the placeholder domain (beam
   deflection, SP 16.13330) until `retarget-mvp-domain` is archived, and
   `backend-layered-architecture` still names it. The MVP domains are shallow
