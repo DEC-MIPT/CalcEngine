@@ -7,7 +7,7 @@ what it does not say. Do not restate `AGENTS.md` here.
 @AGENTS.md
 @agent-docs/domain-constraints.md
 
-## Status (2026-09-28)
+## Status (2026-09-29)
 
 - Application code on `develop`: only Egor's normative pipeline (`normatives_pipeline/`,
   merged 2026-09-27, `02a33de`), with the root `pyproject.toml` (ruff exclude, pytest,
@@ -42,11 +42,24 @@ what it does not say. Do not restate `AGENTS.md` here.
   fields are fixed in code, `status` and `provenance` are stored per formula and per
   coefficient, and the consuming backend and frontend tasks (old 4.1-4.2) left that
   change: Akim adds them to his own change. The code is on `feature/normative-parser/ml`
-  (which also moves `normatives_pipeline/` to a `src/` layout), not on `develop`. Open
-  for Akim: the user-side verification action that sets `human-verified`
-  (`formula-verification-akim.md`).
-- Branching model (Akim, 2026-09-28; Egor's acknowledgement requested in
-  `docs/decisions/branching-model-update-egor.md`): documents (the "no code" list in
+  (which also moves `normatives_pipeline/` to a `src/` layout), not on `develop`. The
+  user-side verification action is dropped: Egor sets every formula to "verified" himself
+  (his fallback, accepted by Akim 2026-09-29, `docs/decisions/
+  pipeline-followup-answers-akim.md`), so Akim adds no flag endpoint, counter or button.
+  Egor's `formulas.toml` is to be deleted. Egor's variable for the norms database is
+  `DEC_NORMATIVES_DATABASE_URL`; Akim's `Settings` keeps `DEC_DATABASE_URL` for `dec_app`.
+- Repo layout (Egor's proposal, accepted by Akim 2026-09-29, moves pending on Egor's
+  side): `backend/` (with `backend/tests/`) and `frontend/` stay in the root; `ml/` is
+  Egor's (`pyproject.toml`, `src/normatives_pipeline/`, `configs/`, `research/`,
+  `tests/`); `docker-compose.yml` moves to `infra/`. No shared root `tests/`. Until the
+  moves are on `develop`, the root `pyproject.toml` and `docker-compose.yml` are
+  unchanged; Akim edits the root `pyproject.toml` (`testpaths`, coverage `source`) on a
+  feature branch after Egor's move, with a diff shown first. `.gitignore` keeps
+  `norm-docs/` until `feature/normative-parser/ml` is merged (it replaces the line with
+  `docs/normative-base/`); the develop code still reads `norm-docs/`. Update the paths in
+  this file when the moves land.
+- Branching model (Akim, 2026-09-28; Egor confirmed both rules 2026-09-29,
+  `docs/decisions/pipeline-followup-answers-egor-rus.md`): documents (the "no code" list in
   `AGENTS.md`, including this file, `docs/reports/` and the code journals) are committed
   directly to `develop`, after `git fetch --all` and `git pull --ff-only`. Code goes only
   on `feature/<feature>/<zone>` and is merged into `develop` when the whole feature is
