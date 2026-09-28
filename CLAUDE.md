@@ -44,6 +44,15 @@ what it does not say. Do not restate `AGENTS.md` here.
   (which also moves `normatives_pipeline/` to a `src/` layout), not on `develop`. Open
   for Akim: the user-side verification action that sets `human-verified`
   (`formula-verification-akim.md`).
+- Branching model (Akim, 2026-09-28; Egor's acknowledgement requested in
+  `docs/decisions/branching-model-update-egor.md`): documents (the "no code" list in
+  `AGENTS.md`, including this file, `docs/reports/` and the code journals) are committed
+  directly to `develop`, after `git fetch --all` and `git pull --ff-only`. Code goes only
+  on `feature/<feature>/<zone>` and is merged into `develop` when the whole feature is
+  done. Planned Akim features: `backend-core` (WP5), `calculation-engine` (WP2),
+  `calculation-verification` (WP4), `report-generator` (WP2 6.3-6.4), `frontend-app`
+  (WP2 3.4, 3.5, 5.4), `dev-environment` (rest of WP6). The eight earlier per-change
+  branches are merged history.
 - The base specs in `openspec/specs/` still describe the placeholder domain (beam
   deflection, SP 16.13330) until `retarget-mvp-domain` is archived, and
   `backend-layered-architecture` still names it. The MVP domains are shallow

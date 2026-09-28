@@ -13,7 +13,7 @@ proposal.
 1. Capture -> OpenSpec change proposal (`openspec new change <name>`)
 2. Plan -> business-analyst writes proposal + DOR
 3. Design -> architect writes design.md
-4. Implement -> developer on a dedicated branch
+4. Implement -> developer on the feature branch (documents go straight to `develop`)
 5. Test -> tester runs tests (>= 95% branch coverage), GO/NO-GO
 6. UI/UX check -> ui-ux-tester verifies visuals/controls (when UI changed)
 7. Review & merge -> change reviewed (other developer or orchestrator) and merged to develop
@@ -27,7 +27,7 @@ proposal.
 - [ ] Non-functional requirements recorded (performance, security, accessibility, coverage)
 - [ ] Plan complete; each task in `tasks.md` completable in one session
 - [ ] Acceptance criteria and Go/No-Go criteria written
-- [ ] Branch naming defined (`feature/<task>/backend` / `feature/<task>/frontend`)
+- [ ] Feature branch defined (`feature/<feature>/<zone>`), or the change states it has no code
 - [ ] Dependencies listed and satisfied
 
 ## DOD — Definition of Done (all must hold)

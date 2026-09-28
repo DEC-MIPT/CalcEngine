@@ -39,46 +39,57 @@ Every task in this project MUST be recorded in specs through OpenSpec. There is 
 1. **Capture** — a task becomes an OpenSpec change proposal (`openspec new change`).
 2. **Plan** — the `business-analyst` agent produces the plan and the DOR.
 3. **Design** — the `architect` agent produces the design.
-4. **Implement** — a developer agent works on a dedicated branch.
+4. **Implement** — a developer agent works on the feature branch of the code (a change
+   with no code has no branch: its documents go straight to `develop`).
 5. **Test** — the `tester` agent writes and runs automated tests (coverage >= 95%)
-   and issues the GO / NO-GO verdict.
+   and issues the GO / NO-GO verdict for each feature.
 6. **UI/UX check** — the `ui-ux-tester` agent verifies visuals and control behavior.
-7. **Review & merge** — after GO, the change is reviewed (by the other developer or
-   the orchestrator) and its branches are merged to `develop`. For a change with no
+7. **Review & merge** — after GO, each feature is reviewed (by the other developer or
+   the orchestrator) and its feature branch is merged to `develop`. For a change with no
    code, the second developer's acknowledgement is the review.
 8. **Archive** — the `spec-keeper` agent syncs specs and archives the change.
 
 ### Branching rules
 
-- **All work happens in the `develop` branch only.** The bootstrap is done:
-  `develop` was created from `main` and contains the former `Specs` /
-  `Specs-onboarding` work. The `Specs*` branches are historical and no longer used.
-- **A sub-branch of `develop` is a task branch** — exactly the branch a developer
-  (Akim or Egor) is currently working on. Create it from `develop` and merge it back
-  into `develop` when the task is done.
+- **`develop` is the integration branch.** The bootstrap is done: `develop` was created
+  from `main` and contains the former `Specs` / `Specs-onboarding` work. The `Specs*`
+  branches are historical and no longer used.
 - **`main` is frozen until MVP**: nothing is merged into `main` until there is a
   working prototype in `develop` (that prototype is the MVP).
-- Every task gets its own branch AND a zone sub-branch from `develop`. Zone
-  sub-branches map to developer responsibility zones (see Team section):
-  - Akim: `feature/<task>/backend`, `feature/<task>/frontend`
-  - Egor: `feature/<task>/data` (normative pipeline), `feature/<task>/ml`
-    (NLP/RAG/ML), `feature/<task>/infra` (DevOps)
-  - Fixes use `fix/<task>/<zone>`.
-- The branch plan is part of the change proposal (in `tasks.md`), so it is also
-  reflected in the specs via OpenSpec.
-- Do not implement directly on `develop`/`main`; implement on the task sub-branch
-  and merge it into `develop`.
-- Repo-meta files (agent entry files, agent settings, `.editorconfig`, `agent-docs/`) are
-  not product changes and need no OpenSpec change; they are still committed on a branch.
-  A change that includes agent settings is still not code-free for GO (section 4).
-- **No-code documents merge into `develop` as soon as they are ready, not held for the
-  rest of the task.** A change to `openspec/**` (specs and changes), `AGENTS.md`, or any
-  other no-code document (`docs/**`, `agent-docs/**`) is the team's shared state: the
-  other developer reads `develop`, not a task sub-branch. As soon as that document change
-  is in the form it should have on `develop` (a validated OpenSpec change, an agreed
-  `AGENTS.md` edit, a decision record), merge the sub-branch into `develop`, even if the
-  code part of the task is still in progress. Do not let doc-only work sit unmerged on a
-  sub-branch waiting for the rest of the task.
+- **Documents are committed directly to `develop`.** A document is a file on the
+  "no code" list (section 4): `openspec/**` (specs and changes), `docs/**`,
+  `agent-docs/**`, the agent and skill definitions under `.claude/`, `.kilo/`, and
+  `.kilocode/`, `AGENTS.md`, `CLAUDE.md`, `README.md`, and `.editorconfig`. There is no
+  sub-branch and no merge commit for them: the other developer reads `develop`, so a
+  document is current as soon as it is committed. Before every commit and every push run
+  `git fetch --all` and `git pull --ff-only`; if `develop` has diverged, stop and resolve
+  it before going on.
+- **Code goes only through a feature branch.** A feature is a component or a stage of
+  the plan (for example the calculation engine, the report generator, the backend core,
+  the frontend), named in the `tasks.md` of the one OpenSpec change it belongs to; a change
+  may hold several features. Every file not on the document list (source code, tests, package
+  manifests, `.gitignore`, agent settings, pre-commit config, `docker-compose.yml`) is
+  code for this rule. Each feature gets its own branch from `develop` (or from the branch of
+  an unmerged feature it depends on), named
+  `feature/<feature>/<zone>`, and is merged into `develop` only when the whole feature
+  is done: every task that `tasks.md` assigns to the feature is checked off, the `tester`
+  has declared GO for the feature, and the review has passed (step 7 above). It is not
+  merged per section or per subtask. One feature has exactly one branch; work in two zones
+  is two features. A feature that needs code from an unmerged feature branches from it and
+  merges after it. Push the branch to `origin` with the commit that finishes a subtask, so
+  it stays visible, and bring new documents into it with `git merge develop`. The change
+  is archived when all its features are merged.
+  - Akim: `feature/<feature>/backend`, `feature/<feature>/frontend`
+  - Egor: `feature/<feature>/data` (normative pipeline), `feature/<feature>/ml`
+    (NLP/RAG/ML), `feature/<feature>/infra` (DevOps)
+  - Fixes use `fix/<feature>/<zone>`.
+- Do not implement code directly on `develop`/`main`; implement it on the feature branch
+  and merge that branch into `develop`.
+- The branch plan is part of the change proposal (in `tasks.md`): the change names each
+  feature, its branch and its tasks (every task with code belongs to exactly one feature),
+  or states that it has no code and no branch. The subtasks in `tasks.md` are checked off
+  in `develop` as they are done on the feature branch, so `tasks.md` may run ahead of the
+  code in `develop` until the feature is merged.
 
 ### Session start
 
@@ -115,7 +126,7 @@ A task is ready for implementation only when ALL of the following hold:
 - The implementation plan (from the `business-analyst` agent) is complete and each
   task in `tasks.md` is small enough to complete in one session.
 - Acceptance criteria and the Go/No-Go criteria are written.
-- Branch naming (frontend/backend sub-branches) is defined.
+- The feature branch name (`feature/<feature>/<zone>`) is defined, or the change states it has no code.
 - Dependencies, if any, are listed and satisfied.
 
 ## 4. DOD — Definition of Done (with Go / No-Go)
@@ -135,8 +146,9 @@ takes the code-free path below instead.
 
 ### Go / No-Go rules
 
-- **GO for a change with code** — tests pass with >= 95% coverage, UI/UX check passed,
-  validation passed.
+- **GO for a change with code** — declared per feature: tests pass with >= 95% coverage,
+  UI/UX check passed, validation passed. The change is archived when all its features
+  are merged.
 - **GO for a change with no code** — `openspec validate --strict` passes, the
   `spec-reviewer` report lists no blocker and no major finding, and the developer who
   did not author the change has acknowledged it in a tracked commit or comment that

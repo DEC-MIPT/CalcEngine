@@ -1,9 +1,10 @@
 # Tasks
 
 Owner: Akim (tooling commands and pre-commit, this change; Docker Compose and CI are
-Egor's and not part of this change). Branch: `feature/bootstrap-dev-environment/backend` for backend and
-root-level tasks, `feature/bootstrap-dev-environment/frontend` for the frontend
-scaffold, both from `develop`.
+Egor's and not part of this change). Branch: sections 2-4.3 were done on `feature/bootstrap-dev-environment/backend` and
+`feature/bootstrap-dev-environment/frontend` and are already merged into `develop`. The
+remaining code (4.4 and 5.1, both blocked on WP5) goes on `feature/dev-environment/backend`
+from `develop`; documents (section 6) go directly to `develop`. Checkboxes in this file are ticked in `develop` as each subtask is done on the feature branch; the code reaches `develop` only when the whole feature is done (`AGENTS.md`, Branching rules).
 
 Marker **[blocked: WP5]**: the task needs `backend-layered-architecture`'s layered
 `backend/app` structure (its task 1.1) or its config module (its task 2.1) before it

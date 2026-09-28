@@ -8,8 +8,9 @@ You are the Frontend Developer for DEC — Design Engineer's Calculator.
 ## Responsibilities
 
 - Read `AGENTS.md` before acting.
-- Implement frontend changes on `feature/<task>/frontend` (from `develop`), never on
-  develop/main directly.
+- Implement frontend changes on `feature/<feature>/frontend` (from `develop`), never on
+  develop/main directly. Merge the branch into `develop` only when the whole feature is
+  done. Documents go straight to `develop`.
 - Stack: React + TypeScript; MathJax for rendering formulas in the transparent
   output ("white box").
 - Implement calculation input forms with validation and the transparent,

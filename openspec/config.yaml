@@ -26,13 +26,14 @@ context: |
   Conventions:
   - Language: English for all specs, agents, skills, and commit messages.
   - Commits: Conventional Commits.
-  - Branching: all work happens on the develop branch only (created from main,
-    containing the former Specs/Specs-onboarding work); a sub-branch of develop is
-    the task branch a developer (Akim or Egor) is currently working on; main is
-    frozen until the MVP. Development branches are feature/<task>/<zone> where zone
-    is backend/frontend (Akim) or data/ml/infra (Egor). Before a development
-    session, check commits on develop and its remote (git fetch --all), warn about
-    important changes, and remind the developer to run git pull.
+  - Branching: develop (created from main, containing the former Specs/Specs-onboarding
+    work) is the integration branch; main is frozen until the MVP. Documents (the
+    "no code" list in AGENTS.md) are committed directly to develop. Code goes only
+    through a feature branch feature/<feature>/<zone>, where zone is backend/frontend
+    (Akim) or data/ml/infra (Egor), merged into develop only when the whole feature
+    is done. Before a development session, check commits on develop and its remote
+    (git fetch --all), warn about important changes, and remind the developer to run
+    git pull.
   - Team: three people. Two developers, Akim (frontend/backend, engine, report
     generator) and Egor (normative pipeline, NLP/RAG, DevOps, ML), and a PM who owns
     scope, pricing, and legal decisions and has no code zone. Ask which developer is
@@ -57,16 +58,16 @@ rules:
     - "Name the component boundary where Python hot paths can later be swapped to C/C++."
   tasks:
     - "Each task must be completable in one session."
-    - "Each task must state its zone sub-branch: feature/<task>/backend or feature/<task>/frontend (Akim), or feature/<task>/data, feature/<task>/ml, feature/<task>/infra (Egor)."
+    - "The change must name each feature, its branch and its tasks (every task with code in exactly one feature): feature/<feature>/backend or feature/<feature>/frontend (Akim), or feature/<feature>/data, feature/<feature>/ml, feature/<feature>/infra (Egor); a change with no code states that it has no branch."
     - "Include the DOR checklist and DOD/Go-No-Go criteria for the change."
 
 # Per-operation guidance
 operations:
   apply:
     guidance:
-      - "Implement on a dedicated branch only, never on develop/main."
+      - "Implement code on its feature branch only, never on develop/main; documents are committed directly to develop."
       - "Run lint and type checks before marking tasks complete."
   archive:
     guidance:
-      - "Confirm the tester GO verdict and >= 95% branch coverage before archiving."
+      - "Confirm the tester GO verdict and >= 95% branch coverage before archiving; for a change with code, every feature is merged with its GO."
       - "Confirm ui-ux-tester approval when UI changed."

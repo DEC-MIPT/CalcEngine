@@ -27,7 +27,8 @@ Completeness
 - A main spec has `## Purpose` and `## Requirements`. A change has `proposal.md`,
   `design.md`, `tasks.md`, and `specs/<capability>/spec.md`.
 - `proposal.md` has a "Non-goals" section (`openspec/config.yaml` rule).
-- `tasks.md` states a zone sub-branch per task, and includes the DOR checklist and
+- `tasks.md` names the feature branch its code lives on (or states that the change has no
+  code and no branch), and includes the DOR checklist and
   DOD / Go-No-Go criteria for the change (`openspec/config.yaml` rule).
 - Non-functional requirements (performance, security, accessibility, coverage) are
   explicit, not implied.

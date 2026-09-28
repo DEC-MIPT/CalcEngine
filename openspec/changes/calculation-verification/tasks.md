@@ -2,10 +2,9 @@
 
 Owner: Akim. Zone tags: an implementation task belongs to the `backend` sub-branch unless it says (spec) or (engineer, no code). Egor reviews the shared files only (section 4).
 
-Branch: spec work is done on a short-lived sub-branch of `develop` and merged into
-`develop` as soon as it is ready (`AGENTS.md`, Branching rules; the `Specs*` branches
-are historical). Implementation after apply uses `feature/calculation-verification/backend`
-(Akim's zone).
+Branch: spec work is committed directly to `develop` (`AGENTS.md`, Branching rules). Code is
+done on `feature/calculation-verification/backend` (Akim's zone, from `develop`) and merged
+only when the whole feature is done. Checkboxes in this file are ticked in `develop` as each subtask is done on the feature branch; the code reaches `develop` only when the whole feature is done (`AGENTS.md`, Branching rules).
 
 Marker **[blocked: typical calculation]**: the task waits for the engineer's definition of a
 "typical calculation". `calculation-core-contract` is re-checked and `NormRef` is agreed

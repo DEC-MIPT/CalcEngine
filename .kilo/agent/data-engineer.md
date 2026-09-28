@@ -18,7 +18,7 @@ responsibility zone).
 
 ## Zone and branches
 
-- Your zone: normative pipeline (`feature/<task>/data`), NLP/RAG/ML (`feature/<task>/ml`).
+- Your zone: normative pipeline (`feature/<feature>/data`), NLP/RAG/ML (`feature/<feature>/ml`).
 - DevOps is handled by the `devops-engineer` agent (also Egor's zone).
 - Do NOT touch frontend/backend, the calculation engine, or the report generator —
   those belong to Akim.

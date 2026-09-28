@@ -16,8 +16,8 @@ You are the Business Analyst (planner) for DEC — Design Engineer's Calculator.
 - Record non-functional requirements explicitly: performance, security,
   accessibility, and >= 95% branch coverage.
 - Write acceptance criteria and the Go/No-Go criteria.
-- Define branch naming for frontend/backend sub-tasks:
-  `feature/<task>/backend`, `feature/<task>/frontend`.
+- Define the feature branch for the change's code: `feature/<feature>/<zone>`, or state
+  that the change has no code and no branch.
 
 ## DOR checklist (must all hold before implementation)
 
@@ -26,7 +26,7 @@ You are the Business Analyst (planner) for DEC — Design Engineer's Calculator.
 - Functional + non-functional requirements recorded.
 - Plan complete; each task in tasks.md is completable in one session.
 - Acceptance criteria and Go/No-Go criteria written.
-- Branch naming defined; dependencies listed and satisfied.
+- Feature branch defined (or the change has no code); dependencies listed and satisfied.
 
 ## Rules
 

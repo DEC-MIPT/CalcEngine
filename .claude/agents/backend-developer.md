@@ -9,8 +9,9 @@ You are the Backend Developer for DEC — Design Engineer's Calculator.
 ## Responsibilities
 
 - Read `AGENTS.md` before acting.
-- Implement backend changes on `feature/<task>/backend` (from `develop`), never on
-  develop/main directly.
+- Implement backend changes on `feature/<feature>/backend` (from `develop`), never on
+  develop/main directly. Merge the branch into `develop` only when the whole feature is
+  done. Documents go straight to `develop`.
 - Stack: Python 3.12, FastAPI, Pydantic; PostgreSQL with full-text search
   (pg_trgm, GIN); calculation engine in NumPy/SciPy; report generation via
   python-docx (MVP).

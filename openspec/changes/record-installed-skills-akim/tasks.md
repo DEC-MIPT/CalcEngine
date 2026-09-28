@@ -1,9 +1,7 @@
 # Tasks
 
-Branch: there is no code; the work is done on a short-lived sub-branch of `develop` in
-Akim's zone (`feature/record-installed-skills-akim/backend`) and merged into `develop` as
-soon as it is ready (`AGENTS.md`, Branching rules; the `Specs*` branches are
-historical). Developer: Akim.
+Branch: there is no code and no branch; the documents are committed directly to `develop`
+(`AGENTS.md`, Branching rules). Developer: Akim.
 
 ## 1. Record the installation
 

@@ -2,11 +2,11 @@
 
 Owner: Akim. Egor confirms `NormRef` only.
 
-Branch: spec work is done on a short-lived sub-branch of `develop` and merged into
-`develop` as soon as it is ready (`AGENTS.md`, Branching rules; the `Specs*` branches
-are historical). Implementation after apply uses
-`feature/calculation-core-contract/backend` (engine, report) and
-`feature/calculation-core-contract/frontend` (transparent output), both Akim's zone.
+Branch: spec work is committed directly to `develop` (`AGENTS.md`, Branching rules). Code
+is done on feature branches from `develop`, each merged only when its whole feature is done:
+`feature/calculation-engine/backend` (engine), `feature/report-generator/backend` (report,
+tasks 6.3-6.4) and `feature/frontend-app/frontend` (transparent output, tasks 3.4, 3.5, 5.4),
+all Akim's zone. Checkboxes in this file are ticked in `develop` as each subtask is done on the feature branch; the code reaches `develop` only when the whole feature is done (`AGENTS.md`, Branching rules).
 
 The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 
