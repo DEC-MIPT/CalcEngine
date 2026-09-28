@@ -1,11 +1,43 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "normatives-pipeline"
+version = "0.1.0"
+description = "Normative document ingestion, search, and formula extraction pipeline"
+requires-python = ">=3.12"
+dependencies = [
+    "pdfplumber==0.11.10",
+    "psycopg2-binary==2.9.13",
+    "pymorphy3==2.0.6",
+    "pymorphy3-dicts-ru==2.4.417150.4580142",
+    "scikit-learn==1.9.1",
+    "numpy==2.5.3",
+    "sympy==1.14.0",
+]
+
+[project.optional-dependencies]
+ml = [
+    "latex2sympy2==1.9.1",
+    "doclayout-yolo==0.0.4",
+    "pix2text==1.1.7",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.ruff]
-extend-exclude = ["normatives_pipeline/research"]
+extend-exclude = ["research"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [tool.coverage.run]
-source = ["normatives_pipeline"]
+source = ["src/normatives_pipeline"]
 branch = true
 
 [tool.coverage.report]

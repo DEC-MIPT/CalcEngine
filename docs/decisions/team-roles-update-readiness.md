@@ -3,7 +3,7 @@
 - Date: 2026-09-26
 - Change: `openspec/changes/team-roles-update/`
 - Author: Akim. Egor is the second developer and must agree, because the change touches shared files.
-- Criteria: `docs/audit/03-verified-roadmap.md`, section 3.7, "Ready when": Egor agrees, and validate passes.
+- Criteria: `docs/reports/verified-roadmap.md`, section 3.7, "Ready when": Egor agrees, and validate passes.
 
 ## Final status
 

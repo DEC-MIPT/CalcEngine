@@ -8,7 +8,7 @@ from pathlib import Path
 from . import extractors, formula_code, text_layer
 from .models import ParsedDocument
 
-PILOT = Path("norm-docs/СП 22.13330.2016.pdf")
+PILOT = Path("docs/normative-base/СП 22.13330.2016.pdf")
 
 
 def main() -> int:

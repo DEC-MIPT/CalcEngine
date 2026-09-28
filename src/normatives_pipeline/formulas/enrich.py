@@ -8,11 +8,12 @@ from pathlib import Path
 import numpy as np
 import pdfplumber
 
-from . import db, formula_ocr
-from .config import formula_ocr_config
+from .. import db
+from ..config import detect_config
+from . import detect
 from .validation import canonical_latex
 
-DEFAULT_PILOT = Path("norm-docs/СП 22.13330.2016.pdf")
+DEFAULT_PILOT = Path("docs/normative-base/СП 22.13330.2016.pdf")
 
 
 def enrich(path: Path) -> int:
@@ -37,17 +38,17 @@ def enrich(path: Path) -> int:
             by_page.setdefault(f["page"], []).append(f)
 
         filled = 0
-        dpi = int(formula_ocr_config()["dpi"])
+        dpi = int(detect_config()["dpi"])
         with pdfplumber.open(path) as pdf:
             for page_no, page_formulas in by_page.items():
                 page = pdf.pages[page_no - 1]
                 img_rgb = np.array(page.to_image(resolution=dpi).original)
                 img_bgr = img_rgb[..., ::-1]
-                crops = formula_ocr.detect_formulas(img_bgr)
+                crops = detect.detect_formulas(img_bgr)
                 for i, (_, crop) in enumerate(crops):
                     if i >= len(page_formulas):
                         break
-                    latex = formula_ocr.recognize_crop(crop)
+                    latex = detect.recognize_crop(crop)
                     if not latex:
                         continue
                     expression = str(canonical_latex(latex))

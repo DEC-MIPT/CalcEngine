@@ -1,4 +1,4 @@
-"""Формульный пайплайн: детекция (DocLayout-YOLO) + распознавание (pix2text)."""
+"""Детекция (DocLayout-YOLO) и распознавание (pix2text) формул."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import types
 
 from PIL import Image
 
-from .config import formula_ocr_config
+from ..config import detect_config
 
 _detector = None
 _recognizer = None
@@ -81,7 +81,7 @@ def correct_latex(latex: str) -> str:
 
 
 def detect_formulas(img) -> list[tuple]:
-    cfg = formula_ocr_config()
+    cfg = detect_config()
     crops: list[tuple] = []
     for r in _get_detector().predict(img, conf=float(cfg["conf"]), imgsz=int(cfg["imgsz"])):
         for box, cls in zip(r.boxes.xyxy, r.boxes.cls):

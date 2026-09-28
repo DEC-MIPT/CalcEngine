@@ -10,7 +10,7 @@ from .config import formula_manifest, parser_config
 from .parser import extractors, symbols, text_layer
 from .retrieval import normalize_text
 
-DEFAULT_PILOT = Path("norm-docs/СП 22.13330.2016.pdf")
+DEFAULT_PILOT = Path("docs/normative-base/СП 22.13330.2016.pdf")
 
 
 def ingest(path: Path, force: bool = False) -> int:

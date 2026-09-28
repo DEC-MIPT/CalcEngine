@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from normatives_pipeline.validation import (
+from normatives_pipeline.formulas.validation import (
     canonical_latex,
     formulas_equal,
     normalize_latex,

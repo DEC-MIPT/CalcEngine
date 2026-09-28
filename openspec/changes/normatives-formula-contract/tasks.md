@@ -16,7 +16,7 @@ Branches: `feature/normative-formula-contract/data` (Egor),
 
 ## 3. Rename storage dir (Egor)
 
-- [ ] 3.1 [Egor] `norm-base` → `norm-docs` in code + `.gitignore`; downloads land in `norm-docs/`
+- [ ] 3.1 [Egor] `norm-base` → `docs/normative-base` in code + `.gitignore`; downloads land in `docs/normative-base/`
 
 ## 4. Consume (Akim)
 
@@ -39,7 +39,7 @@ Branches: `feature/normative-formula-contract/data` (Egor),
 ## Dependencies
 
 - `normatives-parser` (extracts formulas/notation into Postgres).
-- `normatives-collector` (downloads into `norm-docs/`).
+- `normatives-collector` (downloads into `docs/normative-base/`).
 
 ## DOR checklist
 

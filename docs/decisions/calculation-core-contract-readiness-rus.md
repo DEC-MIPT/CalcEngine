@@ -3,7 +3,7 @@
 - Дата: 2026-09-26; обновлено 2026-09-27 (задачи 6.5 и 7.3, проходы 5–7 ревьюера, проход 3 checker; письменное согласие Егора по `NormRef`; путь формул и риски пайплайна)
 - Change: `openspec/changes/calculation-core-contract/`
 - Владелец: Аким. Егор (data engineer) подтверждает только `NormRef`.
-- Критерии: `docs/audit/03-verified-roadmap.md`, раздел 3.2, «Ready when».
+- Критерии: `docs/reports/verified-roadmap.md`, раздел 3.2, «Ready when».
 
 Английская версия: `calculation-core-contract-readiness.md`.
 

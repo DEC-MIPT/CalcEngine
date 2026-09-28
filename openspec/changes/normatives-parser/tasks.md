@@ -39,7 +39,7 @@ Branch: `feature/normative-parser/ml` (Egor, ml zone).
 
 ## Dependencies
 
-- `normatives-collector` (downloaded pilot СП in `norm-docs/`).
+- `normatives-collector` (downloaded pilot СП in `docs/normative-base/`).
 - `norm-source-traceability` (WP3) finalizes the entity schema; the parser uses a
   provisional schema.
 

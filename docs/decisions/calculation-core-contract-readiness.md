@@ -3,7 +3,7 @@
 - Date: 2026-09-26; updated 2026-09-27 (tasks 6.5 and 7.3, reviewer passes 5-7, checker pass 3; Egor's written `NormRef` agreement; formula path and pipeline risks)
 - Change: `openspec/changes/calculation-core-contract/`
 - Owner: Akim. Egor (data engineer) confirms `NormRef` only.
-- Criteria: `docs/audit/03-verified-roadmap.md`, section 3.2, "Ready when".
+- Criteria: `docs/reports/verified-roadmap.md`, section 3.2, "Ready when".
 
 ## Final status
 
