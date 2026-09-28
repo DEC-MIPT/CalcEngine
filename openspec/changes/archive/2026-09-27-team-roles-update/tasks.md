@@ -16,13 +16,13 @@ is not done by `/opsx:apply`.
 - [x] A1.1 Write `proposal.md`, `design.md`, and the delta spec for `development-process`
 - [x] A1.2 Run `openspec validate team-roles-update --strict` and `openspec validate --all --strict` (passed 2026-09-26, 14/14; re-run 2026-09-27 after the "no code" path list edit, 17/17; see `docs/decisions/team-roles-update-readiness.md`, section 9)
 - [x] A1.3 Run the `spec-reviewer` subagent and resolve blockers and major findings (2026-09-26: three passes, the third with 0 blockers and 0 major; 2026-09-27: pass 4 after the "no code" path list edit, 2 major, fixed; pass 5: 0 blockers, 0 major, READY for DOR; see `docs/decisions/team-roles-update-readiness.md`, section 9)
-- [x] A1.4 Get Egor's acknowledgement as second developer (a commit or comment by Egor that names this change) (2026-09-27: commit `243a6b9` by Egor, answer to question 1 in `docs/decisions/team-roles-update-egor.md`: "I acknowledge the change as second developer (task A1.4)"; his answer to question 2 moved agent settings back under the normal gate, applied to the delta and `design.md` decision 2 afterwards)
+- [x] A1.4 Get Egor's acknowledgement as second developer (a commit or comment by Egor that names this change) (2026-09-27: commit `243a6b9` by Egor, answer to question 1 in `docs/decisions/team-roles-update-egor.md`: "I acknowledge the change as the second developer (task A1.4)"; his answer to question 2 moved agent settings back under the normal gate, applied to the delta and `design.md` decision 2 afterwards)
 
 ### A2. Close
 
-- [ ] A2.1 `tester` issues the verdict; this change has no code, so it records tests, coverage, and UI/UX as N/A with the reason (it is the first change to use the path it defines)
-- [ ] A2.2 After A1.2-A1.4 and A2.1 pass, confirm the final version of the change is on `develop`
-- [ ] A2.3 After Part B is applied (B8 passed) or Egor has recorded in a tracked commit or comment that Part B is deferred and until when, `spec-keeper` syncs the delta into `openspec/specs/development-process/spec.md` and archives the change
+- [x] A2.1 `tester` issues the verdict; this change has no code, so it records tests, coverage, and UI/UX as N/A with the reason (it is the first change to use the path it defines) (2026-09-27: **GO** on `develop` @ `455cb74`; tests, coverage, UI/UX: N/A, no code; recorded in `docs/decisions/team-roles-update-readiness.md`, section 11)
+- [x] A2.2 After A1.2-A1.4 and A2.1 pass, confirm the final version of the change is on `develop` (2026-09-27: the change directory on `develop` @ `fcdd989` is identical to the reviewed and GO version plus the A2.1 record)
+- [x] A2.3 After Part B is applied (B8 passed) or Egor has recorded in a tracked commit or comment that Part B is deferred and until when, `spec-keeper` syncs the delta into `openspec/specs/development-process/spec.md` and archives the change (2026-09-27: synced with the archive workflow, four requirements replaced and one added, each checked against the delta; `openspec validate --all --strict` 18/18; archived as `openspec/changes/archive/2026-09-27-team-roles-update/`)
 
 ## B. Shared files follow-up (applied together after both agree)
 

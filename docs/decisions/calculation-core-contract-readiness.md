@@ -1,24 +1,22 @@
 # Readiness review: `calculation-core-contract` (WP2)
 
-- Date: 2026-09-26; updated 2026-09-27 (tasks 6.5 and 7.3, reviewer passes 5-7, checker pass 3; Egor's written `NormRef` agreement; formula path and pipeline risks)
+- Date: 2026-09-26; updated 2026-09-27 (tasks 6.5 and 7.3, reviewer passes 5-8, checker pass 3; Egor's written `NormRef` agreement; formula path and pipeline risks; tester GO for the spec phase)
 - Change: `openspec/changes/calculation-core-contract/`
 - Owner: Akim. Egor (data engineer) confirms `NormRef` only.
 - Criteria: `docs/reports/verified-roadmap.md`, section 3.2, "Ready when".
 
 ## Final status
 
-**READY FOR TESTER VERDICT**
+**GO (spec phase, task 1.6) — 2026-09-27**
 
-All roadmap criteria are met: `NormRef` is agreed with Egor in writing, validation passes, `spec-reviewer` reports no blockers, and `norm-traceability-checker` confirms that no requirement fixes a norm value.
-
-This is not GO. The `tester` verdict (task 1.6) is still open. No implementation task waits for `NormRef` any more; the `[blocked: NormRef]` markers were removed.
+All roadmap criteria are met: `NormRef` is agreed with Egor in writing, validation passes, `spec-reviewer` reports no blockers, and `norm-traceability-checker` confirms that no requirement fixes a norm value. The `tester` declared GO for the spec phase; see section 7. Implementation sections 2-6 remain open and are not covered by this verdict.
 
 | Roadmap criterion (3.2) | State | Evidence |
 |---|---|---|
 | `NormRef` is agreed with DE | Met | Egor agreed to all eight resolutions in his own words in `docs/decisions/normref-questions-egor.md` (commit `a1a896c`, 2026-09-27); task 1.3; `design.md`, section "NormRef" |
 | Validate passes | Met | `openspec validate --all --strict`: 17/17 on 2026-09-27, see section 1 |
-| `spec-reviewer` reports no blockers | Met | 7 passes, 0 blockers in every pass; pass 7 (formula path and pipeline risks): 0 major, 0 minor in this change |
-| `norm-traceability-checker` confirms no norm value is fixed | Met | 3 passes, "No requirement fixes a norm value"; pass 3 confirms the new signature-block rule names document, edition, and clause |
+| `spec-reviewer` reports no blockers | Met | 8 passes, 0 blockers in every pass; pass 8 (after commit `ab3adac`): 0 major, 1 minor (fixed) |
+| `norm-traceability-checker` confirms no norm value is fixed | Met | 3 passes plus a re-check after `ab3adac`, "No requirement fixes a norm value"; pass 3 confirms the new signature-block rule names document, edition, and clause |
 
 ## 1. `openspec validate --all --strict`
 
@@ -122,6 +120,16 @@ Scope: the edit that replaced "agreed on Akim's word" with Egor's written answer
 
 Scope: after reading Egor's branches (`docs/reports/egor-branches-analysis.md`): `design.md` "Consistency with other specs" (the pipeline's formula registry and `normatives-formula-contract`; WP1 task 2.1 closed), resolution 5 (open item on the locator of a formula printed without a number), two new risks (executing an `expression` from data; coefficient tables for the pilot), and task 7.2 (its inputs). The reviewer verified the facts against Egor's branch and the decision files, found no decision taken for Egor's zone or WP5, and confirmed that formula 5.7 of СП 22.13330.2016 is marked `unverified`. Its one minor finding was about `backend-layered-architecture` section 9 (owners and closing criterion) and was fixed there.
 
+### Pass 8 (2026-09-27, after commit `ab3adac`): 0 blockers, 0 major, 1 minor
+
+Scope: commit `ab3adac` edited `design.md` after pass 7 (the "Consistency with other specs" backend-architecture bullet, resolution 5, and the two Risks entries added in pass 7's scope) without a fresh pass; this pass supplies it. The reviewer re-verified every claim against `docs/decisions/normatives-formula-contract-review-egor.md` (questions 2, 10-13, 15), `docs/decisions/research-journal.md` entry 10, and confirmed `docs/decisions/formula-verification-akim.md` is still unanswered. No overstatement found; formula 5.7 stays `unverified`; nothing else in the change was invalidated.
+
+| # | Sev. | Finding | Outcome |
+|---|---|---|---|
+| 1 | Minor | Table 5.5 of СП 22.13330.2016 was named in the Risks section without an explicit `unverified` tag, unlike formula 5.7 three lines above | Fixed: tagged `unverified`; also reworded "manually verified copy" to "manually transcribed copy... a stopgap for the pilot, not a primary-source check" after `norm-traceability-checker`'s point of attention (below) flagged the same passage |
+
+`norm-traceability-checker` re-checked the same edited passages in parallel: PASS, with one point of attention on the same "manually verified copy" wording (below), addressed by the same fix.
+
 ## 3. `norm-traceability-checker` report
 
 ### Pass 1
@@ -188,3 +196,18 @@ No norm value.
 | 1.3 (written confirmation) | Egor answered all eight `NormRef` questions in his own words in `docs/decisions/normref-questions-egor.md` (commit `a1a896c`, 2026-09-27) and agreed to each resolution. His answers add the locator syntax (answer 5) and the `edition` syntax with a separate `amendment_no` in the catalog (answer 8); `design.md` resolutions 5 and 8 reference them. Resolution 3 records his confirmation of the "implementer" reading |
 | 7.3 | `design.md`, section "NormRef", block "Handoff to WP3": the base `report-generator` names GOST R 21.101-2020 as settled; the Rosstandart register lists GOST R 21.101-2026 (order No. 129-ст of 2026-02-12, in force from 2026-04-01) as its replacement |
 | 6.5 | Checked against GOST R 21.101-2026 (text from a copy of the official edition, kept untracked in `docs/NTD/`). Clause 4.1.7: calculations are formatted as text documents. Annex E, columns 10-13: the developer's and the normative controller's signatures are mandatory, a checker line is allowed. The signature block holds the developer and normative control lines, the checker line is optional, the setting is enabled by default. Recorded in `report-generator` "GOST report structure", `design.md` decision 10, and task 6.4 |
+| 1.6 | `tester` GO for the spec phase; see "Tester verdict" below |
+
+## 7. Tester verdict (task 1.6, spec phase only)
+
+```
+Verdict: GO (spec phase only, task 1.6)
+Change: calculation-core-contract (WP2), develop @ cd91116 + a small design.md wording fix (table 5.5 unverified tag), 2026-09-27
+Conditions:
+- Validation: PASS. `openspec validate calculation-core-contract --strict` -> valid. `openspec validate --all --strict` -> 17/17.
+- spec-reviewer no blockers (current text): PASS. Pass 8 (0 blockers, 0 major, 1 minor) plus the tester's own read of the minor's fix (adds the `unverified` tag to table 5.5 and removes the "manually verified" phrasing that could read as a primary-source check).
+- norm-traceability-checker: PASS. Re-check after `ab3adac` found no invented or altered norm source; its one point of attention (same wording) was fixed by the same edit the tester read.
+- Egor's written agreement: PASS. `docs/decisions/normref-questions-egor.md`, all eight questions answered in his own words; commit `a1a896c` authored by Egor.
+```
+
+This verdict covers the spec phase only. Implementation sections 2-6 remain open and are not covered; archive (task 8.3) still needs those, WP1 archived, and the `spec-keeper` sync.

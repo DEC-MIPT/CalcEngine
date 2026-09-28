@@ -39,13 +39,17 @@ given (meeting or message), as proposed in `team-roles-update-egor.md`, question
 
 **Answer (Egor).** Agree with the rule: the first type must be covered by at least 3 worked examples in the guide, rest on documents my pipeline can deliver as pilot data, and be accepted by the PM.
 
-**Answer (PM).**
+**Answer (PM).** Approved verbally to Akim, 2026-09-27. Yesenia has no repository access yet, so this is recorded on her behalf.
 
 ### 2. Which type? (Egor and the PM)
 
 - **Proposal.** Akim reads the guide and proposes the type(s) in section 1 of
   `reference-examples-foundations.md`, with the number of worked examples and their
-  pages. Proposed type: `<pending: Akim fills from the guide>`.
+  pages. Proposed type: design soil resistance of the base, R (formula 5.7, clause
+  5.6.7, СП 22.13330.2016). Confirmed against a guide: 5 distinct worked examples in
+  `Calc_OiF_Linkovskiy.pdf` (Линовский, Якушкина, 2023), pages 7-8, 16, 21-23; 5 more
+  in a second guide. 3 of the first 5 are turned into reference-example cards in
+  `reference-examples-foundations.md`, section 3.
 - **Preliminary candidate.** The design soil resistance of the base R, formula 5.7,
   clause 5.6.7 of СП 22.13330.2016 (numbers from Egor's `formulas.toml`, `unverified`).
   It is already in Egor's formula registry and the SP is ingested. It becomes the
@@ -56,7 +60,7 @@ given (meeting or message), as proposed in `team-roles-update-egor.md`, question
 
 **Answer (Egor).** I confirm R (formula 5.7, clause 5.6.7, СП 22.13330.2016) as the candidate: it is already in the registry (`formulas.toml`) and the СП is ingested. Note the dependency on coefficient table 5.5 (see the formula-contract review, question 7).
 
-**Answer (PM).**
+**Answer (PM).** Approved verbally to Akim, 2026-09-27. Yesenia has no repository access yet, so this is recorded on her behalf.
 
 ### 3. Pilot normative data for that type (Egor)
 

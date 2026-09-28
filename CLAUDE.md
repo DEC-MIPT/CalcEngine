@@ -9,26 +9,33 @@ what it does not say. Do not restate `AGENTS.md` here.
 
 ## Status (2026-09-27)
 
-- No application code on `develop`: `backend/`, `frontend/`, `params/`, `ml/`,
-  `docker-compose.yml` do not exist. Egor's pipeline code is on his branches
-  (`feature/normative-collector/data`, `feature/normative-parser/ml`), not yet merged.
-- Egor's pipeline (on his branches) runs a local PostgreSQL `dec-postgres` on port 5433
-  and keeps a hand-entered formula registry (`normatives_pipeline/formulas.toml`); what
-  it means for Akim's work: `docs/reports/egor-branches-analysis.md`.
+- Application code on `develop`: only Egor's normative pipeline (`normatives_pipeline/`,
+  merged 2026-09-27, `02a33de`), with the root `pyproject.toml` (ruff exclude, pytest,
+  branch coverage), `tests/`, and `docker-compose.yml` (PostgreSQL `dec-postgres` on
+  port 5433, database `dec`). His collector is still on
+  `feature/normative-collector/data`. `backend/`, `frontend/`, `params/`, `ml/` do not
+  exist. What the pipeline means for Akim's work: `docs/reports/egor-branches-analysis.md`.
 - Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
-  (WP2), `calculation-verification` (WP4), `team-roles-update` (WP7),
-  `record-installed-skills-akim`. Led by Egor, with Akim's parts:
-  `retarget-mvp-domain` (WP1), `backend-layered-architecture` (WP5, not yet
-  retargeted). Egor: `normatives-collector`, `normatives-parser`. Planned, not
-  created: `norm-source-traceability` (WP3), `bootstrap-dev-environment` (WP6).
+  (WP2), `calculation-verification` (WP4), `bootstrap-dev-environment` (WP6, spec
+  phase GO, implementation not started), `record-installed-skills-akim`,
+  `backend-layered-architecture` (WP5, not yet retargeted; lead moved from Egor to
+  Akim 2026-09-28, since `backend/` is his zone — `docs/decisions/
+  backend-layered-architecture-lead-change.md`; sections 1-3, 5-6 are his to decide
+  and implement, Egor's agreement or execution is still needed for section 4, section
+  7 (his ML zone), section 8 (his DevOps zone), and section 9's open items 9.3/9.6/9.7).
+  Led by Egor, with Akim's parts: `retarget-mvp-domain` (WP1). Egor:
+  `normatives-collector`, `normatives-parser`, `normatives-formula-contract`. Planned,
+  not created: `norm-source-traceability` (WP3).
 - The base specs in `openspec/specs/` still describe the placeholder domain (beam
   deflection, SP 16.13330) until `retarget-mvp-domain` is archived, and
   `backend-layered-architecture` still names it. The MVP domains are shallow
   foundations, then internal water supply. Build on the active changes, not on the
   placeholder.
-- Egor acknowledged `team-roles-update` on 2026-09-27, and its Part B put the code-free
-  GO path into `AGENTS.md` section 4, so spec-only changes can now get their `tester`
-  verdict.
+- `team-roles-update` (WP7) is archived (2026-09-27,
+  `openspec/changes/archive/2026-09-27-team-roles-update/`): the PM role and the
+  code-free GO path are in `openspec/specs/development-process/spec.md` and `AGENTS.md`
+  section 4, so spec-only changes can get their `tester` verdict.
+- Session state for continuing the work: `docs/reports/session-state-2026-09-27.md`.
 - Norm editions for the MVP domain come from the team and are `unverified` until
   checked against source texts.
 
@@ -47,6 +54,29 @@ what it does not say. Do not restate `AGENTS.md` here.
   without a change that meets the DOR (`AGENTS.md` section 3) and passes
   `openspec validate --strict`.
 
+## Code journal
+
+- Once implementation starts on a WP (writing actual code, not spec artifacts), keep a
+  running journal at `docs/reports/WP<N>-code-journal.md` (one file per WP; English
+  filename, Russian content, matching the existing `docs/reports/` convention). It
+  records execution, not planning: it does not replace `tasks.md`'s checklist, and
+  does not gate anything by itself.
+- Create the file at the first implementation task of the WP, before starting it.
+- One row per `tasks.md` subtask (its own numbering, e.g. `2.1`), appended right after
+  that subtask is finished, as a Markdown table with exactly these five columns, in
+  Russian:
+
+  | Задача | Подзадача | Описание | Критерий успешности | Результат выполнения |
+  |---|---|---|---|---|
+
+  - Задача: the `tasks.md` section number and name (e.g. "2. Backend tooling").
+  - Подзадача: the subtask id (e.g. `2.1`).
+  - Описание: what `tasks.md` asked for, in Akim's own words.
+  - Критерий успешности: how done is verified, from that subtask's own text (a
+    command, a test, an observable behavior).
+  - Результат выполнения: what actually happened — command output, files created or
+    changed, and any deviation from the plan.
+
 ## Do not change without agreement
 
 Edit these only when the user explicitly says so; otherwise show a diff.
@@ -55,7 +85,7 @@ Edit these only when the user explicitly says so; otherwise show a diff.
 - `AGENTS.md`, `.gitignore`, `README.md`, `.kilo/**`, `.kilocode/**`,
   `.claude/agents/*` other than the two subagents added for Claude Code.
 - Anything in Egor's zones: normative pipeline, NLP/RAG, ML, DevOps.
-- The root `pyproject.toml` (shared with Egor's pipeline once his branch is merged).
+- The root `pyproject.toml` (shared with Egor's pipeline).
 
 ## Language
 
@@ -66,10 +96,15 @@ Edit these only when the user explicitly says so; otherwise show a diff.
 
 - `openspec validate --all --strict` — validate all specs and changes (read-only).
 - `openspec list`, `openspec status --change <name>`, `openspec show <item>`.
+- Egor's pipeline (his zone): `.venv/bin/python -m normatives_pipeline.search --json
+  "<query>"` with `DEC_DATABASE_URL` set, as in
+  `docs/decisions/normatives-pilot-usage-akim.md`. Its PostgreSQL is defined in
+  `docker-compose.yml`. Ingestion and the pipeline's `pytest` are Egor's to run.
 
-TBD, see planned change `bootstrap-dev-environment`: tests (`pytest`, `vitest`,
-`playwright`), lint and types (`ruff`, `mypy`, `eslint`, `tsc`), build, `docker`.
-Do not invent or run commands from this list; none of them is set up yet.
+TBD, see planned change `bootstrap-dev-environment`: Akim's backend and frontend tooling
+(`pytest` for the backend, `vitest`, `playwright`, `ruff`, `mypy`, `eslint`, `tsc`,
+build). Do not invent or run commands from this list; none of them is set up for Akim's
+zone yet.
 
 ## Subagents (also mirrored in `.kilo/agent/`)
 

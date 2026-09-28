@@ -26,6 +26,7 @@ roadmap (`docs/reports/verified-roadmap.md`, section 3.2, WP2) records:
   no spec contains it.
 - **B5 (Medium):** task 6.2 of `backend-layered-architecture` ("reading parameters from
   the parameters layer") implies I/O inside the engine, which contradicts its own design.
+  Resolved in WP5 on 2026-09-28: its task 6.2 moved to this change's task 7.1.
 
 ## What Changes
 

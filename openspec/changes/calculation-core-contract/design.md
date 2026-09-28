@@ -127,11 +127,12 @@ task 1.3 was first closed on 2026-09-26 on Akim's word. Egor owns the catalog si
    it counts as unverified in `unverified_step_count` when any of them is not. The "clause
    set" that a stored result is pinned to (WP3 requirement 3) is the set of all locators
    of all references of all steps. The locator syntax is Egor's (answer 5): the loader
-   normalizes it and the catalog resolves it; the engine keeps it opaque. Open with Egor:
-   the locator of a formula that the document prints without a number
-   (`docs/decisions/normatives-formula-contract-review-egor.md`, question 10). Until it is
-   settled, such a locator names the clause and never a number the document does not
-   print (`agent-docs/domain-constraints.md`).
+   normalizes it and the catalog resolves it; the engine keeps it opaque. Settled with
+   Egor on 2026-09-27 (`docs/decisions/normatives-formula-contract-review-egor.md`,
+   question 10): a formula that the document prints without a number is located by its
+   clause in his canonical grammar, never by an invented number
+   (`agent-docs/domain-constraints.md`); a synthetic internal id, if the pipeline needs
+   one, stays outside `NormRef` (his payload carries it as `formula_id`).
 6. **`document` is a designation string,** as printed in the document, not a key into
    `dec_normatives`. It reads well in the parameter YAML, in the `dec_app` columns, and in
    the report, and needs no foreign key across the two databases (B3). The catalog
@@ -206,6 +207,12 @@ later design and is not fixed here.
   and a scenario that split the roles: schema validation first, at the API; method
   applicability second, in the engine (C2).
 - **`backend-architecture` (active change `backend-layered-architecture`):**
+  - **Update 2026-09-28:** WP5 was revised and split. Its task 6.2 and the placeholder
+    pilot moved to this change's task 7.1; decision 7 now names the pure function as the
+    C/C++ boundary; "No hardcoding" now says formulas and coefficients come from
+    `dec_normatives`, not from a parameter file, and `params/**/*.yaml` holds only
+    engineer-set values. Of the points below, only the safe parsing of `expression` and
+    the pipeline verification state for the `provenance` gate stay open (task 7.2).
   - "Parameters stored in YAML" says the parameters layer passes parameters to the
     engine as typed arguments. This agrees with "Pure calculation function".
   - Task 6.2 ("reference implementation reading parameters from the parameters layer")
@@ -215,13 +222,23 @@ later design and is not fixed here.
   - "No hardcoding" says formulas are not written in code but read from configuration or
     a parameter file. If formulas live in YAML, the engine becomes an expression
     evaluator, which changes where a step's `expression` comes from. This is an open
-    question for WP5 and is not decided here. Since 2026-09-27 the pipeline side has a
-    concrete proposal, not yet on `develop`: a hand-entered formula registry
-    (`normatives_pipeline/formulas.toml`, with `expression` strings built from a symbol
-    table) and the change `normatives-formula-contract` (a formula payload the backend
-    queries). Its reference field does not yet match `NormRef`, and the owner of the
-    registry is not settled; see `docs/decisions/normatives-formula-contract-review-egor.md`
-    (questions 1-2) and task 7.2.
+    question for WP5 and is not decided here; task 7.2 settles it. Egor agreed on
+    2026-09-27 (`docs/decisions/normatives-formula-contract-review-egor.md`, question 2):
+    the pipeline writes formulas into `dec_normatives`; the parameters layer reads them,
+    applies the `provenance` gate (resolution 2), and passes resolved parameters to the
+    engine; the backend does not import pipeline code, so the zones stay apart. He owns
+    the hand-entered formula registry (`normatives_pipeline/formulas.toml`, merged to
+    `develop` in `b44d6f3`), which stays the MVP path for executable expressions. Its
+    `norm_ref` was also brought in line with the agreed `NormRef` in that commit (see the
+    review file for what still does not match: `NormRef` fields for coefficients,
+    stored `status`/`provenance`, and config-driven `NormRef` keys, its questions
+    11-13; also empty `document`, question 15).
+    Since 2026-09-27 (his `research-journal.md`, entry 10) the direction changed: OCR
+    (pix2text + DocLayout-YOLO) is now the main source of formulas at scale, each one
+    entered as `provenance = machine-extracted`, `status = unverified`; the hand-entered
+    registry becomes the checked subset. How a formula becomes `human-verified` is the
+    open question in `docs/decisions/formula-verification-akim.md`, not yet
+    answered.
 - **`report-generator` "GOST-compliant report assembly"** names GOST R 21.101-2020; that
   edition is not checked against the source text. Handed to WP3 in section "NormRef"
   (task 7.3); not edited here.
@@ -253,14 +270,25 @@ later design and is not fixed here.
 - If formulas come from data (see "Consistency with other specs"), the engine turns an
   `expression` string into executable code. SymPy's `sympify` and `parse_expr` use
   `eval`, and `lambdify` generates code, so an unchecked string is code execution, and a
-  `machine-extracted` formula could reach the calculation path. Mitigation, to be fixed
-  when task 7.2 settles where formulas live: expressions are parsed against a whitelist
-  of symbols and operations, never passed to `eval`-based parsing as is, and only values
-  that pass the `provenance` gate of the parameters layer (resolution 2) reach the
-  engine.
+  `machine-extracted` formula could reach the calculation path. Sharper since
+  2026-09-27: OCR now writes most formulas as `machine-extracted`/`unverified` at scale
+  (see above), and the pipeline has no column yet that records a formula moving to
+  `human-verified` (`docs/decisions/normatives-formula-contract-review-egor.md`,
+  question 12), so the `provenance` gate below has nothing to key on until that is
+  fixed. Mitigation, to be fixed when task 7.2 settles where formulas live: expressions
+  are parsed against a whitelist of symbols and operations, never passed to
+  `eval`-based parsing as is, and only values that pass the `provenance` gate of the
+  parameters layer (resolution 2) reach the engine; that gate needs the pipeline to
+  persist verification state (question 12), which is not yet in place.
 - The pilot (task 7.1) may need coefficient tables. The candidate first type, R by
-  formula 5.7 of СП 22.13330.2016 (`unverified`), takes coefficients from a table, and
-  the pipeline does not store tables yet
-  (`docs/decisions/normatives-formula-contract-review-egor.md`, question 7). Mitigation:
-  only task 7.1 depends on it, and it starts when the table data is available with its
-  `NormRef`; the other tasks of this change do not use a real calculation type.
+  formula 5.7 of СП 22.13330.2016 (`unverified`), takes coefficients from a table.
+  Egor added table storage on 2026-09-27 (`b44d6f3`, starting with table 5.5 of
+  СП 22.13330.2016, `unverified`), but the stored cells carry no `NormRef` and no
+  verification state yet (`docs/decisions/normatives-formula-contract-review-egor.md`,
+  question 11; the same gap as question 12 above); until then he takes `M_γ`, `M_q`,
+  `M_c` for the pilot from his own manually transcribed copy of that table in the
+  registry (his answer to question 7), which is a stopgap for the pilot, not a
+  primary-source check.
+  Mitigation: only task 7.1 depends on it, and it starts when the table data is
+  available with its `NormRef`; the other tasks of this change do not use a real
+  calculation type.

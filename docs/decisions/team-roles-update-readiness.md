@@ -1,15 +1,17 @@
 # Readiness review: `team-roles-update` (WP7)
 
 - Date: 2026-09-26
-- Change: `openspec/changes/team-roles-update/`
+- Change: `openspec/changes/archive/2026-09-27-team-roles-update/` (archived 2026-09-27; was `openspec/changes/team-roles-update/`)
 - Author: Akim. Egor is the second developer and must agree, because the change touches shared files.
 - Criteria: `docs/reports/verified-roadmap.md`, section 3.7, "Ready when": Egor agrees, and validate passes.
 
 ## Final status
 
-**READY FOR TEAM DISCUSSION**
+**GO (tester, 2026-09-27) — ready to archive**
 
-Technically ready, waiting for Egor's agreement. After the third `spec-reviewer` pass there are 0 blockers, 0 major and 0 new minor findings, and `openspec validate --all --strict` passes 14/14. Egor has not agreed yet. That is a separate roadmap condition, so this is not "ready to archive": the change stays open until Egor acknowledges it (task A1.4) and Part B is applied or its deferral is recorded (task A2.3).
+Egor acknowledged the change (commit `243a6b9`, task A1.4), Part B is applied (commit `75e0eac`, tasks B2-B8), the sixth `spec-reviewer` pass is READY for DOR (section 10), and the `tester` declared GO on the code-free path (section 11). Left: A2.2 (the final version is on `develop`) and A2.3 (`spec-keeper` syncs and archives).
+
+History: until 2026-09-27 the status was READY FOR TEAM DISCUSSION, waiting for Egor's agreement (third pass: 0 blockers, 0 major, validate 14/14).
 
 | Roadmap criterion (3.7) | State | Evidence |
 |---|---|---|
@@ -201,3 +203,32 @@ Verdict: **READY for DOR**. The delta, `design.md`, and `tasks.md` agree; Part B
 | 2 | Minor | `CLAUDE.md` "Status" still said Egor's answers were awaited | Fixed: it now says Egor acknowledged the change and that spec-only changes can get their `tester` verdict |
 
 Left: A2.1 (`tester` verdict), A2.2, A2.3 (archive).
+
+## 11. Tester verdict (task A2.1)
+
+```
+Verdict: GO
+Change: team-roles-update (WP7), develop @ 455cb74, 2026-09-27
+tests: N/A. The change has no code. It has specs, docs and shared process files only, so there is nothing executable to test.
+coverage: N/A. The change has no code, so there is no changed code to measure branch coverage on.
+UI/UX: N/A. The change has no code and no UI.
+
+Conditions:
+- No code: pass. Every file the commits touch is on the allowed list. Commits b3d9f51, 6755ac6, c0415f9, 243a6b9 and 30198ca touch only openspec/** and docs/**. 75e0eac touches AGENTS.md, CLAUDE.md, openspec/config.yaml and tasks.md. Merge 455cb74 has no tree diff against 75e0eac. No commit touches .claude/settings.json or .gitignore.
+- Validation: pass. "Change 'team-roles-update' is valid"; --all: "Totals: 17 passed, 0 failed (17 items)". Both exit 0.
+- Review: pass. Section 10, sixth pass: 0 blockers, 0 major, 2 minor, READY for DOR. Both minor fixes are at HEAD. Since 30198ca, the only edit in the change directory is tasks.md (B2-B8 ticked, each with a note), part of the Part B commit that the sixth pass covers.
+- Acknowledgement: pass. Commit 243a6b9 is authored by Egor; in docs/decisions/team-roles-update-egor.md, the answer to question 1 reads "I acknowledge the change as the second developer (task A1.4)."
+
+Open after verdict: A2.2, A2.3 (archive).
+```
+
+Recorded by Akim from the `tester` agent's report. It is the first verdict on the code-free GO path, which this change defines. The `tester` agent definition (`.claude/agents/tester.md`) still describes only the test-and-coverage gate; aligning it is task 4.1 of `calculation-verification`. After recording, the A1.4 note in `tasks.md` was corrected to quote Egor exactly ("as the second developer"); the tester flagged the missing word as cosmetic.
+
+Part B is applied (B2-B8), so it no longer blocks archive. Next: A2.2 (the final version is on `develop`), then A2.3, `spec-keeper` syncs the delta into `openspec/specs/development-process/spec.md` and archives the change.
+
+## 12. Archive (tasks A2.2, A2.3)
+
+- A2.2: the change directory on `develop` @ `fcdd989` was the reviewed and GO version plus the A2.1 record.
+- A2.3, 2026-09-27: the delta was synced into `openspec/specs/development-process/spec.md` with the archive workflow. Four requirements were replaced ("Non-overlapping developer responsibility zones", "Planning before implementation", "Review before merge", "Go/No-Go verdict and archive") and one was added ("Shared decisions are tracked"); each was checked against the delta, and the seven other requirements are unchanged. `openspec validate --all --strict`: 17 passed, 0 failed (the change left the active list). The change moved to `openspec/changes/archive/2026-09-27-team-roles-update/`.
+- Other active changes with `development-process` deltas (`calculation-verification`, `record-installed-skills-akim`) only add requirements with other names, so the archive does not conflict with them.
+- Hand-off (section C of the change's `tasks.md`, not tasks of this change): C1, the untracked "passport" citations in `backend-layered-architecture`; C2, align `record-installed-skills-akim` with the code-free path (Egor's acknowledgement, `spec-reviewer`, `tester` verdict with the N/A fields).
