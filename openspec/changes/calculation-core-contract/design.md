@@ -229,16 +229,21 @@ later design and is not fixed here.
     engine; the backend does not import pipeline code, so the zones stay apart. He owns
     the hand-entered formula registry (`normatives_pipeline/formulas.toml`, merged to
     `develop` in `b44d6f3`), which stays the MVP path for executable expressions. Its
-    `norm_ref` was also brought in line with the agreed `NormRef` in that commit (see the
-    review file for what still does not match: `NormRef` fields for coefficients,
-    stored `status`/`provenance`, and config-driven `NormRef` keys, its questions
-    11-13; also empty `document`, question 15).
+    `norm_ref` was also brought in line with the agreed `NormRef` in that commit. Egor
+    agreed on 2026-09-28 to the remaining findings 11-15
+    (`docs/decisions/normatives-formula-contract-review-egor.md`): a `NormRef` on every
+    stored coefficient value, `status`/`provenance` stored per formula and per
+    coefficient instead of constants, the five `NormRef` fields built unconditionally in
+    code (config selects only extra fields), and no payload built from an empty
+    `document`. Applied on `feature/normative-parser/ml` (commit `a28cf0a`), not merged
+    into `develop` yet.
     Since 2026-09-27 (his `research-journal.md`, entry 10) the direction changed: OCR
     (pix2text + DocLayout-YOLO) is now the main source of formulas at scale, each one
     entered as `provenance = machine-extracted`, `status = unverified`; the hand-entered
-    registry becomes the checked subset. How a formula becomes `human-verified` is the
-    open question in `docs/decisions/formula-verification-akim.md`, not yet
-    answered.
+    registry becomes the checked subset, stored as `human-verified` at ingestion (answer
+    12). How a formula moves to `human-verified` by a user action, as opposed to the
+    registry's own entries, is still the open question in
+    `docs/decisions/formula-verification-akim.md`, not yet answered.
 - **`report-generator` "GOST-compliant report assembly"** names GOST R 21.101-2020; that
   edition is not checked against the source text. Handed to WP3 in section "NormRef"
   (task 7.3); not edited here.
@@ -272,23 +277,28 @@ later design and is not fixed here.
   `eval`, and `lambdify` generates code, so an unchecked string is code execution, and a
   `machine-extracted` formula could reach the calculation path. Sharper since
   2026-09-27: OCR now writes most formulas as `machine-extracted`/`unverified` at scale
-  (see above), and the pipeline has no column yet that records a formula moving to
-  `human-verified` (`docs/decisions/normatives-formula-contract-review-egor.md`,
-  question 12), so the `provenance` gate below has nothing to key on until that is
-  fixed. Mitigation, to be fixed when task 7.2 settles where formulas live: expressions
-  are parsed against a whitelist of symbols and operations, never passed to
-  `eval`-based parsing as is, and only values that pass the `provenance` gate of the
-  parameters layer (resolution 2) reach the engine; that gate needs the pipeline to
-  persist verification state (question 12), which is not yet in place.
+  (see above). Egor agreed on 2026-09-28
+  (`docs/decisions/normatives-formula-contract-review-egor.md`, answer 12) to store
+  `status` and `provenance` as columns per formula and per coefficient instead of
+  constants, so the `provenance` gate has something to key on once that code reaches
+  `develop` (currently on `feature/normative-parser/ml`). Still open: the user action
+  that moves a formula to `human-verified` (`docs/decisions/formula-verification-akim.md`)
+  is not designed yet, so no value reaches `human-verified` except the hand-entered
+  registry, which his answer marks `human-verified` at ingestion, not by that action.
+  Mitigation, to be fixed when task 7.2 settles where formulas live: expressions are
+  parsed against a whitelist of symbols and operations, never passed to `eval`-based
+  parsing as is, and only values that pass the `provenance` gate of the parameters layer
+  (resolution 2) reach the engine.
 - The pilot (task 7.1) may need coefficient tables. The candidate first type, R by
   formula 5.7 of СП 22.13330.2016 (`unverified`), takes coefficients from a table.
   Egor added table storage on 2026-09-27 (`b44d6f3`, starting with table 5.5 of
-  СП 22.13330.2016, `unverified`), but the stored cells carry no `NormRef` and no
-  verification state yet (`docs/decisions/normatives-formula-contract-review-egor.md`,
-  question 11; the same gap as question 12 above); until then he takes `M_γ`, `M_q`,
-  `M_c` for the pilot from his own manually transcribed copy of that table in the
-  registry (his answer to question 7), which is a stopgap for the pilot, not a
-  primary-source check.
+  СП 22.13330.2016, `unverified`) and agreed on 2026-09-28
+  (`docs/decisions/normatives-formula-contract-review-egor.md`, answer 11) to add a
+  `NormRef` per stored coefficient value, starting with that same table
+  (`normatives-formula-contract` tasks 1.4-1.7). Not merged into `develop` yet; until it
+  is, he takes `M_γ`, `M_q`, `M_c` for the pilot from his own manually transcribed copy
+  of that table in the registry (his answer to question 7), which is a stopgap for the
+  pilot, not a primary-source check.
   Mitigation: only task 7.1 depends on it, and it starts when the table data is
   available with its `NormRef`; the other tasks of this change do not use a real
   calculation type.
