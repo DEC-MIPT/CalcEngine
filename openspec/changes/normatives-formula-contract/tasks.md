@@ -1,13 +1,16 @@
 # Tasks
 
-Branches: `feature/normative-formula-contract/data` (Egor),
-`feature/normative-formula-contract/backend` (Akim).
+Branch: `feature/normative-formula-contract/data` (Egor).
 
 ## 1. Contract + config (Egor)
 
 - [ ] 1.1 [Egor] `[output]` config section (`formula_keys`, `norm_ref_keys`, `symbol_keys`, `default_symbol_kind`)
 - [ ] 1.2 [Egor] `build_formula_payload` in `db.py` driven by `[output]`
 - [ ] 1.3 [Egor] `search.query(query) -> dict` returning the payload; `--json` CLI mode
+- [ ] 1.4 [Egor] `build_formula_payload` builds the five fixed `NormRef` fields (`document`, `edition`, `clause`, `status`, `provenance`) unconditionally; `norm_ref_keys` selects extra payload fields only (answer to finding 13)
+- [ ] 1.5 [Egor] `coefficient` gains `document`/`edition`/`clause`/`status`/`provenance` and a `NormRef` builder per value; start with table 5.5 of СП 22.13330.2016 (answer to finding 11)
+- [ ] 1.6 [Egor] Store `status`/`provenance` per formula and per coefficient; `formulas.toml` entries are `human-verified`, OCR output is `machine-extracted`/`unverified` (answer to finding 12)
+- [ ] 1.7 [Egor] A formula or coefficient with no `document` fails ingestion; no payload is built from an empty string (answer to finding 15)
 
 ## 2. Symbol normalization (Egor)
 
@@ -18,10 +21,10 @@ Branches: `feature/normative-formula-contract/data` (Egor),
 
 - [ ] 3.1 [Egor] `norm-base` → `norm-docs` in code + `.gitignore`; downloads land in `norm-docs/`
 
-## 4. Consume (Akim)
+## 4. Consume (moved out)
 
-- [ ] 4.1 [Akim] Backend consumes `search.query(...)` and binds `symbols[].id` in the engine
-- [ ] 4.2 [Akim] Frontend renders `latex`/`symbols[].latex` via MathJax and builds inputs from `symbols`
+- Removed on 2026-09-28 (answer to question 3): the consuming backend/frontend work (old
+  tasks 4.1-4.2) is not this change's. Akim adds it to his own change.
 
 ## 5. Tests and quality
 
