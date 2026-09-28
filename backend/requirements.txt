@@ -1,1 +1,6 @@
 fastapi
+pydantic-settings
+sqlalchemy
+alembic
+pyyaml
+psycopg[binary]
