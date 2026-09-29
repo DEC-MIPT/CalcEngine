@@ -193,6 +193,25 @@ class ValidatedBound(_Bound):
     source: Source
 
 
+def check_bounds(bounds: Sequence[MethodBound | ValidatedBound]) -> None:
+    """A range has at most one lower and one upper bound per quantity, and is not empty."""
+    sides: dict[tuple[str, str], MethodBound | ValidatedBound] = {}
+    for bound in bounds:
+        key = (bound.quantity, bound.kind)
+        if key in sides:
+            raise ValueError(f"quantity {bound.quantity!r} has two {bound.kind} bounds")
+        sides[key] = bound
+    for (quantity, kind), lower in sides.items():
+        upper = sides.get((quantity, "max"))
+        if kind != "min" or upper is None:
+            continue
+        empty = lower.value > upper.value or (
+            lower.value == upper.value and not (lower.inclusive and upper.inclusive)
+        )
+        if empty:
+            raise ValueError(f"the range of {quantity!r} is empty: its min is above its max")
+
+
 class OutputValue(QuantityValue):
     """An output quantity in its base unit, rounded by its rule."""
 

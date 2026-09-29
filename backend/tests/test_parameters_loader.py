@@ -4,8 +4,7 @@ import pytest
 
 from app.core.exceptions import DECError, ParameterValidationError
 from app.parameters.loader import load_parameters
-from app.parameters.param_schemas import RoundingEntry
-from app.schemas.parameters import ValidatedRange
+from app.parameters.param_schemas import EngineerBound, RoundingEntry
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures" / "params"
 
@@ -18,10 +17,11 @@ def test_load_parameters_returns_typed_values() -> None:
     assert (rounding.rule.decimals, rounding.rule.mode) == (2, "half_up")
     assert rounding.source.engineer == "И. И. Иванов"
 
-    validated_range = parameters.validated_ranges["depth"]
-    assert isinstance(validated_range, ValidatedRange)
-    assert validated_range.min_value == 0.5
-    assert validated_range.max_value == 5.0
+    lower, upper = parameters.validated_range
+    assert isinstance(lower, EngineerBound)
+    assert (lower.quantity, lower.kind, lower.value, lower.inclusive) == ("depth", "min", 0.5, True)
+    assert (upper.kind, upper.value) == ("max", 5.0)
+    assert upper.source.engineer == "И. И. Иванов"
 
 
 def test_unknown_key_is_rejected_with_a_dec_error() -> None:

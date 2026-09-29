@@ -6,9 +6,18 @@ rounding_rules:
     source:
       engineer: "И. И. Иванов"
       rationale: "Табличная точность СП 22.13330.2016, округление до сотых кПа для приёмки заказчиком"
-validated_ranges:
-  depth:
-    min_value: 0.5
-    max_value: 5.0
-    engineer: "И. И. Иванов"
-    rationale: "Диапазон глубин заложения фундамента, принятый практикой проектной организации"
+validated_range:
+  - quantity: depth
+    kind: min
+    value: 0.5
+    inclusive: true
+    source:
+      engineer: "И. И. Иванов"
+      rationale: "Диапазон глубин заложения фундамента, принятый практикой проектной организации"
+  - quantity: depth
+    kind: max
+    value: 5.0
+    inclusive: true
+    source:
+      engineer: "И. И. Иванов"
+      rationale: "Диапазон глубин заложения фундамента, принятый практикой проектной организации"
