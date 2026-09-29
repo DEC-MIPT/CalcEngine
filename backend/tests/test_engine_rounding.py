@@ -76,7 +76,6 @@ def test_a_check_whose_outcome_would_change_on_the_rounded_value_uses_the_unroun
 
     result = assemble_result(
         contract,
-        engine_version="0.1.0",
         input_hash="0" * 64,
         trace=(y, check),
         outputs=make_outputs(contract, {"y": y.result}),

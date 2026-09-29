@@ -100,7 +100,6 @@ def warning(bound: ValidatedBound) -> ApplicabilityWarning:
 
 def assemble(**changes: Any) -> CalculationResult:
     fields: dict[str, Any] = {
-        "engine_version": "0.1.0",
         "input_hash": HASH,
         "trace": (table("k", A), check()),
         "outputs": OUTPUTS,

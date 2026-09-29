@@ -4,6 +4,7 @@ from typing import Literal
 from pydantic import ValidationError
 
 from app.core.exceptions import CalculationError, UnitError
+from app.engine import ENGINE_VERSION
 from app.schemas.calculation import (
     ApplicabilityWarning,
     BoundViolation,
@@ -75,7 +76,6 @@ def _check_steps_are_declared(contract: CalculationTypeContract, trace: Sequence
 def assemble_result(
     contract: CalculationTypeContract,
     *,
-    engine_version: str,
     input_hash: str,
     trace: Sequence[Step],
     outputs: Sequence[OutputValue],
@@ -84,6 +84,8 @@ def assemble_result(
     refusal: BoundViolation | None = None,
 ) -> CalculationResult:
     """Build a calculation result with its lists ordered (design.md decision 17).
+
+    ``engine_version`` is the engine package's ``ENGINE_VERSION`` (decision 7).
 
     ``outputs`` follow the contract's declared order, ``warnings`` the declared order
     of ``validated_range``; ``norm_refs`` and ``engineer_rules`` hold each source
@@ -110,7 +112,7 @@ def assemble_result(
     )
     try:
         return CalculationResult(
-            engine_version=engine_version,
+            engine_version=ENGINE_VERSION,
             input_hash=input_hash,
             outputs=ordered_outputs,
             norm_refs=norm_refs,

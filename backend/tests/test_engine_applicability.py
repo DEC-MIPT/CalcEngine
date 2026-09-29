@@ -203,7 +203,6 @@ def test_a_refused_outcome_becomes_a_refused_envelope() -> None:
 
     result = assemble_result(
         CONTRACT,
-        engine_version="0.1.0",
         input_hash="0" * 64,
         trace=(),
         outputs=(),
