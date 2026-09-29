@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from app.core.exceptions import CalculationError, UnitError
 from app.engine.applicability import check_applicability
 from app.engine.base import Calculator
+from app.engine.hashing import input_hash
 from app.engine.rounding import round_value
 from app.schemas.calculation import (
     ApplicabilityWarning,
@@ -92,9 +93,12 @@ class Outcome[ResultT]:
     """What the engine boundary gives back: the calculator's result, or a refusal.
 
     ``result`` is ``None`` exactly when ``refusal`` is set; ``warnings`` hold the
-    validated-range warnings in either case.
+    validated-range warnings in either case. ``input_hash`` identifies the run by
+    its calculation type, inputs in base units, and resolved parameters, including
+    both ranges (design.md decision 6).
     """
 
+    input_hash: str
     result: ResultT | None
     refusal: BoundViolation | None
     warnings: tuple[ApplicabilityWarning, ...]
@@ -116,9 +120,21 @@ def run[ParametersT, ResultT](
     calculation, and the calculator does not run (design.md decisions 2 and 3).
     """
     converted = inputs_to_base_units(contract, inputs)
+    identity = input_hash(
+        contract.name,
+        converted,
+        {
+            "parameters": parameters,
+            "method_range": method_range,
+            "validated_range": validated_range,
+        },
+    )
     refusal, warnings = check_applicability(converted, method_range, validated_range)
     if refusal is not None:
-        return Outcome(result=None, refusal=refusal, warnings=warnings)
+        return Outcome(input_hash=identity, result=None, refusal=refusal, warnings=warnings)
     return Outcome(
-        result=calculator.calculate(converted, parameters), refusal=None, warnings=warnings
+        input_hash=identity,
+        result=calculator.calculate(converted, parameters),
+        refusal=None,
+        warnings=warnings,
     )
