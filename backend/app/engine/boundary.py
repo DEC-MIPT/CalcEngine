@@ -1,10 +1,20 @@
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 
 from app.core.exceptions import CalculationError, UnitError
+from app.engine.applicability import check_applicability
 from app.engine.base import Calculator
 from app.engine.rounding import round_value
-from app.schemas.calculation import CalculationTypeContract, OutputValue, QuantityValue
+from app.schemas.calculation import (
+    ApplicabilityWarning,
+    BoundViolation,
+    CalculationTypeContract,
+    MethodBound,
+    OutputValue,
+    QuantityValue,
+    ValidatedBound,
+)
 from app.schemas.units import UNITS, Unit
 
 
@@ -77,15 +87,38 @@ def make_outputs(
     )
 
 
+@dataclass(frozen=True)
+class Outcome[ResultT]:
+    """What the engine boundary gives back: the calculator's result, or a refusal.
+
+    ``result`` is ``None`` exactly when ``refusal`` is set; ``warnings`` hold the
+    validated-range warnings in either case.
+    """
+
+    result: ResultT | None
+    refusal: BoundViolation | None
+    warnings: tuple[ApplicabilityWarning, ...]
+
+
 def run[ParametersT, ResultT](
     contract: CalculationTypeContract,
     calculator: Calculator[Mapping[str, QuantityValue], ParametersT, ResultT],
     inputs: Mapping[str, QuantityValue],
     parameters: ParametersT,
-) -> ResultT:
-    """Convert the inputs to base units at the boundary, then run the calculator.
+    *,
+    method_range: Sequence[MethodBound] = (),
+    validated_range: Sequence[ValidatedBound] = (),
+) -> Outcome[ResultT]:
+    """Convert the inputs to base units, check applicability, then run the calculator.
 
     A unit outside the vocabulary or of another dimension fails with a ``DECError``
-    before the calculator runs any step.
+    before any step runs. An input outside the method's range refuses the
+    calculation, and the calculator does not run (design.md decisions 2 and 3).
     """
-    return calculator.calculate(inputs_to_base_units(contract, inputs), parameters)
+    converted = inputs_to_base_units(contract, inputs)
+    refusal, warnings = check_applicability(converted, method_range, validated_range)
+    if refusal is not None:
+        return Outcome(result=None, refusal=refusal, warnings=warnings)
+    return Outcome(
+        result=calculator.calculate(converted, parameters), refusal=None, warnings=warnings
+    )

@@ -118,7 +118,10 @@ def test_convert_rejects_a_value_that_overflows() -> None:
 
 
 def test_a_non_base_input_shows_in_the_trace_in_its_base_unit() -> None:
-    step = run(CONTRACT, TraceCalculator(), {"b": q(1500.0, "mm"), "p": q(0.2, "MPa")}, FORMULA)
+    step = run(
+        CONTRACT, TraceCalculator(), {"b": q(1500.0, "mm"), "p": q(0.2, "MPa")}, FORMULA
+    ).result
+    assert step is not None
 
     assert [(s.symbol, s.value, s.unit) for s in step.substitutions] == [("b", 1.5, "m")]
     assert step.result == q(3.0, "m")
