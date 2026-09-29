@@ -4,8 +4,9 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from app.core.exceptions import InputValidationError
 from app.schemas.parameters import EngineerRule
-from app.schemas.units import UnitSymbol
+from app.schemas.units import UNITS, UnitSymbol
 
 UNVERIFIED: Literal["unverified"] = "unverified"
 
@@ -346,3 +347,30 @@ class ResultEnvelope(CalculationResult):
     """A calculation result with the ``result_id`` the service layer assigns."""
 
     result_id: UUID
+
+
+class CalculationRequest(BaseModel):
+    """A request to run a calculation type, validated before the engine runs.
+
+    The schema rejects a malformed request, a non-finite value and a unit outside
+    the vocabulary; ``check_against`` rejects inputs that do not fit the type's
+    contract (``security`` "Input validation", design.md decisions 12 and 13).
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    calculation_type: str = Field(min_length=1)
+    inputs: dict[str, QuantityValue]
+
+    def check_against(self, contract: CalculationTypeContract) -> None:
+        declared = {quantity.name: quantity.base_unit for quantity in contract.inputs}
+        if set(self.inputs) != set(declared):
+            raise InputValidationError(
+                f"inputs {sorted(self.inputs)} do not match the declared inputs {sorted(declared)}"
+            )
+        for name, value in self.inputs.items():
+            given, base = UNITS[value.unit].dimension, UNITS[declared[name]].dimension
+            if given != base:
+                raise InputValidationError(
+                    f"input {name!r} is in {value.unit!r} ({given}), not a unit of {base}"
+                )

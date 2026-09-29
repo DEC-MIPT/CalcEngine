@@ -24,3 +24,7 @@ class UnitError(DECError):
 
 class CalculationError(DECError):
     """Raised when the parts a calculator produced do not form a valid result."""
+
+
+class InputValidationError(DECError):
+    """Raised when a calculation request does not fit its calculation type's contract."""
