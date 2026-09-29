@@ -21,7 +21,8 @@ envelope's `outputs`, applicability warnings, and refusals.
 #### Scenario: Every step field rendered
 - **WHEN** a user opens a completed calculation
 - **THEN** each step shows its expression, its substitutions with units, its result with
-  its unit, and its `norm_refs`
+  its unit, and its `norm_refs`, and each check step also shows its comparison, its
+  right-hand value with its unit, and whether it passed, in text and not by colour alone
 
 #### Scenario: Outputs with rounding rule shown
 - **WHEN** a user opens a completed calculation
@@ -35,8 +36,9 @@ envelope's `outputs`, applicability warnings, and refusals.
 
 #### Scenario: Validated-range warning shown
 - **WHEN** the envelope carries an applicability warning
-- **THEN** the warning is shown next to the result and names the input, the validated
-  range, and the range's source; a source set by the engineer is shown as engineer-set
+- **THEN** the warning is shown next to the result and names the input, the violated
+  bound of the validated range, and that bound's source; a source set by the engineer is
+  shown as engineer-set
   with the engineer and the rationale
 
 #### Scenario: Refusal shown

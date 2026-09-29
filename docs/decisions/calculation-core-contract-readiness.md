@@ -211,3 +211,33 @@ Conditions:
 ```
 
 This verdict covers the spec phase only. Implementation sections 2-6 remain open and are not covered; archive (task 8.3) still needs those, WP1 archived, and the `spec-keeper` sync.
+
+## 8. Implementation audit (2026-09-29, task 1.7)
+
+Before implementation went on past task 2.1, Akim audited the change against the WP5
+split, the deletion of `formulas.toml` and the automatic "verified" mark of the pipeline
+(`docs/decisions/pipeline-followup-answers-akim.md`, A1 and A3). Akim's decisions: honest
+`NormRef.status` (resolution 2 amended); formulas as expression trees interpreted by the
+engine, method order in code (decision 11); `result_id` and schema validation at the
+service level, storage and endpoint in a later change (decision 12).
+
+Changes: `design.md` decisions 1, 3, 5, 6, 7 refined and 11-17 added, resolution 2
+amended, new `NormRef` invariant (pending task 1.8); `calculation-engine` delta: new
+requirement "Formula evaluation from data", and "Pure calculation function", "Typed trace
+step", "Explicit units at the boundary", "Applicability check with three outcomes",
+"Result envelope", "Automatic correctness validation" extended; check steps added to the
+`transparent-output` and `report-generator` scenarios; `tasks.md` reworked (new 1.7, 1.8,
+2.5, 3.6, 4.4, 6.1a, 6.1b; 7.1 split into 7.1a-7.1c). Letter to Egor:
+`calculation-core-contract-formula-execution-akim.md` (task 1.8).
+
+| Check | Result |
+|---|---|
+| `openspec validate --all --strict` | 18/18 |
+| `spec-reviewer` pass 9 | 3 blockers, 7 major, 4 minor: decisions 12, 16, 17 were only in `design.md`; fixed by moving the testable rules into the requirements |
+| `spec-reviewer` pass 10 | 0 blockers, 3 major, 6 minor: warning source per bound, pilot start, hidden branch dependencies; fixed with minors 4, 5, 6, 8 |
+| `spec-reviewer` pass 11 | 0 blockers, 0 major, 1 minor (fixed). **READY for DOR**, apart from tasks 1.7 and 1.8 themselves. Minors 7 (tasks 2.5, 6.1, 7.1b borderline for one session) and 9 (DOR checklist dates) left as they are |
+| `norm-traceability-checker`, two passes | 0 blockers; major 1 of the first pass (proposal Non-goals) fixed; no norm value fixed, no invented citation. Minors: rounding policy recorded as an engine design choice (decision 14); the new invariant marked pending Egor; the GOST R 21.101-2026 copy location and the formula 5.7 locator origin carried over from earlier passes |
+
+Open: task 1.8 (Egor's acknowledgement of the resolution 2 amendment, decision 11 and
+decision 6). Task 6.2 is checked off only after it; task 7.1c waits for the items in
+`tasks.md` "Dependencies".
