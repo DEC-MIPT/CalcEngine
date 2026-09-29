@@ -32,7 +32,8 @@ roadmap (`docs/audit/03-verified-roadmap.md`, section 3.2, WP2) records:
 
 - `calculation-engine`: adds a pure calculation function, a typed trace step, explicit
   units with conversion at the boundary and declared rounding rules, an applicability
-  check with three outcomes, and a result envelope. "Step-by-step logging" points to the
+  check with three outcomes, a result envelope, and the evaluation of formulas from data
+  as expression trees (added 2026-09-29, `design.md` decision 11). "Step-by-step logging" points to the
   typed trace step, and "Automatic correctness validation" points to the envelope's
   `verdict` and `verdict_reason`.
 - `transparent-output`: the trace is rendered from typed steps; unverified references,
@@ -48,11 +49,14 @@ roadmap (`docs/audit/03-verified-roadmap.md`, section 3.2, WP2) records:
 
 ## Non-goals
 
-- Fixing any norm value: no tolerance, bound, coefficient, unit value, rounding rule, or
-  clause number in calculation data. These are data that the engineer fills from a
-  primary source. The only clauses this change cites are the GOST R 21.101-2026 (edition
-  unverified) sources of the report's signature block, which were read from the
-  standard's text.
+- Fixing any norm value: no tolerance, bound, coefficient, rounding rule, or clause
+  number in calculation data. The unit vocabulary of `design.md` decision 13 holds
+  definitions of units (symbol, dimension, conversion factor), not norm values. These are data that the engineer fills from a
+  primary source. The only clauses this change cites as sources are the GOST R 21.101-2026
+  (edition unverified) sources of the report's signature block, which were read from the
+  standard's text. `design.md` ("Risks") also names formula 5.7 and table 5.5 of
+  СП 22.13330.2016 (`unverified`) as the candidate pilot, taken from Egor's records; that
+  mention identifies the pilot and fixes no value.
 - Finalizing `NormRef`: its shape is agreed with Egor (see `design.md`).
 - Choosing how the declarative input model generates API and form validation (C10 stays
   a design note).
@@ -75,7 +79,9 @@ None.
 
 ## Impact
 
-- Affects four specs after archive. No code, no migrations.
+- Affects four specs after archive. The code is written on the feature branches named in
+  `tasks.md`. No migration: storing the result envelope in `dec_app` belongs to a later
+  change (`design.md`, decision 12).
 - Depends on `retarget-mvp-domain` (WP1) for the domain name only; the first domain is
   `foundations-shallow` there, and the contract itself is domain-neutral.
 - `NormRef` is shared with WP3 (`norm-source-traceability`, Egor) and is agreed

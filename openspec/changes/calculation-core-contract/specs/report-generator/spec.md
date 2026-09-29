@@ -3,7 +3,8 @@
 ### Requirement: GOST report structure
 The system SHALL structure the report with the sections required for project
 documentation: a title block with the organization stamp (основная надпись), the input
-data as a table, the calculation trace with formulas and normative references, the
+data as a table, the calculation trace with formulas, normative references, and, for each
+check step, its comparison and whether it passed, the
 conclusion, the result accountability block, and, when enabled, a signature block. The
 signature block SHALL contain a line for the developer (Разраб.) and a line for the
 person responsible for normative control (Н. контр.), each with a surname, a signature,
@@ -25,6 +26,11 @@ normative control are mandatory, and a checker line is allowed in place of a pos
 - **WHEN** a report is generated with the signature block enabled
 - **THEN** it contains the title block, input-data table, calculation trace, conclusion,
   result accountability block, and signature block, in that order
+
+#### Scenario: Check steps in the report
+- **WHEN** a report is generated for a calculation with check steps
+- **THEN** the trace prints, for each check step, its comparison, both values with their
+  units, and whether it passed
 
 #### Scenario: Report without the signature block
 - **WHEN** a report is generated with the signature block disabled
@@ -62,4 +68,5 @@ the system, is responsible for the result and for its use in project documentati
 
 #### Scenario: Warnings carried into the report
 - **WHEN** the envelope carries an applicability warning
-- **THEN** the report prints the warning with the input and the validated range it names
+- **THEN** the report prints the warning with the input, the violated bound of the
+  validated range, and that bound's source
