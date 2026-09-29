@@ -1,7 +1,10 @@
 rounding_rules:
   R:
-    decimals: 2
-    engineer: "И. И. Иванов"
-    rationale: "..."
+    rule:
+      decimals: 2
+      mode: half_up
+    source:
+      engineer: "И. И. Иванов"
+      rationale: "..."
 formulas:
   R: "5.7"

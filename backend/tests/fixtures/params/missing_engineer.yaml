@@ -1,4 +1,7 @@
 rounding_rules:
   R:
-    decimals: 2
-    rationale: "Округление до сотых по требованию заказчика"
+    rule:
+      decimals: 2
+      mode: half_up
+    source:
+      rationale: "Округление до сотых по требованию заказчика"

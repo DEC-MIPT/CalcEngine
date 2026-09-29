@@ -12,3 +12,15 @@ class AlreadyRegisteredError(DECError):
 
 class ParameterValidationError(DECError):
     """Raised when parameter data fails schema validation."""
+
+
+class ExpressionError(DECError):
+    """Raised when a formula's expression tree cannot be checked or evaluated."""
+
+
+class UnitError(DECError):
+    """Raised when a value does not carry the unit the calculation expects."""
+
+
+class CalculationError(DECError):
+    """Raised when the parts a calculator produced do not form a valid result."""

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator
 
 
 class EngineerRule(BaseModel):
@@ -14,12 +14,6 @@ class EngineerRule(BaseModel):
 
     engineer: str
     rationale: str
-
-
-class RoundingRule(EngineerRule):
-    """How many decimal places an output quantity is rounded to."""
-
-    decimals: int = Field(ge=0)
 
 
 class ValidatedRange(EngineerRule):

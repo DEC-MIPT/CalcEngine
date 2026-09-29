@@ -1,4 +1,7 @@
 rounding_rules:
   R:
-    decimals: 2
-    engineer: "И. И. Иванов"
+    rule:
+      decimals: 2
+      mode: half_up
+    source:
+      engineer: "И. И. Иванов"

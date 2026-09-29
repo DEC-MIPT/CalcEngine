@@ -1,8 +1,11 @@
 rounding_rules:
   R:
-    decimals: 2
-    engineer: "И. И. Иванов"
-    rationale: "Табличная точность СП 22.13330.2016, округление до сотых кПа для приёмки заказчиком"
+    rule:
+      decimals: 2
+      mode: half_up
+    source:
+      engineer: "И. И. Иванов"
+      rationale: "Табличная точность СП 22.13330.2016, округление до сотых кПа для приёмки заказчиком"
 validated_ranges:
   depth:
     min_value: 0.5
