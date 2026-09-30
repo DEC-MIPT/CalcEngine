@@ -83,11 +83,18 @@ See `proposal.md` (Non-goals).
     was matched to the Rosstandart register entry (in force from 2026-04-01, replaces
     GOST R 21.101-2020). The edition stays `unverified` under
     `agent-docs/domain-constraints.md` until the normative pipeline confirms it.
+    Refined 2026-09-30 (task 1.9): the report has the full title block of form 5 on its
+    first sheet (decision 18), and form 5 already holds the developer, checker and
+    normative control rows in columns 10-13. The signature block is therefore those rows,
+    not a separate section after the accountability block; disabling the setting prints
+    the rows without surnames and dates.
 
 Decisions 11-17 were added on 2026-09-29 after an audit of this change for
 implementation and revised after the `spec-reviewer` pass of the same day. The testable
 rules among them are also stated in the requirements of the `calculation-engine` delta;
 the decisions give the shapes and the rationale. None of them fixes a norm value.
+Decision 18 was added on 2026-09-30 for the report (task 1.9); it takes the sizes of
+the frame and the title blocks from GOST R 21.101-2026 and adds no norm value of its own.
 
 11. **Formulas are data, the method structure is code (option D).** A formula, a
     coefficient, and a threshold that chooses between branches of a method, where a norm
@@ -211,6 +218,50 @@ the decisions give the shapes and the rationale. None of them fixes a norm value
     `NormRef` are the same item when all five fields are equal; two `EngineerRule` when
     `engineer` and `rationale` are equal. Equal lists in equal order are needed for the
     bit-for-bit comparison of "Pure calculation function".
+18. **The report is a model and a renderer** (tasks 6.2a-6.4, added 2026-09-30). In
+    `reporting`, a pure function builds a typed report model from the `ResultEnvelope`,
+    the request inputs, the title-block data (columns 1, 2, 3, 5, 6 and 9 of form 5), the
+    signature-block setting, and the signatories (surname and date of the developer, the
+    normative control and the optional checker, columns 11 and 13); all of these come
+    with the report request, and the date is never read from the clock. A renderer writes
+    the model to `.docx` with python-docx, in memory. The later `.pdf` export is a second
+    renderer of the same model; the download endpoint belongs to the change that adds the
+    API. `reporting` imports `schemas` and `core` only (`backend-layered-architecture`
+    decision 2).
+    - The request schema rejects a missing developer or normative control surname or date
+      while the signature block is enabled, and any control character in the title-block
+      and signature texts (Unicode category Cc; python-docx cannot write them to XML);
+      a checker needs both a surname and a date; with the block disabled, given surnames
+      and dates are not printed.
+    - A refused calculation keeps the body sections: the trace section states the refusal
+      and holds no step, and the conclusion names the bound.
+    - A formula is printed as its LaTeX from the catalog, as text, followed by the
+      substitutions and the result. Typeset formulas in Word are a later task.
+    - A number is printed as the shortest decimal that reads back to the same float, in
+      positional notation without an exponent, with a decimal comma, and with the Russian designation of its unit (`kPa` as `кПа`) from a
+      fixed table next to the unit vocabulary; the designations are `source: unverified`.
+      Trace values are unrounded, as in the envelope; outputs are printed rounded, with
+      their rule and its source. A date prints as `ДД.ММ.ГГ` (GOST R 21.101-2026, edition
+      unverified, Annex E, note 2).
+    - Sheet frame and title block, GOST R 21.101-2026 (edition unverified): A4 with the
+      title block along the short side, as Annex Zh, figure Zh.1 a) shows; the frame
+      margins come from that figure, and the column grid, widths and row heights of the
+      title blocks from the figures of form 5 and form 6 of Annex E. The frame is a page
+      border and the title block a table in the page footer: form 5 in the first-page
+      footer, form 6 in the other footer; the sheet number (column 7) and the number of
+      sheets (column 8) are the Word fields `PAGE` and `NUMPAGES`, so tests check the
+      field codes, not their values. Columns 14-19 (changes) print empty in the MVP and
+      column 26 prints the sheet format. Columns 20-22 on the binding margin and the dashed
+      optional columns (27, "Согласовано") are out of the MVP.
+    - Risk: title-block rows have the fixed heights of the form, so a text longer than
+      its cell is cut on the sheet. Length limits per column are a follow-up (tasks.md,
+      "Dependencies").
+    - The base requirement "GOST-compliant report assembly" still names GOST R 21.101-2020;
+      it stays with WP3 as recorded in the section "NormRef", "Handoff to WP3".
+    - The text of the report is Russian. The dimensions of the frame and the forms are
+      taken from GOST R 21.101-2026 and this decision adds none of its own; the number
+      format and the layout choices the standard does not fix are design choices of the
+      report, not norm values.
 
 ## NormRef (agreed with Egor)
 

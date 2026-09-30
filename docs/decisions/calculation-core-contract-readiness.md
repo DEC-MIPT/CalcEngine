@@ -241,3 +241,29 @@ step", "Explicit units at the boundary", "Applicability check with three outcome
 Open: task 1.8 (Egor's acknowledgement of the resolution 2 amendment, decision 11 and
 decision 6). Task 6.2 is checked off only after it; task 7.1c waits for the items in
 `tasks.md` "Dependencies".
+
+## 9. Report amendment (2026-09-30, task 1.9)
+
+Before starting the report (tasks 6.3-6.4), Akim found that no task built the report
+itself (title block, input table, trace, conclusion), although the scenarios of 6.4
+check the order of all sections. Akim's decisions: the missing body and title block
+become their own tasks; formulas print as LaTeX text; the title block is the full form of
+GOST R 21.101-2026 (edition unverified), form 5 on the first sheet and form 6 on the
+following sheets; the signature block is the rows of columns 10-13 of form 5, not a
+separate section; columns 20-22 and the dashed optional columns are out of the MVP.
+
+Changes: `design.md` decision 10 refined and decision 18 added; `report-generator` delta:
+"GOST report structure" rewritten (frame and forms 5/6, signatories from the request,
+rejection rules, refused-calculation and checker scenarios), new requirement "Report
+values, formulas and dates"; `tasks.md`: new 1.9 and 6.2a-6.2f, 6.3 and 6.4 reworded with
+tests, a follow-up for title-block length limits.
+
+| Check | Result |
+|---|---|
+| `openspec validate --all --strict` | 18/18 |
+| `spec-reviewer` pass 12 | 0 blockers, 6 major, 7 minor: signatory data source, refused-report scenario, references section, base 2020 edition, task size, 6.3 without tests; all fixed |
+| `spec-reviewer` pass 13 | 0 blockers, 1 major (generation-time test waited for the pilot; now a synthetic envelope of 200 steps), 5 minor; all fixed |
+| `spec-reviewer` pass 14 | 0 blockers, 0 major, 3 minor (fixed). **READY for DOR** |
+| `norm-traceability-checker`, three passes | 0 blockers; the two majors of the first pass (the 185 mm width and the frame without Annex Zh) fixed; no norm number fixed. Minors left: the Russian unit designations are `source: unverified` (for WP3); the base spec still names GOST R 21.101-2020 (recorded WP3 handoff) |
+
+Open: none for task 1.9. Task 6.2a may start on `feature/report-generator/backend`.

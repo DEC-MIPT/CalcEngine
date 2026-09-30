@@ -5,7 +5,7 @@ Owner: Akim. Egor confirms `NormRef` only.
 Branch: spec work is committed directly to `develop` (`AGENTS.md`, Branching rules). Code
 is done on feature branches from `develop`, each merged only when its whole feature is done:
 `feature/calculation-engine/backend` (engine: every backend task of sections 2-5, tasks
-6.1-6.2, and 7.1a-7.1c), `feature/report-generator/backend` (report, tasks 6.3-6.4) and
+6.1-6.2, and 7.1a-7.1c), `feature/report-generator/backend` (report, tasks 6.2a-6.2f and 6.3-6.4) and
 `feature/frontend-app/frontend` (transparent output, tasks 3.4, 3.5, 5.4), all Akim's zone.
 Checkboxes in this file are ticked in `develop` as each subtask is done on the feature branch; the code reaches `develop` only when the whole feature is done (`AGENTS.md`, Branching rules).
 
@@ -23,6 +23,7 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 - [x] 1.6 `tester` issues the verdict for the spec change (see DOD) (2026-09-27: **GO**, spec phase; validation, spec-reviewer pass 8 (0 blockers, 0 major, 1 minor fixed), norm-traceability-checker re-check, and Egor's written NormRef agreement all pass; implementation sections 2-6 remain open and are not covered; see `docs/decisions/calculation-core-contract-readiness.md`, section "Tester verdict")
 - [x] 1.7 (spec) Resolve the implementation audit of 2026-09-29: `design.md` decisions 11-17, refinements of decisions 3-7, the amendment of resolution 2, the requirement "Formula evaluation from data", and the changes to "Pure calculation function", "Typed trace step", "Explicit units at the boundary", "Applicability check with three outcomes", "Result envelope", "Automatic correctness validation", and the `transparent-output` and `report-generator` scenarios for check steps; re-run `openspec validate --all --strict`, `spec-reviewer` and `norm-traceability-checker` until they report no blocker and no major finding; record the result in `docs/decisions/calculation-core-contract-readiness.md` (2026-09-29: validate 18/18; `spec-reviewer` passes 9-11, last one 0 blockers, 0 major, READY; `norm-traceability-checker` two passes, 0 blockers, 0 major; see section 8 of that file)
 - [ ] 1.8 (spec) Egor acknowledges in writing the amendment of resolution 2, decision 11 (the expression tree he stores) and decision 6 (the `input_hash` algorithm), in `docs/decisions/calculation-core-contract-formula-execution-akim.md`
+- [x] 1.9 (spec) Resolve the report amendment of 2026-09-30: `design.md` decision 10 refined and decision 18 added, the `report-generator` requirement "GOST report structure" changed (the signature block is the rows of columns 10-13 of the title block of form 5), tasks 6.2a-6.2f added, the requirement "Report values, formulas and dates" added, and tasks 6.3 and 6.4 reworded; re-run `openspec validate --all --strict`, `spec-reviewer` and `norm-traceability-checker` until they report no blocker and no major finding; record the result in `docs/decisions/calculation-core-contract-readiness.md` (2026-09-30: validate 18/18; `spec-reviewer` passes 12-14, last one 0 blockers, 0 major, READY; `norm-traceability-checker` three passes, 0 blockers, 0 major; see section 9 of that file)
 
 ## 2. Requirement 1: pure calculation function (backend)
 
@@ -61,8 +62,14 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 - [x] 6.1a Set `engine_version` from the constant `ENGINE_VERSION` of the engine package (`design.md` decision 7); test that it equals the version in `backend/pyproject.toml` (done 2026-09-30 on `feature/calculation-engine/backend`, `9c268c6`) (backend)
 - [x] 6.1b Order and deduplicate the envelope's lists (`design.md` decision 17); tests: a `NormRef` used by two steps appears once at its first use; an `EngineerRule` used by a rounding source and a warning appears once; `outputs` follow the declared order of output quantities and `warnings` the declared order of the validated range's bounds (done 2026-09-30 on `feature/calculation-engine/backend`, `4a8a1eb`) (backend)
 - [ ] 6.2 Implement `input_hash` per `design.md` decision 6; test that identical inputs and parameters give identical hashes, that a different input, calculation type, or resolved parameter set each gives a different hash, and that an integer and the equal float give the same hash. Checked off only after task 1.8 (implemented 2026-09-30 on `feature/calculation-engine/backend`, `ae096cd`; waits for task 1.8) (backend)
-- [ ] 6.3 Print the accountability block and the engineer responsibility statement in the report (backend)
-- [ ] 6.4 Add the signature-block report setting, enabled by default, with the developer and normative control lines and an optional checker line; test the default, and the section order with the block enabled and disabled (backend)
+- [ ] 6.2a Report model (`design.md` decision 18): the report request schema (title-block data of columns 1, 2, 3, 5, 6 and 9; the signature-block setting, default enabled; the signatories with surname and date) and a pure function that builds the typed report model from the `ResultEnvelope`, the request inputs and the request, with the body sections input-data table (declared order of inputs), trace, and conclusion. Tests on the model: the sections are in this order; a check step carries its comparison, both values with units and whether it passed; each `NormRef` of a step is carried with its status, an unverified one marked unverified; a refused envelope keeps the sections, its trace section states the refusal and holds no step, and its conclusion names the bound, the input value with its unit and the bound's `NormRef` list; the request is rejected with the block enabled and a missing developer or normative control surname or date, with a checker without a surname or a date, and with a control character in any text ("GOST report structure"). Synthetic data only (backend)
+- [ ] 6.2b Render the report body to `.docx` with python-docx, in memory (`design.md` decision 18), with numbers, units and formulas as "Report values, formulas and dates" gives them. Tests: the `.docx` read back with python-docx holds the body sections in order with the model's text; the value 172.5 `kPa` prints as `172,5 кПа`, 1e-07 `m` as `0,0000001 м`, and 2.0 `1` as `2`; every unit of the unit vocabulary (`design.md` decision 13) has a Russian designation; a LaTeX `expression` prints unchanged; rendering a synthetic envelope of 200 trace steps finishes in under 1 minute (base "Non-functional — generation time") (backend)
+- [ ] 6.2c Sheet frame: A4 portrait, margins and page border as Annex Zh, figure Zh.1 a) of GOST R 21.101-2026 (edition unverified) shows. Tests: the section is A4 portrait, has a page border, and its margins equal the figure's frame (backend)
+- [ ] 6.2d Grid of the form-5 title block in the first-page footer (Annex E, form 5 of GOST R 21.101-2026, edition unverified): the column widths and row heights of the figure, the column captions, the sheet format in column 26, columns 14-19 empty. Tests: the first-page footer holds a table with the form's captions; its column widths add up to the width of the form in the figure; every row has the figure's height; column 26 holds the format; the cells of columns 14-19 are empty (backend)
+- [ ] 6.2e Data of the form-5 title block (Annex E, form 5 of GOST R 21.101-2026, edition unverified): the title-block data in columns 1, 2, 3, 5, 6 and 9, and the sheet number and the number of sheets as the Word fields `PAGE` and `NUMPAGES` (columns 7 and 8). Tests: each datum is in its column; the field codes `PAGE` and `NUMPAGES` are in columns 7 and 8 (backend)
+- [ ] 6.2f Title block of form 6 in the footer of the following sheets (Annex E, form 6 of GOST R 21.101-2026, edition unverified): column 1 and the sheet number field. Tests: the document uses a separate first-page footer; the other footer holds form 6 with its captions, column 1 and the field code `PAGE`; its column widths add up to the width of the form in the figure; a report long enough for two sheets renders without error (backend)
+- [ ] 6.3 Print the result accountability block and the engineer responsibility statement after the conclusion ("Result accountability block"). Tests: the block shows `result_id`, `engine_version`, `input_hash`, the `outputs` with their rounding rule and its source, the `norm_refs` with their status, the `engineer_rules` with engineer and rationale, `verdict` and `verdict_reason`, the warnings, and `unverified_step_count`; it states that the design engineer is responsible for the result; an envelope with an applicability warning prints the warning with the input, the violated bound and that bound's source; the block is the last body section, in the model and in the rendered `.docx` (backend)
+- [ ] 6.4 Fill the signature block, the rows of columns 10-13 of the form-5 title block ("GOST report structure"; GOST R 21.101-2026, edition unverified, Annex E, instructions for columns 10-13 and note 2): when the setting is enabled (the default), the developer (Разраб.) and normative control (Н. контр.) lines carry their surname (column 11) and date (column 13, `ДД.ММ.ГГ`), and the optional checker (Пров.) takes the row under the developer line; column 12 stays empty; when disabled, the role captions stay and columns 11 and 13 are empty. Tests: the default fills both lines; with a checker the row under the developer line holds Пров., the surname and the date, without one its caption, surname and date cells are empty; the date 2026-09-30 prints as `30.09.26`; with the block disabled and surnames and dates given, columns 11 and 13 are empty and the body section order is the same as with it enabled (backend)
 - [x] 6.5 (backend, no code) Check GOST R 21.101 (edition unverified) from its primary source text and decide the default of the signature-block setting; the edition stays `unverified` until the normative pipeline confirms it (2026-09-27; checked against GOST R 21.101-2026, clause 4.1.7 and Annex E; default enabled; see `design.md` decision 10)
 
 ## 7. Pilot and sync
@@ -76,7 +83,7 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 
 ## 8. Close
 
-- [ ] 8.1 (spec) After 1.2-1.8 pass, confirm the final version of the change is on `develop`
+- [ ] 8.1 (spec) After 1.2-1.9 pass, confirm the final version of the change is on `develop`
 - [x] 8.2 (spec) Confirm WP1 task 2.1 (`retarget-mvp-domain`) is closed: the WP1 engine and output deltas match this contract (2026-09-27; `docs/decisions/retarget-mvp-domain-akim-review.md`)
 - [ ] 8.3 (spec) `spec-keeper` syncs the deltas and archives the change, after `retarget-mvp-domain` is archived
 
@@ -87,7 +94,9 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 - `backend-layered-architecture` (WP5) is applied first: task 7.1 needs its `parameters/param_schemas.py`, `schemas/parameters.py` and the calculator registry (its task 6.1), and tasks 2.1, 3.6 and 4.3 extend that registry. WP5 needs nothing from this change, since `Calculator` is generic over the types.
 - Task 7.2 runs after this change is applied.
 - Inside this change: tasks 7.1a and 7.1b need tasks 4.3 and 5.1 (the parameter file's `RoundingRule` and bound schemas change there), and 7.1b also needs 2.5 and 3.6.
-- `feature/report-generator/backend` (tasks 6.3-6.4) and `feature/frontend-app/frontend` (tasks 3.4, 3.5, 5.4) consume the `ResultEnvelope` and trace types of `feature/calculation-engine/backend`. Each branches from `feature/calculation-engine/backend` once tasks 3.1, 3.6, 4.4, 6.1 and 6.1b are done there, and merges into `develop` after it (`AGENTS.md`, Branching rules).
+- `feature/report-generator/backend` (tasks 6.2a-6.2f and 6.3-6.4) and `feature/frontend-app/frontend` (tasks 3.4, 3.5, 5.4) consume the `ResultEnvelope` and trace types of `feature/calculation-engine/backend`. Each branches from `feature/calculation-engine/backend` once tasks 3.1, 3.6, 4.4, 6.1 and 6.1b are done there, and merges into `develop` after it (`AGENTS.md`, Branching rules).
+- Inside `feature/report-generator/backend` (added 2026-09-30): tasks 6.2a to 6.2f run in that order; task 6.3 needs 6.2b, task 6.4 needs 6.2e. Task 1.9 is done before task 6.2a starts. Every report test uses synthetic envelopes, so no report task waits for task 7.1.
+- Follow-up, not in this change (added 2026-09-30; owner Akim, a later `report-generator` change): length limits per title-block column, since a text longer than its cell is cut (`design.md` decision 18, "Risk").
 - Task 1.8 (Egor's acknowledgement, added 2026-09-29): task 6.2 is checked off only after it. Task 2.5 may start before it; a change to the node set from Egor's answer is then applied to the interpreter.
 - Task 7.1c (added 2026-09-29) waits for: `normatives-formula-contract` tasks 1.4-1.7
   merged into `develop` (Egor); the expression-tree field and the symbol binding on stored
@@ -102,10 +111,10 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 - [x] `openspec validate --strict` passes (task 1.2; re-run for task 1.7 on 2026-09-29)
 - [x] Functional requirements and scenarios recorded
 - [x] Non-functional requirements recorded (`design.md`, "Non-functional requirements")
-- [x] Each task is small enough for one session (re-checked 2026-09-29: tasks 4.3, 6.1 and 7.1a split)
+- [x] Each task is small enough for one session (re-checked 2026-09-29: tasks 4.3, 6.1 and 7.1a split; 2026-09-30: the report tasks split into 6.2a-6.2f)
 - [x] Acceptance and Go/No-Go criteria written (below)
 - [x] Branches defined (above)
-- [ ] Dependencies satisfied: `NormRef` agreed with Egor (task 1.3; his written agreement is in `docs/decisions/normref-questions-egor.md`, commit `a1a896c`); open since 2026-09-29: task 1.7 (review of the audit changes) for every implementation task, task 1.8 for task 6.2, and the items of "Dependencies" for task 7.1c
+- [ ] Dependencies satisfied: `NormRef` agreed with Egor (task 1.3; his written agreement is in `docs/decisions/normref-questions-egor.md`, commit `a1a896c`); open since 2026-09-29: task 1.7 (review of the audit changes) for every implementation task, task 1.8 for task 6.2, and the items of "Dependencies" for task 7.1c; open since 2026-09-30: task 1.9 for tasks 6.2a-6.4
 
 ## DOD and Go / No-Go
 
@@ -114,7 +123,8 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
   no blockers; `norm-traceability-checker` confirms no norm value is fixed; Egor's
   agreement is recorded in his own words in `docs/decisions/normref-questions-egor.md`
   (commit `a1a896c`). Since 2026-09-29 also: task 1.7 is done with no blocker and no
-  major finding, and Egor's acknowledgement of task 1.8 is recorded.
+  major finding, and Egor's acknowledgement of task 1.8 is recorded. Since 2026-09-30
+  also: task 1.9 is done with no blocker and no major finding.
 - For implementation: all tests of sections 2-6 pass with >= 95% branch coverage;
   `ui-ux-tester` confirms the frontend tasks 3.4, 3.5, and 5.4; the delta specs match the
   implementation.
