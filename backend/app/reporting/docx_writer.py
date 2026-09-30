@@ -4,6 +4,7 @@ from docx import Document
 from docx.document import Document as DocumentObject
 
 from app.reporting.format import OPERATORS, format_norm_ref, format_quantity
+from app.reporting.layout import apply_sheet, fit_table
 from app.reporting.model import ConclusionSection, InputSection, Report, TraceSection
 from app.schemas.calculation import BoundViolation, CheckStep, NormRef, TraceStep
 
@@ -74,6 +75,7 @@ def _write_inputs(document: DocumentObject, section: InputSection) -> None:
     for row in section.rows:
         cells = table.add_row().cells
         cells[0].text, cells[1].text = row.quantity, format_quantity(row.value)
+    fit_table(table)
 
 
 def _write_trace(document: DocumentObject, section: TraceSection) -> None:
@@ -87,6 +89,7 @@ def _write_trace(document: DocumentObject, section: TraceSection) -> None:
 def render_docx(report: Report) -> bytes:
     """Write the report body to ``.docx`` in memory (design.md decision 18)."""
     document = Document()
+    apply_sheet(document)
     for number, section in enumerate(report.body, start=1):
         heading = document.add_paragraph()
         heading.add_run(f"{number} {SECTION_TITLES[section.kind]}").bold = True
