@@ -13,8 +13,9 @@ from docx.shared import Mm, Pt
 from docx.table import Table
 from docx.text.paragraph import Paragraph
 
+from app.reporting.format import format_date
 from app.reporting.layout import FRAME_MM, SHEET_MM
-from app.schemas.report import TitleBlockData
+from app.schemas.report import ReportRequest, Signatory
 
 FORM5_WIDTHS_MM = (10, 10, 10, 10, 15, 10, 70, 15, 15, 20)
 """Column widths of form 5, left to right (GOST R 21.101-2026, edition unverified, Annex E)."""
@@ -56,6 +57,19 @@ FORM5_COLUMNS: MappingProxyType[str, tuple[int, int]] = MappingProxyType(
 
 CHANGE_CELLS = tuple((row, column) for row in (0, 1) for column in range(6))
 """Columns 14-19 (changes): empty in the MVP."""
+
+SIGNATURE_ROWS: MappingProxyType[str, int] = MappingProxyType(
+    {"developer": 3, "checker": 4, "normative_control": 6}
+)
+"""Rows of form 5 for the developer, the checker (the row under the developer) and normative control."""
+
+SIGNATURE_COLUMNS: MappingProxyType[str, int] = MappingProxyType({"10": 0, "11": 2, "12": 4, "13": 5})
+"""Grid column of columns 10 (role), 11 (surname), 12 (signature) and 13 (date) in those rows."""
+
+CHECKER_CAPTION = "Пров."
+
+DATE_SIZE_PT = 6
+"""A date ``ДД.ММ.ГГ`` is about 3.9 em wide; at 6 pt it fits column 13 (10 mm less the cell margins)."""
 
 FORM6_WIDTHS_MM = (10, 10, 10, 10, 15, 10, 110, 10)
 """Column widths of form 6, left to right (GOST R 21.101-2026, edition unverified, Annex E)."""
@@ -227,13 +241,33 @@ def _footer_form(footer: _Footer, style: str, form: Form) -> Table:
     return table
 
 
-def add_title_blocks(document: Document, title: TitleBlockData) -> tuple[Table, Table]:
+def _sign(table: Table, row: int, signatory: Signatory) -> None:
+    table.cell(row, SIGNATURE_COLUMNS["11"]).paragraphs[0].add_run(signatory.surname)
+    date = format_date(signatory.date) if signatory.date else ""
+    table.cell(row, SIGNATURE_COLUMNS["13"]).paragraphs[0].add_run(date).font.size = Pt(DATE_SIZE_PT)
+
+
+def _signatures(table: Table, request: ReportRequest) -> None:
+    """Columns 10-13 of form 5: filled only while the signature block is enabled; column 12 stays empty."""
+    if not request.signature_block:
+        return
+    for role in ("developer", "checker", "normative_control"):
+        signatory = getattr(request, role)
+        if signatory is None:
+            continue
+        if role == "checker":
+            table.cell(SIGNATURE_ROWS[role], SIGNATURE_COLUMNS["10"]).paragraphs[0].add_run(CHECKER_CAPTION)
+        _sign(table, SIGNATURE_ROWS[role], signatory)
+
+
+def add_title_blocks(document: Document, request: ReportRequest) -> tuple[Table, Table]:
     """Form 5 in the first-page footer and form 6 in the footer of the following sheets.
 
-    Form 5 carries columns 1, 5, 6 and 9 and the sheet fields of columns 7 and 8; form 6
-    carries column 1 and the sheet number. Both have column 26 under the frame and empty
-    columns 14-19.
+    Form 5 carries columns 1, 5, 6 and 9, the sheet fields of columns 7 and 8, and the
+    signature block in columns 10-13; form 6 carries column 1 and the sheet number. Both
+    have column 26 under the frame and empty columns 14-19.
     """
+    title = request.title
     section = document.sections[0]
     section.different_first_page_header_footer = True
     style = _title_style(document)
@@ -249,6 +283,7 @@ def add_title_blocks(document: Document, title: TitleBlockData) -> tuple[Table, 
         },
         FIELDS,
     )
+    _signatures(first, request)
     following = _footer_form(section.footer, style, FORM6)
     _fill(following, FORM6, {"1": (title.designation, LARGE_SIZE_PT)}, {"7": FIELDS["7"]})
     return first, following

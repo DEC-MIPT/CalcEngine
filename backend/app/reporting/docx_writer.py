@@ -106,7 +106,7 @@ def render_docx(report: Report) -> bytes:
     """Write the report body to ``.docx`` in memory (design.md decision 18)."""
     document = Document()
     apply_sheet(document)
-    add_title_blocks(document, report.request.title)
+    add_title_blocks(document, report.request)
     for number, section in enumerate(report.body, start=1):
         heading = document.add_paragraph()
         heading.add_run(f"{number} {SECTION_TITLES[section.kind]}").bold = True

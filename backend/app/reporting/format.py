@@ -1,3 +1,4 @@
+import datetime
 from decimal import Decimal
 from types import MappingProxyType
 
@@ -95,3 +96,8 @@ def format_source(source: Source) -> str:
 
 def format_rounding(rule: RoundingRule) -> str:
     return f"{rule.decimals} знак(а) после запятой, {ROUNDING_MODES[rule.mode]}"
+
+
+def format_date(day: datetime.date) -> str:
+    """``ДД.ММ.ГГ``: the year as its last two digits (GOST R 21.101-2026, edition unverified, Annex E, note 2)."""
+    return day.strftime("%d.%m.%y")
