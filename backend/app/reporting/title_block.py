@@ -1,3 +1,5 @@
+from collections.abc import Mapping
+from dataclasses import dataclass
 from types import MappingProxyType
 
 from docx.document import Document
@@ -55,6 +57,51 @@ FORM5_COLUMNS: MappingProxyType[str, tuple[int, int]] = MappingProxyType(
 CHANGE_CELLS = tuple((row, column) for row in (0, 1) for column in range(6))
 """Columns 14-19 (changes): empty in the MVP."""
 
+FORM6_WIDTHS_MM = (10, 10, 10, 10, 15, 10, 110, 10)
+"""Column widths of form 6, left to right (GOST R 21.101-2026, edition unverified, Annex E)."""
+
+FORM6_ROW_HEIGHTS_MM = (5, 2, 3, 5)
+"""Form 6 is 15 mm high: three rows of 5 mm on the left, 7 mm and 8 mm under "Лист" on
+the right. One grid holds both, so its rows are 5, 2, 3 and 5 mm and cells merge across."""
+
+FORM6_MERGES: tuple[tuple[int, int, int, int], ...] = (
+    (0, 6, 3, 6),
+    (0, 7, 1, 7),
+    (2, 7, 3, 7),
+    *((1, column, 2, column) for column in range(6)),
+)
+
+FORM6_CAPTIONS: MappingProxyType[tuple[int, int], str] = MappingProxyType(
+    {
+        (3, 0): "Изм.",
+        (3, 1): "Кол.уч",
+        (3, 2): "Лист",
+        (3, 3): "№ док.",
+        (3, 4): "Подп.",
+        (3, 5): "Дата",
+        (0, 7): "Лист",
+    }
+)
+
+FORM6_COLUMNS: MappingProxyType[str, tuple[int, int]] = MappingProxyType({"1": (0, 6), "7": (2, 7)})
+
+FORM6_CHANGE_CELLS = tuple((row, column) for row in (0, 1) for column in range(6))
+
+
+@dataclass(frozen=True)
+class Form:
+    """The grid of one title-block form: widths, row heights, merges, captions, data columns."""
+
+    widths_mm: tuple[int, ...]
+    row_heights_mm: tuple[int, ...]
+    merges: tuple[tuple[int, int, int, int], ...]
+    captions: MappingProxyType[tuple[int, int], str]
+    columns: MappingProxyType[str, tuple[int, int]]
+
+
+FORM5 = Form(FORM5_WIDTHS_MM, (ROW_HEIGHT_MM,) * FORM5_ROWS, FORM5_MERGES, FORM5_CAPTIONS, FORM5_COLUMNS)
+FORM6 = Form(FORM6_WIDTHS_MM, FORM6_ROW_HEIGHTS_MM, FORM6_MERGES, FORM6_CAPTIONS, FORM6_COLUMNS)
+
 SHEET_FORMAT = "А4"
 FORMAT_BOX_MM = (150, 40)
 """Column 26 under the lower frame line, below the right part of the form: x and width."""
@@ -101,21 +148,21 @@ def _borders(table: Table) -> None:
     table._tbl.tblPr.insert_element_before(margins, "w:tblLook")
 
 
-def _grid(footer: _Footer, style: str) -> Table:
-    widths = [Mm(width) for width in FORM5_WIDTHS_MM]
-    table = footer.add_table(FORM5_ROWS, len(widths), Mm(sum(FORM5_WIDTHS_MM)))
+def _grid(footer: _Footer, style: str, form: Form) -> Table:
+    widths = [Mm(width) for width in form.widths_mm]
+    table = footer.add_table(len(form.row_heights_mm), len(widths), Mm(sum(form.widths_mm)))
     table.autofit = False
     _borders(table)
     for index, width in enumerate(widths):
         table.columns[index].width = width
-    for row in table.rows:
-        row.height, row.height_rule = Mm(ROW_HEIGHT_MM), WD_ROW_HEIGHT_RULE.EXACTLY
+    for row, height in zip(table.rows, form.row_heights_mm, strict=True):
+        row.height, row.height_rule = Mm(height), WD_ROW_HEIGHT_RULE.EXACTLY
         for index, cell in enumerate(row.cells):
             cell.width = widths[index]
             cell.paragraphs[0].style = style
-    for first_row, first_column, last_row, last_column in FORM5_MERGES:
+    for first_row, first_column, last_row, last_column in form.merges:
         table.cell(first_row, first_column).merge(table.cell(last_row, last_column))
-    for (row, column), caption in FORM5_CAPTIONS.items():
+    for (row, column), caption in form.captions.items():
         table.cell(row, column).paragraphs[0].text = caption
     return table
 
@@ -159,29 +206,49 @@ def _field(paragraph: Paragraph, instruction: str) -> None:
     paragraph._p.append(field)
 
 
-def _fill(table: Table, title: TitleBlockData) -> None:
-    texts = {
-        "1": (title.designation, LARGE_SIZE_PT),
-        "5": (title.document_name, LARGE_SIZE_PT),
-        "6": (title.documentation_kind, TITLE_SIZE_PT),
-        "9": (title.organization, TITLE_SIZE_PT),
-    }
+def _fill(
+    table: Table,
+    form: Form,
+    texts: Mapping[str, tuple[str, int]],
+    fields: Mapping[str, str],
+) -> None:
     for column, (text, size) in texts.items():
-        cell = table.cell(*FORM5_COLUMNS[column])
+        cell = table.cell(*form.columns[column])
         cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
         cell.paragraphs[0].add_run(text).font.size = Pt(size)
-    for column, instruction in FIELDS.items():
-        _field(table.cell(*FORM5_COLUMNS[column]).paragraphs[0], instruction)
+    for column, instruction in fields.items():
+        _field(table.cell(*form.columns[column]).paragraphs[0], instruction)
 
 
-def add_form5(document: Document, title: TitleBlockData) -> Table:
-    """Form 5 in the first-page footer: grid, captions, data of columns 1 and 5-9, column 26."""
-    section = document.sections[0]
-    section.different_first_page_header_footer = True
-    footer = section.first_page_footer
-    style = _title_style(document)
+def _footer_form(footer: _Footer, style: str, form: Form) -> Table:
     _format_box(footer.paragraphs[0], style)
-    table = _grid(footer, style)
-    _fill(table, title)
+    table = _grid(footer, style, form)
     _closing_paragraph(footer, style)
     return table
+
+
+def add_title_blocks(document: Document, title: TitleBlockData) -> tuple[Table, Table]:
+    """Form 5 in the first-page footer and form 6 in the footer of the following sheets.
+
+    Form 5 carries columns 1, 5, 6 and 9 and the sheet fields of columns 7 and 8; form 6
+    carries column 1 and the sheet number. Both have column 26 under the frame and empty
+    columns 14-19.
+    """
+    section = document.sections[0]
+    section.different_first_page_header_footer = True
+    style = _title_style(document)
+    first = _footer_form(section.first_page_footer, style, FORM5)
+    _fill(
+        first,
+        FORM5,
+        {
+            "1": (title.designation, LARGE_SIZE_PT),
+            "5": (title.document_name, LARGE_SIZE_PT),
+            "6": (title.documentation_kind, TITLE_SIZE_PT),
+            "9": (title.organization, TITLE_SIZE_PT),
+        },
+        FIELDS,
+    )
+    following = _footer_form(section.footer, style, FORM6)
+    _fill(following, FORM6, {"1": (title.designation, LARGE_SIZE_PT)}, {"7": FIELDS["7"]})
+    return first, following

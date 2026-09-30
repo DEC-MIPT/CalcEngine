@@ -6,7 +6,7 @@ from docx.document import Document as DocumentObject
 from app.reporting.format import OPERATORS, format_norm_ref, format_quantity
 from app.reporting.layout import apply_sheet, fit_table
 from app.reporting.model import ConclusionSection, InputSection, Report, TraceSection
-from app.reporting.title_block import add_form5
+from app.reporting.title_block import add_title_blocks
 from app.schemas.calculation import BoundViolation, CheckStep, NormRef, TraceStep
 
 SECTION_TITLES = {"inputs": "Исходные данные", "trace": "Расчёт", "conclusion": "Заключение"}
@@ -91,7 +91,7 @@ def render_docx(report: Report) -> bytes:
     """Write the report body to ``.docx`` in memory (design.md decision 18)."""
     document = Document()
     apply_sheet(document)
-    add_form5(document, report.request.title)
+    add_title_blocks(document, report.request.title)
     for number, section in enumerate(report.body, start=1):
         heading = document.add_paragraph()
         heading.add_run(f"{number} {SECTION_TITLES[section.kind]}").bold = True
