@@ -29,6 +29,20 @@ class Formula(BaseModel):
         return self
 
 
+class Threshold(BaseModel):
+    """A value of a norm that decides which branch of a method runs (design.md decision 11).
+
+    A branch is not a trace step; its threshold is a resolved parameter with its own
+    ``NormRef`` list, never a literal in code.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    latex: str = Field(min_length=1)
+    value: QuantityValue
+    norm_refs: NormRefs
+
+
 class TableValue(BaseModel):
     """One entry of a norm's table as a resolved parameter."""
 

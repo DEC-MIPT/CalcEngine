@@ -59,6 +59,20 @@ def table_step(step_id: str, entry: TableValue, selectors: Mapping[str, Quantity
     )
 
 
+def compare(
+    step_id: str, left: QuantityValue, operator: Operator, right: QuantityValue
+) -> bool:
+    """Compare two values in the same unit, for a check step or a branch of a method."""
+    if left.unit != right.unit:
+        raise UnitError(f"step {step_id!r} compares {left.unit!r} with {right.unit!r}")
+    return {
+        "le": left.value <= right.value,
+        "lt": left.value < right.value,
+        "ge": left.value >= right.value,
+        "gt": left.value > right.value,
+    }[operator]
+
+
 def check_step(
     step_id: str,
     left: tuple[str, QuantityValue],
@@ -68,16 +82,7 @@ def check_step(
 ) -> CheckStep:
     """Compare two values in the same unit; ``left`` and ``right`` pair a LaTeX symbol with a value."""
     (left_symbol, left_value), (right_symbol, right_value) = left, right
-    if left_value.unit != right_value.unit:
-        raise UnitError(
-            f"step {step_id!r} compares {left_value.unit!r} with {right_value.unit!r}"
-        )
-    passed = {
-        "le": left_value.value <= right_value.value,
-        "lt": left_value.value < right_value.value,
-        "ge": left_value.value >= right_value.value,
-        "gt": left_value.value > right_value.value,
-    }[operator]
+    passed = compare(step_id, left_value, operator, right_value)
     return CheckStep(
         step_id=step_id,
         expression=f"{left_symbol} {_LATEX[operator]} {right_symbol}",
