@@ -220,7 +220,8 @@ the frame and the title blocks from GOST R 21.101-2026 and adds no norm value of
     bit-for-bit comparison of "Pure calculation function".
 18. **The report is a model and a renderer** (tasks 6.2a-6.4, added 2026-09-30). In
     `reporting`, a pure function builds a typed report model from the `ResultEnvelope`,
-    the request inputs, the title-block data (columns 1, 2, 3, 5, 6 and 9 of form 5), the
+    the request inputs, the title-block data (columns 1, 5, 6 and 9 of form 5; form 5 has
+    no columns 2 and 3), the
     signature-block setting, and the signatories (surname and date of the developer, the
     normative control and the optional checker, columns 11 and 13); all of these come
     with the report request, and the date is never read from the clock. A renderer writes
