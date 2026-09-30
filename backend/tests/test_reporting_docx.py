@@ -21,8 +21,8 @@ def read_back(data: bytes) -> tuple[list[str], list[list[str]]]:
 def test_the_docx_holds_the_body_sections_in_order() -> None:
     paragraphs, _ = read_back(render_docx(report()))
 
-    headings = [text for text in paragraphs if text in {"1 Исходные данные", "2 Расчёт", "3 Заключение"}]
-    assert headings == ["1 Исходные данные", "2 Расчёт", "3 Заключение"]
+    expected = ["1 Исходные данные", "2 Расчёт", "3 Заключение", "4 Подотчётность результата"]
+    assert [text for text in paragraphs if text in expected] == expected
 
 
 def test_the_input_table_holds_the_inputs_in_the_declared_order() -> None:
@@ -76,7 +76,9 @@ def test_a_refused_report_prints_the_refusal_and_the_bound() -> None:
     trace_start = paragraphs.index("2 Расчёт")
     assert paragraphs[trace_start + 1] == "Расчёт не выполнялся: входное значение вне области применения метода."
     assert paragraphs[trace_start + 2] == "3 Заключение"
-    assert paragraphs[trace_start + 3 :] == conclusion_lines(conclusion)
+    lines = conclusion_lines(conclusion)
+    assert paragraphs[trace_start + 3 : trace_start + 3 + len(lines)] == lines
+    assert paragraphs[trace_start + 3 + len(lines)] == "4 Подотчётность результата"
     assert "Нарушенная граница: b = 2 м, допускается не более 1 м." in paragraphs
 
 

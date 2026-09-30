@@ -48,8 +48,16 @@ class ConclusionSection(_Section):
     violation: BoundViolation | None
 
 
+class AccountabilitySection(_Section):
+    """The result accountability block: the envelope's fields, printed after the conclusion."""
+
+    kind: Literal["accountability"] = "accountability"
+    envelope: ResultEnvelope
+
+
 BodySection = Annotated[
-    InputSection | TraceSection | ConclusionSection, Field(discriminator="kind")
+    InputSection | TraceSection | ConclusionSection | AccountabilitySection,
+    Field(discriminator="kind"),
 ]
 
 
@@ -92,8 +100,9 @@ def build_report(
     """The report model of one result (``calculation-core-contract`` design.md decision 18).
 
     The body holds the input-data table in the contract's order of inputs, the trace,
-    and the conclusion. A refused calculation keeps every section: its trace section
-    holds no step, and its conclusion names the violated bound.
+    the conclusion, and the result accountability block. A refused calculation keeps
+    every section: its trace section holds no step, and its conclusion names the
+    violated bound.
     """
     return Report(
         request=request,
@@ -101,5 +110,6 @@ def build_report(
             InputSection(rows=_input_rows(contract, inputs)),
             TraceSection(refused=envelope.verdict == "refused", steps=envelope.trace),
             _conclusion(envelope),
+            AccountabilitySection(envelope=envelope),
         ),
     )

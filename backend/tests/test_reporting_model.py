@@ -14,6 +14,7 @@ from app.core.exceptions import InputValidationError
 from app.engine import foundations_shallow_r as pilot
 from app.engine.registry import CalculatorRegistry
 from app.reporting.model import (
+    AccountabilitySection,
     ConclusionSection,
     InputSection,
     Report,
@@ -69,8 +70,21 @@ def report(given: dict[str, QuantityValue] | None = None, **kwargs: bool) -> Rep
     return build_report(pilot.contract(ROUNDING, RULE), given, envelope(given, **kwargs), REQUEST)
 
 
-def test_the_body_sections_are_inputs_trace_and_conclusion_in_this_order() -> None:
-    assert [section.kind for section in report().body] == ["inputs", "trace", "conclusion"]
+@pytest.mark.parametrize("refused", [False, True], ids=["completed", "refused"])
+def test_the_body_sections_are_in_the_order_of_the_requirement(refused: bool) -> None:
+    kinds = [section.kind for section in report(refused=refused).body]
+
+    assert kinds == ["inputs", "trace", "conclusion", "accountability"]
+
+
+def test_the_accountability_block_carries_the_envelope() -> None:
+    given = inputs()
+    result = envelope(given)
+
+    block = build_report(pilot.contract(ROUNDING, RULE), given, result, REQUEST).body[-1]
+
+    assert isinstance(block, AccountabilitySection)
+    assert block.envelope == result
 
 
 def test_the_input_table_follows_the_declared_order_in_the_units_of_the_request() -> None:
@@ -120,7 +134,7 @@ def test_the_conclusion_names_the_deciding_check(p: float, verdict: str, passed:
 def test_a_refused_calculation_keeps_the_sections_and_names_the_bound() -> None:
     refused = report(refused=True)
 
-    inputs_section, trace, conclusion = refused.body
+    inputs_section, trace, conclusion, _ = refused.body
     assert isinstance(inputs_section, InputSection) and len(inputs_section.rows) == len(pilot.INPUTS)
     assert isinstance(trace, TraceSection) and (trace.refused, trace.steps) == (True, ())
     assert isinstance(conclusion, ConclusionSection)

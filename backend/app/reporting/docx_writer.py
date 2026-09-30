@@ -3,13 +3,30 @@ from io import BytesIO
 from docx import Document
 from docx.document import Document as DocumentObject
 
-from app.reporting.format import OPERATORS, format_norm_ref, format_quantity
+from app.reporting.accountability import RESPONSIBILITY, accountability_lines
+from app.reporting.format import (
+    OPERATORS,
+    format_bound,
+    format_norm_ref,
+    format_quantity,
+)
 from app.reporting.layout import apply_sheet, fit_table
-from app.reporting.model import ConclusionSection, InputSection, Report, TraceSection
+from app.reporting.model import (
+    AccountabilitySection,
+    ConclusionSection,
+    InputSection,
+    Report,
+    TraceSection,
+)
 from app.reporting.title_block import add_title_blocks
 from app.schemas.calculation import BoundViolation, CheckStep, NormRef, TraceStep
 
-SECTION_TITLES = {"inputs": "Исходные данные", "trace": "Расчёт", "conclusion": "Заключение"}
+SECTION_TITLES = {
+    "inputs": "Исходные данные",
+    "trace": "Расчёт",
+    "conclusion": "Заключение",
+    "accountability": "Подотчётность результата",
+}
 STEP_KINDS = {"formula": "Формула", "table": "Табличное значение", "check": "Проверка"}
 VERDICTS = {
     "pass": "Все проверки выполнены.",
@@ -17,7 +34,6 @@ VERDICTS = {
     "refused": "Расчёт отклонён: входное значение вне области применения метода.",
 }
 REFUSED_TRACE = "Расчёт не выполнялся: входное значение вне области применения метода."
-BOUND_WORDS = {("min", True): "не менее", ("min", False): "более", ("max", True): "не более", ("max", False): "менее"}
 
 
 def _passed(passed: bool) -> str:
@@ -50,10 +66,9 @@ def step_lines(number: int, step: TraceStep) -> list[str]:
 
 def _violation_lines(violation: BoundViolation) -> list[str]:
     bound = violation.bound
-    limit = format_quantity(violation.value.model_copy(update={"value": bound.value}))
-    allowed = f"допускается {BOUND_WORDS[(bound.kind, bound.inclusive)]} {limit}."
+    allowed = format_bound(bound, violation.value.unit)
     return [
-        f"Нарушенная граница: {bound.quantity} = {format_quantity(violation.value)}, {allowed}",
+        f"Нарушенная граница: {bound.quantity} = {format_quantity(violation.value)}, {allowed}.",
         *_sources(bound.source),
     ]
 
@@ -99,6 +114,10 @@ def render_docx(report: Report) -> bytes:
             _write_inputs(document, section)
         elif isinstance(section, TraceSection):
             _write_trace(document, section)
+        elif isinstance(section, AccountabilitySection):
+            for line in accountability_lines(section):
+                document.add_paragraph(line)
+            document.add_paragraph().add_run(RESPONSIBILITY).bold = True
         else:
             for line in conclusion_lines(section):
                 document.add_paragraph(line)
