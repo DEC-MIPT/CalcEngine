@@ -2,7 +2,7 @@ from types import MappingProxyType
 
 from docx.document import Document
 from docx.enum.style import WD_STYLE_TYPE
-from docx.enum.table import WD_ROW_HEIGHT_RULE
+from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_ROW_HEIGHT_RULE
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
@@ -12,6 +12,7 @@ from docx.table import Table
 from docx.text.paragraph import Paragraph
 
 from app.reporting.layout import FRAME_MM, SHEET_MM
+from app.schemas.report import TitleBlockData
 
 FORM5_WIDTHS_MM = (10, 10, 10, 10, 15, 10, 70, 15, 15, 20)
 """Column widths of form 5, left to right (GOST R 21.101-2026, edition unverified, Annex E)."""
@@ -60,6 +61,11 @@ FORMAT_BOX_MM = (150, 40)
 
 TITLE_STYLE = "DEC Title Block"
 TITLE_SIZE_PT = 7
+LARGE_SIZE_PT = 10
+"""Columns 1 and 5 print larger than the captions; a layout choice, not a norm value."""
+
+FIELDS: MappingProxyType[str, str] = MappingProxyType({"7": "PAGE", "8": "NUMPAGES"})
+"""Column 7 (sheet number) and column 8 (number of sheets) as Word fields."""
 CELL_MARGIN_MM = 0.5
 OUTER_LINE, INNER_LINE = "12", "4"
 """Line widths of the form in eighths of a point; layout choices, not norm values."""
@@ -141,13 +147,41 @@ def _closing_paragraph(footer: _Footer, style: str) -> None:
     closing.paragraph_format.line_spacing = Pt(1)
 
 
-def add_form5(document: Document) -> Table:
-    """Form 5 in the first-page footer: its grid, captions, column 26 and empty columns 14-19."""
+def _field(paragraph: Paragraph, instruction: str) -> None:
+    """A simple Word field; its cached text is ``1`` until the viewer updates it."""
+    field = OxmlElement("w:fldSimple")
+    field.set(qn("w:instr"), f" {instruction} ")
+    run = OxmlElement("w:r")
+    text = OxmlElement("w:t")
+    text.text = "1"
+    run.append(text)
+    field.append(run)
+    paragraph._p.append(field)
+
+
+def _fill(table: Table, title: TitleBlockData) -> None:
+    texts = {
+        "1": (title.designation, LARGE_SIZE_PT),
+        "5": (title.document_name, LARGE_SIZE_PT),
+        "6": (title.documentation_kind, TITLE_SIZE_PT),
+        "9": (title.organization, TITLE_SIZE_PT),
+    }
+    for column, (text, size) in texts.items():
+        cell = table.cell(*FORM5_COLUMNS[column])
+        cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+        cell.paragraphs[0].add_run(text).font.size = Pt(size)
+    for column, instruction in FIELDS.items():
+        _field(table.cell(*FORM5_COLUMNS[column]).paragraphs[0], instruction)
+
+
+def add_form5(document: Document, title: TitleBlockData) -> Table:
+    """Form 5 in the first-page footer: grid, captions, data of columns 1 and 5-9, column 26."""
     section = document.sections[0]
     section.different_first_page_header_footer = True
     footer = section.first_page_footer
     style = _title_style(document)
     _format_box(footer.paragraphs[0], style)
     table = _grid(footer, style)
+    _fill(table, title)
     _closing_paragraph(footer, style)
     return table

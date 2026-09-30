@@ -20,6 +20,7 @@ from app.reporting.title_block import (
     FORM5_WIDTHS_MM,
     ROW_HEIGHT_MM,
 )
+from app.schemas.report import TitleBlockData
 
 
 @pytest.fixture(scope="module")
@@ -106,3 +107,35 @@ def test_the_form_text_is_not_indented_like_the_body(form5: Table) -> None:
 
     assert paragraph.style is not None and paragraph.style.name == "DEC Title Block"
     assert mm(paragraph.style.paragraph_format.left_indent) == 0.0
+
+
+TITLE = TitleBlockData(
+    designation="<DESIGNATION>", document_name="<DOCUMENT>", documentation_kind="<KIND>", organization="<ORG>"
+)
+
+
+@pytest.fixture(scope="module")
+def filled() -> Table:
+    model = report()
+    request = model.request.model_copy(update={"title": TITLE})
+    document = Document(BytesIO(render_docx(model.model_copy(update={"request": request}))))
+    return document.sections[0].first_page_footer.tables[0]
+
+
+def test_each_datum_is_in_its_column(filled: Table) -> None:
+    texts = {column: filled.cell(*FORM5_COLUMNS[column]).text for column in ("1", "5", "6", "9")}
+
+    assert texts == {"1": "<DESIGNATION>", "5": "<DOCUMENT>", "6": "<KIND>", "9": "<ORG>"}
+
+
+def test_columns_7_and_8_hold_the_sheet_fields(filled: Table) -> None:
+    instructions = {
+        column: [field.get(qn("w:instr")).strip() for field in filled.cell(*FORM5_COLUMNS[column])._tc.iter(qn("w:fldSimple"))]
+        for column in ("7", "8")
+    }
+
+    assert instructions == {"7": ["PAGE"], "8": ["NUMPAGES"]}
+
+
+def test_an_empty_column_6_prints_nothing(form5: Table) -> None:
+    assert form5.cell(*FORM5_COLUMNS["6"]).text == ""

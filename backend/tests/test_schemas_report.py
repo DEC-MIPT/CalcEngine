@@ -26,10 +26,14 @@ def test_the_signature_block_is_enabled_by_default() -> None:
     assert request().signature_block is True
 
 
-def test_optional_title_columns_may_stay_empty() -> None:
-    data = TitleBlockData.model_validate(title())
+def test_column_6_may_stay_empty() -> None:
+    assert TitleBlockData.model_validate(title()).documentation_kind == ""
 
-    assert (data.enterprise, data.building, data.documentation_kind) == ("", "", "")
+
+@pytest.mark.parametrize("column", ["enterprise", "building"])
+def test_form_5_has_no_columns_2_and_3(column: str) -> None:
+    with pytest.raises(ValidationError, match="Extra inputs"):
+        TitleBlockData.model_validate(title(**{column: "<TEXT>"}))
 
 
 @pytest.mark.parametrize(
@@ -71,7 +75,7 @@ def test_a_disabled_signature_block_needs_no_signatory() -> None:
 
 
 @pytest.mark.parametrize("character", ["\n", "\t", "\x00", "\x7f"], ids=["lf", "tab", "nul", "del"])
-@pytest.mark.parametrize("field", ["designation", "building", "surname"])
+@pytest.mark.parametrize("field", ["designation", "documentation_kind", "surname"])
 def test_a_control_character_in_any_text_is_rejected(field: str, character: str) -> None:
     text = f"a{character}b"
     changes = {"developer": person(surname=text)} if field == "surname" else {"title": title(**{field: text})}

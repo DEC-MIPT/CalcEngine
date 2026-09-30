@@ -15,18 +15,16 @@ Text = Annotated[str, AfterValidator(_no_control_character)]
 
 
 class TitleBlockData(BaseModel):
-    """What the report request gives for columns 1, 2, 3, 5, 6 and 9 of the form-5 title block.
+    """What the report request gives for columns 1, 5, 6 and 9 of the form-5 title block.
 
     GOST R 21.101-2026 (edition unverified), Annex E: column 1 is the designation of the
-    document, 2 the enterprise or complex, 3 the building, 5 the name of the document,
-    6 the kind of documentation, 9 the organization. Columns 2, 3 and 6 may stay empty.
+    document, 5 the name of the document, 6 the kind of documentation, 9 the organization.
+    Column 6 may stay empty. Form 5 has no columns 2 and 3.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     designation: Text
-    enterprise: Text = ""
-    building: Text = ""
     document_name: Text
     documentation_kind: Text = ""
     organization: Text
