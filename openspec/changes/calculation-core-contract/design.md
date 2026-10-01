@@ -559,4 +559,5 @@ later design and is not fixed here.
   Mitigation: only task 7.1c depends on it, and it starts when the table data is
   available with its `NormRef`; tasks 7.1a and 7.1b use the candidate type's working
   name with synthetic data, and the other tasks of this change do not use a real
-  calculation type.
+  calculation type. Update 2026-10-01: task 7.1c moved to the planned change
+  `normative-catalog-backend`, which adds the read path from `dec_normatives`.

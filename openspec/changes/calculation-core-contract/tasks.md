@@ -5,7 +5,7 @@ Owner: Akim. Egor confirms `NormRef` only.
 Branch: spec work is committed directly to `develop` (`AGENTS.md`, Branching rules). Code
 is done on feature branches from `develop`, each merged only when its whole feature is done:
 `feature/calculation-engine/backend` (engine: every backend task of sections 2-5, tasks
-6.1-6.2, and 7.1a-7.1c), `feature/report-generator/backend` (report, tasks 6.2a-6.2f and 6.3-6.4) and
+6.1-6.2, and 7.1a-7.1b), `feature/report-generator/backend` (report, tasks 6.2a-6.2f and 6.3-6.4) and
 `feature/frontend-app/frontend` (transparent output, tasks 3.4, 3.5, 5.4), all Akim's zone.
 Checkboxes in this file are ticked in `develop` as each subtask is done on the feature branch; the code reaches `develop` only when the whole feature is done (`AGENTS.md`, Branching rules).
 
@@ -74,10 +74,10 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 
 ## 7. Pilot and sync
 
-- [ ] 7.1 Use one in-scope calculation type of `foundations-shallow` (from WP1) as the pilot for the contract tests (backend). Tasks 7.1a and 7.1b use the working name of the candidate type agreed by Egor and the PM (`docs/decisions/first-calculation-type-egor-pm.md`, question 2) with synthetic data, and do not wait for WP1 to list it; task 7.1c waits for WP1 task 3.1. Since 2026-09-28 this also carries WP5's old tasks 5.2 and 6.2 (moved here when `backend-layered-architecture` was split). Split on 2026-09-29 (`design.md` decision 11):
+- [ ] 7.1 Use one in-scope calculation type of `foundations-shallow` (from WP1) as the pilot for the contract tests (backend). Tasks 7.1a and 7.1b use the working name of the candidate type agreed by Egor and the PM (`docs/decisions/first-calculation-type-egor-pm.md`, question 2) with synthetic data, and do not wait for WP1 to list it. Task 7.1c, the run on catalog data, moved on 2026-10-01 to the planned change `normative-catalog-backend`, which adds the read path it needs. Since 2026-09-28 this also carries WP5's old tasks 5.2 and 6.2 (moved here when `backend-layered-architecture` was split). Split on 2026-09-29 (`design.md` decision 11):
   - [x] 7.1a The pilot's engineer-set parameter file under `params/`, validated by WP5's `parameters/param_schemas.py`; verify: the file validates against the engineer-set schema and contains no formula or coefficient key (done 2026-09-30 on `feature/calculation-engine/backend`, `5825cb6`) (backend)
   - [x] 7.1b The pilot under `engine/` as a pure function holding only the order of the method's steps, receiving typed inputs and resolved parameters (formulas as expression trees, coefficients and branch thresholds with their `NormRef` list), registered in WP5's `Calculator` registry with at least one check. Tests use synthetic formulas and coefficients with placeholder `NormRef`, never a real formula or value of the norm; verify: a scan of the module's syntax tree finds no numeric literal other than `0` and `1`, calling the implementation with the same inputs and resolved parameters always returns the same result, and the module has no I/O-performing import (file, network, database client). The literal scan is a partial check (a constant written as `1 + x` in code would pass it); the review of the task compares the module's arithmetic against the expression trees it evaluates (done 2026-09-30 on `feature/calculation-engine/backend`, `66f7adb`) (backend)
-  - [ ] 7.1c Run the pilot on the formula, its expression tree, its coefficients and thresholds read from `dec_normatives`; waits for the items in "Dependencies" (backend)
+  - 7.1c Moved on 2026-10-01 to the planned change `normative-catalog-backend` (Akim and Egor): run the pilot on the formula, its expression tree, its coefficients and thresholds read from `dec_normatives`. It is no longer a task of this change and does not hold back the merge of `feature/calculation-engine/backend`; its waits are listed in "Dependencies"
 - [ ] 7.2 (spec) Remaining sync with `backend-layered-architecture` (WP5) after apply of this change: fix the safe parsing of `expression` named in `design.md` "Risks", and the pipeline verification state for the `provenance` gate (`normatives-formula-contract-review-egor.md`, questions 5-10, 12). Done 2026-09-28 in WP5: the engine is a pure function receiving typed arguments (former B5, its task 6.2 moved to task 7.1 above), decision 7 names the pure function as the C/C++ boundary, and "formulas in YAML vs in code" is settled (`dec_normatives` through the `provenance` gate; `params/**/*.yaml` holds only engineer-set values, WP5 `design.md` decision 3). The change owners (Akim and Egor) edit it; this change does not. Update 2026-09-29: the safe parsing of `expression` is settled by `design.md` decision 11 (no string parsing in the engine), and the `provenance` gate by the amendment of resolution 2; what remains is the read path from `dec_normatives`, which belongs to `normative-catalog-backend`
 - [x] 7.3 (spec) Record for WP3 that `report-generator` names GOST R 21.101-2020 with an unchecked edition (2026-09-27; `design.md`, section "NormRef", "Handoff to WP3")
 
@@ -98,12 +98,13 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 - Inside `feature/report-generator/backend` (added 2026-09-30): tasks 6.2a to 6.2f run in that order; task 6.3 needs 6.2b, task 6.4 needs 6.2e. Task 1.9 is done before task 6.2a starts. Every report test uses synthetic envelopes, so no report task waits for task 7.1.
 - Follow-up, not in this change (added 2026-09-30; owner Akim, a later `report-generator` change): length limits per title-block column, since a text longer than its cell is cut (`design.md` decision 18, "Risk").
 - Task 1.8 (Egor's acknowledgement, added 2026-09-29): task 6.2 is checked off only after it. Task 2.5 may start before it; a change to the node set from Egor's answer is then applied to the interpreter.
-- Task 7.1c (added 2026-09-29) waits for: `normatives-formula-contract` tasks 1.4-1.7
-  merged into `develop` (Egor); the expression-tree field and the symbol binding on stored
-  formulas (Egor, task 1.8); a named source for every coefficient of the pilot formula
-  (Egor); `retarget-mvp-domain` task 3.1 (Egor); and the read path from `dec_normatives`
-  in the planned `normative-catalog-backend` (Akim and Egor; not created yet). Tasks 7.1a
-  and 7.1b wait for none of these.
+- Task 7.1c (added 2026-09-29, moved to the planned `normative-catalog-backend` on
+  2026-10-01) waits for: `normatives-formula-contract` tasks 1.4-1.7 merged into
+  `develop` (Egor); the expression-tree field and the symbol binding on stored formulas
+  (Egor, task 1.8); a named source for every coefficient of the pilot formula (Egor);
+  `retarget-mvp-domain` task 3.1 (Egor); and the read path from `dec_normatives` in
+  `normative-catalog-backend` (Akim and Egor; not created yet). That change carries these
+  waits; this change no longer does. Tasks 7.1a and 7.1b wait for none of these.
 
 ## DOR checklist
 
@@ -114,7 +115,7 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 - [x] Each task is small enough for one session (re-checked 2026-09-29: tasks 4.3, 6.1 and 7.1a split; 2026-09-30: the report tasks split into 6.2a-6.2f)
 - [x] Acceptance and Go/No-Go criteria written (below)
 - [x] Branches defined (above)
-- [ ] Dependencies satisfied: `NormRef` agreed with Egor (task 1.3; his written agreement is in `docs/decisions/normref-questions-egor.md`, commit `a1a896c`); open since 2026-09-29: task 1.7 (review of the audit changes) for every implementation task, task 1.8 for task 6.2, and the items of "Dependencies" for task 7.1c; open since 2026-09-30: task 1.9 for tasks 6.2a-6.4
+- [ ] Dependencies satisfied: `NormRef` agreed with Egor (task 1.3; his written agreement is in `docs/decisions/normref-questions-egor.md`, commit `a1a896c`); open since 2026-09-29: task 1.7 (review of the audit changes) for every implementation task, task 1.8 for task 6.2 (task 7.1c and its waits moved to `normative-catalog-backend` on 2026-10-01); open since 2026-09-30: task 1.9 for tasks 6.2a-6.4
 
 ## DOD and Go / No-Go
 

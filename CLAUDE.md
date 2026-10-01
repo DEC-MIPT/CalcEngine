@@ -47,7 +47,15 @@ what it does not say. Do not restate `AGENTS.md` here.
   (his fallback, accepted by Akim 2026-09-29, `docs/decisions/
   pipeline-followup-answers-akim.md`), so Akim adds no flag endpoint, counter or button.
   Egor's `formulas.toml` is to be deleted. Egor's variable for the norms database is
-  `DEC_NORMATIVES_DATABASE_URL`; Akim's `Settings` keeps `DEC_DATABASE_URL` for `dec_app`.
+  `DEC_NORMATIVES_DATABASE_URL`; Akim's `Settings` reads `DEC_APP_DATABASE_URL` for
+  `dec_app`.
+- Backend plan (Akim, 2026-10-01): three planned changes finish the backend.
+  `calculation-api` (Akim): calculation types, calculations, stored envelopes in `dec_app`,
+  `.docx` download. `user-accounts-auth` (Akim): test accounts made by an admin command,
+  login, JWT, Argon2id; tiers, trial and billing deferred. `normative-catalog-backend`
+  (Akim and Egor): read-only access to `dec_normatives`, search, the catalog parameter
+  source; WP2 task 7.1c moved there on 2026-10-01. Questions to Egor:
+  `docs/decisions/normative-catalog-backend-questions-akim.md`.
 - Repo layout (Egor's proposal, accepted by Akim 2026-09-29, moves pending on Egor's
   side): `backend/` (with `backend/tests/`) and `frontend/` stay in the root; `ml/` is
   Egor's (`pyproject.toml`, `src/normatives_pipeline/`, `configs/`, `research/`,
