@@ -28,3 +28,15 @@ class CalculationError(DECError):
 
 class InputValidationError(DECError):
     """Raised when a calculation request does not fit its calculation type's contract."""
+
+
+class ParameterSourceUnavailableError(DECError):
+    """Raised when a registered calculation type has no configured parameter source."""
+
+
+class CalculationTypeNotRegisteredError(DECError):
+    """Raised when a stored result's calculation type is no longer registered."""
+
+
+class DatabaseUnavailableError(DECError):
+    """Raised when the application database is not configured or does not answer."""
