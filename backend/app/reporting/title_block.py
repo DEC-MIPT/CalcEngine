@@ -8,13 +8,21 @@ from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_ROW_HEIGHT_RULE
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from docx.oxml.xmlchemy import BaseOxmlElement
 from docx.section import _Footer
-from docx.shared import Mm, Pt
+from docx.shared import Length, Mm, Pt, Twips
 from docx.table import Table
 from docx.text.paragraph import Paragraph
 
 from app.reporting.format import format_date
-from app.reporting.layout import FRAME_MM, SHEET_MM
+from app.reporting.layout import (
+    BODY_INDENT_MM,
+    FRAME_LINE_EIGHTHS_PT,
+    FRAME_MM,
+    SHEET_MM,
+    line_mm,
+    margin_mm,
+)
 from app.schemas.report import ReportRequest, Signatory
 
 FORM5_WIDTHS_MM = (10, 10, 10, 10, 15, 10, 70, 15, 15, 20)
@@ -128,8 +136,19 @@ LARGE_SIZE_PT = 10
 FIELDS: MappingProxyType[str, str] = MappingProxyType({"7": "PAGE", "8": "NUMPAGES"})
 """Column 7 (sheet number) and column 8 (number of sheets) as Word fields."""
 CELL_MARGIN_MM = 0.5
-OUTER_LINE, INNER_LINE = "12", "4"
-"""Line widths of the form in eighths of a point; layout choices, not norm values."""
+OUTER_LINE, INNER_LINE = FRAME_LINE_EIGHTHS_PT, 4
+"""Line widths of the form in eighths of a point; layout choices, not norm values. The
+outer line is the frame line, so that the two lie on each other."""
+
+FRAME_SIDES = ("left", "right")
+"""The sides of the form that the frame draws: a second line there, even one lying exactly
+on the frame line, can round to a different pixel on screen and stick out of the frame."""
+
+CLOSING_TWIPS = 2
+"""Height of the paragraph a footer must end in, under the form."""
+
+BODY_GAP_MM = BODY_INDENT_MM
+"""Space between the body text and the form, as wide as the body text keeps off the frame."""
 
 
 def _title_style(document: Document) -> str:
@@ -147,8 +166,8 @@ def _borders(table: Table) -> None:
     borders = OxmlElement("w:tblBorders")
     for side in ("top", "left", "bottom", "right", "insideH", "insideV"):
         line = OxmlElement(f"w:{side}")
-        line.set(qn("w:val"), "single")
-        line.set(qn("w:sz"), INNER_LINE if side.startswith("inside") else OUTER_LINE)
+        line.set(qn("w:val"), "nil" if side in FRAME_SIDES else "single")
+        line.set(qn("w:sz"), str(INNER_LINE if side.startswith("inside") else OUTER_LINE))
         line.set(qn("w:space"), "0")
         line.set(qn("w:color"), "000000")
         borders.append(line)
@@ -158,8 +177,46 @@ def _borders(table: Table) -> None:
         margin.set(qn("w:w"), str(Mm(CELL_MARGIN_MM).twips))
         margin.set(qn("w:type"), "dxa")
         margins.append(margin)
+    table._tbl.tblPr.insert_element_before(
+        _indent(), "w:tblBorders", "w:shd", "w:tblLayout", "w:tblCellMar", "w:tblLook"
+    )
     table._tbl.tblPr.insert_element_before(borders, "w:shd", "w:tblLayout", "w:tblCellMar", "w:tblLook")
     table._tbl.tblPr.insert_element_before(margins, "w:tblLook")
+
+
+def indent_mm() -> float:
+    """The table indent that puts the left edge of the form on the left frame line.
+
+    The indent counts from the text area to the text of the first cell, so the left
+    edge of the form lies one cell margin to the left of it.
+    """
+    return FRAME_MM["left"] - margin_mm("left") + CELL_MARGIN_MM
+
+
+def _indent() -> BaseOxmlElement:
+    indent = OxmlElement("w:tblInd")
+    indent.set(qn("w:w"), str(Mm(indent_mm()).twips))
+    indent.set(qn("w:type"), "dxa")
+    return indent
+
+
+def row_heights_mm(form: Form) -> list[float]:
+    """Row heights that put the middle of every horizontal line where the figure draws it.
+
+    Word and LibreOffice draw a horizontal line below its row boundary, so each boundary
+    lies half its line width above the figure's line: the outer lines are thicker than
+    the inner ones, so the first row is longer and the last row shorter than the figure.
+    """
+    lines = [OUTER_LINE, *(INNER_LINE,) * (len(form.row_heights_mm) - 1), OUTER_LINE]
+    return [
+        height - (line_mm(lower) - line_mm(upper)) / 2
+        for height, upper, lower in zip(form.row_heights_mm, lines[:-1], lines[1:], strict=True)
+    ]
+
+
+def footer_distance_mm() -> float:
+    """The footer distance that puts the middle of the lower line of the form on the frame."""
+    return FRAME_MM["bottom"] - line_mm(OUTER_LINE) / 2 - Twips(CLOSING_TWIPS).mm
 
 
 def _grid(footer: _Footer, style: str, form: Form) -> Table:
@@ -169,7 +226,7 @@ def _grid(footer: _Footer, style: str, form: Form) -> Table:
     _borders(table)
     for index, width in enumerate(widths):
         table.columns[index].width = width
-    for row, height in zip(table.rows, form.row_heights_mm, strict=True):
+    for row, height in zip(table.rows, row_heights_mm(form), strict=True):
         row.height, row.height_rule = Mm(height), WD_ROW_HEIGHT_RULE.EXACTLY
         for index, cell in enumerate(row.cells):
             cell.width = widths[index]
@@ -201,11 +258,15 @@ def _format_box(paragraph: Paragraph, style: str) -> None:
     paragraph.text = f"Формат {SHEET_FORMAT}"
 
 
+def _exact_paragraph(footer: _Footer, style: str, height: Length) -> None:
+    paragraph = footer.add_paragraph(style=style)
+    paragraph.paragraph_format.line_spacing_rule = WD_LINE_SPACING.EXACTLY
+    paragraph.paragraph_format.line_spacing = height
+
+
 def _closing_paragraph(footer: _Footer, style: str) -> None:
     """A footer must end in a paragraph; this one takes almost no height."""
-    closing = footer.add_paragraph(style=style)
-    closing.paragraph_format.line_spacing_rule = WD_LINE_SPACING.EXACTLY
-    closing.paragraph_format.line_spacing = Pt(1)
+    _exact_paragraph(footer, style, Twips(CLOSING_TWIPS))
 
 
 def _field(paragraph: Paragraph, instruction: str) -> None:
@@ -235,7 +296,9 @@ def _fill(
 
 
 def _footer_form(footer: _Footer, style: str, form: Form) -> Table:
+    """Column 26, an empty line that keeps the body text off the form, the form, the closing paragraph."""
     _format_box(footer.paragraphs[0], style)
+    _exact_paragraph(footer, style, Mm(BODY_GAP_MM))
     table = _grid(footer, style, form)
     _closing_paragraph(footer, style)
     return table
@@ -265,11 +328,13 @@ def add_title_blocks(document: Document, request: ReportRequest) -> tuple[Table,
 
     Form 5 carries columns 1, 5, 6 and 9, the sheet fields of columns 7 and 8, and the
     signature block in columns 10-13; form 6 carries column 1 and the sheet number. Both
-    have column 26 under the frame and empty columns 14-19.
+    have column 26 under the frame and empty columns 14-19. The lower line of each form
+    is the lower frame line, so the footer distance is set here.
     """
     title = request.title
     section = document.sections[0]
     section.different_first_page_header_footer = True
+    section.footer_distance = Mm(footer_distance_mm())
     style = _title_style(document)
     first = _footer_form(section.first_page_footer, style, FORM5)
     _fill(
