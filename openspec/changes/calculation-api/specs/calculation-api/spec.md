@@ -30,6 +30,8 @@ stores its result envelope, and returns that envelope with status `201` and a `L
 header naming the stored result. A calculation that the method's range refuses
 (`calculation-engine` "Applicability check with three outcomes") SHALL be stored and
 returned the same way, with the verdict `refused`; a refusal is a result, not an error.
+That requirement is part of the `calculation-engine` delta of the active change
+`calculation-core-contract`, which is archived before this one.
 
 #### Scenario: Calculation completes
 - **WHEN** a client posts a valid request for a registered type whose inputs are inside
@@ -58,9 +60,10 @@ rejected with `422`.
 
 #### Scenario: Malformed request
 - **WHEN** a client posts a body that is not a calculation request (a missing field, a
-  wrong type, an unknown field, or a non-finite number)
-- **THEN** the response is `422` with the error body, the engine does not run, and
-  nothing is stored
+  wrong type, an unknown field, a non-finite number, or a unit outside the unit
+  vocabulary)
+- **THEN** the response is `422` with the code `validation_error` and the error body,
+  the engine does not run, and nothing is stored
 
 #### Scenario: Unknown calculation type
 - **WHEN** a client posts a request whose calculation type is not registered
@@ -69,8 +72,9 @@ rejected with `422`.
 #### Scenario: Inputs do not fit the type's contract
 - **WHEN** a client posts a request with a missing or undeclared input, or with an input
   in a unit of another dimension than the declared one
-- **THEN** the response is `422` with the error body naming the input, the engine does
-  not run, and nothing is stored
+- **THEN** the response is `422` with the code `invalid_input` and one entry in `fields`
+  per offending input, whose location is `["body", "inputs", "<input name>"]`; the
+  engine does not run, and nothing is stored
 
 #### Scenario: Input outside the method's range is not a validation error
 - **WHEN** a client posts a well-formed request whose input lies outside the method's
@@ -82,7 +86,8 @@ rejected with `422`.
 The system SHALL expose `GET /calculations/{result_id}`, which returns the stored result
 envelope with `200`, unchanged from the envelope that `POST /calculations` returned. An
 unknown `result_id` SHALL give `404`, and a `result_id` that is not a UUID SHALL give
-`422`.
+`422`. The resource SHALL accept no method that changes or deletes it: `PUT`, `PATCH`
+and `DELETE` on `/calculations/{result_id}` SHALL give `405`.
 
 #### Scenario: Read a stored result
 - **WHEN** a client sends `GET /calculations/{result_id}` for a result it created
@@ -97,6 +102,11 @@ unknown `result_id` SHALL give `404`, and a `result_id` that is not a UUID SHALL
 #### Scenario: Not a UUID
 - **WHEN** a client sends `GET /calculations/abc`
 - **THEN** the response is `422` with the error body
+
+#### Scenario: A stored result cannot be changed over HTTP
+- **WHEN** a client sends `PUT`, `PATCH` or `DELETE` to `/calculations/{result_id}`
+- **THEN** the response is `405` with the code `method_not_allowed`, and the stored
+  result is unchanged
 
 ### Requirement: Reproducible stored result
 The system SHALL store, for each result, the calculation type, the inputs as the request
@@ -113,7 +123,8 @@ stored result SHALL NOT be changed after it is stored.
 
 #### Scenario: Re-run from the stored record
 - **WHEN** the stored inputs of a result are posted again for the same type, with the
-  same parameters and the same `engine_version`
+  same `engine_version`, the same `.yaml` file of the type, and a parameter source that
+  returns the same values (in tests, the same synthetic source)
 - **THEN** the new envelope has the same `input_hash` and is equal to the stored one
   except for `result_id`
 
@@ -124,8 +135,10 @@ returns the `.docx` report of the stored result with `200`, the media type
 `application/vnd.openxmlformats-officedocument.wordprocessingml.document`, and a
 `Content-Disposition` header of type `attachment` with a file name that ends in `.docx`.
 The report SHALL be built from the stored inputs and the stored envelope only, so the
-client does not send the calculation again. An unknown `result_id` SHALL give `404`, and
-an invalid report request SHALL give `422`. The report follows `report-generator`; this
+client does not send the calculation again. An unknown `result_id` SHALL give `404`, an
+invalid report request SHALL give `422`, and a stored result whose calculation type is no
+longer registered SHALL give `409` with the code `calculation_type_not_registered`, since
+its report needs the type's contract. The report follows `report-generator`; this
 requirement adds only its delivery.
 
 #### Scenario: Download the report of a stored result
@@ -149,18 +162,49 @@ requirement adds only its delivery.
 - **WHEN** a client posts a report request for a `result_id` that names no stored result
 - **THEN** the response is `404` with the error body
 
+#### Scenario: Report of a result whose type is no longer registered
+- **WHEN** a client posts a valid report request for a stored result whose calculation
+  type is not registered in the running application
+- **THEN** the response is `409` with the code `calculation_type_not_registered`, and the
+  stored result is unchanged
+
 ### Requirement: Error responses
 The system SHALL answer every error of this capability with a JSON body that holds a
-stable machine-readable `code` and a human-readable `message`, and, for a validation
-error, the location of each invalid field. It SHALL map errors to status codes as
-follows: a missing resource `404`; an invalid request `422`; a calculation type with no
-configured parameter source `503`; any other error `500` with a generic message. No
-error body SHALL contain a stack trace, an SQL statement, a file path, or a
-configuration value.
+stable machine-readable `code` and a human-readable `message`; every `422` body SHALL
+also hold `fields`, one entry per invalid field with its `location` and `message`. It
+SHALL map errors to status codes and codes as follows:
+
+| Condition | Status | `code` |
+|---|---|---|
+| A resource or route that does not exist | `404` | `not_found` |
+| A method the route does not accept | `405` | `method_not_allowed` |
+| A stored result whose type is no longer registered (report only) | `409` | `calculation_type_not_registered` |
+| A request body over the size limit | `413` | `payload_too_large` |
+| A request the schema rejects | `422` | `validation_error` |
+| Inputs that do not fit the type's contract | `422` | `invalid_input` |
+| A type with no configured parameter source | `503` | `parameter_source_unavailable` |
+| The application database not configured or not reachable | `503` | `database_unavailable` |
+| Any other error | `500` | `internal_error` |
+
+No error body SHALL contain a stack trace, an SQL statement, a file path, a configuration
+value, or an input value the client sent.
 
 #### Scenario: Validation error body
-- **WHEN** a request is rejected with `422`
-- **THEN** the body has a `code`, a `message`, and the location of each invalid field
+- **WHEN** a request is rejected with `422`, whatever its `code`
+- **THEN** the body has a `code`, a `message`, and `fields` with the location of each
+  invalid field, and no field echoes the value the client sent
+
+#### Scenario: Unknown route or method
+- **WHEN** a client calls a path that no route serves, or a route with a method it does
+  not accept
+- **THEN** the response is `404` with `not_found`, or `405` with `method_not_allowed`, in
+  the error body
+
+#### Scenario: Database not available
+- **WHEN** a request needs the application database and the database URL is not
+  configured or the database does not answer
+- **THEN** the response is `503` with the code `database_unavailable`, and the body names
+  neither the URL nor the driver's error text
 
 #### Scenario: Unexpected error
 - **WHEN** an unexpected error occurs while a request is handled
@@ -168,14 +212,16 @@ configuration value.
   holds no stack trace, SQL, file path, or configuration value
 
 #### Scenario: Error log without request data
-- **WHEN** an error is logged while a request is handled
+- **WHEN** an error answered with `422`, `503` or `500` is logged while a request is
+  handled
 - **THEN** the log line names the error `code` and the endpoint, and holds no input
   value, database URL, or credential (`security` "No sensitive data in logs")
 
 ### Requirement: Calculation parameter source
 The system SHALL resolve the parameters of a calculation from two sources only: the
 engineer-set values (rounding rules, validated range) from the calculation type's
-`.yaml` file (`backend-architecture` "Engineer-set parameters stored in YAML"), and the
+`.yaml` file (`backend-architecture` "Engineer-set parameters stored in YAML"), each
+carrying its source (the engineer and the rationale), and the
 norm-given values (formulas, table values, thresholds, the method's range) from the
 normative catalog through a parameter source for that type. The system SHALL NOT take a
 norm-given value from code, from a `.yaml` file, or from the client. A calculation type
@@ -194,6 +240,11 @@ nothing SHALL be stored.
 - **THEN** the engine receives the engineer-set values from the type's `.yaml` file and
   the norm-given values from that source, and the request body supplies only the inputs
 
+#### Scenario: Engineer-set value without its source
+- **WHEN** a calculation type's `.yaml` file holds a rounding rule or a validated-range
+  bound without the engineer or the rationale
+- **THEN** the application does not start, and the error names the file and the value
+
 #### Scenario: Client cannot supply parameters
 - **WHEN** a client adds formulas, coefficients, bounds or rounding rules to a
   calculation request
@@ -202,13 +253,15 @@ nothing SHALL be stored.
 ### Requirement: API documentation
 The system SHALL publish an OpenAPI description in which every endpoint of this
 capability appears with its request schema, its success response schema or media type,
-and its error responses with the error body schema (`web-platform` "Backend API").
+and its error responses with the error body schema. This requirement narrows
+`web-platform` "Backend API" for the calculation endpoints: that requirement asks for
+documented schemas, and this one fixes which responses each endpoint documents.
 
 #### Scenario: Inspect the calculation endpoints
 - **WHEN** a developer reads the OpenAPI description
 - **THEN** each endpoint of this capability is listed with its request schema, its
-  success response, and its `404`, `422` or `503` responses where this capability defines
-  them
+  success response, and its `404`, `409`, `422` or `503` responses where this capability
+  defines them
 
 ### Requirement: Cross-origin requests
 The system SHALL accept cross-origin browser requests only from the origins named in
@@ -225,16 +278,21 @@ configuration, and SHALL accept none when no origin is configured.
 
 ### Requirement: Non-functional — request size and latency
 The system SHALL reject a request body larger than 1 MiB with `413` and the error body
-before it is parsed. A `POST /calculations` for a registered type with an in-process
-parameter source SHALL respond within 1 second on a developer machine, excluding the
-first request after start-up; the report endpoint SHALL stay within `report-generator`
-"Non-functional — generation time".
+before it is parsed. `POST /calculations` for a registered type with an in-process
+parameter source SHALL answer with a median time of at most 1 second over 20 sequential
+requests from one client, after one warm-up request, against a local `dec_app`. The
+target is indicative for a developer laptop (4 or more CPU cores, PostgreSQL on the same
+machine), not a production capacity figure. It refines `web-platform` "Non-functional —
+integration and latency" for the calculation step. The report endpoint SHALL stay within
+`report-generator` "Non-functional — generation time".
 
 #### Scenario: Oversized request
 - **WHEN** a client posts a body larger than 1 MiB to any endpoint of this capability
-- **THEN** the response is `413` with the error body, and the body is not parsed
+- **THEN** the response is `413` with the code `payload_too_large`, and the body is not
+  parsed
 
 #### Scenario: Calculation latency
-- **WHEN** the pilot calculation type runs through `POST /calculations` with a synthetic
-  in-process parameter source and a reachable `dec_app`
-- **THEN** the response arrives within 1 second
+- **WHEN** one warm-up request is sent, and then 20 sequential `POST /calculations`
+  requests for the pilot type with a synthetic in-process parameter source, against a
+  local migrated `dec_app`
+- **THEN** the median response time of the 20 requests is at most 1 second

@@ -74,8 +74,8 @@ carries the engine:
    resolve(calculation_type, inputs) -> ResolvedParameters(parameters, method_range)
    ```
 
-   It receives `inputs` because a table value depends on an input (`φ_II` selects the
-   row of table 5.5). The service reads `validated_range` from the type's `.yaml`.
+   It receives `inputs` because a table value can depend on an input: an input selects
+   the row of a norm's table. The service reads `validated_range` from the type's `.yaml`.
    - The application holds a mapping from calculation type to source.
    - This change configures no source. A registered type with no source raises
      `ParameterSourceUnavailableError` (a `DECError`), which gives `503`.
@@ -127,16 +127,34 @@ carries the engine:
    {"code": str, "message": str, "fields": [{"location": [...], "message": str}]}
    ```
 
-   `fields` is present for `422` only.
+   `fields` is present for `422` only, and always present there.
 
    | Error | Status | `code` |
    |---|---|---|
+   | `NotFoundError`; `HTTPException` 404 (no route) | 404 | `not_found` |
+   | `HTTPException` 405 | 405 | `method_not_allowed` |
+   | `CalculationTypeNotRegisteredError` (report of a stored result) | 409 | `calculation_type_not_registered` |
+   | body over the limit | 413 | `payload_too_large` |
    | `RequestValidationError` | 422 | `validation_error` |
    | `InputValidationError`, `UnitError` | 422 | `invalid_input` |
-   | `NotFoundError` | 404 | `not_found` |
+
+   A unit outside the vocabulary never reaches `UnitError` through the API: the request
+   schema types each unit as a symbol of the vocabulary, so it is a
+   `RequestValidationError` (`validation_error`). `UnitError` stays mapped for a unit
+   error raised behind the schema.
    | `ParameterSourceUnavailableError` | 503 | `parameter_source_unavailable` |
-   | body over the limit | 413 | `payload_too_large` |
+   | `DatabaseUnavailableError` | 503 | `database_unavailable` |
    | `ParameterValidationError`, `ExpressionError`, `CalculationError`, `AlreadyRegisteredError`, any other | 500 | `internal_error` |
+
+   - `fields` is present in every `422` body. For `invalid_input`, the location of each
+     offending input is `["body", "inputs", "<input name>"]`, the same prefix pydantic
+     uses for the body. `CalculationRequest.check_against` changes to collect every
+     missing, undeclared, or wrong-dimension input and raise one `InputValidationError`
+     carrying their names, instead of stopping at the first. The message text keeps
+     naming the inputs, so the WP2 tests stay valid.
+   - New `DECError` subclasses in `core/exceptions.py`:
+     `ParameterSourceUnavailableError`, `CalculationTypeNotRegisteredError` and
+     `DatabaseUnavailableError`.
 
    A broken `.yaml` or a bad expression tree is a fault of the server's data, not of the
    request, so it is `500`, not `422`.
@@ -151,14 +169,22 @@ carries the engine:
    limit. Both give `413` with the error body before anything is parsed.
 
 7. **Settings.**
-   - `Settings` gains `dec_params_root`: a path whose default is `backend/params`
-     resolved from the package, so it is not a literal machine path.
-   - A second settings class, `ApiSettings`, with no required field, reads
-     `DEC_CORS_ORIGINS` (comma-separated origins, empty by default). `create_app` needs
-     the CORS origins when it builds the middleware, while the database URL is needed
-     only at the first database use. Keeping them apart lets the application start, and
-     `GET /health` answer, without `DEC_APP_DATABASE_URL`. That is how the WP5 health
-     test runs today.
+   - A second settings class, `ApiSettings`, with no required field, holds what the
+     application needs to start:
+     - `DEC_CORS_ORIGINS`: comma-separated origins, empty by default;
+     - `DEC_PARAMS_ROOT`: a path whose default is `backend/params` resolved from the
+       package, so it is not a literal machine path.
+
+     `create_app` and the lifespan (`build_registry`) read only `ApiSettings`.
+   - `Settings` keeps only the database URLs and its fail-fast rule
+     (`backend-architecture` "Fail-fast configuration"). It is read lazily, at the first
+     request that needs `dec_app`. So the server starts, and `GET /health`,
+     `GET /calculation-types` and `/docs` answer, without `DEC_APP_DATABASE_URL`.
+   - The session provider turns a missing or invalid `DEC_APP_DATABASE_URL` (the
+     pydantic-settings validation error, not a `DECError`) and a connection failure
+     (SQLAlchemy `OperationalError`) into `DatabaseUnavailableError`, which gives `503`.
+     The original error is logged by type only, never with its text, since that text
+     can hold the URL.
 
    The engine and the session factory are created lazily and cached by the provider.
 
@@ -168,9 +194,11 @@ carries the engine:
 
 9. **Report endpoint.**
    - The route is `POST`, because the report request has a body.
-   - The service loads the stored record and takes the contract from the registry (a
-     type that is no longer registered gives `404`). It then calls `build_report` with
-     the stored inputs and envelope and `render_docx`, and returns the bytes.
+   - The service loads the stored record and takes the contract from the registry. A
+     stored result whose type is no longer registered raises
+     `CalculationTypeNotRegisteredError` (`409`): the result exists, so `404` would
+     mislead. It then calls `build_report` with the stored inputs and envelope and
+     `render_docx`, and returns the bytes.
    - The file name is `dec-report-<result_id>.docx`, ASCII only, so no header encoding
      is needed.
 
@@ -201,8 +229,10 @@ carries the engine:
 ## Non-functional requirements
 
 - **Latency.** `POST /calculations` for the pilot type, with a synthetic in-process
-  source and a reachable `dec_app`, answers within 1 second after the first request
-  (spec "Non-functional — request size and latency"). The report endpoint stays within
+  source and a local `dec_app`, has a median of at most 1 second over 20 sequential
+  requests after one warm-up (spec "Non-functional — request size and latency"). The
+  target is indicative for a developer laptop, and it is checked in the `postgres`
+  module, which is part of the implementation GO, not of `check.sh`. The report endpoint stays within
   `report-generator` "Non-functional — generation time" (under 1 minute; WP2 measured
   200 steps).
 - **Security.** Database URLs only from the environment, never logged or returned.
@@ -225,8 +255,9 @@ carries the engine:
 - **[SQLite in unit tests differs from PostgreSQL]** → Only generic column types are
   used. The `postgres` integration module runs the real migration and a round trip, and
   its run is part of the implementation GO.
-- **[A stored result's type later unregistered]** → The report endpoint answers `404`
-  for it. Stored rows are never deleted by this change.
+- **[A stored result's type later unregistered]** → The report endpoint answers `409`
+  `calculation_type_not_registered` for it; the result itself stays readable. Stored rows
+  are never deleted by this change.
 - **[`json` instead of `jsonb` costs indexing and querying inside the envelope]** → No
   requirement queries inside the envelope. `input_hash` and `calculation_type` are real
   columns.
@@ -239,5 +270,7 @@ carries the engine:
 
 ## Open Questions
 
-None that change the specs or the tasks. The token transport for CORS credentials is
-decided in `user-accounts-auth`.
+None that change the specs or the tasks. Decided here: a missing or unreachable
+application database gives `503 database_unavailable` (decision 7), and a report of a
+result whose type is unregistered gives `409` (decision 9). The token transport for CORS
+credentials is decided in `user-accounts-auth`.
