@@ -248,7 +248,9 @@ the frame and the title blocks from GOST R 21.101-2026 and adds no norm value of
       title block along the short side, as Annex Zh, figure Zh.1 a) shows; the frame
       margins come from that figure, and the column grid, widths and row heights of the
       title blocks from the figures of form 5 and form 6 of Annex E. The frame is a page
-      border and the title block a table in the page footer: form 5 in the first-page
+      border on the top, left and right, with the middle of its line on the figure's frame;
+      the title block is a table in the page footer whose lower line is the lower frame
+      line and whose sides the border draws (2026-10-01): form 5 in the first-page
       footer, form 6 in the other footer; the sheet number (column 7) and the number of
       sheets (column 8) are the Word fields `PAGE` and `NUMPAGES`, so tests check the
       field codes, not their values. Columns 14-19 (changes) print empty in the MVP and
