@@ -39,7 +39,7 @@ class Settings:
                 },
             )
         return cls(
-            output_dir=Path(str(data.get("output_dir", "norm-base"))),
+            output_dir=Path(str(data.get("output_dir", "docs/normative-base"))),
             user_agent=str(data.get("user_agent", "")),
             sources=sources,
         )
