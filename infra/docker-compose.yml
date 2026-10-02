@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  postgres:
+  dec-postgres:
     image: postgres:14
     container_name: dec-postgres
     environment:

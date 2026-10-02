@@ -1,0 +1,20 @@
+# Конфигурация источников нормативных документов.
+
+output_dir = "norm-base"
+user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
+
+[sources.faufcc]
+enabled = true
+base_url = "https://api.faufcc.ru/api"
+sp_registry_id = "c5020d9a-a239-4806-a793-ac66cb36c71a"
+
+# Сметные нормативы (ФСНБ/КСР/ПССР). Для расчётного движка не нужны — отложено.
+[sources.fgiscs]
+enabled = false
+base_url = "https://fgiscs.minstroyrf.ru"
+referer = "https://fgiscs.minstroyrf.ru/opendata/"
+
+[sources.pravo]
+enabled = true
+base_url = "http://publication.pravo.gov.ru"
+minstroy_id = "efa6da4b-4c1a-4fa8-8caf-860c17b205fd"
