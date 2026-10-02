@@ -77,7 +77,7 @@ Neither item blocks `calculation-api`: its tests use synthetic parameters. Both 
      edit to a root file is not needed.
    - 1c. Confirmed: the service is named `dec-postgres` and keeps port 5433. I rename the
      compose service key from `postgres` to `dec-postgres` so the name matches.
-   - Merge commit: to be written here when the move is merged into `develop`.
+   - Merge commit: `24797f7` (the move into `ml/`).
 
 2. **Formula status.**
 
