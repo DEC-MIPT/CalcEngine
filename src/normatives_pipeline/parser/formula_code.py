@@ -6,7 +6,6 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from sympy import Expr, Symbol, lambdify  # type: ignore[import-untyped]
-from sympy.parsing.latex import parse_latex  # type: ignore[import-untyped]
 
 
 @dataclass(frozen=True)
@@ -55,14 +54,6 @@ def demo_formula_5_7() -> BoundFormula:
         expr=expr,
         symbols=(g_c1, g_c2, k, m_g, k_z, b, g_ii, m_q, d_1, g_ii_p, d_b, m_c, c_ii),
     )
-
-
-def alternative_parse_latex(latex: str) -> Expr:
-    """Менее валидно: наивный parse_latex.
-
-    Теряет многосимвольные индексы: \\gamma_{c1} → c*1, \\gamma_{II} → I*I.
-    """
-    return parse_latex(latex)
 
 
 def alternative_latex_only(latex: str) -> str:

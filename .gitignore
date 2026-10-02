@@ -42,14 +42,17 @@ docker-compose.override.yml
 ml/models/
 
 # Research notebook artifacts (generated page images and formula crops)
-normatives_pipeline/research/pages/
-normatives_pipeline/research/crops/
+research/pages/
+research/crops/
 
 # Research datasets (im2latex-100k etc.)
-normatives_pipeline/research/data/
+research/data/
+
+# Vendored wheels (offline install; regenerate via `pip download -d packages/`)
+packages/
 
 # Downloaded normative documents (full texts are not redistributed)
-norm-docs/
+docs/normative-base/
 
 # OS / editor
 .DS_Store

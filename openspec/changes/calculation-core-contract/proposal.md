@@ -5,7 +5,7 @@
 The calculation engine, the transparent output, and the report generator are Akim's
 three components, and the specs describe the calculation from each side separately.
 Nothing states the contract between them, so "white box" cannot be tested. The verified
-roadmap (`docs/audit/03-verified-roadmap.md`, section 3.2, WP2) records:
+roadmap (`docs/reports/verified-roadmap.md`, section 3.2, WP2) records:
 
 - **A11 (High):** the trace has no schema. The engine, the UI, and the report each
   describe it from their own side (`calculation-engine/spec.md:20-27,44-52`,

@@ -222,6 +222,29 @@ def fetch_coefficients(conn: Any, doc_id: int, table_number: str) -> list[dict]:
         return [dict(row) for row in cur.fetchall()]
 
 
+def fetch_formulas(conn: Any, doc_id: int) -> list[dict]:
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT id, number, clause_number, page
+            FROM formula
+            WHERE document_id = %s
+            ORDER BY id
+            """,
+            (doc_id,),
+        )
+        return [dict(row) for row in cur.fetchall()]
+
+
+def update_formula(conn: Any, formula_id: int, latex: str, expression: str) -> None:
+    with conn.cursor() as cur:
+        cur.execute(
+            "UPDATE formula SET latex = %s, expression = %s WHERE id = %s",
+            (latex, expression, formula_id),
+        )
+    conn.commit()
+
+
 def _trgm_search(
     conn: Any, table: str, alias: str, cols: str, query: str, k: int
 ) -> list[dict]:

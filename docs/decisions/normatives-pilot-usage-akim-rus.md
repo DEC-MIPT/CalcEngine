@@ -7,19 +7,19 @@
 ## Предусловия
 
 - Docker Postgres `dec-postgres` на порту 5433 — см. `normatives-postgres-storage.md`.
-- Venv `.venv` с установленными зависимостями.
-- Пилотные PDF лежат в `norm-docs/` (в .gitignore; полные тексты не распространяются).
+- Venv `.venv` с пакетом, установленным editable: `.venv/bin/pip install -e ".[ml]"`.
+- Пилотные PDF лежат в `docs/normative-base/` (в .gitignore; полные тексты не распространяются).
 
 ## 1. Получить пилотный файл
 
-Пилотные документы уже в `norm-docs/` (СП 22.13330.2016, СП 24/30/31/45.13330, скан-СНиП).
-Новые загрузки тоже попадают в `norm-docs/` (туда пишет коллектор).
+Пилотные документы уже в `docs/normative-base/` (СП 22.13330.2016, СП 24/30/31/45.13330, скан-СНиП).
+Новые загрузки тоже попадают в `docs/normative-base/` (туда пишет коллектор).
 
 ## 2. Обработка (загрузка в Postgres)
 
 ```bash
 cd /home/malkinte/CalcEngine
-.venv/bin/python -m normatives_pipeline.ingest --force "norm-docs/СП 22.13330.2016.pdf"
+.venv/bin/python -m normatives_pipeline.ingest --force "docs/normative-base/СП 22.13330.2016.pdf"
 ```
 
 Идемпотентно: повторный запуск без `--force` печатает `[skip] … уже в хранилище`.
@@ -41,7 +41,7 @@ cd /home/malkinte/CalcEngine
 
 ## Контракт возврата
 
-Форма задаётся конфигом: `normatives_pipeline/parser.toml` → `[output]`
+Форма задаётся конфигом: `configs/parser.toml` → `[output]`
 (`formula_keys`, `norm_ref_keys`, `symbol_keys`, `default_symbol_kind`).
 
 ```json
@@ -70,7 +70,7 @@ cd /home/malkinte/CalcEngine
 загрузи СП 24:
 
 ```bash
-.venv/bin/python -m normatives_pipeline.ingest --force "norm-docs/СП 24.13330.2021.pdf"
+.venv/bin/python -m normatives_pipeline.ingest --force "docs/normative-base/СП 24.13330.2021.pdf"
 .venv/bin/python -m normatives_pipeline.search --json "допускаемая нагрузка на сваю"
 ```
 

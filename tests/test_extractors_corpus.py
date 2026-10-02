@@ -10,7 +10,7 @@ import pytest
 from normatives_pipeline.parser import extractors, symbols, text_layer
 
 REPO = Path(__file__).resolve().parent.parent
-NORM_DOCS = REPO / "norm-docs"
+NORM_DOCS = REPO / "docs/normative-base"
 
 CURRENT_DOCS = [
     "СП 22.13330.2016.pdf",

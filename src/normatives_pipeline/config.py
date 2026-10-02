@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
+import tomllib
 from functools import lru_cache
 from pathlib import Path
 
-import tomllib
-
-PARSER_TOML = Path(__file__).parent / "parser.toml"
-FORMULAS_TOML = Path(__file__).parent / "formulas.toml"
-OCR_TOML = Path(__file__).parent / "ocr.toml"
+CONFIG_DIR = Path(__file__).resolve().parents[2] / "configs"
+PARSER_TOML = CONFIG_DIR / "parser.toml"
+FORMULAS_TOML = CONFIG_DIR / "formulas.toml"
 
 
 @lru_cache(maxsize=1)
@@ -31,12 +30,12 @@ def search_config() -> dict:
 
 
 @lru_cache(maxsize=1)
-def formula_manifest() -> list[dict]:
-    with FORMULAS_TOML.open("rb") as fh:
-        return tomllib.load(fh).get("formula", [])
+def detect_config() -> dict:
+    with PARSER_TOML.open("rb") as fh:
+        return tomllib.load(fh)["detect"]
 
 
 @lru_cache(maxsize=1)
-def ocr_config() -> dict:
-    with OCR_TOML.open("rb") as fh:
-        return tomllib.load(fh)
+def formula_manifest() -> list[dict]:
+    with FORMULAS_TOML.open("rb") as fh:
+        return tomllib.load(fh).get("formula", [])

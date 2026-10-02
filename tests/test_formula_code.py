@@ -27,8 +27,3 @@ def test_alternative_latex_only() -> None:
 def test_alternative_codegen() -> None:
     out = formula_code.alternative_codegen(Symbol("a") + Symbol("b"))
     assert out == "a + b"
-
-
-def test_alternative_parse_latex_runs() -> None:
-    expr = formula_code.alternative_parse_latex("\\gamma_{c1}")
-    assert expr is not None

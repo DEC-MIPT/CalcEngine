@@ -29,8 +29,8 @@ See `proposal.md`.
    `greek_map` for Greek, `pua_map` as a font-specific stopgap, `cyr_map` for id
    transliteration. PUA is a known heuristic — the real fix is the text layer (ToUnicode/OCR).
 4. **`expression` is a placeholder until structured extraction.** It is carried in the
-   contract but empty for now; populated by the parser's formula step (pix2tex + symbol
-   correction), never derived from LaTeX.
+   contract but empty for now; populated by the parser's formula step (DocLayout-YOLO +
+   pix2text + symbol correction), never derived from LaTeX.
 5. **`kind` defaults to `input`.** Output-variable detection (the left-hand side of `=`) is
    a later step.
 
