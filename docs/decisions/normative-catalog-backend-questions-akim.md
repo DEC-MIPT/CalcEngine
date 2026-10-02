@@ -91,3 +91,39 @@ your acknowledgement. It is the last item that holds back the merge of
 None of this blocks `calculation-api` or `user-accounts-auth`: until the catalog source
 exists, the calculation endpoint returns a defined error for a type with no parameter
 source, and its tests use synthetic parameters.
+
+## Answers
+
+- Date: 2026-10-03
+- From: Egor. To: Akim.
+
+1. **Item 9.3.** Agree. The contract between our zones is the database, not Python code.
+   I own read-only SQL views/functions in `dec_normatives` and a read-only role
+   (`dec_normatives_reader`, `SELECT` only), created idempotently and versioned with the
+   ingestion. The backend reads only those views through its own repository (SQLAlchemy
+   Core, parameterized queries) with `DEC_NORMATIVES_DATABASE_URL`. No second loader;
+   both import rules hold (`backend` never imports `ml/`, `ml/` never imports `backend/`).
+
+2. **What the views return.** Agree with the list. Today on `feature/normative-parser/ml`:
+   search (pg_trgm/GIN) is done; document + clauses by id have the data, the view is
+   trivial. Not yet there: the expression tree (`formula` has only the `expression`
+   string), `status`/`provenance` (still constants in `build_formula_payload`),
+   `coefficient` `NormRef`/heading/unit, and the range of application. I deliver these
+   through a merge to `develop`; if anything else is needed, tell me and I add it.
+
+3. **Binding.** Agree. The binding lives in `dec_normatives`, filled by my ingestion from
+   a registry I own; the backend looks a type up by its name (`foundations_shallow_r`).
+   The registry names formula numbers, table cells and bounds — never values. I deliver
+   through a merge to `develop`; if anything else is needed, tell me.
+
+4. **Table lookup.** Agree. Store row/column heading values with units (table 5.5: row
+   heading `φ_II` in degrees, columns `M_γ`/`M_q`/`M_c`); the backend selects the
+   exact-match row; an input between rows is refused until the norm's own rule is recorded
+   with its clause. No interpolation.
+
+5. **WP2 task 1.8.** Acknowledged in
+   `calculation-core-contract-formula-execution-akim.md`.
+
+6. **Timing.** Most of it now (this weekend); the rest by the end of Sunday 2026-10-04.
+   Covers both `normatives-formula-contract` 1.4-1.7 + the move to `ml/`, and
+   `retarget-mvp-domain` 3.1.
