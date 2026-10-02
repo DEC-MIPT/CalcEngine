@@ -74,6 +74,6 @@ Conditions:
 |---|---|---|
 | «Calculation latency» в `specs/calculation-engine/spec.md`: «типичный расчёт» не определён | Инженер (Аким, или инженер, заполняющий `reference-examples-foundations.md`) | Только задачу 3.7; уже помечена `[blocked: typical calculation]` |
 | Правки общих файлов раздела 4 (`tester.md`, `test-process`, `development-process`) требуют согласия Егора | Егор | Задача 4.1; не часть этого GO |
-| Алгоритм `input_hash` в `calculation-core-contract` остаётся «предложением для ревью» | Аким/Егор, через тот change | Регрессионный корпус (задачи 3.2–3.3) |
+| ~~Алгоритм `input_hash` в `calculation-core-contract` остаётся «предложением для ревью»~~ Закрыто 2026-10-03: Егор принял без изменений (`calculation-core-contract`, задача 1.8, `a01af6f`) | Аким/Егор, через тот change | Сейчас ничего (было: регрессионный корпус, задачи 3.2–3.3) |
 | Эталонные примеры, инварианты и определение «типичного расчёта» для `foundations-shallow` | Аким (инженер) | Разделы 2–3; см. `docs/decisions/reference-examples-foundations.md` |
 | Отдельный проход `norm-traceability-checker` по текущему тексту не запускался (только содержательные проверки ревьюеров и tester) | — | Ничего сегодня; отмечено для следующей содержательной правки |

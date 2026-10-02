@@ -208,6 +208,7 @@ can be implemented; until then it is not started, not stubbed as a no-op.
   change or task.
 - NO-GO: validation fails; an unresolved blocker; either `check.sh` exits non-zero on a
   clean checkout; frontend coverage below 95%; `pre-commit run --all-files` fails; a
-  root `pyproject.toml`, `tests/`, or any other file in the pipeline's zone is touched;
+  file in the pipeline's zone (`ml/`, including its `pyproject.toml` and `tests/`, which
+  were at the root until 2026-10-03) is touched;
   or task 7.1's open question (backend coverage applicability) is unresolved.
 - Archive (task 7.3) happens only after GO.

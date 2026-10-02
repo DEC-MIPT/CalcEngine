@@ -74,6 +74,6 @@ This verdict covers the spec phase only. Sections 2 and 3 (implementation: refer
 |---|---|---|
 | `specs/calculation-engine/spec.md` "Calculation latency": "typical calculation" undefined | Engineer (Akim, or the engineer who fills `reference-examples-foundations.md`) | Task 3.7 only; already marked `[blocked: typical calculation]` |
 | Section 4 shared-file edits (`tester.md`, `test-process`, `development-process`) need Egor's agreement | Egor | Task 4.1; not part of this GO |
-| `input_hash` algorithm in `calculation-core-contract` is still "a proposal, open for review" | Akim/Egor, via that change | Regression corpus (task 3.2-3.3) |
+| ~~`input_hash` algorithm in `calculation-core-contract` is still "a proposal, open for review"~~ Closed 2026-10-03: accepted by Egor with no change (`calculation-core-contract` task 1.8, `a01af6f`) | Akim/Egor, via that change | Nothing now (was: regression corpus, tasks 3.2-3.3) |
 | Reference examples, invariants, and the definition of "typical calculation" for `foundations-shallow` | Akim (engineer) | Sections 2-3; see `docs/decisions/reference-examples-foundations.md` |
 | A dedicated `norm-traceability-checker` pass on the current text was never run (only the spec-reviewers' and tester's content checks) | — | Nothing today; noted for the next content edit |

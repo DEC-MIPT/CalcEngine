@@ -11,9 +11,14 @@ See `proposal.md` (Why) for the motivation. Two facts shape this design:
   (`backend-layered-architecture` for the backend layout;
   `calculation-core-contract`/`calculation-verification` for calculation code; no
   change yet scaffolds a frontend project).
+  Update 2026-10-03: the pipeline moved to `ml/` (commit `24797f7`), with its own
+  `ml/pyproject.toml` and `ml/tests/`; the repository root has no `pyproject.toml` and no
+  `tests/` any more. Wherever this design says the pipeline's or the root
+  `pyproject.toml` or `tests/`, read `ml/pyproject.toml` and `ml/tests/`.
 - No dependency manifest exists anywhere in the repository yet (not even for the
   pipeline): packages are installed by hand into a `.venv`. This change fixes that for
-  the backend zone only; the pipeline's manifest is Egor's to add.
+  the backend zone only; the pipeline's manifest is Egor's to add (he added it in his
+  `pyproject.toml`, now `ml/pyproject.toml`).
 
 ## Goals / Non-Goals
 
@@ -47,6 +52,8 @@ See `proposal.md` (Why) for the motivation. Two facts shape this design:
    `[tool.ruff.per-file-ignores]`-style scoping — rejected, still one shared file both
    zones must agree on, and `coverage`'s `source` list would need to name both zones or
    be run twice anyway, so the separation buys nothing.
+   Update 2026-10-03: with the pipeline's file moved to `ml/pyproject.toml`, the root
+   has no Python tool config; each zone keeps its own (`backend/`, `ml/`).
 
 2. **Backend dependencies: `requirements.txt` + `requirements-dev.txt`, `.venv`.**
    Matches the pipeline's own convention (`.venv/bin/python`, no lockfile tool) instead
@@ -124,10 +131,10 @@ See `proposal.md` (Why) for the motivation. Two facts shape this design:
   scanner, not a guarantee. Mitigation: this change's own goal is "the smallest set of
   tools that lets the first code meet the DOD", not a complete security control;
   `code-security`/`owasp-security` skills remain the review-time backstop.
-- **Two Python tool configs (root, `backend/`) can drift in style** (e.g. `ruff`
+- **Two Python tool configs (root, now `ml/`; `backend/`) can drift in style** (e.g. `ruff`
   target Python version, rule selection) even though they must not share a file.
   Mitigation: `backend/pyproject.toml`'s `ruff`/`mypy` settings are copied from the
-  root file's values where nothing zone-specific applies (e.g. Python target version),
+  root file's values (now `ml/pyproject.toml`) where nothing zone-specific applies (e.g. Python target version),
   recorded once in this design so a future diff is a deliberate choice, not drift.
 
 ## Open Questions
