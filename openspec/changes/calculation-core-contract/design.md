@@ -47,9 +47,10 @@ See `proposal.md` (Non-goals).
    compares calculation results, which have no `result_id`.
 6. **`input_hash`:** the requirement fixes what goes into it (the calculation type
    identifier, the inputs in base units, and the identity of the resolved parameter set).
-   The algorithm is a proposal, open for review: SHA-256 over a canonical serialization
-   of those three parts. Refined 2026-09-29 (proposal, still waiting for Egor's
-   acknowledgement): the canonical serialization is JSON with sorted keys, no
+   The algorithm is SHA-256 over a canonical serialization of those three parts.
+   Refined 2026-09-29 and acknowledged by Egor on 2026-10-03
+   (`docs/decisions/calculation-core-contract-formula-execution-akim.md`, "Answers",
+   item 4: WP3 needs nothing more; task 1.8): the canonical serialization is JSON with sorted keys, no
    insignificant whitespace, and every number written by Python's `repr` of the float
    (the shortest string that reads back to the same value); the identity of the resolved
    parameter set is the SHA-256 of the same canonical JSON of the resolved parameters,
@@ -131,9 +132,13 @@ the frame and the title blocks from GOST R 21.101-2026 and adds no norm value of
       parsing out of the calculation path (see "Risks"), and needs little code for one
       pilot type. A fully declarative method scheme stays possible later, when there
       are many types.
-    - Open for Egor: the tree field on a stored formula and the binding of formula
-      symbols to quantities with units
-      (`docs/decisions/calculation-core-contract-formula-execution-akim.md`, task 1.8).
+    - Agreed with Egor on 2026-10-03
+      (`docs/decisions/calculation-core-contract-formula-execution-akim.md`, "Answers",
+      item 1; task 1.8): the pipeline builds the tree as JSON in this node set at
+      ingestion (`latex2sympy2` stays in his zone) and stores, with each formula, the
+      binding of each symbol to its quantity and unit. Egor puts these data into
+      `normative-catalog-backend`, where the exact JSON shape is fixed together; a
+      change to the node set that comes out of it is applied to the interpreter.
 12. **The engine returns a calculation result; the service returns the envelope.** The
     pure function returns a `CalculationResult`: every field of the result envelope
     except `result_id` ("Pure calculation function"). The service layer assigns
@@ -283,8 +288,8 @@ task 1.3 was first closed on 2026-09-26 on Akim's word. Egor owns the catalog si
       provenance: human-verified | machine-extracted
     }
     Invariant: status = verified implies edition and clause are concrete.
-    Invariant (2026-09-29, resolution 2 amendment; pending Egor's acknowledgement, task
-    1.8): provenance = machine-extracted implies status = unverified.
+    Invariant (2026-09-29, resolution 2 amendment; acknowledged by Egor on 2026-10-03,
+    task 1.8): provenance = machine-extracted implies status = unverified.
     Both invariants follow from the meaning of verified that the `normatives-catalog`
     requirement "Norm reference status" (WP1) owns, and the field format is WP3's
     (`norm-source-traceability`). This change does not restate them as a requirement; it
@@ -320,10 +325,10 @@ task 1.3 was first closed on 2026-09-26 on Akim's word. Egor owns the catalog si
    `human-verified`. ~~The parameters layer rejects `machine-extracted` values, so they
    never reach the engine (WP3 requirement 4).~~ Superseded for the MVP by the amendment
    below.
-   Amended 2026-09-29 (Akim; needs Egor's acknowledgement). Egor's pipeline now marks
-   every formula as verified automatically, with no person checking it
-   (`docs/decisions/pipeline-followup-answers-egor-rus.md`, A1, accepted in
-   `pipeline-followup-answers-akim.md`, A1). That flag is not `NormRef.status`:
+   Amended 2026-09-29 (Akim; acknowledged by Egor on 2026-10-03, task 1.8). On
+   2026-09-29 Egor's pipeline was to mark every formula as verified automatically, with
+   no person checking it (`docs/decisions/pipeline-followup-answers-egor-rus.md`, A1,
+   accepted in `pipeline-followup-answers-akim.md`, A1). That flag is not `NormRef.status`:
    - `status = verified` still means that a person checked the reference against the
      primary source text, as the `normatives-catalog` requirement "Norm reference
      status" defines it. A `NormRef` with `provenance = machine-extracted` always has
@@ -336,6 +341,13 @@ task 1.3 was first closed on 2026-09-26 on Akim's word. Egor owns the catalog si
      counted in `unverified_step_count`, as in the WP1 scenario "Unverified norm
      source". Otherwise no calculation could run, since no value is `human-verified`
      yet. Whether to reject them again is a later decision of `normative-catalog-backend`.
+   - Update 2026-10-03 (`docs/decisions/pipeline-open-items-questions-akim.md`,
+     "Answers", 2a-2b): the automatic mark writes the honest values, not "verified":
+     `status = unverified` and `provenance = machine-extracted`, stored per formula and
+     per coefficient (`normatives-formula-contract` task 1.6). The pilot keeps
+     `provenance = machine-extracted` for its formulas and coefficients, so its steps are
+     shown as unverified and counted in `unverified_step_count`; no pilot value gets
+     `human-verified`.
 3. **A rule set by the engineer is a separate source type**, `EngineerRule`, not a
    `NormRef` with a reserved `document`. A reserved document would leak into every
    consumer of `NormRef` and into the traceability metric. It is visible in the envelope
@@ -423,7 +435,9 @@ question that task 1.3 must answer:
 ## Design note: declarative input model (C10)
 
 This is a note, not a requirement. The team intends one declarative input model per
-calculation type (`docs/audit/01-recon.md:97`). That model is the single source for
+calculation type, from which the validation rules of the backend, the frontend and the
+calculation core are generated (stated by the team at the project recon; the recon notes
+are not tracked in git). That model is the single source for
 API validation (`security` "Input validation"), form validation (`web-platform`
 "Calculation input form"), and the engine's typed inputs, base units, and applicability
 bounds. How the API schema and the form are generated from it (a shared JSON Schema,
@@ -461,8 +475,9 @@ later design and is not fixed here.
     the pipeline writes formulas into `dec_normatives`; the parameters layer reads them,
     applies the `provenance` gate (resolution 2), and passes resolved parameters to the
     engine; the backend does not import pipeline code, so the zones stay apart. He owns
-    the hand-entered formula registry (`normatives_pipeline/formulas.toml`, merged to
-    `develop` in `b44d6f3`), which stays the MVP path for executable expressions. Its
+    the hand-entered formula registry (`formulas.toml`, merged to `develop` in `b44d6f3`;
+    at `ml/configs/formulas.toml` since the move of 2026-10-03), which stays the MVP path
+    for executable expressions. Its
     `norm_ref` was also brought in line with the agreed `NormRef` in that commit. Egor
     agreed on 2026-09-28 to the remaining findings 11-15
     (`docs/decisions/normatives-formula-contract-review-egor.md`): a `NormRef` on every
@@ -470,7 +485,9 @@ later design and is not fixed here.
     coefficient instead of constants, the five `NormRef` fields built unconditionally in
     code (config selects only extra fields), and no payload built from an empty
     `document`. Applied on `feature/normative-parser/ml` (commit `a28cf0a`), not merged
-    into `develop` yet.
+    into `develop` yet. Update 2026-10-03: that branch is merged into `develop`
+    (`0184450`); the code of findings 11-15 is `normatives-formula-contract` tasks
+    1.4-1.7, still open, which Egor named for the end of 2026-10-04.
     Since 2026-09-27 (his `research-journal.md`, entry 10) the direction changed: OCR
     (pix2text + DocLayout-YOLO) is now the main source of formulas at scale, each one
     entered as `provenance = machine-extracted`, `status = unverified`; the hand-entered
@@ -483,7 +500,10 @@ later design and is not fixed here.
     expressions; that path is the expression tree of decision 11. The question of
     `formula-verification-akim.md` is closed: there is no user-side verification action,
     and the pipeline marks every formula as verified automatically, which this change
-    does not carry into `NormRef.status` (resolution 2, amendment).
+    does not carry into `NormRef.status` (resolution 2, amendment). Update 2026-10-03:
+    the automatic mark writes `status = unverified` and `provenance = machine-extracted`
+    (resolution 2, amendment); `formulas.toml` is still at `ml/configs/formulas.toml`,
+    to be deleted.
 - **`report-generator` "GOST-compliant report assembly"** names GOST R 21.101-2020; that
   edition is not checked against the source text. Handed to WP3 in section "NormRef"
   (task 7.3); not edited here.
@@ -548,7 +568,8 @@ later design and is not fixed here.
   СП 22.13330.2016, `unverified`) and agreed on 2026-09-28
   (`docs/decisions/normatives-formula-contract-review-egor.md`, answer 11) to add a
   `NormRef` per stored coefficient value, starting with that same table
-  (`normatives-formula-contract` tasks 1.4-1.7). Not merged into `develop` yet; until it
+  (`normatives-formula-contract` tasks 1.4-1.7). Not merged into `develop` yet (update
+  2026-10-03: the branch is merged, tasks 1.4-1.7 are still open); until it
   is, he takes `M_γ`, `M_q`, `M_c` for the pilot from his own manually transcribed copy
   of that table in the registry (his answer to question 7), which is a stopgap for the
   pilot, not a primary-source check. Update 2026-09-29: the registry `formulas.toml` is
@@ -561,3 +582,7 @@ later design and is not fixed here.
   name with synthetic data, and the other tasks of this change do not use a real
   calculation type. Update 2026-10-01: task 7.1c moved to the planned change
   `normative-catalog-backend`, which adds the read path from `dec_normatives`.
+  Update 2026-10-03 (`calculation-core-contract-formula-execution-akim.md`, "Answers",
+  item 2): Egor re-verifies the other coefficients of the formula (`γc1`, `γc2`, `k`,
+  `kz`) against the primary text of СП 22.13330.2016 before naming their source, then
+  stores them like table 5.5, each value with its `NormRef`.

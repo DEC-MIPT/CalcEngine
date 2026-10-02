@@ -28,7 +28,7 @@ and normative coefficients get hardcoded in Python.
 
 - No ML in the calculation path (explicitly rejected by the passport).
 - This change builds no normative database, no ingestion, no search, and no NLP/RAG
-  parsing: the normative pipeline (`normatives_pipeline/`, Egor's zone) owns parsing,
+  parsing: the normative pipeline (`ml/src/normatives_pipeline/`, Egor's zone) owns parsing,
   and the backend's reading side is a planned change (`normative-catalog-backend`).
 - This change builds no `ml/` zone and no Docker configuration (Egor's zones).
 - No cloud provisioning — local only.

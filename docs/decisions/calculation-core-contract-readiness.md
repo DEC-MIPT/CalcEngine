@@ -267,3 +267,29 @@ tests, a follow-up for title-block length limits.
 | `norm-traceability-checker`, three passes | 0 blockers; the two majors of the first pass (the 185 mm width and the frame without Annex Zh) fixed; no norm number fixed. Minors left: the Russian unit designations are `source: unverified` (for WP3); the base spec still names GOST R 21.101-2020 (recorded WP3 handoff) |
 
 Open: none for task 1.9. Task 6.2a may start on `feature/report-generator/backend`.
+
+## 10. Egor's acknowledgement (2026-10-03, task 1.8)
+
+Egor answered in the "Answers" section of
+`calculation-core-contract-formula-execution-akim.md` (commit `a01af6f`):
+
+- Item 1 (decision 11, the expression tree): agreed. The pipeline builds the tree as JSON
+  in the engine's node set at ingestion and stores the binding of each symbol to its
+  quantity and unit; the exact JSON shape is fixed together in `normative-catalog-backend`.
+- Item 3 (resolution 2 amendment): accepted. For the pilot, the steps stay unverified
+  (`pipeline-open-items-questions-akim.md`, "Answers", 2b).
+- Item 4 (decision 6, `input_hash`): accepted with no change.
+- Item 2 (the other coefficients of the pilot formula): Egor re-verifies them against the
+  primary text before naming their source; this waits in `normative-catalog-backend`, not
+  here.
+
+Changes: `design.md` decisions 6 and 11, the `NormRef` invariant and the resolution 2
+amendment record the acknowledgement; the "Consistency with other specs" and "Risks"
+sections record the merge of `feature/normative-parser/ml` into `develop` (`0184450`) and
+the new path `ml/configs/formulas.toml`; the citation of the untracked recon notes in the
+design note on the declarative input model is replaced by its content. `tasks.md`: 1.8 and
+6.2 checked off (6.2 was implemented in `ae096cd` and waited only for 1.8), the DOR
+dependency line closed. No requirement and no scenario changed.
+
+Open: none for task 1.8. Task 7.1c and its waits are in the planned
+`normative-catalog-backend`.
