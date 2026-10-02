@@ -42,11 +42,11 @@ docker-compose.override.yml
 ml/models/
 
 # Research notebook artifacts (generated page images and formula crops)
-research/pages/
-research/crops/
+ml/research/pages/
+ml/research/crops/
 
 # Research datasets (im2latex-100k etc.)
-research/data/
+ml/research/data/
 
 # Vendored wheels (offline install; regenerate via `pip download -d packages/`)
 packages/

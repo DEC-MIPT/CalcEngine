@@ -16,13 +16,15 @@ report generation.
 ## Repository layout
 
 ```
-src/normatives_pipeline/       # ingestion, search, retrieval, DB access
-├── parser/                    # PDF/structural text parsing
-└── formulas/                  # formula extraction: detect, enrich, validation
-configs/                       # parser.toml, formulas.toml (config-driven)
-infra/                         # docker-compose.yml (Postgres)
-tests/                         # pytest
-research/                      # formula-extraction research notebook + fixtures
+ml/                            # Egor's zone: normative pipeline + ML
+├── pyproject.toml             # normatives-pipeline project
+├── src/normatives_pipeline/   # ingestion, search, retrieval, DB access, collector
+│   ├── parser/                # PDF/structural text parsing
+│   └── formulas/              # formula extraction: detect, enrich, validation
+├── configs/                   # parser.toml, formulas.toml, sources.toml (config-driven)
+├── research/                  # formula-extraction research notebook + fixtures
+└── tests/                     # pytest
+infra/                         # docker-compose.yml (Postgres, dec-postgres)
 agent-docs/                    # domain constraints (agents read this)
 docs/decisions/                # team's written channel (decisions, journals)
 docs/reports/                  # WP reports, roadmap
@@ -39,7 +41,7 @@ sub-branches; `main` stays frozen until the MVP.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -e ".[ml]"          # core pipeline + formula-extraction extras
+pip install -e "./ml[ml]"       # core pipeline + formula-extraction extras (project in ml/)
 docker compose -f infra/docker-compose.yml up -d   # Postgres (dec-postgres, port 5433)
 export DEC_DATABASE_URL="postgresql://dec:dec@localhost:5433/dec"
 ```
@@ -55,9 +57,11 @@ python -m normatives_pipeline.formulas.enrich   # formula extraction (needs .[ml
 ### Checks
 
 ```bash
-pytest -q                       # branch coverage >= 95%
+cd ml
+pytest -q                       # branch coverage >= 95% (testpaths = tests/)
 ruff check src
 mypy src/normatives_pipeline
+cd ..
 ```
 
 ### Offline install (vendored wheels)
@@ -67,4 +71,4 @@ pip download ".[ml]" -d packages/
 pip install --no-index --find-links packages/ -e ".[ml]"
 ```
 
-`packages/`, `docs/normative-base/`, and `research/{pages,crops,data}/` are gitignored.
+`packages/`, `docs/normative-base/`, and `ml/research/{pages,crops,data}/` are gitignored.
