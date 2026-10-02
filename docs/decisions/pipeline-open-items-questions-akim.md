@@ -62,3 +62,32 @@ are treated as verified." With the backend rule above, every pilot step resting 
 
 Neither item blocks `calculation-api`: its tests use synthetic parameters. Both block
 `normative-catalog-backend` and the pilot R on catalog data (WP2 task 7.1c).
+
+## Answers
+
+- Date: 2026-10-03
+- From: Egor. To: Akim.
+
+1. **Repo layout move (`ml/`, `infra/`).**
+
+   - 1a. Yes — the target stays `ml/`, containing `pyproject.toml`,
+     `src/normatives_pipeline/`, `configs/`, `research/`, `tests/`.
+   - 1b. No root `pyproject.toml` stays after the move: the project moves to
+     `ml/pyproject.toml`, and the backend has its own `backend/pyproject.toml`, so your
+     edit to a root file is not needed.
+   - 1c. Confirmed: the service is named `dec-postgres` and keeps port 5433. I rename the
+     compose service key from `postgres` to `dec-postgres` so the name matches.
+   - Merge commit: to be written here when the move is merged into `develop`.
+
+2. **Formula status.**
+
+   - 2a. Yes, the automatic mark is still planned, as the ingestion default. It writes the
+     honest values, not "verified": `status = "unverified"` and
+     `provenance = "machine-extracted"` into stored columns on `formula` and
+     `coefficient` (replacing the constants in `build_formula_payload`). Columns: `status`,
+     `provenance`. It lands with `normatives-formula-contract` 1.4-1.7 (task 1.6).
+   - 2b. Option (a): for the pilot, mark as unverified. The data keep
+     `provenance = "machine-extracted"` / `status = "unverified"`; the pilot report shows
+     its steps as unverified and counts them in `unverified_step_count`. No pilot formula
+     or coefficient gets a `human-verified` provenance.
+   - Merge commit: to be written here when the status columns are filled as decided.
