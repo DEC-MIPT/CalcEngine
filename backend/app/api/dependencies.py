@@ -1,3 +1,4 @@
+import threading
 from collections.abc import Iterator
 from typing import Annotated
 
@@ -12,9 +13,15 @@ from app.db.session import get_engine, get_session_factory
 from app.engine.registry import CalculatorRegistry
 from app.services.calculation import CalculationService, calculation_service
 
+_FACTORY_LOCK = threading.Lock()
+
 
 def _session_factory(request: Request) -> sessionmaker[Session]:
     """Возвращает фабрику сессий приложения, построенную при первом запросе к ``dec_app``.
+
+    Синхронные зависимости выполняются в пуле потоков, поэтому построение защищено
+    блокировкой: два первых одновременных запроса строят один движок. Построенный здесь
+    движок принадлежит приложению и освобождается при его остановке.
 
     Args:
         request: текущий запрос; фабрика кэшируется в ``app.state``.
@@ -29,10 +36,13 @@ def _session_factory(request: Request) -> sessionmaker[Session]:
     """
     state = request.app.state
     if state.session_factory is None:
-        try:
-            state.session_factory = get_session_factory(get_engine(Settings()))  # type: ignore[call-arg]
-        except (ValidationError, ArgumentError):
-            raise DatabaseUnavailableError("the application database is not configured") from None
+        with _FACTORY_LOCK:
+            if state.session_factory is None:
+                try:
+                    state.session_factory = get_session_factory(get_engine(Settings()))  # type: ignore[call-arg]
+                except (ValidationError, ArgumentError):
+                    raise DatabaseUnavailableError("the application database is not configured") from None
+                state.owns_session_factory = True
     factory: sessionmaker[Session] = state.session_factory
     return factory
 

@@ -24,7 +24,9 @@ def as_psycopg_url(raw_url: str) -> URL:
 
 def get_engine(settings: Settings | None = None) -> Engine:
     settings = settings or Settings()  # type: ignore[call-arg]
-    return create_engine(as_psycopg_url(settings.dec_app_database_url.get_secret_value()))
+    return create_engine(
+        as_psycopg_url(settings.dec_app_database_url.get_secret_value()), hide_parameters=True
+    )
 
 
 def get_session_factory(engine: Engine | None = None) -> sessionmaker[Session]:

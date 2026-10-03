@@ -1,10 +1,12 @@
 import logging
+from collections.abc import Mapping
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import OperationalError
 from starlette.exceptions import HTTPException
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from app.core.exceptions import (
     CalculationTypeNotRegisteredError,
@@ -46,24 +48,53 @@ SERVER_NAMED = ("calculation_type_not_registered", "parameter_source_unavailable
 
 LOGGED = (422, 500, 503)
 
+STATIC_MESSAGE_TYPES = frozenset(
+    {
+        "missing",
+        "extra_forbidden",
+        "string_type",
+        "string_too_short",
+        "float_type",
+        "float_parsing",
+        "finite_number",
+        "dict_type",
+        "model_type",
+        "model_attributes_type",
+        "json_invalid",
+        "uuid_type",
+        "date_type",
+        "date_from_datetime_parsing",
+        "bool_type",
+    }
+)
+"""Типы ошибок pydantic, текст которых не содержит значения клиента; у остальных — фиксированный текст."""
+
 
 def _route(request: Request) -> str:
     route = request.scope.get("route")
     return getattr(route, "path", "unmatched")
 
 
-def _response(request: Request, status: int, code: str, message: str, fields: tuple[FieldError, ...] | None) -> JSONResponse:
+def _response(
+    request: Request,
+    status: int,
+    code: str,
+    message: str,
+    fields: tuple[FieldError, ...] | None,
+    headers: Mapping[str, str] | None = None,
+) -> JSONResponse:
     if status in LOGGED:
         logger.warning("code=%s route=%s", code, _route(request))
     body = ErrorBody(code=code, message=message, fields=fields)
-    return JSONResponse(body.model_dump(mode="json", exclude_none=True), status_code=status)
+    return JSONResponse(body.model_dump(mode="json", exclude_none=True), status_code=status, headers=headers)
 
 
 def _request_fields(exc: RequestValidationError) -> tuple[FieldError, ...]:
     """Собирает неверные поля запроса с их местом.
 
-    Текст пользовательской проверки может содержать значение клиента, поэтому он
-    заменяется фиксированным.
+    Текст pydantic передаётся, только если его тип из ``STATIC_MESSAGE_TYPES``: у
+    остальных (пользовательские проверки, разбор UUID и т. п.) текст может содержать
+    значение клиента, поэтому он заменяется фиксированным.
 
     Args:
         exc: ошибка проверки схемы запроса.
@@ -74,7 +105,7 @@ def _request_fields(exc: RequestValidationError) -> tuple[FieldError, ...]:
     return tuple(
         FieldError(
             location=tuple(error["loc"]) or ("body",),
-            message="Invalid value." if error["type"] in ("value_error", "assertion_error") else error["msg"],
+            message=error["msg"] if error["type"] in STATIC_MESSAGE_TYPES else "Invalid value.",
         )
         for error in exc.errors()
     )
@@ -104,7 +135,7 @@ async def _on_http_error(request: Request, exc: Exception) -> JSONResponse:
     code = HTTP_CODES.get(exc.status_code)
     if code is None:
         return await _on_unexpected(request, exc)
-    return _response(request, exc.status_code, code, MESSAGES[code], None)
+    return _response(request, exc.status_code, code, MESSAGES[code], None, exc.headers)
 
 
 async def _on_database_error(request: Request, exc: Exception) -> JSONResponse:
@@ -117,9 +148,48 @@ async def _on_unexpected(request: Request, exc: Exception) -> JSONResponse:
     return _response(request, 500, "internal_error", MESSAGES["internal_error"], None)
 
 
+class UnexpectedErrors:
+    """Отвечает ``500 internal_error`` на любое необработанное исключение и не пробрасывает его.
+
+    Обработчик ``Exception`` у Starlette после ответа снова бросает исключение, и сервер
+    пишет полный traceback с текстом ошибки, где может быть SQL с параметрами, то есть
+    данные клиента (``calculation-api`` "Error responses", design.md, решение 5). Эта
+    прослойка стоит внутри CORS, поэтому ответ ``500`` получает заголовки CORS, а в лог
+    попадают только код, маршрут и тип исключения.
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        started = False
+
+        async def tracked(message: Message) -> None:
+            nonlocal started
+            if message["type"] == "http.response.start":
+                started = True
+            await send(message)
+
+        try:
+            await self.app(scope, receive, tracked)
+        except Exception as exc:  # noqa: BLE001 - the boundary catches everything by design
+            logger.error("error=%s", type(exc).__name__)
+            if not started:
+                response = _response(Request(scope), 500, "internal_error", MESSAGES["internal_error"], None)
+                await response(scope, receive, send)
+
+
 def install_error_handlers(app: FastAPI) -> None:
+    """Подключает обработчики ошибок и прослойку ``UnexpectedErrors``.
+
+    Args:
+        app: приложение FastAPI.
+    """
     app.add_exception_handler(RequestValidationError, _on_request_validation)
     app.add_exception_handler(DECError, _on_dec_error)
     app.add_exception_handler(HTTPException, _on_http_error)
     app.add_exception_handler(OperationalError, _on_database_error)
-    app.add_exception_handler(Exception, _on_unexpected)
+    app.add_middleware(UnexpectedErrors)

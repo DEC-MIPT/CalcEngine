@@ -55,11 +55,14 @@ def create_app(
             app.state.registry = registry
             app.state.validated_ranges = dict(validated_ranges or {})
         yield
+        if app.state.owns_session_factory:
+            app.state.session_factory.kw["bind"].dispose()
 
     app = FastAPI(title="DEC", lifespan=lifespan)
     app.state.api_settings = settings
     app.state.sources = dict(sources or {})
     app.state.session_factory = session_factory
+    app.state.owns_session_factory = False
     install_error_handlers(app)
     app.add_middleware(BodySizeLimit)
     app.add_middleware(
