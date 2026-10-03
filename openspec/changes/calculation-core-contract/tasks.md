@@ -7,6 +7,9 @@ is done on feature branches from `develop`, each merged only when its whole feat
 `feature/calculation-engine/backend` (engine: every backend task of sections 2-5, tasks
 6.1-6.2, and 7.1a-7.1b), `feature/report-generator/backend` (report, tasks 6.2a-6.2f and 6.3-6.4) and
 `feature/frontend-app/frontend` (transparent output, tasks 3.4, 3.5, 5.4), all Akim's zone.
+Since 2026-10-03 the post-merge fixes of section 9 go on `fix/calculation-engine/backend`
+(Akim, from `develop`), which also carries `calculation-api` section 7 and merges into
+`develop` after the `tester` GO and the review (task 9.10).
 Checkboxes in this file are ticked in `develop` as each subtask is done on the feature branch; the code reaches `develop` only when the whole feature is done (`AGENTS.md`, Branching rules).
 
 The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
@@ -87,6 +90,60 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
 - [x] 8.2 (spec) Confirm WP1 task 2.1 (`retarget-mvp-domain`) is closed: the WP1 engine and output deltas match this contract (2026-09-27; `docs/decisions/retarget-mvp-domain-akim-review.md`)
 - [ ] 8.3 (spec) `spec-keeper` syncs the deltas and archives the change, after `retarget-mvp-domain` is archived
 
+## 9. Review follow-ups (backend)
+
+Added 2026-10-03 from the `tester` and `orchestrator` reviews of the three merged backend
+branches (`docs/decisions/calculation-core-contract-readiness.md`, sections 12-14). One
+branch, `fix/calculation-engine/backend` (Akim), from `develop`; it also carries the two
+`calculation-api` follow-ups (that change's tasks 7.1-7.2). Not here: item 6 (table
+entries carry no selector values) goes to `normative-catalog-backend` with task 7.1c;
+item 9 (per-column length limits) stays the follow-up listed in "Dependencies", because
+it needs a decision on how many characters each title-block column holds and adds new
+request rejections with their own scenario; item 3 is already fixed in `cc70f7d`.
+
+- [ ] 9.1 (item 8, first) Reject in the report request's `Text` every character that XML
+  1.0 does not allow, besides category Cc ("GOST report structure", scenario "Text that
+  cannot be written to the document") (backend); verify: U+0000, U+0009, U+FFFE, U+FFFF
+  in a title-block or signature text are rejected by the schema; Cyrillic and other
+  printable text passes; `POST /calculations/{result_id}/report` with U+FFFF answers
+  `422 validation_error`, not `500`
+- [ ] 9.2 (item 1) Bound `RoundingRule.decimals` and round in a context with enough
+  precision, raising `CalculationError` instead of `decimal.InvalidOperation` (backend);
+  the bound is an implementation limit of a float output (its significant digits), not a
+  norm value; verify: a rule at the bound is accepted and one above it is rejected by the
+  schema; rounding a very large value by an allowed rule gives its value or a
+  `CalculationError`, never `InvalidOperation`
+- [ ] 9.3 (item 2) Check the units of a formula's symbols before the tree is evaluated
+  (backend); verify: a formula whose evaluation would fail (division by zero) and whose
+  symbol has a wrong unit fails with `UnitError` naming the symbol, not `ExpressionError`
+- [ ] 9.4 (item 4) Detect a refusal by `outcome.refusal is not None` in
+  `engine/pipeline.py`, as `design.md` decision 3 names it (backend); verify: the refusal
+  and completion tests still pass
+- [ ] 9.5 (item 5) One alias for the trace-step union and one `Operator` literal, both in
+  `schemas` (backend); verify: each is defined once (`grep`), and `ruff`, `mypy` and the
+  tests pass
+- [ ] 9.6 (item 7) `EngineerRule`: `engineer` and `rationale` at least one character, and
+  the model frozen (backend); this changes a schema of `backend-layered-architecture`
+  (WP5, `schemas/parameters.py`), which this change already extends; verify: an empty
+  engineer or rationale is rejected, also in a parameter file, which then stops the
+  start-up naming the file and the value
+- [ ] 9.7a (items 10-11) Label `FORMAT_BOX_MM` as a layout choice, not a norm value, and
+  rename the title block's `FRAME_SIDES` to `FRAME_DRAWN_SIDES` (backend); verify: the
+  label is in the constant's docstring, no `FRAME_SIDES` is left in `title_block.py`, and
+  the report tests pass unchanged
+- [ ] 9.7b (items 12-13) Take the font and the repeated sheet setting from `layout`, and
+  keep the verdict words in one table (backend); verify: the font name and each verdict
+  word appear once in `app/reporting` (`grep`), and the report tests pass unchanged
+- [ ] 9.8 (item 14) Pin `python-docx>=1.2,<2` in `backend/requirements.txt` (backend);
+  verify: the installed version satisfies it and the tests pass
+- [ ] 9.9 (items 15-16) The timing and two-sheet report tests include the accountability
+  section, and the docstrings of `FRAME_MM`, `ROW_HEIGHT_MM`, `FORM6_ROW_HEIGHTS_MM` say
+  "edition unverified" (backend); verify: the 200-step timing test, now with the
+  accountability block, stays under 1 minute, and the three docstrings contain "edition
+  unverified" (`grep`)
+- [ ] 9.10 `tester` issues the GO for `fix/calculation-engine/backend`, `orchestrator`
+  reviews it, then it merges into `develop` (backend)
+
 ## Dependencies
 
 - `retarget-mvp-domain` (WP1) archives first; this change needs only its domain name.
@@ -132,7 +189,7 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
   (commit `a1a896c`). Since 2026-09-29 also: task 1.7 is done with no blocker and no
   major finding, and Egor's acknowledgement of task 1.8 is recorded. Since 2026-09-30
   also: task 1.9 is done with no blocker and no major finding.
-- For implementation: all tests of sections 2-6 pass with >= 95% branch coverage;
+- For implementation: all tests of sections 2-6 and 9 pass with >= 95% branch coverage;
   `ui-ux-tester` confirms the frontend tasks 3.4, 3.5, and 5.4; the delta specs match the
   implementation.
 - NO-GO: validation fails; an unresolved blocker; a norm value, tolerance, or clause

@@ -237,6 +237,9 @@ the frame and the title blocks from GOST R 21.101-2026 and adds no norm value of
     - The request schema rejects a missing developer or normative control surname or date
       while the signature block is enabled, and any control character in the title-block
       and signature texts (Unicode category Cc; python-docx cannot write them to XML);
+      since 2026-10-03 also any other character XML 1.0 does not allow, such as U+FFFE
+      and U+FFFF, which the Cc check let through (review of the report feature, task
+      9.1);
       a checker needs both a surname and a date; with the block disabled, given surnames
       and dates are not printed.
     - A refused calculation keeps the body sections: the trace section states the refusal

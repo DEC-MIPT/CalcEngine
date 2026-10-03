@@ -20,7 +20,8 @@ rejected before any report is built. When it is disabled, the role captions of t
 stay, columns 11 and 13 are left empty, and surnames and dates given with the request
 are not printed. The title-block and signature texts SHALL NOT contain a control
 character (a character of the Unicode category Cc, which includes the tab and the line
-feed); a request with one SHALL be rejected.
+feed) or any other character that XML 1.0 does not allow (such as U+FFFE and U+FFFF); a
+request with one SHALL be rejected before any report is built.
 
 Source: GOST R 21.101-2026 (edition unverified). Clause 4.1.7: calculations are
 formatted according to the requirements for text documents. Clause 5.2.2: the title
@@ -41,6 +42,12 @@ frame sizes are taken from those figures; this requirement fixes none of them as
 - **WHEN** a report is requested with the signature block enabled and without the
   surname of the developer line
 - **THEN** the request is rejected and no report is built
+
+#### Scenario: Text that cannot be written to the document
+- **WHEN** a report request carries, in a title-block or signature text, a control
+  character or a character that XML 1.0 does not allow (for example U+FFFF)
+- **THEN** the request is rejected before any report is built, and no document is
+  produced
 
 #### Scenario: Complete report sections
 - **WHEN** a report is generated with the signature block enabled

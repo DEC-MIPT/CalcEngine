@@ -7,7 +7,10 @@ Branch: one feature, `feature/calculation-api/backend` (Akim). It branches from
 merged into `develop` only after both WP2 features and only when every code task below
 is done (`AGENTS.md`, Branching rules). Spec work (section 1) is committed directly to
 `develop`. Checkboxes are ticked in `develop` as each subtask is done on the feature
-branch. Every task with code below is on this branch.
+branch. Every task with code below is on this branch, except section 7: since
+2026-10-03 its post-merge fixes go on `fix/calculation-engine/backend` (Akim, from
+`develop`) with `calculation-core-contract` section 9, and merge into `develop` after
+that branch's `tester` GO and review (`calculation-core-contract` task 9.10).
 
 Code journal: `docs/akim/reports/WP8-code-journal.md`, created before task 2.1.
 
@@ -163,6 +166,21 @@ Code journal: `docs/akim/reports/WP8-code-journal.md`, created before task 2.1.
 - [ ] 6.5 (spec) `spec-keeper` syncs the delta into `openspec/specs/calculation-api/` and
   archives the change after `calculation-core-contract` is archived
 
+## 7. Review follow-ups (backend)
+
+Added 2026-10-03 from the second `orchestrator` review (items 17-18 in
+`docs/decisions/calculation-core-contract-readiness.md`, section 14). Branch:
+`fix/calculation-engine/backend`, with `calculation-core-contract` section 9. The GO, the
+review and the merge of this section are `calculation-core-contract` task 9.10.
+
+- [ ] 7.1 (item 17) An unexpected error writes one log line with the code, the route and
+  the exception type, also when the response had already started (`design.md` decision 5)
+  (backend); verify: one log record per unexpected error, holding
+  `code=internal_error`, the route template and the type, in both cases
+- [ ] 7.2 (item 18) Dispose the engine the application built also when the lifespan exits
+  with an error (`try`/`finally` around `yield`) (backend); verify: the engine is disposed
+  when an exception is thrown into the lifespan at `yield`
+
 ## Requirement coverage
 
 | Requirement | Verified by |
@@ -173,7 +191,7 @@ Code journal: `docs/akim/reports/WP8-code-journal.md`, created before task 2.1.
 | Stored result retrieval | tasks 3.2, 4.3, 5.3 |
 | Reproducible stored result | tasks 3.2, 4.3, 5.3 (`405` on change methods) |
 | Report download | tasks 4.4, 5.4 |
-| Error responses | tasks 2.4 (mapping, bodies, logs), 2.5 (`413`), 3.3 (`503` database); tasks 5.1-5.4 (per route) |
+| Error responses | tasks 2.4 (mapping, bodies, logs), 2.5 (`413`), 3.3 (`503` database); tasks 5.1-5.4 (per route); task 7.1 (one log line per unexpected error) |
 | Calculation parameter source | tasks 4.1 (engineer-set sources), 4.2, 5.2 |
 | API documentation | task 5.5 |
 | Cross-origin requests | tasks 2.1, 5.5 |
@@ -214,6 +232,8 @@ Code journal: `docs/akim/reports/WP8-code-journal.md`, created before task 2.1.
 - NO-GO: any of: a failed validation; an open blocker or major finding; a failed verify
   clause; coverage < 95%; a security finding; a norm value added in code, configuration
   or non-test data; any file in Egor's zones changed.
+- Section 7 is closed by `calculation-core-contract` task 9.10 (GO, review, merge of
+  `fix/calculation-engine/backend`).
 - Archive only after GO and after `calculation-core-contract` is archived.
 
 ## Dependencies

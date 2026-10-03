@@ -401,3 +401,24 @@ The three backend branches are merged (`8c001b9`, `9642d8d`, `23318c1`), so the 
     started; design.md decision 5 asks for one line with code, route and type. Log once.
 18. `main.py`: the engine the application built is not disposed if shutdown fails after
     `yield`; wrap the `yield` in `try`/`finally`.
+
+## 15. Review follow-ups planned; requirement amended (2026-10-03, passes 17-18)
+
+The follow-ups of sections 12-14 became tasks: section 9 of this change (9.1-9.10, with
+9.7 split into 9.7a and 9.7b) and section 7 of `calculation-api` (7.1-7.2), on one branch
+`fix/calculation-engine/backend`, named in both branch headers. Items 3 (fixed in
+`cc70f7d`), 6 (moved to `normative-catalog-backend` with task 7.1c) and 9 (per-column
+length limits need their own decision and scenario) are left out with that reason.
+
+Unlike the edit of section 11, this amendment **changes a requirement**: "GOST report
+structure" in the `report-generator` delta now rejects, besides a control character, any
+character that XML 1.0 does not allow (U+FFFE and U+FFFF passed the Cc check and made
+python-docx fail while rendering, so the report endpoint answered `500`), with a new
+scenario "Text that cannot be written to the document"; `design.md` decision 18 records
+why. No norm value is fixed.
+
+| Check | Result |
+|---|---|
+| `openspec validate --all --strict` | 19/19 |
+| `spec-reviewer`, pass 17 | 0 blockers, 2 major (this record not yet written; the fix branch missing from the branch headers), 7 minor (DOD sections, the api section 7 closure and coverage row, the reason for item 9, 9.7 not checkable as one task, the bound of 9.2, the WP5 schema in 9.6). All fixed |
+| `spec-reviewer`, pass 18 | 0 blockers, 0 major, 2 minor (9.9 verify clause for the docstrings, one overlong line), both fixed. **READY for DOR** for both changes, with this record |
