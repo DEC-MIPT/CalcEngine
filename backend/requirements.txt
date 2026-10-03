@@ -3,4 +3,5 @@ pydantic-settings
 sqlalchemy
 alembic
 pyyaml
+python-docx
 psycopg[binary]
