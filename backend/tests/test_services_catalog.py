@@ -195,3 +195,13 @@ def test_each_input_lists_the_units_of_its_dimension() -> None:
     assert units["phi_II"] == ("rad", "deg")
     assert units["gamma_II"] == ("N/m3", "kN/m3")
     assert all(item.base_unit in item.units for item in view.inputs)
+
+
+def test_an_empty_engineer_in_the_parameter_file_stops_the_start_up(tmp_path: Path) -> None:
+    write_params(tmp_path, VALID_RULE.replace('engineer: "<ENGINEER>"', 'engineer: ""'))
+
+    with pytest.raises(DECError) as raised:
+        build_registry(tmp_path)
+
+    assert FILE_NAME in str(raised.value)
+    assert "rounding_rules.R.source.engineer" in str(raised.value)

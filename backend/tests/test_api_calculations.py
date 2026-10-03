@@ -376,3 +376,16 @@ def test_a_422_on_the_real_route_echoes_no_client_value(
         assert SENTINEL not in field["message"]
     assert SENTINEL not in response.json()["message"]
     assert SENTINEL not in logged and "code=validation_error" in logged
+
+
+@pytest.mark.parametrize("character", [chr(0xFFFE), chr(0xFFFF)], ids=["fffe", "ffff"])
+def test_a_report_request_with_a_character_xml_does_not_allow_is_422(
+    client: TestClient, character: str
+) -> None:
+    created = client.post("/calculations", json=body()).json()
+    report = REPORT_BODY | {"title": REPORT_BODY["title"] | {"designation": f"ПР-{character}"}}
+
+    response = client.post(f"/calculations/{created['result_id']}/report", json=report)
+
+    assert (response.status_code, response.json()["code"]) == (422, "validation_error")
+    assert [field["location"] for field in response.json()["fields"]] == [["body", "title", "designation"]]

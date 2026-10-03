@@ -8,11 +8,9 @@ from app.engine.result import assemble_result
 from app.schemas.calculation import (
     CalculationResult,
     CalculationTypeContract,
-    CheckStep,
-    FormulaStep,
     MethodBound,
     QuantityValue,
-    TableStep,
+    Step,
     ValidatedBound,
 )
 
@@ -26,7 +24,7 @@ class CalculatorOutput:
         outputs: неокруглённые выходы по именам величин.
     """
 
-    trace: tuple[FormulaStep | TableStep | CheckStep, ...]
+    trace: tuple[Step, ...]
     outputs: Mapping[str, QuantityValue]
 
 
@@ -69,7 +67,7 @@ def calculate[ParametersT](
         method_range=method_range,
         validated_range=validated_range,
     )
-    if outcome.result is None:
+    if outcome.refusal is not None:
         return assemble_result(
             contract,
             input_hash=outcome.input_hash,

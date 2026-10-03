@@ -12,16 +12,13 @@ from app.schemas.calculation import (
     CalculationTypeContract,
     CheckReason,
     CheckStep,
-    FormulaStep,
     OutputValue,
-    TableStep,
+    Step,
     ValidatedBound,
     ordered_sources,
     unverified_steps,
     verdict_of,
 )
-
-Step = FormulaStep | TableStep | CheckStep
 
 
 def _ordered_outputs(

@@ -1,5 +1,4 @@
 from collections.abc import Mapping
-from typing import Literal
 
 from app.core.exceptions import UnitError
 from app.engine.expression import evaluate_expression
@@ -7,14 +6,13 @@ from app.schemas.calculation import (
     CheckStep,
     FormulaStep,
     NormRefs,
+    Operator,
     QuantityValue,
     Substitution,
     TableStep,
 )
 from app.schemas.expression import symbols
 from app.schemas.resolved import Formula, TableValue
-
-Operator = Literal["le", "lt", "ge", "gt"]
 
 _LATEX: Mapping[Operator, str] = {"le": r"\le", "lt": "<", "ge": r"\ge", "gt": ">"}
 
@@ -37,20 +35,23 @@ def formula_step(
     Returns:
         Шаг формулы с подстановками и результатом.
 
+    Единицы символов проверяются до вычисления, поэтому неверная единица называется
+    как ошибка единицы, даже если вычисление тоже упало бы.
+
     Raises:
         ExpressionError: если дерево не проходит проверку или значение не конечное.
         UnitError: если единица значения не та, что связана с символом.
     """
-    result = evaluate_expression(
-        formula.tree, {name: value.value for name, value in values.items()}, step_id
-    )
     used = symbols(formula.tree)
     for name in used:
-        if values[name].unit != formula.units[name]:
+        if name in values and values[name].unit != formula.units[name]:
             raise UnitError(
                 f"step {step_id!r}: {name!r} is in {values[name].unit!r},"
                 f" the formula expects {formula.units[name]!r}"
             )
+    result = evaluate_expression(
+        formula.tree, {name: value.value for name, value in values.items()}, step_id
+    )
     return FormulaStep(
         step_id=step_id,
         expression=formula.latex,

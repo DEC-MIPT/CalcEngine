@@ -38,7 +38,7 @@ from app.reporting.title_block import (
     FORM6_MERGES,
     FORM6_ROW_HEIGHTS_MM,
     FORM6_WIDTHS_MM,
-    FRAME_SIDES,
+    FRAME_DRAWN_SIDES,
     INNER_LINE,
     OUTER_LINE,
     ROW_HEIGHT_MM,
@@ -137,7 +137,7 @@ def test_the_outer_line_of_the_form_is_the_frame_line(form5: Table) -> None:
         "bottom": ("single", FRAME_LINE_EIGHTHS_PT),
         "right": ("nil", FRAME_LINE_EIGHTHS_PT),
     }
-    assert FRAME_SIDES == ("left", "right")
+    assert FRAME_DRAWN_SIDES == ("left", "right")
 
 
 def test_the_left_edge_of_the_form_lies_on_the_left_frame_line(form5: Table) -> None:
@@ -312,7 +312,9 @@ def test_a_report_of_two_sheets_or_more_renders_with_both_forms() -> None:
     trace = model.body[1]
     assert isinstance(trace, TraceSection)
     steps = tuple(trace.steps[7].model_copy(update={"step_id": f"s{index}"}) for index in range(60))
-    long = model.model_copy(update={"body": (model.body[0], trace.model_copy(update={"steps": steps}), model.body[2])})
+    long = model.model_copy(
+        update={"body": (model.body[0], trace.model_copy(update={"steps": steps}), model.body[2], model.body[3])}
+    )
 
     section = Document(BytesIO(render_docx(long))).sections[0]
 

@@ -4,14 +4,51 @@ from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, model_validator
 
+XML_FORBIDDEN = frozenset({0xFFFE, 0xFFFF})
+"""Символы вне управляющих и суррогатов, которых нет в наборе символов XML 1.0."""
 
-def _no_control_character(text: str) -> str:
-    if any(unicodedata.category(character) == "Cc" for character in text):
-        raise ValueError("text must not contain a control character (Unicode category Cc)")
+
+def writable_character(character: str) -> bool:
+    """Проверяет, можно ли записать символ в текст отчёта.
+
+    Args:
+        character: один символ.
+
+    Returns:
+        ``False`` для управляющего символа (Cc), суррогата, U+FFFE и U+FFFF.
+    """
+    code = ord(character)
+    return not (
+        unicodedata.category(character) == "Cc"
+        or 0xD800 <= code <= 0xDFFF
+        or code in XML_FORBIDDEN
+    )
+
+
+def _writable_text(text: str) -> str:
+    """Проверяет, что текст можно записать в документ.
+
+    Отклоняются управляющие символы (категория Cc, в том числе табуляция и перевод
+    строки) и любой другой символ, недопустимый в XML 1.0: суррогаты, U+FFFE и U+FFFF
+    (``report-generator`` "GOST report structure", design.md, решение 18).
+
+    Args:
+        text: текст основной надписи или блока подписей.
+
+    Returns:
+        Тот же текст.
+
+    Raises:
+        ValueError: если в тексте есть такой символ.
+    """
+    if not all(writable_character(character) for character in text):
+        raise ValueError(
+            "text must not contain a control character or another character XML 1.0 does not allow"
+        )
     return text
 
 
-Text = Annotated[str, AfterValidator(_no_control_character)]
+Text = Annotated[str, AfterValidator(_writable_text)]
 
 
 class TitleBlockData(BaseModel):

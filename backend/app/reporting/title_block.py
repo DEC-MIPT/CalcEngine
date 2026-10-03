@@ -16,6 +16,7 @@ from docx.text.paragraph import Paragraph
 
 from app.reporting.format import format_date
 from app.reporting.layout import (
+    BODY_FONT,
     BODY_INDENT_MM,
     FRAME_LINE_EIGHTHS_PT,
     FRAME_MM,
@@ -30,7 +31,7 @@ FORM5_WIDTHS_MM = (10, 10, 10, 10, 15, 10, 70, 15, 15, 20)
 
 FORM5_ROWS = 8
 ROW_HEIGHT_MM = 5
-"""Форма 5 — восемь строк по 5 мм, как на её рисунке."""
+"""Форма 5 — восемь строк по 5 мм, как на её рисунке (GOST R 21.101-2026, edition unverified, приложение Е)."""
 
 FORM5_MERGES: tuple[tuple[int, int, int, int], ...] = (
     (0, 6, 2, 9),
@@ -83,7 +84,8 @@ FORM6_WIDTHS_MM = (10, 10, 10, 10, 15, 10, 110, 10)
 """Ширины граф формы 6 слева направо (GOST R 21.101-2026, edition unverified, приложение Е)."""
 
 FORM6_ROW_HEIGHTS_MM = (5, 2, 3, 5)
-"""Форма 6 высотой 15 мм: слева три строки по 5 мм, справа 7 мм и 8 мм под «Лист».
+"""Форма 6 высотой 15 мм (GOST R 21.101-2026, edition unverified, приложение Е): слева три
+строки по 5 мм, справа 7 мм и 8 мм под «Лист».
 Обе части держит одна сетка, поэтому её строки — 5, 2, 3 и 5 мм, а ячейки объединяются
 поперёк."""
 
@@ -127,7 +129,8 @@ FORM6 = Form(FORM6_WIDTHS_MM, FORM6_ROW_HEIGHTS_MM, FORM6_MERGES, FORM6_CAPTIONS
 
 SHEET_FORMAT = "А4"
 FORMAT_BOX_MM = (150, 40)
-"""Графа 26 под нижней линией рамки, ниже правой части формы: координата x и ширина."""
+"""Графа 26 под нижней линией рамки, ниже правой части формы: координата x и ширина;
+выбор вёрстки, а не значение нормы."""
 
 TITLE_STYLE = "DEC Title Block"
 TITLE_SIZE_PT = 7
@@ -141,7 +144,7 @@ OUTER_LINE, INNER_LINE = FRAME_LINE_EIGHTHS_PT, 4
 """Толщины линий формы в восьмых долях пункта; выбор вёрстки, а не значения нормы.
 Внешняя линия — это линия рамки, чтобы они совпадали друг с другом."""
 
-FRAME_SIDES = ("left", "right")
+FRAME_DRAWN_SIDES = ("left", "right")
 """Стороны формы, которые рисует рамка: вторая линия там, даже лежащая точно на линии
 рамки, на экране может округлиться до другого пикселя и выступить из рамки."""
 
@@ -154,7 +157,7 @@ BODY_GAP_MM = BODY_INDENT_MM
 
 def _title_style(document: Document) -> str:
     style = document.styles.add_style(TITLE_STYLE, WD_STYLE_TYPE.PARAGRAPH)
-    style.font.name = "Arial"
+    style.font.name = BODY_FONT
     style.font.size = Pt(TITLE_SIZE_PT)
     paragraph = style.paragraph_format
     paragraph.space_before = paragraph.space_after = Pt(0)
@@ -167,7 +170,7 @@ def _borders(table: Table) -> None:
     borders = OxmlElement("w:tblBorders")
     for side in ("top", "left", "bottom", "right", "insideH", "insideV"):
         line = OxmlElement(f"w:{side}")
-        line.set(qn("w:val"), "nil" if side in FRAME_SIDES else "single")
+        line.set(qn("w:val"), "nil" if side in FRAME_DRAWN_SIDES else "single")
         line.set(qn("w:sz"), str(INNER_LINE if side.startswith("inside") else OUTER_LINE))
         line.set(qn("w:space"), "0")
         line.set(qn("w:color"), "000000")
@@ -355,7 +358,6 @@ def add_title_blocks(document: Document, request: ReportRequest) -> tuple[Table,
     """
     title = request.title
     section = document.sections[0]
-    section.different_first_page_header_footer = True
     section.footer_distance = Mm(footer_distance_mm())
     style = _title_style(document)
     first = _footer_form(section.first_page_footer, style, FORM5)
