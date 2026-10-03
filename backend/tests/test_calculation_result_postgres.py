@@ -1,21 +1,30 @@
 import json
 import math
 import os
+import statistics
+import time
 import uuid
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
 
 import pytest
 from alembic.config import Config
+from fastapi.testclient import TestClient
 from sqlalchemy import Engine, create_engine, inspect, sql
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
+from test_engine_foundations_shallow_r import FixedSource as PilotSource
+from test_engine_foundations_shallow_r import inputs as pilot_inputs
 from test_models_calculation_result import COLUMNS
 from test_repositories_calculation_result import ENVELOPE, RECORD
 from test_services_submit import FixedSource, make_service, request
 
 from alembic import command
+from app.core.config import PARAMS_ROOT
 from app.db.session import as_psycopg_url
+from app.engine import foundations_shallow_r as pilot
+from app.main import create_app
 from app.repositories.calculation_result import CalculationResultRepository
+from app.services.catalog import build_registry, load_validated_ranges
 
 pytestmark = pytest.mark.postgres
 
@@ -87,3 +96,34 @@ def test_the_service_reads_back_a_stored_result_with_its_storage_time(database: 
 
     assert stored.envelope == envelope
     assert stored.created_at.tzinfo is not None
+
+
+def test_the_median_calculation_time_is_at_most_one_second(
+    database: tuple[Config, Engine], record_property: Callable[[str, object], None]
+) -> None:
+    _, engine = database
+    registry = build_registry(PARAMS_ROOT)
+    application = create_app(
+        registry=registry,
+        sources={pilot.NAME: PilotSource()},
+        validated_ranges=load_validated_ranges(registry, PARAMS_ROOT),
+        session_factory=sessionmaker(bind=engine),
+    )
+    body = {
+        "calculation_type": pilot.NAME,
+        "inputs": {name: value.model_dump() for name, value in pilot_inputs().items()},
+    }
+
+    durations: list[float] = []
+    with TestClient(application) as client:
+        assert client.post("/calculations", json=body).status_code == 201
+        for _ in range(20):
+            started = time.perf_counter()
+            response = client.post("/calculations", json=body)
+            durations.append(time.perf_counter() - started)
+            assert response.status_code == 201
+
+    median = statistics.median(durations)
+    record_property("median_seconds", median)
+    print(f"\nPOST /calculations median over 20: {median * 1000:.1f} ms; max {max(durations) * 1000:.1f} ms")
+    assert median <= 1.0
