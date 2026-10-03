@@ -345,3 +345,47 @@ Review minor findings, follow-ups after the three backend branches are merged (p
 Open in this change: the report feature (`feature/report-generator/backend`, tasks
 6.2a-6.4), the frontend feature (3.4, 3.5, 5.4), task 7.2, and the archive (8.3) after
 `retarget-mvp-domain`.
+
+## 13. Report feature: GO, review and merge (2026-10-03)
+
+`feature/report-generator/backend` (tasks 6.2a-6.2f, 6.3, 6.4), with `develop` (engine
+included) merged into it at `035c640`.
+
+| Step | Result |
+|---|---|
+| `tester` | **GO** at `035c640`: 447 passed (report tests 104 in 2.6 s); branch coverage 100%, all 7 report modules 100%; ruff and mypy clean; every verify clause of 6.2a-6.4 mapped to tests; all 15 `report-generator` scenarios covered; 200 trace steps rendered in 0.14 s; GOST R 21.101-2026 citations "edition unverified", unit designations "source: unverified"; only `backend/` changed; UI/UX N/A (`.docx` output, no UI) |
+| `orchestrator` review | **APPROVED**: no blocker, no major. Checked sound: body order and the refused report, number, unit and date formats (no clock read), form-5 and form-6 geometry (185 mm widths, 40 mm and 15 mm heights, merges, columns 10-13), `PAGE`/`NUMPAGES` fields, the signature block enabled and disabled, the accountability block and statement, layer order (`reporting` does not import `engine`), untrusted text written only through python-docx runs (escaped), XML attributes built from constants only, no invented norm value |
+| Merge | `9642d8d` into `develop`; `check.sh` on `develop` after the merge: 447 passed, coverage 100% |
+
+Follow-ups added to the planned `fix/calculation-engine/backend` (after the three
+backend branches are merged), numbered after section 12's seven:
+
+8. **First of the fix branch.** `schemas/report.py`: the `Text` check rejects only
+   category Cc; U+FFFE and U+FFFF pass the schema and python-docx then fails while
+   rendering, so `POST /calculations/{result_id}/report` answers `500 internal_error`
+   instead of `422`. Reject every character that is not valid XML 1.0 and refine the
+   "GOST report structure" scenario of the `report-generator` delta. Safe to do after the
+   `calculation-api` merge: the endpoints run on a developer machine only, with no client
+   and no login yet.
+9. `schemas/report.py`: no length limit on `Text` fields (decision 18, "Risk"); add
+   per-column `max_length`.
+10. `reporting/title_block.py`: `FORMAT_BOX_MM` has neither a source nor a "layout
+    choice" label; label it.
+11. `reporting/title_block.py` and `layout.py`: two `FRAME_SIDES` constants with opposite
+    meanings; rename the title-block one (for example `FRAME_DRAWN_SIDES`).
+12. `reporting/title_block.py`: `"Arial"` and one sheet setting repeat `layout`; use the
+    `layout` constants.
+13. `reporting/docx_writer.py` and `accountability.py`: the verdict words are defined
+    twice; keep one table.
+14. `backend/requirements.txt`: pin `python-docx>=1.2,<2`, since the code uses its
+    private objects (`_tbl`, `_p`, `_sectPr`, `_Header`).
+15. (`tester`) The timing and two-sheet tests build a `Report` without the accountability
+    section; add it, so the timing covers the whole body.
+16. (`tester`) Three geometry docstrings (`FRAME_MM`, `ROW_HEIGHT_MM`,
+    `FORM6_ROW_HEIGHTS_MM`) name the GOST figure without "edition unverified"; add it.
+
+Accepted as they are: the control-character test covers 3 of the `Text` fields (they share
+one type); the two-sheet test checks structure, not real page breaks (the spec allows it).
+
+Open in this change: the frontend feature (3.4, 3.5, 5.4), task 7.2, and the archive (8.3)
+after `retarget-mvp-domain`.
