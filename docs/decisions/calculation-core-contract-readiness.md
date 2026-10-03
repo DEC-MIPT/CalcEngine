@@ -304,3 +304,44 @@ Run on the current text after section 10's edits, together with WP5 (the 9.3 set
 | 16 | 0 blockers, 0 major, 2 minor (wording of "No hardcoding" as former WP5 text; the antecedent in task 7.2). Both fixed. **READY for DOR** |
 
 `openspec validate --all --strict`: 19/19. No requirement or scenario changed.
+
+## 12. Engine feature: GO, review and merge (2026-10-03)
+
+`feature/calculation-engine/backend` (backend tasks of sections 2-5, 6.1, 6.1a, 6.1b, 6.2,
+7.1a, 7.1b), with `develop` merged into it at `ae9d486`.
+
+| Step | Result |
+|---|---|
+| `tester` | **GO** at `ae9d486`: `backend/check.sh` 343 passed, 0 skipped; branch coverage 100%; ruff and mypy clean; every task and verify clause mapped to tests; all 31 `calculation-engine` scenarios and `security` "Invalid input rejected" covered; purity (file, socket, clock, random, uuid patched to raise), determinism (three `PYTHONHASHSEED` subprocess runs) and the pilot literal scan pass; only `backend/` changed; UI/UX N/A (no UI) |
+| `orchestrator` review | **APPROVED**: no blocker, no major. Checked sound: interpreter safety (closed node and function sets, limits and bindings checked on the whole tree before evaluation, no `eval`/`exec`/`sympify`, non-finite values caught per node), applicability with three outcomes, rounding by `Decimal(repr(value))` on outputs only, `input_hash` per decision 6, envelope order and dedup per decision 17, verdict, layer order (`engine` imports only `schemas` and `core`), no norm literal in the pilot, units converted once at the boundary |
+| Merge | `8c001b9` into `develop`; `check.sh` on `develop` after the merge: 343 passed, coverage 100% |
+
+`tester` minor findings, accepted: `params/*.yaml` is checked by a key whitelist and
+forbidden words, not a literal scan (task 7.1a asks for that); `submit` with an input
+outside the method's range is covered end to end by the `calculation-api` tests; the
+unknown-node-kind cases fail at parsing, before any evaluation.
+
+Review minor findings, follow-ups after the three backend branches are merged (planned
+`fix/calculation-engine/backend`, with tests):
+
+1. `engine/rounding.py`: `RoundingRule.decimals` has no upper bound, so `quantize` can
+   raise `decimal.InvalidOperation` (a `500`, not a `DECError`) for many decimals or a
+   very large value. Bound `decimals` or quantize in a local context and raise
+   `CalculationError`.
+2. `engine/steps.py`: the units of a formula's symbols are checked after evaluation, so a
+   unit mismatch can surface as a non-finite value. Check units first.
+3. `engine/hashing.py`: stale docstring about task 1.8. Already fixed on
+   `feature/calculation-api/backend` (`cc70f7d`).
+4. `engine/pipeline.py`: a refusal is detected by `outcome.result is None`; test
+   `outcome.refusal is not None`, as decision 3 names it.
+5. The step union type is spelled out five times and `Operator` twice; keep one alias
+   each in `schemas`.
+6. `schemas/resolved.py`: `TableValue` does not carry the values that selected it, so the
+   engine cannot confirm that a table entry belongs to the given input. Goes to
+   `normative-catalog-backend` (task 7.1c), together with the exact-match row lookup.
+7. `schemas/parameters.py` (WP5): `EngineerRule` accepts empty strings and is not frozen;
+   add `min_length=1` and `frozen=True`.
+
+Open in this change: the report feature (`feature/report-generator/backend`, tasks
+6.2a-6.4), the frontend feature (3.4, 3.5, 5.4), task 7.2, and the archive (8.3) after
+`retarget-mvp-domain`.
