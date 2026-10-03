@@ -88,6 +88,14 @@ carries the engine:
      6. store.
 
      So nothing is stored on any rejection.
+   - Accepted deviation (2026-10-03, review before merge, minor 2): the service depends
+     on the request's session, and FastAPI resolves that dependency before it checks the
+     body and the path. When `dec_app` is not configured (no or a malformed
+     `DEC_APP_DATABASE_URL`), a route that needs the service therefore answers
+     `503 database_unavailable` before step 1, even to a malformed request. This happens
+     only on a misconfigured server; with `dec_app` configured, the order above holds.
+     Making the session lazy would change the repository for that case alone, so it is
+     not done.
    - `normative-catalog-backend` adds the catalog implementation. Tests add a synthetic
      one through `app.dependency_overrides`.
    - Alternatives rejected:
