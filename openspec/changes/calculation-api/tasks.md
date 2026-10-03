@@ -34,10 +34,10 @@ Code journal: `docs/akim/reports/WP8-code-journal.md`, created before task 2.1.
   `foundations_shallow_r.yaml`, an override from the environment, and `ApiSettings()`
   constructed with `DEC_APP_DATABASE_URL` unset
 - [ ] 2.2 Add `schemas/api.py` (`ErrorBody`, `FieldError`, `CalculationTypeView` with
-  its input and output views) and the exceptions `ParameterSourceUnavailableError`,
-  `CalculationTypeNotRegisteredError` and `DatabaseUnavailableError` in
-  `core/exceptions.py` (backend); verify: schema tests for every field; each new
-  exception is a `DECError`
+  its input and output views; the input view's `units` field is added by task 5.2a) and
+  the exceptions `ParameterSourceUnavailableError`, `CalculationTypeNotRegisteredError`
+  and `DatabaseUnavailableError` in `core/exceptions.py` (backend); verify: schema tests
+  for every field except `units` (tested by 5.2a); each new exception is a `DECError`
 - [ ] 2.3 Add `create_app(api_settings=..., registry=..., sources=...,
   session_factory=...)` in `app/main.py`, keeping `app = create_app()` importable and
   startable without `DEC_APP_DATABASE_URL` (`design.md` decisions 1, 7) (backend);
@@ -121,6 +121,13 @@ Code journal: `docs/akim/reports/WP8-code-journal.md`, created before task 2.1.
   source" (`404`, both `422` codes with their `fields`, `503` without a source, nothing
   stored on any rejection, client-supplied parameters rejected as unknown fields, a unit
   outside the vocabulary rejected as `validation_error`)
+- [ ] 5.2a (added 2026-10-03, after 5.2) Add `units` to each input of
+  `CalculationTypeView`: the symbols of the unit vocabulary with the input's dimension,
+  in the vocabulary's order (`design.md` decision 10) (backend); verify: the pilot's `b`
+  lists exactly `m`, `cm`, `mm` and its `phi_II` exactly `rad`, `deg`, in that order;
+  every list contains the input's base unit; the input view rejects a list without the
+  base unit or with a unit of another dimension; a `POST /calculations` (task 5.2) that
+  gives each input of a synthetic type in each of its listed units answers `201`
 - [ ] 5.3 Add `GET /calculations/{result_id}` (backend); verify: the `GET` body equals
   the `POST` body; `404` for an unknown UUID; `422` for `abc`; `PUT`, `PATCH` and
   `DELETE` give `405 method_not_allowed` and the stored result is unchanged
@@ -160,7 +167,7 @@ Code journal: `docs/akim/reports/WP8-code-journal.md`, created before task 2.1.
 
 | Requirement | Verified by |
 |---|---|
-| Calculation types listing | tasks 4.1, 5.1 |
+| Calculation types listing | tasks 4.1, 5.1, 5.2a |
 | Run a calculation | tasks 4.2, 5.2 |
 | Calculation request validation over HTTP | tasks 4.2, 5.2 |
 | Stored result retrieval | tasks 3.2, 4.3, 5.3 |

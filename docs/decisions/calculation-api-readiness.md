@@ -72,3 +72,20 @@ Two `spec-reviewer` passes on the current text after commit `11bdca4` (task 1.8 
 pipeline moved to `ml/` and `infra/`). First pass: 0 blockers, 0 major, wording minors
 (task 1.8 passages in the present tense, paths, the open-points paragraph), all fixed.
 Second pass: 0 blockers, 0 major, no finding. **READY for DOR.**
+
+## Amendment: units of each input in the types listing (2026-10-03)
+
+Before task 5.3, a check of the client side showed that the input form (`web-platform`
+"Calculation input form", modified in the WP1 delta: fields from the type's contract, no
+hard-coded fields) has no task in any change, and that `GET /calculation-types` gave the
+form no list of allowed units, so the form would need its own copy of the unit
+vocabulary. Akim's decision: list, for each input, the units of the vocabulary with its
+dimension. Edited: the requirement "Calculation types listing" and a new scenario "Units
+a form can offer"; `design.md` decision 10; task 5.2a (after 5.2) and the coverage row;
+task 2.2's verify clause; one proposal bullet. The form itself stays outside this change.
+
+| Check | Result |
+|---|---|
+| `openspec validate --all --strict` | 19/19 |
+| `spec-reviewer`, first pass | 0 blockers, 2 major (the claim "a client can build the form from this listing alone" was not checkable; the task's verify used `POST /calculations` before task 5.2), 5 minor. Fixed: the claim narrowed to units that pass the dimension check; the task moved after 5.2 as 5.2a; unit order in the requirement and the scenario; "is not rejected with `422`"; exact lists in the verify clause |
+| `spec-reviewer`, second pass | 0 blockers, 0 major, 3 minor (one fixed: task 2.2 verifies every field except `units`; two accepted: order checked on the pilot's two inputs, the vocabulary order is the one of `schemas/units.py` named in decision 10). **READY for DOR** |

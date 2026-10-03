@@ -10,14 +10,24 @@ parameters come from.
 
 ### Requirement: Calculation types listing
 The system SHALL expose `GET /calculation-types`, which returns every registered
-calculation type with its name, its declared inputs (each with its name, base unit and
-the unit's dimension), and its declared outputs (each with its name and base unit), in
-the order the type's contract declares them.
+calculation type with its name, its declared inputs (each with its name, base unit,
+the unit's dimension, and every unit of the unit vocabulary with that dimension, in the
+vocabulary's order), and its declared outputs (each with its name and base unit), in the
+order the type's contract declares them. The listed units of an input are the units a
+request may give it, so a client can offer, per input, only units that pass the
+dimension check of "Calculation request validation over HTTP", without its own copy of
+the unit vocabulary (`web-platform` "Calculation input form").
 
 #### Scenario: List the registered types
 - **WHEN** a client sends `GET /calculation-types`
 - **THEN** the response is `200` with one entry per registered calculation type, and
   each entry lists the type's inputs and outputs as its contract declares them
+
+#### Scenario: Units a form can offer
+- **WHEN** a client sends `GET /calculation-types`
+- **THEN** each input lists the units of its dimension in the unit vocabulary, in the
+  vocabulary's order and with its base unit among them, and a calculation request that
+  gives the input in any listed unit is not rejected with `422`
 
 #### Scenario: No type registered
 - **WHEN** no calculation type is registered and a client sends `GET /calculation-types`

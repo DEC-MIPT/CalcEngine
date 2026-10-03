@@ -27,7 +27,7 @@ calculation, and MVP testing needs it to run one end to end.
 
 - A new capability `calculation-api`: the HTTP contract of calculations.
   - `GET /calculation-types`: the registered calculation types with their declared
-    inputs and outputs.
+    inputs (each with the units a request may give it) and outputs.
   - `POST /calculations`: runs a `CalculationRequest` and returns the stored
     `ResultEnvelope`; a refusal by the method's range is a stored result, not an error.
   - `GET /calculations/{result_id}`: returns a stored envelope.
