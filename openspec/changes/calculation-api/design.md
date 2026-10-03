@@ -205,11 +205,18 @@ carries the engine:
 10. **Calculation types view.** The service maps each contract to a schema
     `CalculationTypeView`:
     - `name`;
-    - `inputs`: name, base unit, dimension from the unit vocabulary;
+    - `inputs`: name, base unit, dimension from the unit vocabulary, and `units`: the
+      symbols of the vocabulary with that dimension, in the vocabulary's order;
     - `outputs`: name, base unit.
 
     Rounding rules, checks and sources stay out of the listing. They belong to a result,
     not to the input form.
+
+    `units` (task 5.2a): without it the input form could offer only the base unit, or
+    keep its own copy of the unit vocabulary, which is the hard-coding the `web-platform`
+    "Calculation input form" requirement (WP1 delta) rules out. The vocabulary stays in
+    `schemas/units.py`; the listing exposes it per input. The form itself is not part of
+    this change.
 
 11. **Testing.**
     - API tests use `TestClient(create_app(...))` with a SQLite in-memory engine

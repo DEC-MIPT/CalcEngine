@@ -72,3 +72,75 @@ Two `spec-reviewer` passes on the current text after commit `11bdca4` (task 1.8 
 pipeline moved to `ml/` and `infra/`). First pass: 0 blockers, 0 major, wording minors
 (task 1.8 passages in the present tense, paths, the open-points paragraph), all fixed.
 Second pass: 0 blockers, 0 major, no finding. **READY for DOR.**
+
+## Amendment: units of each input in the types listing (2026-10-03)
+
+Before task 5.3, a check of the client side showed that the input form (`web-platform`
+"Calculation input form", modified in the WP1 delta: fields from the type's contract, no
+hard-coded fields) has no task in any change, and that `GET /calculation-types` gave the
+form no list of allowed units, so the form would need its own copy of the unit
+vocabulary. Akim's decision: list, for each input, the units of the vocabulary with its
+dimension. Edited: the requirement "Calculation types listing" and a new scenario "Units
+a form can offer"; `design.md` decision 10; task 5.2a (after 5.2) and the coverage row;
+task 2.2's verify clause; one proposal bullet. The form itself stays outside this change.
+
+| Check | Result |
+|---|---|
+| `openspec validate --all --strict` | 19/19 |
+| `spec-reviewer`, first pass | 0 blockers, 2 major (the claim "a client can build the form from this listing alone" was not checkable; the task's verify used `POST /calculations` before task 5.2), 5 minor. Fixed: the claim narrowed to units that pass the dimension check; the task moved after 5.2 as 5.2a; unit order in the requirement and the scenario; "is not rejected with `422`"; exact lists in the verify clause |
+| `spec-reviewer`, second pass | 0 blockers, 0 major, 3 minor (one fixed: task 2.2 verifies every field except `units`; two accepted: order checked on the pilot's two inputs, the vocabulary order is the one of `schemas/units.py` named in decision 10). **READY for DOR** |
+
+## Implementation verdict (task 6.3), 2026-10-03
+
+`tester`, on `feature/calculation-api/backend` at `2b3edc8` (tasks 2.1-6.2 done; commits
+`dc2eca4`, `8ef5678`, `82fc8ac`, `0b7545e`, `2b3edc8`):
+
+**GO.**
+
+| Item | Result |
+|---|---|
+| tests | `backend/check.sh`: 612 passed, 1 skipped (the `postgres` module without its variable); `postgres` module against a hand-made `dec_app_wp8_test` on `dec-postgres`: 5/5 |
+| coverage | 100% branch coverage of `app` (54 files), gate 95% |
+| lint and types | `ruff`: no finding; `mypy`: no issue in 109 source files |
+| latency | `POST /calculations`, pilot with a synthetic in-process source: median 3.7 ms, max 4.3 ms over 20 sequential requests after a warm-up (target: median at most 1 s) |
+| spec coverage | every scenario of the delta mapped to at least one test |
+| zones | the branch changes only `backend/` |
+| UI/UX | N/A: the change has no UI (HTTP endpoints, storage, services only) |
+
+No blocker, no major finding. Minor findings, closed by tests in `8ebf870` (619 passed,
+coverage 100%): a validated-range bound without its engineer stops the start-up naming the
+file and the value; on the real `POST /calculations`, a `422` body and its log line hold
+no client value; `413 payload_too_large` with its code on every route of the assembled
+application. The fourth minor (tasks unticked on `develop`) is closed by this record's
+commit.
+
+Task 6.2 (manual run, recorded in the code journal): `uvicorn` on `127.0.0.1` with a
+migrated `dec_app_wp8_test` answered `/health`, `/docs` and `GET /calculation-types` with
+`200`, and `POST /calculations` for the pilot with `503 parameter_source_unavailable`;
+with `dec-postgres` stopped, `GET /calculations/{result_id}` answered
+`503 database_unavailable` and recovered after the restart without restarting `uvicorn`;
+the log held no URL or password.
+
+Open: task 6.4 (review by the orchestrator, then the merge after
+`feature/calculation-engine/backend` and `feature/report-generator/backend`) and task 6.5
+(sync and archive after `calculation-core-contract`).
+
+## Docstring pass and GO reconfirmed (2026-10-03)
+
+`cc70f7d` translated 160 docstrings (module, class, function and attribute docstrings) in
+39 files under `backend/app` and `backend/tests` into Russian, Google style, under Akim's
+local rule; section keywords (`Args:`, `Returns:`, `Raises:`, `Attributes:`, `Yields:`)
+stay English. It is on this branch because `calculation-engine` ⊂ `report-generator` ⊂
+`calculation-api`: the lower branches merge into `develop` with their English
+docstrings, and this branch's merge brings the translation for all three.
+
+`tester` on `cc70f7d`: **GO**, no finding.
+
+| Item | Result |
+|---|---|
+| docstrings only | AST of all 39 changed files compared with every string expression replaced by `pass`: 0 differences; no comment line edited |
+| tests | `backend/check.sh`: 619 passed, 1 skipped; `postgres` module: 5/5, median 3.6 ms |
+| coverage | 100% branch coverage of `app` |
+| lint and types | `ruff` and `mypy`: no finding |
+| docstring content | every `Args:` entry of 65 functions names a real parameter; `Attributes:` match the fields; norm citations, `design.md` decisions and requirement names kept |
+| UI/UX | N/A: no UI |

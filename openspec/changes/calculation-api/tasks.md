@@ -25,59 +25,59 @@ Code journal: `docs/akim/reports/WP8-code-journal.md`, created before task 2.1.
 
 ## 2. Groundwork (backend)
 
-- [ ] 2.1 Create the branch from `feature/report-generator/backend`. Add `uvicorn` to
+- [x] 2.1 Create the branch from `feature/report-generator/backend`. Add `uvicorn` to
   `backend/requirements.txt`. Add `ApiSettings` with `DEC_CORS_ORIGINS`
   (comma-separated, empty by default) and `DEC_PARAMS_ROOT` (default `backend/params`
   resolved from the package), with no required field (`design.md` decision 7)
   (backend); verify: tests show an empty origin list without the variable, two origins
   from `"a,b"`, the default params root pointing at the directory that holds
   `foundations_shallow_r.yaml`, an override from the environment, and `ApiSettings()`
-  constructed with `DEC_APP_DATABASE_URL` unset
-- [ ] 2.2 Add `schemas/api.py` (`ErrorBody`, `FieldError`, `CalculationTypeView` with
-  its input and output views) and the exceptions `ParameterSourceUnavailableError`,
-  `CalculationTypeNotRegisteredError` and `DatabaseUnavailableError` in
-  `core/exceptions.py` (backend); verify: schema tests for every field; each new
-  exception is a `DECError`
-- [ ] 2.3 Add `create_app(api_settings=..., registry=..., sources=...,
+  constructed with `DEC_APP_DATABASE_URL` unset (done 2026-10-02, `dc2eca4` on `feature/calculation-api/backend`)
+- [x] 2.2 Add `schemas/api.py` (`ErrorBody`, `FieldError`, `CalculationTypeView` with
+  its input and output views; the input view's `units` field is added by task 5.2a) and
+  the exceptions `ParameterSourceUnavailableError`, `CalculationTypeNotRegisteredError`
+  and `DatabaseUnavailableError` in `core/exceptions.py` (backend); verify: schema tests
+  for every field except `units` (tested by 5.2a); each new exception is a `DECError` (done 2026-10-02, `dc2eca4` on `feature/calculation-api/backend`)
+- [x] 2.3 Add `create_app(api_settings=..., registry=..., sources=...,
   session_factory=...)` in `app/main.py`, keeping `app = create_app()` importable and
   startable without `DEC_APP_DATABASE_URL` (`design.md` decisions 1, 7) (backend);
   verify: with the variable unset, `GET /health` answers `{"status": "ok"}` and the
-  lifespan builds the registry from `ApiSettings` only
-- [ ] 2.4 Add `api/errors.py`: the error body and the handlers of `design.md` decision 5,
+  lifespan builds the registry from `ApiSettings` only (done 2026-10-02, `dc2eca4` on `feature/calculation-api/backend`)
+- [x] 2.4 Add `api/errors.py`: the error body and the handlers of `design.md` decision 5,
   including `404` for an unknown route and `405` for a wrong method (backend); verify: a
   test app with throwaway routes raising each mapped error gives the table's status and
   `code`; every `422` body has `fields`, without the input echo; a `500` body holds none
   of the exception's text; captured log lines of a `422`, a `503` and a `500` hold the
-  `code` and the route and no request value
-- [ ] 2.5 Add the 1 MiB body-size middleware (`design.md` decision 6) (backend); verify:
+  `code` and the route and no request value (done 2026-10-02, `dc2eca4` on `feature/calculation-api/backend`)
+- [x] 2.5 Add the 1 MiB body-size middleware (`design.md` decision 6) (backend); verify:
   a body over 1 MiB, with a declared `Content-Length` and chunked without one, gives
   `413 payload_too_large` before the route runs (a spy on the route); a body of exactly
-  1 MiB passes
+  1 MiB passes (done 2026-10-02, `dc2eca4` on `feature/calculation-api/backend`)
 
 ## 3. Storage (backend)
 
-- [ ] 3.1 Add `models/calculation_result.py` (`design.md` decision 4) and one Alembic
+- [x] 3.1 Add `models/calculation_result.py` (`design.md` decision 4) and one Alembic
   revision on top of `869e03eddcc5`, plus `tests/test_calculation_result_postgres.py`
   marked `postgres` and skipped unless `DEC_TEST_APP_DATABASE_URL` is set (register the
   marker in `backend/pyproject.toml`) (backend); verify: the metadata creates the table
   on SQLite in a test; with the variable set to a hand-made database on `dec-postgres`,
   `alembic upgrade head` creates the table with the columns of decision 4,
-  `alembic downgrade 869e03eddcc5` drops it, and both run without error
-- [ ] 3.2 Add `repositories/calculation_result.py` with `add` and `get` only (backend);
+  `alembic downgrade 869e03eddcc5` drops it, and both run without error (done 2026-10-03, `8ef5678` on `feature/calculation-api/backend`)
+- [x] 3.2 Add `repositories/calculation_result.py` with `add` and `get` only (backend);
   verify: on SQLite, an added row reads back with every column equal; `get` of an unknown
   id returns nothing; the repository has no update or delete method; the `postgres`
   module stores and reads an envelope whose floats include `-0.0`, `1e-07` and `172.5`
-  and gets the same JSON text back
-- [ ] 3.3 Add the session provider of `design.md` decision 7: lazy `Settings`, a cached
+  and gets the same JSON text back (done 2026-10-03, `8ef5678` on `feature/calculation-api/backend`)
+- [x] 3.3 Add the session provider of `design.md` decision 7: lazy `Settings`, a cached
   engine and session factory, and the translation of a missing or invalid
   `DEC_APP_DATABASE_URL` and of `OperationalError` into `DatabaseUnavailableError`
   (backend); verify: with the variable unset, and with a URL to a closed port, a request
   that needs the database answers `503 database_unavailable`, and neither the body nor
-  the log line holds the URL or the driver's text
+  the log line holds the URL or the driver's text (done 2026-10-03, `8ef5678` on `feature/calculation-api/backend`)
 
 ## 4. Services (backend)
 
-- [ ] 4.1 Add `services/catalog.py`: `build_registry(params_root)`, which registers the
+- [x] 4.1 Add `services/catalog.py`: `build_registry(params_root)`, which registers the
   pilot from its `.yaml`, and `calculation_types(registry)`, which returns
   `CalculationTypeView` values; add the `ParameterSource` protocol and
   `ResolvedParameters` (`design.md` decisions 2, 3, 10) (backend); verify: the built
@@ -85,72 +85,79 @@ Code journal: `docs/akim/reports/WP8-code-journal.md`, created before task 2.1.
   rule's engineer and rationale as `rounding_source`; a missing `.yaml`, an invalid one,
   or a rounding rule without its engineer or rationale makes `build_registry` raise a
   `DECError` subclass naming the file and the value (the output quantity of the rule); the views list inputs and outputs in contract
-  order with dimensions from the unit vocabulary
-- [ ] 4.2 Change `CalculationRequest.check_against` to collect every offending input
+  order with dimensions from the unit vocabulary (done 2026-10-03, `82fc8ac` on `feature/calculation-api/backend`)
+- [x] 4.2 Change `CalculationRequest.check_against` to collect every offending input
   into one `InputValidationError` carrying their names (`design.md` decision 5), and
   extend `CalculationService.submit` with the parameter sources and the repository,
   checking in the order of decision 3 (registered type, contract, source, run, store)
   (backend); verify: the WP2 request tests still pass; two missing and one undeclared
   input give one error naming all three; a spy shows the engine and the repository are
   not called on an unknown type, a contract mismatch, or a missing source; a refused
-  calculation is stored with verdict `refused`
-- [ ] 4.3 Add `CalculationService.get` and the stored-record fields of "Reproducible
+  calculation is stored with verdict `refused` (done 2026-10-03, `82fc8ac` on `feature/calculation-api/backend`)
+- [x] 4.3 Add `CalculationService.get` and the stored-record fields of "Reproducible
   stored result" (backend); verify: the stored record holds the calculation type, the
   request inputs with units, the envelope, `engine_version`, `input_hash`, the storage
   time, and the distinct documents and editions of `norm_refs` in first-use order;
   re-running stored inputs with the same `.yaml` and the same synthetic source gives the
   same `input_hash` and an envelope equal except `result_id`; `get` of an unknown id
   raises `NotFoundError`; no return value of the service is an instance of a class from
-  `app.models` (`backend-architecture` "No layer mixing")
-- [ ] 4.4 Add `CalculationService.report(result_id, report_request) -> bytes`
+  `app.models` (`backend-architecture` "No layer mixing") (done 2026-10-03, `82fc8ac` on `feature/calculation-api/backend`)
+- [x] 4.4 Add `CalculationService.report(result_id, report_request) -> bytes`
   (`design.md` decision 9) (backend); verify: the `.docx` read back holds the stored
   inputs, trace, conclusion and accountability block; a refused result's report states
   the refusal and names the bound; an unknown id raises `NotFoundError`; a stored result
-  whose type is no longer registered raises `CalculationTypeNotRegisteredError`
+  whose type is no longer registered raises `CalculationTypeNotRegisteredError` (done 2026-10-03, `82fc8ac` on `feature/calculation-api/backend`)
 
 ## 5. API (backend)
 
-- [ ] 5.1 Add `api/dependencies.py` (session per request, service provider) and
+- [x] 5.1 Add `api/dependencies.py` (session per request, service provider) and
   `GET /calculation-types` (backend); verify: `TestClient` gets `200` with the
   registry's types in contract order, and `200` with `[]` from an empty registry; with
   `DEC_APP_DATABASE_URL` unset, `GET /calculation-types` still answers `200` (the session
-  is opened only by routes that need it)
-- [ ] 5.2 Add `POST /calculations` (`201`, `Location`) (backend); verify, on SQLite with
+  is opened only by routes that need it) (done 2026-10-03, `0b7545e` on `feature/calculation-api/backend`)
+- [x] 5.2 Add `POST /calculations` (`201`, `Location`) (backend); verify, on SQLite with
   a synthetic source through `dependency_overrides`: every scenario of "Run a
   calculation", "Calculation request validation over HTTP" and "Calculation parameter
   source" (`404`, both `422` codes with their `fields`, `503` without a source, nothing
   stored on any rejection, client-supplied parameters rejected as unknown fields, a unit
-  outside the vocabulary rejected as `validation_error`)
-- [ ] 5.3 Add `GET /calculations/{result_id}` (backend); verify: the `GET` body equals
+  outside the vocabulary rejected as `validation_error`) (done 2026-10-03, `0b7545e` on `feature/calculation-api/backend`)
+- [x] 5.2a (added 2026-10-03, after 5.2) Add `units` to each input of
+  `CalculationTypeView`: the symbols of the unit vocabulary with the input's dimension,
+  in the vocabulary's order (`design.md` decision 10) (backend); verify: the pilot's `b`
+  lists exactly `m`, `cm`, `mm` and its `phi_II` exactly `rad`, `deg`, in that order;
+  every list contains the input's base unit; the input view rejects a list without the
+  base unit or with a unit of another dimension; a `POST /calculations` (task 5.2) that
+  gives each input of a synthetic type in each of its listed units answers `201` (done 2026-10-03, `0b7545e` on `feature/calculation-api/backend`)
+- [x] 5.3 Add `GET /calculations/{result_id}` (backend); verify: the `GET` body equals
   the `POST` body; `404` for an unknown UUID; `422` for `abc`; `PUT`, `PATCH` and
-  `DELETE` give `405 method_not_allowed` and the stored result is unchanged
-- [ ] 5.4 Add `POST /calculations/{result_id}/report` (backend); verify: `200` with the
+  `DELETE` give `405 method_not_allowed` and the stored result is unchanged (done 2026-10-03, `0b7545e` on `feature/calculation-api/backend`)
+- [x] 5.4 Add `POST /calculations/{result_id}/report` (backend); verify: `200` with the
   `.docx` media type and an `attachment` file name `dec-report-<result_id>.docx`; the
   body opens with python-docx and holds the stored result; `422` on an invalid report
   request; `404` on an unknown id; `409 calculation_type_not_registered` for a stored
-  result of a type missing from the test registry
-- [ ] 5.5 Add the CORS middleware from `ApiSettings` and declare every error response of
+  result of a type missing from the test registry (done 2026-10-03, `0b7545e` on `feature/calculation-api/backend`)
+- [x] 5.5 Add the CORS middleware from `ApiSettings` and declare every error response of
   each route in the OpenAPI description (backend); verify: a preflight from a configured
   origin is allowed and one from another origin is not; with no origin configured none is
   allowed; `/openapi.json` lists the four endpoints with their request schemas, success
   responses, the `ErrorBody` schema, and the `404`, `409`, `422` and `503` responses where
-  the spec defines them
+  the spec defines them (done 2026-10-03, `0b7545e` on `feature/calculation-api/backend`)
 
 ## 6. Verification and close
 
-- [ ] 6.1 Add the latency check to the `postgres` module: one warm-up request, then 20
+- [x] 6.1 Add the latency check to the `postgres` module: one warm-up request, then 20
   sequential `POST /calculations` for the pilot with a synthetic in-process source; the
   median is at most 1 second (backend); verify: the test passes against the hand-made
-  `dec_app`, and the measured median is recorded in the code journal
-- [ ] 6.2 Manual run: `uvicorn app.main:app --host 127.0.0.1` with `DEC_APP_DATABASE_URL`
+  `dec_app`, and the measured median is recorded in the code journal (done 2026-10-03, `2b3edc8`; median 3.7-3.8 ms over 20 requests on `feature/calculation-api/backend`)
+- [x] 6.2 Manual run: `uvicorn app.main:app --host 127.0.0.1` with `DEC_APP_DATABASE_URL`
   pointing at a migrated `dec_app`; check `/health`, `/docs`, `GET /calculation-types`,
   and that `POST /calculations` for the pilot answers `503 parameter_source_unavailable`
   (no catalog source exists yet); then stop the database and check `503
   database_unavailable`; record the commands and the answers in the code journal
-  (backend); verify: the recorded answers match the spec
-- [ ] 6.3 `tester` issues the GO for `feature/calculation-api/backend`: `backend/check.sh`
+  (backend); verify: the recorded answers match the spec (2026-10-03, no code; commands and answers in the code journal; with the database stopped, `POST /calculations` for the pilot still answers `parameter_source_unavailable`, since the source is checked before the first database access, so `database_unavailable` was checked on `GET /calculations/{result_id}`)
+- [x] 6.3 `tester` issues the GO for `feature/calculation-api/backend`: `backend/check.sh`
   passes (`ruff`, `mypy`, `pytest`, ≥ 95% branch coverage), and the `postgres` module
-  passes against a hand-made `dec_app` (backend)
+  passes against a hand-made `dec_app` (backend) (2026-10-03: **GO** on `2b3edc8` (612 passed, 1 skipped, branch coverage 100%; `postgres` module 5/5; every scenario mapped to a test; UI/UX N/A, no UI); its three minor findings closed by tests in `8ebf870` (619 passed); see `docs/decisions/calculation-api-readiness.md`)
 - [ ] 6.4 Review by the orchestrator or Egor, then merge into `develop` after both WP2
   features (backend)
 - [ ] 6.5 (spec) `spec-keeper` syncs the delta into `openspec/specs/calculation-api/` and
@@ -160,7 +167,7 @@ Code journal: `docs/akim/reports/WP8-code-journal.md`, created before task 2.1.
 
 | Requirement | Verified by |
 |---|---|
-| Calculation types listing | tasks 4.1, 5.1 |
+| Calculation types listing | tasks 4.1, 5.1, 5.2a |
 | Run a calculation | tasks 4.2, 5.2 |
 | Calculation request validation over HTTP | tasks 4.2, 5.2 |
 | Stored result retrieval | tasks 3.2, 4.3, 5.3 |

@@ -102,6 +102,8 @@ The `NormRef` shape is agreed with Egor (task 1.3), so no task waits for it.
   2026-10-01) waits for: `normatives-formula-contract` tasks 1.4-1.7 merged into
   `develop` (Egor); the expression-tree field and the symbol binding on stored formulas
   (Egor; agreed in task 1.8 on 2026-10-03, delivered through `normative-catalog-backend`);
+  the selector values stored with each table entry, so that the engine can confirm that
+  an entry belongs to the given input (engine review, 2026-10-03, minor 6);
   a named source for every coefficient of the pilot formula (Egor re-verifies `γc1`,
   `γc2`, `k`, `kz` against the primary text of СП 22.13330.2016 and stores them like
   table 5.5, each with its `NormRef`; `a01af6f`, item 2); `retarget-mvp-domain` task 3.1
