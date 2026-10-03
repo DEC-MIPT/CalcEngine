@@ -124,3 +124,23 @@ the log held no URL or password.
 Open: task 6.4 (review by the orchestrator, then the merge after
 `feature/calculation-engine/backend` and `feature/report-generator/backend`) and task 6.5
 (sync and archive after `calculation-core-contract`).
+
+## Docstring pass and GO reconfirmed (2026-10-03)
+
+`cc70f7d` translated 160 docstrings (module, class, function and attribute docstrings) in
+39 files under `backend/app` and `backend/tests` into Russian, Google style, under Akim's
+local rule; section keywords (`Args:`, `Returns:`, `Raises:`, `Attributes:`, `Yields:`)
+stay English. It is on this branch because `calculation-engine` ⊂ `report-generator` ⊂
+`calculation-api`: the lower branches merge into `develop` with their English
+docstrings, and this branch's merge brings the translation for all three.
+
+`tester` on `cc70f7d`: **GO**, no finding.
+
+| Item | Result |
+|---|---|
+| docstrings only | AST of all 39 changed files compared with every string expression replaced by `pass`: 0 differences; no comment line edited |
+| tests | `backend/check.sh`: 619 passed, 1 skipped; `postgres` module: 5/5, median 3.6 ms |
+| coverage | 100% branch coverage of `app` |
+| lint and types | `ruff` and `mypy`: no finding |
+| docstring content | every `Args:` entry of 65 functions names a real parameter; `Attributes:` match the fields; norm citations, `design.md` decisions and requirement names kept |
+| UI/UX | N/A: no UI |
