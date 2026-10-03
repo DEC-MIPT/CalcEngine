@@ -26,11 +26,11 @@ from app.reporting.layout import (
 from app.schemas.report import ReportRequest, Signatory
 
 FORM5_WIDTHS_MM = (10, 10, 10, 10, 15, 10, 70, 15, 15, 20)
-"""Column widths of form 5, left to right (GOST R 21.101-2026, edition unverified, Annex E)."""
+"""Ширины граф формы 5 слева направо (GOST R 21.101-2026, edition unverified, приложение Е)."""
 
 FORM5_ROWS = 8
 ROW_HEIGHT_MM = 5
-"""Form 5 is eight rows of 5 mm, as its figure gives them."""
+"""Форма 5 — восемь строк по 5 мм, как на её рисунке."""
 
 FORM5_MERGES: tuple[tuple[int, int, int, int], ...] = (
     (0, 6, 2, 9),
@@ -39,7 +39,7 @@ FORM5_MERGES: tuple[tuple[int, int, int, int], ...] = (
     *((row, 0, row, 1) for row in range(3, FORM5_ROWS)),
     *((row, 2, row, 3) for row in range(3, FORM5_ROWS)),
 )
-"""Merged cells of form 5 as (first row, first column, last row, last column)."""
+"""Объединённые ячейки формы 5 в виде (первая строка, первый столбец, последняя строка, последний столбец)."""
 
 FORM5_CAPTIONS: MappingProxyType[tuple[int, int], str] = MappingProxyType(
     {
@@ -56,35 +56,36 @@ FORM5_CAPTIONS: MappingProxyType[tuple[int, int], str] = MappingProxyType(
         (3, 9): "Листов",
     }
 )
-"""The captions printed in form 5, by the cell they stand in."""
+"""Подписи граф, печатаемые в форме 5, по ячейкам, в которых они стоят."""
 
 FORM5_COLUMNS: MappingProxyType[str, tuple[int, int]] = MappingProxyType(
     {"1": (0, 6), "5": (3, 6), "6": (4, 7), "7": (4, 8), "8": (4, 9), "9": (5, 7)}
 )
-"""The top-left cell of each numbered column of form 5 that carries data."""
+"""Левая верхняя ячейка каждой нумерованной графы формы 5, в которой есть данные."""
 
 CHANGE_CELLS = tuple((row, column) for row in (0, 1) for column in range(6))
-"""Columns 14-19 (changes): empty in the MVP."""
+"""Графы 14–19 (изменения): в MVP пустые."""
 
 SIGNATURE_ROWS: MappingProxyType[str, int] = MappingProxyType(
     {"developer": 3, "checker": 4, "normative_control": 6}
 )
-"""Rows of form 5 for the developer, the checker (the row under the developer) and normative control."""
+"""Строки формы 5 для разработчика, проверяющего (строка под разработчиком) и нормоконтроля."""
 
 SIGNATURE_COLUMNS: MappingProxyType[str, int] = MappingProxyType({"10": 0, "11": 2, "12": 4, "13": 5})
-"""Grid column of columns 10 (role), 11 (surname), 12 (signature) and 13 (date) in those rows."""
+"""Столбцы сетки для граф 10 (роль), 11 (фамилия), 12 (подпись) и 13 (дата) в этих строках."""
 
 CHECKER_CAPTION = "Пров."
 
 DATE_SIZE_PT = 6
-"""A date ``ДД.ММ.ГГ`` is about 3.9 em wide; at 6 pt it fits column 13 (10 mm less the cell margins)."""
+"""Дата ``ДД.ММ.ГГ`` шириной около 3,9 em; кеглем 6 пт она помещается в графу 13 (10 мм за вычетом полей ячейки)."""
 
 FORM6_WIDTHS_MM = (10, 10, 10, 10, 15, 10, 110, 10)
-"""Column widths of form 6, left to right (GOST R 21.101-2026, edition unverified, Annex E)."""
+"""Ширины граф формы 6 слева направо (GOST R 21.101-2026, edition unverified, приложение Е)."""
 
 FORM6_ROW_HEIGHTS_MM = (5, 2, 3, 5)
-"""Form 6 is 15 mm high: three rows of 5 mm on the left, 7 mm and 8 mm under "Лист" on
-the right. One grid holds both, so its rows are 5, 2, 3 and 5 mm and cells merge across."""
+"""Форма 6 высотой 15 мм: слева три строки по 5 мм, справа 7 мм и 8 мм под «Лист».
+Обе части держит одна сетка, поэтому её строки — 5, 2, 3 и 5 мм, а ячейки объединяются
+поперёк."""
 
 FORM6_MERGES: tuple[tuple[int, int, int, int], ...] = (
     (0, 6, 3, 6),
@@ -112,7 +113,7 @@ FORM6_CHANGE_CELLS = tuple((row, column) for row in (0, 1) for column in range(6
 
 @dataclass(frozen=True)
 class Form:
-    """The grid of one title-block form: widths, row heights, merges, captions, data columns."""
+    """Сетка одной формы основной надписи: ширины, высоты строк, объединения, подписи граф и графы данных."""
 
     widths_mm: tuple[int, ...]
     row_heights_mm: tuple[int, ...]
@@ -126,29 +127,29 @@ FORM6 = Form(FORM6_WIDTHS_MM, FORM6_ROW_HEIGHTS_MM, FORM6_MERGES, FORM6_CAPTIONS
 
 SHEET_FORMAT = "А4"
 FORMAT_BOX_MM = (150, 40)
-"""Column 26 under the lower frame line, below the right part of the form: x and width."""
+"""Графа 26 под нижней линией рамки, ниже правой части формы: координата x и ширина."""
 
 TITLE_STYLE = "DEC Title Block"
 TITLE_SIZE_PT = 7
 LARGE_SIZE_PT = 10
-"""Columns 1 and 5 print larger than the captions; a layout choice, not a norm value."""
+"""Графы 1 и 5 печатаются крупнее подписей; выбор вёрстки, а не значение нормы."""
 
 FIELDS: MappingProxyType[str, str] = MappingProxyType({"7": "PAGE", "8": "NUMPAGES"})
-"""Column 7 (sheet number) and column 8 (number of sheets) as Word fields."""
+"""Графа 7 (номер листа) и графа 8 (число листов) как поля Word."""
 CELL_MARGIN_MM = 0.5
 OUTER_LINE, INNER_LINE = FRAME_LINE_EIGHTHS_PT, 4
-"""Line widths of the form in eighths of a point; layout choices, not norm values. The
-outer line is the frame line, so that the two lie on each other."""
+"""Толщины линий формы в восьмых долях пункта; выбор вёрстки, а не значения нормы.
+Внешняя линия — это линия рамки, чтобы они совпадали друг с другом."""
 
 FRAME_SIDES = ("left", "right")
-"""The sides of the form that the frame draws: a second line there, even one lying exactly
-on the frame line, can round to a different pixel on screen and stick out of the frame."""
+"""Стороны формы, которые рисует рамка: вторая линия там, даже лежащая точно на линии
+рамки, на экране может округлиться до другого пикселя и выступить из рамки."""
 
 CLOSING_TWIPS = 2
-"""Height of the paragraph a footer must end in, under the form."""
+"""Высота абзаца под формой, которым должен заканчиваться колонтитул."""
 
 BODY_GAP_MM = BODY_INDENT_MM
-"""Space between the body text and the form, as wide as the body text keeps off the frame."""
+"""Промежуток между текстом тела и формой, равный отступу текста тела от рамки."""
 
 
 def _title_style(document: Document) -> str:
@@ -185,10 +186,13 @@ def _borders(table: Table) -> None:
 
 
 def indent_mm() -> float:
-    """The table indent that puts the left edge of the form on the left frame line.
+    """Вычисляет отступ таблицы, при котором левый край формы лежит на левой линии рамки.
 
-    The indent counts from the text area to the text of the first cell, so the left
-    edge of the form lies one cell margin to the left of it.
+    Отступ отсчитывается от области текста до текста первой ячейки, поэтому левый край
+    формы лежит на одно поле ячейки левее него.
+
+    Returns:
+        Отступ в миллиметрах.
     """
     return FRAME_MM["left"] - margin_mm("left") + CELL_MARGIN_MM
 
@@ -201,11 +205,18 @@ def _indent() -> BaseOxmlElement:
 
 
 def row_heights_mm(form: Form) -> list[float]:
-    """Row heights that put the middle of every horizontal line where the figure draws it.
+    """Вычисляет высоты строк, при которых середина каждой горизонтальной линии лежит там, где её рисует чертёж.
 
-    Word and LibreOffice draw a horizontal line below its row boundary, so each boundary
-    lies half its line width above the figure's line: the outer lines are thicker than
-    the inner ones, so the first row is longer and the last row shorter than the figure.
+    Word и LibreOffice рисуют горизонтальную линию под границей её строки, поэтому
+    каждая граница лежит на половину толщины линии выше линии чертежа. Внешние линии
+    толще внутренних, поэтому первая строка длиннее, а последняя короче, чем на
+    чертеже.
+
+    Args:
+        form: сетка формы.
+
+    Returns:
+        Высоты строк в миллиметрах.
     """
     lines = [OUTER_LINE, *(INNER_LINE,) * (len(form.row_heights_mm) - 1), OUTER_LINE]
     return [
@@ -215,7 +226,11 @@ def row_heights_mm(form: Form) -> list[float]:
 
 
 def footer_distance_mm() -> float:
-    """The footer distance that puts the middle of the lower line of the form on the frame."""
+    """Вычисляет отступ нижнего колонтитула, при котором середина нижней линии формы лежит на рамке.
+
+    Returns:
+        Отступ в миллиметрах.
+    """
     return FRAME_MM["bottom"] - line_mm(OUTER_LINE) / 2 - Twips(CLOSING_TWIPS).mm
 
 
@@ -239,7 +254,7 @@ def _grid(footer: _Footer, style: str, form: Form) -> Table:
 
 
 def _format_box(paragraph: Paragraph, style: str) -> None:
-    """Column 26: a frame anchored to the page, under the lower frame line."""
+    """Заполняет графу 26: рамку, привязанную к странице, под нижней линией рамки листа."""
     paragraph.style = style
     x, width = FORMAT_BOX_MM
     frame = OxmlElement("w:framePr")
@@ -265,12 +280,12 @@ def _exact_paragraph(footer: _Footer, style: str, height: Length) -> None:
 
 
 def _closing_paragraph(footer: _Footer, style: str) -> None:
-    """A footer must end in a paragraph; this one takes almost no height."""
+    """Добавляет закрывающий абзац: колонтитул должен заканчиваться абзацем, этот почти не занимает высоты."""
     _exact_paragraph(footer, style, Twips(CLOSING_TWIPS))
 
 
 def _field(paragraph: Paragraph, instruction: str) -> None:
-    """A simple Word field; its cached text is ``1`` until the viewer updates it."""
+    """Вставляет простое поле Word; его кэшированный текст — ``1``, пока программа просмотра его не обновит."""
     field = OxmlElement("w:fldSimple")
     field.set(qn("w:instr"), f" {instruction} ")
     run = OxmlElement("w:r")
@@ -296,7 +311,7 @@ def _fill(
 
 
 def _footer_form(footer: _Footer, style: str, form: Form) -> Table:
-    """Column 26, an empty line that keeps the body text off the form, the form, the closing paragraph."""
+    """Собирает колонтитул: графа 26, пустая строка, отодвигающая текст тела от формы, сама форма и закрывающий абзац."""
     _format_box(footer.paragraphs[0], style)
     _exact_paragraph(footer, style, Mm(BODY_GAP_MM))
     table = _grid(footer, style, form)
@@ -311,7 +326,7 @@ def _sign(table: Table, row: int, signatory: Signatory) -> None:
 
 
 def _signatures(table: Table, request: ReportRequest) -> None:
-    """Columns 10-13 of form 5: filled only while the signature block is enabled; column 12 stays empty."""
+    """Заполняет графы 10–13 формы 5, только пока блок подписей включён; графа 12 остаётся пустой."""
     if not request.signature_block:
         return
     for role in ("developer", "checker", "normative_control"):
@@ -324,12 +339,19 @@ def _signatures(table: Table, request: ReportRequest) -> None:
 
 
 def add_title_blocks(document: Document, request: ReportRequest) -> tuple[Table, Table]:
-    """Form 5 in the first-page footer and form 6 in the footer of the following sheets.
+    """Добавляет форму 5 в колонтитул первой страницы и форму 6 — в колонтитул следующих листов.
 
-    Form 5 carries columns 1, 5, 6 and 9, the sheet fields of columns 7 and 8, and the
-    signature block in columns 10-13; form 6 carries column 1 and the sheet number. Both
-    have column 26 under the frame and empty columns 14-19. The lower line of each form
-    is the lower frame line, so the footer distance is set here.
+    Форма 5 несёт графы 1, 5, 6 и 9, поля листов в графах 7 и 8 и блок подписей в
+    графах 10–13; форма 6 — графу 1 и номер листа. У обеих графа 26 под рамкой и пустые
+    графы 14–19. Нижняя линия каждой формы — нижняя линия рамки, поэтому отступ
+    колонтитула задаётся здесь.
+
+    Args:
+        document: документ python-docx.
+        request: данные основной надписи и подписей.
+
+    Returns:
+        Таблицы формы 5 и формы 6.
     """
     title = request.title
     section = document.sections[0]

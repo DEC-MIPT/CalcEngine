@@ -27,7 +27,7 @@ DEC_ERRORS: tuple[tuple[type[DECError], int, str], ...] = (
     (ParameterSourceUnavailableError, 503, "parameter_source_unavailable"),
     (DatabaseUnavailableError, 503, "database_unavailable"),
 )
-"""``calculation-api`` "Error responses"; any other error is ``500 internal_error``."""
+"""Таблица ``calculation-api`` "Error responses"; любая другая ошибка — ``500 internal_error``."""
 
 HTTP_CODES = {404: "not_found", 405: "method_not_allowed"}
 
@@ -39,10 +39,10 @@ MESSAGES = {
     "database_unavailable": "The application database is not available.",
     "internal_error": "Internal server error.",
 }
-"""Fixed texts, so that no message repeats a value the client sent."""
+"""Фиксированные тексты, чтобы ни одно сообщение не повторяло значение, присланное клиентом."""
 
 SERVER_NAMED = ("calculation_type_not_registered", "parameter_source_unavailable")
-"""Codes whose message names a calculation type the server knows, not a client value."""
+"""Коды, сообщение которых называет известный серверу тип расчёта, а не значение клиента."""
 
 LOGGED = (422, 500, 503)
 
@@ -60,7 +60,17 @@ def _response(request: Request, status: int, code: str, message: str, fields: tu
 
 
 def _request_fields(exc: RequestValidationError) -> tuple[FieldError, ...]:
-    """Each invalid field with its location; a custom check's text may hold the value, so it is replaced."""
+    """Собирает неверные поля запроса с их местом.
+
+    Текст пользовательской проверки может содержать значение клиента, поэтому он
+    заменяется фиксированным.
+
+    Args:
+        exc: ошибка проверки схемы запроса.
+
+    Returns:
+        По записи на каждое неверное поле.
+    """
     return tuple(
         FieldError(
             location=tuple(error["loc"]) or ("body",),
@@ -98,7 +108,7 @@ async def _on_http_error(request: Request, exc: Exception) -> JSONResponse:
 
 
 async def _on_database_error(request: Request, exc: Exception) -> JSONResponse:
-    """A database that does not answer; the driver's text can hold the URL, so it is dropped."""
+    """Отвечает ``503 database_unavailable``, когда база не отвечает; текст драйвера может содержать URL, поэтому отбрасывается."""
     return _response(request, 503, "database_unavailable", MESSAGES["database_unavailable"], None)
 
 

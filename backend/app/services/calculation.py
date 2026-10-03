@@ -75,7 +75,14 @@ class CalculationService:
         self._results = results
 
     def envelope(self, result: CalculationResult) -> ResultEnvelope:
-        """The result with a new ``result_id``; every other field is the result's."""
+        """Превращает результат в конверт с новым ``result_id``.
+
+        Args:
+            result: результат расчёта.
+
+        Returns:
+            Конверт; все поля, кроме ``result_id``, — из результата.
+        """
         return ResultEnvelope.model_validate(dict(result) | {"result_id": self._new_id()})
 
     def submit(self, request: CalculationRequest) -> ResultEnvelope:

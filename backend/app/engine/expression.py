@@ -51,7 +51,16 @@ _BINARY: Mapping[str, Callable[[float, float], float]] = MappingProxyType(
 
 
 def check_expression(tree: ExpressionNode, bindings: Mapping[str, float]) -> None:
-    """Check the whole tree before any node is evaluated (design.md decision 11)."""
+    """Проверяет всё дерево до вычисления любого узла (design.md, решение 11).
+
+    Args:
+        tree: дерево выражения.
+        bindings: значения символов в базовых единицах.
+
+    Raises:
+        ExpressionError: если дерево глубже или больше допустимого, у символа нет
+            значения или функция не разрешена либо получила неверное число аргументов.
+    """
     count = 0
     stack: list[tuple[ExpressionNode, int]] = [(tree, 1)]
     while stack:
@@ -96,7 +105,22 @@ def _evaluate(node: ExpressionNode, bindings: Mapping[str, float]) -> float:
 def evaluate_expression(
     tree: ExpressionNode, bindings: Mapping[str, float], step_id: str
 ) -> float:
-    """Evaluate a checked expression tree; values are in base units, so is the result."""
+    """Вычисляет дерево выражения после его проверки.
+
+    Значения символов и результат — в базовых единицах.
+
+    Args:
+        tree: дерево выражения.
+        bindings: значения символов в базовых единицах.
+        step_id: шаг трассы, который называется в ошибке.
+
+    Returns:
+        Значение выражения.
+
+    Raises:
+        ExpressionError: если дерево не проходит проверку или значение не конечное
+            число (например, деление на ноль).
+    """
     check_expression(tree, bindings)
     try:
         return _evaluate(tree, bindings)

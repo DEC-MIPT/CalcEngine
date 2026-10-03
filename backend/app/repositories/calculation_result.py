@@ -8,8 +8,10 @@ from app.models.calculation_result import CalculationResultRow
 
 
 class CalculationResultRepository:
-    """Stored results: added once, read by ``result_id``, never updated or deleted
-    (``calculation-api`` "Reproducible stored result")."""
+    """Сохранённые результаты: добавляются один раз, читаются по ``result_id``, не изменяются и не удаляются.
+
+    Требование ``calculation-api`` "Reproducible stored result".
+    """
 
     def __init__(self, session: Session) -> None:
         self._session = session

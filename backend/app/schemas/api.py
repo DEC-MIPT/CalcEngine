@@ -4,7 +4,7 @@ from app.schemas.units import UNITS, Dimension, UnitSymbol
 
 
 class FieldError(BaseModel):
-    """One invalid field of a request: where it is, and what is wrong with it."""
+    """Одно неверное поле запроса: где оно и что с ним не так."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -13,9 +13,9 @@ class FieldError(BaseModel):
 
 
 class ErrorBody(BaseModel):
-    """The body of every error response (``calculation-api`` "Error responses").
+    """Тело каждого ответа об ошибке (``calculation-api`` "Error responses").
 
-    ``fields`` is present in a ``422`` body only, and always present there.
+    ``fields`` есть только в теле ``422`` и там есть всегда.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -53,7 +53,7 @@ class InputView(BaseModel):
 
 
 class OutputView(BaseModel):
-    """A declared output of a calculation type."""
+    """Объявленный выход типа расчёта."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -62,7 +62,7 @@ class OutputView(BaseModel):
 
 
 class CalculationTypeView(BaseModel):
-    """A registered calculation type with its inputs and outputs in contract order."""
+    """Зарегистрированный тип расчёта со входами и выходами в порядке контракта."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 

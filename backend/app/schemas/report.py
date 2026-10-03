@@ -15,11 +15,11 @@ Text = Annotated[str, AfterValidator(_no_control_character)]
 
 
 class TitleBlockData(BaseModel):
-    """What the report request gives for columns 1, 5, 6 and 9 of the form-5 title block.
+    """Данные запроса на отчёт для граф 1, 5, 6 и 9 основной надписи формы 5.
 
-    GOST R 21.101-2026 (edition unverified), Annex E: column 1 is the designation of the
-    document, 5 the name of the document, 6 the kind of documentation, 9 the organization.
-    Column 6 may stay empty. Form 5 has no columns 2 and 3.
+    По GOST R 21.101-2026 (edition unverified), приложение Е: графа 1 — обозначение
+    документа, 5 — наименование документа, 6 — вид документации, 9 — организация.
+    Графа 6 может остаться пустой. Граф 2 и 3 в форме 5 нет.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -31,7 +31,7 @@ class TitleBlockData(BaseModel):
 
 
 class Signatory(BaseModel):
-    """A person of the signature block: surname (column 11) and date of signing (column 13)."""
+    """Подписант блока подписей: фамилия (графа 11) и дата подписания (графа 13)."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -44,11 +44,11 @@ class Signatory(BaseModel):
 
 
 class ReportRequest(BaseModel):
-    """What a report needs besides the envelope ("GOST report structure").
+    """Что нужно отчёту, кроме конверта ("GOST report structure").
 
-    The signature block is enabled by default. While it is enabled, the developer and the
-    normative control lines need a surname and a date, and a checker, when given, needs
-    both too; otherwise the request is rejected before any report is built.
+    Блок подписей по умолчанию включён. Пока он включён, строкам разработчика и
+    нормоконтроля нужны фамилия и дата, а проверяющему, если он указан, — тоже обе;
+    иначе запрос отклоняется до построения отчёта.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)

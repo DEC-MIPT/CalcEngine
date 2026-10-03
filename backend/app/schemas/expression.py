@@ -10,14 +10,14 @@ class _Node(BaseModel):
 
 
 class NumberNode(_Node):
-    """A constant printed in the formula itself, never a coefficient of a table."""
+    """Константа, напечатанная в самой формуле, а не коэффициент из таблицы."""
 
     kind: Literal["number"] = "number"
     value: float
 
 
 class SymbolNode(_Node):
-    """A quantity bound to an input, a parameter, or the result of an earlier step."""
+    """Величина, связанная с входом, параметром или результатом предыдущего шага."""
 
     kind: Literal["symbol"] = "symbol"
     name: str = Field(min_length=1)
@@ -35,7 +35,7 @@ class NegNode(_Node):
 
 
 class CallNode(_Node):
-    """A call of a function; the engine keeps the closed list of allowed functions."""
+    """Вызов функции; закрытый список разрешённых функций хранит движок."""
 
     kind: Literal["call"] = "call"
     function: str = Field(min_length=1)
@@ -53,7 +53,14 @@ _ADAPTER: TypeAdapter[ExpressionNode] = TypeAdapter(ExpressionNode)
 
 
 def children(node: ExpressionNode) -> tuple[ExpressionNode, ...]:
-    """The direct operands of a node, left to right."""
+    """Возвращает непосредственные операнды узла слева направо.
+
+    Args:
+        node: узел дерева выражения.
+
+    Returns:
+        Операнды узла; у числа и символа — пустой кортеж.
+    """
     if isinstance(node, BinaryNode):
         return (node.left, node.right)
     if isinstance(node, NegNode):
@@ -64,7 +71,14 @@ def children(node: ExpressionNode) -> tuple[ExpressionNode, ...]:
 
 
 def symbols(tree: ExpressionNode) -> tuple[str, ...]:
-    """The symbol names of a tree, each once, in the order they are first read."""
+    """Перечисляет имена символов дерева, каждое один раз, в порядке первого чтения.
+
+    Args:
+        tree: дерево выражения.
+
+    Returns:
+        Имена символов.
+    """
     found: dict[str, None] = {}
     stack = [tree]
     while stack:
@@ -76,10 +90,19 @@ def symbols(tree: ExpressionNode) -> tuple[str, ...]:
 
 
 def parse_expression(data: object) -> ExpressionNode:
-    """Build an expression tree from its JSON form (design.md decision 11).
+    """Строит дерево выражения из его JSON-формы (design.md, решение 11).
 
-    A node kind outside the allowed set, a malformed node, or a tree too deep to
-    validate fails with an ``ExpressionError``; nothing is evaluated here.
+    Здесь ничего не вычисляется.
+
+    Args:
+        data: JSON-форма дерева.
+
+    Returns:
+        Дерево выражения.
+
+    Raises:
+        ExpressionError: если вид узла вне разрешённого набора, узел некорректен или
+            дерево слишком глубоко для проверки.
     """
     try:
         return _ADAPTER.validate_python(data)

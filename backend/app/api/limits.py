@@ -4,14 +4,14 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 from app.schemas.api import ErrorBody
 
 BODY_LIMIT = 1024 * 1024
-"""1 MiB (``calculation-api`` "Non-functional — request size and latency")."""
+"""1 МиБ (``calculation-api`` "Non-functional — request size and latency")."""
 
 
 class BodySizeLimit:
-    """Rejects a request body over the limit with ``413`` before any route parses it.
+    """Отклоняет тело запроса больше лимита ответом ``413`` до того, как его разберёт маршрут.
 
-    A declared ``Content-Length`` over the limit is rejected at once; a body without
-    one is read and counted up to the limit, then handed on (design.md decision 6).
+    Объявленный ``Content-Length`` больше лимита отклоняется сразу; тело без него
+    читается с подсчётом до лимита и затем передаётся дальше (design.md, решение 6).
     """
 
     def __init__(self, app: ASGIApp, limit: int = BODY_LIMIT) -> None:

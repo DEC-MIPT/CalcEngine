@@ -31,7 +31,7 @@ UNIT_DESIGNATIONS: MappingProxyType[str, str] = MappingProxyType(
         "deg": "°",
     }
 )
-"""Russian designations of the unit vocabulary as printed in a report (source: unverified)."""
+"""Русские обозначения единиц словаря в том виде, в каком они печатаются в отчёте (source: unverified)."""
 
 _ATTACHED = frozenset({"°"})
 
@@ -43,7 +43,16 @@ UNVERIFIED_TEXT = "не проверено"
 
 
 def format_number(value: float) -> str:
-    """The shortest decimal that reads back to the same float, without an exponent, with a comma."""
+    """Форматирует число самой короткой десятичной записью без экспоненты и с запятой.
+
+    Запись читается обратно в то же значение float.
+
+    Args:
+        value: число.
+
+    Returns:
+        Число в виде строки, например ``172,5`` или ``0,0000001``.
+    """
     if value == 0:
         return "0"
     text = format(Decimal(repr(value)).normalize(), "f")
@@ -51,7 +60,16 @@ def format_number(value: float) -> str:
 
 
 def format_quantity(value: QuantityValue) -> str:
-    """A value followed by the Russian designation of its unit; a dimensionless value has none."""
+    """Форматирует значение с русским обозначением его единицы.
+
+    У безразмерного значения обозначения нет.
+
+    Args:
+        value: значение с единицей.
+
+    Returns:
+        Строка вида ``172,5 кПа``.
+    """
     number, unit = format_number(value.value), UNIT_DESIGNATIONS[value.unit]
     if not unit:
         return number
@@ -59,7 +77,16 @@ def format_quantity(value: QuantityValue) -> str:
 
 
 def format_norm_ref(reference: NormRef) -> str:
-    """A reference with its status; an ``unverified`` edition or clause is printed as unverified."""
+    """Форматирует ссылку на норму с её статусом.
+
+    Редакция или пункт со значением ``unverified`` печатаются как непроверенные.
+
+    Args:
+        reference: ссылка на норму.
+
+    Returns:
+        Строка ссылки со статусом.
+    """
     edition, clause = (
         UNVERIFIED_TEXT if part == "unverified" else part
         for part in (reference.edition, reference.clause)
@@ -78,7 +105,15 @@ ROUNDING_MODES: MappingProxyType[str, str] = MappingProxyType(
 
 
 def format_bound(bound: MethodBound | ValidatedBound, unit: str) -> str:
-    """What a bound allows, in the unit of the input it bounds (its base unit)."""
+    """Описывает, что допускает граница, в единице входа, который она ограничивает.
+
+    Args:
+        bound: граница диапазона метода или проверенного диапазона.
+        unit: базовая единица входа.
+
+    Returns:
+        Строка вида «допускается не более 1 м».
+    """
     limit = format_quantity(QuantityValue(value=bound.value, unit=unit))
     return f"допускается {BOUND_WORDS[(bound.kind, bound.inclusive)]} {limit}"
 
@@ -88,7 +123,14 @@ def format_engineer_rule(rule: EngineerRule) -> str:
 
 
 def format_source(source: Source) -> str:
-    """A source: an engineer's rule, or norm references with their status."""
+    """Форматирует источник: правило инженера или ссылки на нормы со статусом.
+
+    Args:
+        source: правило инженера или список ссылок на нормы.
+
+    Returns:
+        Строка источника.
+    """
     if isinstance(source, EngineerRule):
         return format_engineer_rule(source)
     return "; ".join(format_norm_ref(reference) for reference in source)
@@ -99,5 +141,14 @@ def format_rounding(rule: RoundingRule) -> str:
 
 
 def format_date(day: datetime.date) -> str:
-    """``ДД.ММ.ГГ``: the year as its last two digits (GOST R 21.101-2026, edition unverified, Annex E, note 2)."""
+    """Форматирует дату как ``ДД.ММ.ГГ`` с двумя последними цифрами года.
+
+    Формат по GOST R 21.101-2026 (edition unverified), приложение Е, примечание 2.
+
+    Args:
+        day: дата.
+
+    Returns:
+        Строка вида ``30.09.26``.
+    """
     return day.strftime("%d.%m.%y")

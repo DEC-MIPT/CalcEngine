@@ -7,17 +7,24 @@ from app.schemas.calculation import MethodBound, QuantityValue
 
 @dataclass(frozen=True)
 class ResolvedParameters:
-    """The norm-given parameters of one calculation: the calculator's typed parameters and
-    the method's range of application (``calculation-api`` design.md decision 3)."""
+    """Нормативные параметры одного расчёта.
+
+    Это типизированные параметры калькулятора и диапазон применимости метода
+    (``calculation-api`` design.md, решение 3).
+
+    Attributes:
+        parameters: разрешённые параметры калькулятора.
+        method_range: границы диапазона метода.
+    """
 
     parameters: object
     method_range: tuple[MethodBound, ...]
 
 
 class ParameterSource(Protocol):
-    """Where a calculation type's norm-given parameters come from: the normative catalog.
+    """Откуда берутся нормативные параметры типа расчёта: из нормативного каталога.
 
-    It receives the inputs, since a table value can depend on an input.
+    Источник получает входы, потому что табличное значение может зависеть от входа.
     """
 
     def resolve(

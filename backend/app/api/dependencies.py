@@ -14,10 +14,18 @@ from app.services.calculation import CalculationService, calculation_service
 
 
 def _session_factory(request: Request) -> sessionmaker[Session]:
-    """The application's session factory, built at the first request that needs ``dec_app``.
+    """Возвращает фабрику сессий приложения, построенную при первом запросе к ``dec_app``.
 
-    A missing or malformed ``DEC_APP_DATABASE_URL`` becomes ``DatabaseUnavailableError``;
-    its text is not carried on, since it can hold the URL (design.md decision 7).
+    Args:
+        request: текущий запрос; фабрика кэшируется в ``app.state``.
+
+    Returns:
+        Фабрика сессий ``dec_app``.
+
+    Raises:
+        DatabaseUnavailableError: если ``DEC_APP_DATABASE_URL`` не задан или неверен;
+            текст исходной ошибки не передаётся дальше, потому что в нём может быть
+            URL (design.md, решение 7).
     """
     state = request.app.state
     if state.session_factory is None:
@@ -30,7 +38,17 @@ def _session_factory(request: Request) -> sessionmaker[Session]:
 
 
 def get_session(request: Request) -> Iterator[Session]:
-    """One session per request, committed when the route returns without an error."""
+    """Открывает одну сессию на запрос и фиксирует её, если маршрут завершился без ошибки.
+
+    Args:
+        request: текущий запрос.
+
+    Yields:
+        Сессия ``dec_app`` этого запроса.
+
+    Raises:
+        DatabaseUnavailableError: если база не настроена.
+    """
     with _session_factory(request)() as session:
         yield session
         session.commit()

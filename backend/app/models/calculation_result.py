@@ -9,10 +9,11 @@ from app.models import Base
 
 
 class CalculationResultRow(Base):
-    """One stored calculation result (``calculation-api`` design.md decision 4).
+    """Один сохранённый результат расчёта (``calculation-api`` design.md, решение 4).
 
-    ``JSON`` is PostgreSQL ``json``, which keeps the text as written, so a stored
-    envelope reads back equal to the one returned. A row is never updated.
+    ``JSON`` — это ``json`` PostgreSQL, который хранит текст как записан, поэтому
+    сохранённый конверт читается обратно равным возвращённому. Строка никогда не
+    изменяется.
     """
 
     __tablename__ = "calculation_result"

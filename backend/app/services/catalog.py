@@ -23,10 +23,21 @@ REGISTRATIONS = (_register_foundations_shallow_r,)
 
 
 def build_registry(params_root: Path) -> CalculatorRegistry:
-    """Every known calculation type, registered with its engineer-set values.
+    """Регистрирует каждый известный тип расчёта со значениями, заданными инженером.
 
-    A missing or invalid parameter file stops the application at start-up
-    (``calculation-api`` design.md decision 2).
+    Отсутствующий или неверный файл параметров останавливает приложение при старте
+    (``calculation-api`` design.md, решение 2).
+
+    Args:
+        params_root: каталог файлов параметров.
+
+    Returns:
+        Реестр типов расчёта.
+
+    Raises:
+        NotFoundError: если файла параметров типа нет.
+        ParameterValidationError: если файл не проходит проверку или в нём нет
+            правила округления выхода.
     """
     registry = CalculatorRegistry()
     for register in REGISTRATIONS:

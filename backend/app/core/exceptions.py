@@ -1,29 +1,29 @@
 class DECError(Exception):
-    """Base class for every backend-defined exception."""
+    """Базовый класс всех исключений бэкенда."""
 
 
 class NotFoundError(DECError):
-    """Raised when a requested resource does not exist."""
+    """Запрошенного ресурса не существует."""
 
 
 class AlreadyRegisteredError(DECError):
-    """Raised when a name is registered twice."""
+    """Имя регистрируется второй раз."""
 
 
 class ParameterValidationError(DECError):
-    """Raised when parameter data fails schema validation."""
+    """Данные параметров не проходят проверку схемы."""
 
 
 class ExpressionError(DECError):
-    """Raised when a formula's expression tree cannot be checked or evaluated."""
+    """Дерево выражения формулы не проходит проверку или не вычисляется."""
 
 
 class UnitError(DECError):
-    """Raised when a value does not carry the unit the calculation expects."""
+    """Значение не в той единице, которую ожидает расчёт."""
 
 
 class CalculationError(DECError):
-    """Raised when the parts a calculator produced do not form a valid result."""
+    """Части, которые выдал калькулятор, не складываются в корректный результат."""
 
 
 class InputValidationError(DECError):
@@ -40,12 +40,12 @@ class InputValidationError(DECError):
 
 
 class ParameterSourceUnavailableError(DECError):
-    """Raised when a registered calculation type has no configured parameter source."""
+    """У зарегистрированного типа расчёта не настроен источник параметров."""
 
 
 class CalculationTypeNotRegisteredError(DECError):
-    """Raised when a stored result's calculation type is no longer registered."""
+    """Тип расчёта сохранённого результата больше не зарегистрирован."""
 
 
 class DatabaseUnavailableError(DECError):
-    """Raised when the application database is not configured or does not answer."""
+    """База приложения не настроена или не отвечает."""

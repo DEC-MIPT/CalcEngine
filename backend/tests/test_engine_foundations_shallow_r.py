@@ -88,7 +88,7 @@ SYNTHETIC_R = op(
 
 
 def parameters(**changes: Any) -> pilot.Parameters:
-    """Synthetic resolved parameters: no formula, coefficient or threshold of the norm."""
+    """Синтетические разрешённые параметры: ни формулы, ни коэффициента, ни порога нормы."""
     values: dict[str, Any] = {
         "gamma_c1": entry("gamma_c1", 2.0),
         "gamma_c2": entry("gamma_c2", 3.0),
@@ -243,7 +243,7 @@ def test_the_service_runs_the_registered_pilot(sqlite_session: Session) -> None:
 
 
 def numeric_literals(source: str) -> list[object]:
-    """Numeric constants of a module other than ``0`` and ``1``; booleans are not numbers here."""
+    """Числовые константы модуля, кроме ``0`` и ``1``; булевы значения здесь не считаются числами."""
     return [
         node.value
         for node in ast.walk(ast.parse(source))

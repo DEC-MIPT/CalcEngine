@@ -5,7 +5,7 @@ from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, NoDecode
 
 PARAMS_ROOT = Path(__file__).resolve().parents[2] / "params"
-"""``backend/params``, found from the package so that no machine path is written down."""
+"""Каталог ``backend/params``, найденный от пакета, чтобы не записывать путь конкретной машины."""
 
 
 class Settings(BaseSettings):
@@ -16,9 +16,9 @@ class Settings(BaseSettings):
 
 
 class ApiSettings(BaseSettings):
-    """What the application needs to start; no field is required (design.md decision 7).
+    """Что нужно приложению для старта; ни одно поле не обязательно (design.md, решение 7).
 
-    The database URLs stay in ``Settings``, read at the first request that needs them.
+    URL баз остаются в ``Settings`` и читаются при первом запросе, которому они нужны.
     """
 
     dec_cors_origins: Annotated[list[str], NoDecode] = Field(

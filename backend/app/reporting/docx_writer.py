@@ -52,7 +52,17 @@ def _sources(references: tuple[NormRef, ...]) -> list[str]:
 
 
 def step_lines(number: int, step: TraceStep) -> list[str]:
-    """The lines a trace step prints: kind, formula, substitutions, result, sources."""
+    """Собирает строки, которые печатает шаг трассы.
+
+    Это вид шага, формула, подстановки, результат и источники.
+
+    Args:
+        number: номер шага в отчёте.
+        step: шаг трассы.
+
+    Returns:
+        Строки шага по порядку.
+    """
     lines = [f"{number}. {STEP_KINDS[step.kind]} {step.step_id}", f"Выражение: {step.expression}"]
     if step.substitutions:
         values = "; ".join(f"{item.symbol} = {format_quantity(item)}" for item in step.substitutions)
@@ -103,7 +113,14 @@ def _write_trace(document: DocumentObject, section: TraceSection) -> None:
 
 
 def render_docx(report: Report) -> bytes:
-    """Write the report body to ``.docx`` in memory (design.md decision 18)."""
+    """Записывает отчёт в ``.docx`` в памяти (design.md, решение 18).
+
+    Args:
+        report: модель отчёта.
+
+    Returns:
+        Содержимое файла ``.docx``.
+    """
     document = Document()
     apply_sheet(document)
     add_title_blocks(document, report.request)

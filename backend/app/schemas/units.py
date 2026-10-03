@@ -17,9 +17,9 @@ class Dimension(StrEnum):
 
 
 class Unit(BaseModel):
-    """A unit symbol, its dimension, and its factor to the SI unit of that dimension.
+    """Обозначение единицы, её размерность и множитель к единице СИ этой размерности.
 
-    These are definitions of units, not norm values (design.md decision 13).
+    Это определения единиц, а не значения норм (design.md, решение 13).
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)

@@ -13,7 +13,7 @@ RESPONSIBILITY = (
     "Ответственность за результат расчёта и за его применение в проектной документации"
     " несёт инженер-проектировщик, а не система."
 )
-"""The engineer responsibility statement of "Result accountability block"."""
+"""Фраза об ответственности инженера из "Result accountability block"."""
 
 VERDICT_NAMES = {"pass": "выполнено", "fail": "не выполнено", "refused": "расчёт отклонён"}
 NONE = "нет"
@@ -35,9 +35,16 @@ def _list(title: str, items: list[str]) -> list[str]:
 
 
 def accountability_lines(section: AccountabilitySection) -> list[str]:
-    """Every field of the envelope that "Result accountability block" requires, in Russian.
+    """Собирает строки блока подотчётности на русском языке.
 
-    The engineer responsibility statement is printed after these lines by the renderer.
+    В блок входит каждое поле конверта, которое требует "Result accountability block".
+    Фразу об ответственности инженера печатает после этих строк модуль вывода.
+
+    Args:
+        section: раздел подотчётности модели отчёта с конвертом результата.
+
+    Returns:
+        Строки блока по порядку.
     """
     envelope = section.envelope
     outputs = [
