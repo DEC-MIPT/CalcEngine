@@ -11,6 +11,7 @@ from sqlalchemy import Engine, create_engine, inspect, sql
 from sqlalchemy.orm import Session
 from test_models_calculation_result import COLUMNS
 from test_repositories_calculation_result import ENVELOPE, RECORD
+from test_services_submit import FixedSource, make_service, request
 
 from alembic import command
 from app.db.session import as_psycopg_url
@@ -73,3 +74,16 @@ def test_a_stored_envelope_reads_back_as_the_same_json_text(database: tuple[Conf
     assert row is not None and row.envelope == ENVELOPE
     assert math.copysign(1.0, row.envelope["outputs"][0]["value"]) == -1.0
     assert text == json.dumps(ENVELOPE)
+
+
+def test_the_service_reads_back_a_stored_result_with_its_storage_time(database: tuple[Config, Engine]) -> None:
+    _, engine = database
+
+    with Session(engine) as session:
+        envelope = make_service(CalculationResultRepository(session), FixedSource()).submit(request())
+        session.commit()
+    with Session(engine) as session:
+        stored = make_service(CalculationResultRepository(session)).get(envelope.result_id)
+
+    assert stored.envelope == envelope
+    assert stored.created_at.tzinfo is not None

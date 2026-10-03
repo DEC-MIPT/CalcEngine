@@ -26,6 +26,14 @@ class CalculatorRegistry:
     def contract(self, calculation_type: str) -> CalculationTypeContract:
         return self._entry(calculation_type)[0]
 
+    def contracts(self) -> tuple[CalculationTypeContract, ...]:
+        """Возвращает контракты всех зарегистрированных типов расчёта.
+
+        Returns:
+            Контракты в порядке регистрации.
+        """
+        return tuple(contract for contract, _ in self._entries.values())
+
     def _entry(
         self, calculation_type: str
     ) -> tuple[CalculationTypeContract, Calculator[Any, Any, Any]]:

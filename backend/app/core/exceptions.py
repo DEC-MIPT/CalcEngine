@@ -27,7 +27,16 @@ class CalculationError(DECError):
 
 
 class InputValidationError(DECError):
-    """Raised when a calculation request does not fit its calculation type's contract."""
+    """Запрос на расчёт не подходит к контракту своего типа расчёта.
+
+    Attributes:
+        fields: по одной записи на каждый неподходящий вход (``FieldError`` из
+            ``app.schemas.api``); обработчик ошибок API кладёт их в тело ``422``.
+    """
+
+    def __init__(self, message: str, fields: tuple[object, ...] = ()) -> None:
+        super().__init__(message)
+        self.fields = fields
 
 
 class ParameterSourceUnavailableError(DECError):

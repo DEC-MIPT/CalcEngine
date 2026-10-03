@@ -53,3 +53,10 @@ def test_malformed_yaml_is_rejected_with_a_dec_error() -> None:
 def test_missing_file_raises_a_dec_error() -> None:
     with pytest.raises(DECError):
         load_parameters("does_not_exist", FIXTURES_DIR)
+
+
+def test_a_schema_error_names_the_file_and_the_value() -> None:
+    with pytest.raises(ParameterValidationError) as raised:
+        load_parameters("unknown_key", FIXTURES_DIR)
+
+    assert str(FIXTURES_DIR / "unknown_key.yaml") in str(raised.value)

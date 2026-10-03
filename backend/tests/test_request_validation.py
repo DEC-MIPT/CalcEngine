@@ -3,6 +3,7 @@ from typing import Any
 
 import pytest
 from pydantic import ValidationError
+from sqlalchemy.orm import Session
 
 import app.services.calculation as service_module
 from app.core.exceptions import DECError, InputValidationError, NotFoundError
@@ -10,6 +11,7 @@ from app.engine.base import Calculator
 from app.engine.pipeline import CalculatorOutput
 from app.engine.registry import CalculatorRegistry
 from app.engine.steps import check_step
+from app.repositories.calculation_result import CalculationResultRepository
 from app.schemas.calculation import (
     CalculationRequest,
     CalculationTypeContract,
@@ -21,6 +23,7 @@ from app.schemas.calculation import (
 )
 from app.schemas.parameters import EngineerRule
 from app.services.calculation import CalculationService
+from app.services.parameter_source import ResolvedParameters
 
 REF = NormRef(
     document="<NORM-DOC-PLACEHOLDER>",
@@ -67,11 +70,20 @@ def engine_calls(monkeypatch: pytest.MonkeyPatch) -> list[str]:
     return calls
 
 
+class NoParameters:
+    def resolve(self, calculation_type: str, inputs: Mapping[str, QuantityValue]) -> ResolvedParameters:
+        return ResolvedParameters(parameters=None, method_range=())
+
+
 @pytest.fixture
-def service() -> CalculationService:
+def service(sqlite_session: Session) -> CalculationService:
     registry = CalculatorRegistry()
     registry.register(CONTRACT, PassThrough())
-    return CalculationService(registry)
+    return CalculationService(
+        registry,
+        sources={"synthetic": NoParameters()},
+        results=CalculationResultRepository(sqlite_session),
+    )
 
 
 def request(**inputs: Any) -> dict[str, Any]:
@@ -80,7 +92,7 @@ def request(**inputs: Any) -> dict[str, Any]:
 
 
 def submit(service: CalculationService, data: dict[str, Any]) -> Any:
-    return service.submit(CalculationRequest.model_validate(data), None)
+    return service.submit(CalculationRequest.model_validate(data))
 
 
 def test_a_valid_request_reaches_the_engine(

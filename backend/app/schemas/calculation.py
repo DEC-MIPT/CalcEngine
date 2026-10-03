@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.core.exceptions import InputValidationError
+from app.schemas.api import FieldError
 from app.schemas.parameters import EngineerRule
 from app.schemas.units import UNITS, UnitSymbol
 
@@ -363,14 +364,44 @@ class CalculationRequest(BaseModel):
     inputs: dict[str, QuantityValue]
 
     def check_against(self, contract: CalculationTypeContract) -> None:
+        """Проверяет входы запроса по контракту типа расчёта.
+
+        Собирает все неподходящие входы сразу, а не останавливается на первом
+        (``calculation-api`` design.md, решение 5): пропущенные в порядке контракта,
+        затем необъявленные и входы в единице другой размерности в порядке запроса.
+
+        Args:
+            contract: контракт типа расчёта из реестра.
+
+        Raises:
+            InputValidationError: если хотя бы один вход не подходит. Сообщение
+                называет все такие входы, а ``fields`` содержит по записи на каждый
+                с местом ``("body", "inputs", <имя входа>)``.
+        """
         declared = {quantity.name: quantity.base_unit for quantity in contract.inputs}
-        if set(self.inputs) != set(declared):
-            raise InputValidationError(
-                f"inputs {sorted(self.inputs)} do not match the declared inputs {sorted(declared)}"
-            )
+        problems: list[tuple[str, str, str]] = []
+        for name in declared:
+            if name not in self.inputs:
+                problems.append((name, f"{name!r} is missing", "Missing input."))
         for name, value in self.inputs.items():
+            if name not in declared:
+                problems.append((name, f"{name!r} is not declared", "Undeclared input."))
+                continue
             given, base = UNITS[value.unit].dimension, UNITS[declared[name]].dimension
             if given != base:
-                raise InputValidationError(
-                    f"input {name!r} is in {value.unit!r} ({given}), not a unit of {base}"
+                problems.append(
+                    (
+                        name,
+                        f"{name!r} is in {value.unit!r} ({given}), not a unit of {base}",
+                        f"Expected a unit of {base}.",
+                    )
                 )
+        if problems:
+            raise InputValidationError(
+                f"inputs do not fit the declared inputs {sorted(declared)}: "
+                + "; ".join(text for _, text, _ in problems),
+                fields=tuple(
+                    FieldError(location=("body", "inputs", name), message=message)
+                    for name, _, message in problems
+                ),
+            )

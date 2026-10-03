@@ -104,3 +104,12 @@ def test_a_type_whose_output_lacks_rounding_cannot_be_registered(missing: str) -
 
     with pytest.raises(DECError):
         registry.get("doubling")
+
+
+def test_contracts_are_listed_in_registration_order() -> None:
+    registry = CalculatorRegistry()
+    registry.register(doubling_contract("b"), DoublingCalculator())
+    registry.register(doubling_contract("a"), DoublingCalculator())
+
+    assert [contract.name for contract in registry.contracts()] == ["b", "a"]
+    assert CalculatorRegistry().contracts() == ()

@@ -34,8 +34,7 @@ class Body(BaseModel):
     count: int
 
 
-class FieldedError(InputValidationError):
-    fields = (FieldError(location=("body", "inputs", "b"), message="missing input"),)
+FIELDS = (FieldError(location=("body", "inputs", "b"), message="missing input"),)
 
 
 def make_app(error: Exception) -> FastAPI:
@@ -91,7 +90,7 @@ def test_a_server_known_type_is_named_in_the_message() -> None:
 
 
 def test_an_input_error_carries_its_fields() -> None:
-    _, body = call(FieldedError("inputs do not fit"))
+    _, body = call(InputValidationError("inputs do not fit", fields=FIELDS))
 
     assert body["fields"] == [{"location": ["body", "inputs", "b"], "message": "missing input"}]
 

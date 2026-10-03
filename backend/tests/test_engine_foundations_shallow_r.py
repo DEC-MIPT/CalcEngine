@@ -1,14 +1,17 @@
 import ast
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
 import pytest
+from sqlalchemy.orm import Session
 
 from app.core.exceptions import CalculationError, ExpressionError, UnitError
 from app.engine import foundations_shallow_r as pilot
 from app.engine.pipeline import calculate
 from app.engine.registry import CalculatorRegistry
 from app.parameters.loader import load_parameters
+from app.repositories.calculation_result import CalculationResultRepository
 from app.schemas.calculation import (
     CalculationRequest,
     CalculationResult,
@@ -20,6 +23,7 @@ from app.schemas.expression import parse_expression
 from app.schemas.parameters import EngineerRule
 from app.schemas.resolved import Formula, TableValue, Threshold
 from app.services.calculation import CalculationService
+from app.services.parameter_source import ResolvedParameters
 
 BACKEND = Path(__file__).resolve().parents[1]
 MODULE = BACKEND / "app" / "engine" / "foundations_shallow_r.py"
@@ -217,12 +221,22 @@ def test_the_same_inputs_and_parameters_give_the_same_result() -> None:
     assert first.model_dump_json() == second.model_dump_json()
 
 
-def test_the_service_runs_the_registered_pilot() -> None:
+class FixedSource:
+    def resolve(self, calculation_type: str, given: Mapping[str, QuantityValue]) -> ResolvedParameters:
+        return ResolvedParameters(parameters=parameters(), method_range=())
+
+
+def test_the_service_runs_the_registered_pilot(sqlite_session: Session) -> None:
     registry = CalculatorRegistry()
     pilot.register(registry, ROUNDING, RULE)
     request = CalculationRequest(calculation_type=pilot.NAME, inputs=inputs())
+    service = CalculationService(
+        registry,
+        sources={pilot.NAME: FixedSource()},
+        results=CalculationResultRepository(sqlite_session),
+    )
 
-    envelope = CalculationService(registry).submit(request, parameters())
+    envelope = service.submit(request)
 
     assert envelope.verdict == "pass"
     assert envelope.outputs[0].value == 172.5
