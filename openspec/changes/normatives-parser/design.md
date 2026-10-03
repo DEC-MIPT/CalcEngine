@@ -31,7 +31,8 @@ See `proposal.md`.
    Alternatives to evaluate in the journal: auto-bind by notation-name match; auto-bind by
    table-header match.
 4. **Per-type adapters (H10).** text-PDF → `pdfplumber`/regex; scan → OCR (Surya);
-   formula → `pix2tex`/Nougat; table → `pdfplumber` (text) / Table Transformer (scan).
+   formula → DocLayout-YOLO (detection) + pix2text (recognition); table → `pdfplumber`
+   (text) / Table Transformer (scan).
 5. **Model strategy.** Deterministic baseline first; ML only where it fails; every ML
    output is `machine-extracted` and gated behind `human-verified`.
 

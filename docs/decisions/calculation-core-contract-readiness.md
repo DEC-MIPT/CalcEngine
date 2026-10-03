@@ -3,7 +3,7 @@
 - Date: 2026-09-26; updated 2026-09-27 (tasks 6.5 and 7.3, reviewer passes 5-8, checker pass 3; Egor's written `NormRef` agreement; formula path and pipeline risks; tester GO for the spec phase)
 - Change: `openspec/changes/calculation-core-contract/`
 - Owner: Akim. Egor (data engineer) confirms `NormRef` only.
-- Criteria: `docs/audit/03-verified-roadmap.md`, section 3.2, "Ready when".
+- Criteria: `docs/reports/verified-roadmap.md`, section 3.2, "Ready when".
 
 ## Final status
 
@@ -267,3 +267,81 @@ tests, a follow-up for title-block length limits.
 | `norm-traceability-checker`, three passes | 0 blockers; the two majors of the first pass (the 185 mm width and the frame without Annex Zh) fixed; no norm number fixed. Minors left: the Russian unit designations are `source: unverified` (for WP3); the base spec still names GOST R 21.101-2020 (recorded WP3 handoff) |
 
 Open: none for task 1.9. Task 6.2a may start on `feature/report-generator/backend`.
+
+## 10. Egor's acknowledgement (2026-10-03, task 1.8)
+
+Egor answered in the "Answers" section of
+`calculation-core-contract-formula-execution-akim.md` (commit `a01af6f`):
+
+- Item 1 (decision 11, the expression tree): agreed. The pipeline builds the tree as JSON
+  in the engine's node set at ingestion and stores the binding of each symbol to its
+  quantity and unit; the exact JSON shape is fixed together in `normative-catalog-backend`.
+- Item 3 (resolution 2 amendment): accepted. For the pilot, the steps stay unverified
+  (`pipeline-open-items-questions-akim.md`, "Answers", 2b).
+- Item 4 (decision 6, `input_hash`): accepted with no change.
+- Item 2 (the other coefficients of the pilot formula): Egor re-verifies them against the
+  primary text before naming their source; this waits in `normative-catalog-backend`, not
+  here.
+
+Changes: `design.md` decisions 6 and 11, the `NormRef` invariant and the resolution 2
+amendment record the acknowledgement; the "Consistency with other specs" and "Risks"
+sections record the merge of `feature/normative-parser/ml` into `develop` (`0184450`) and
+the new path `ml/configs/formulas.toml`; the citation of the untracked recon notes in the
+design note on the declarative input model is replaced by its content. `tasks.md`: 1.8 and
+6.2 checked off (6.2 was implemented in `ae096cd` and waited only for 1.8), the DOR
+dependency line closed. No requirement and no scenario changed.
+
+Open: none for task 1.8. Task 7.1c and its waits are in the planned
+`normative-catalog-backend`.
+
+## 11. `spec-reviewer` after Egor's answers (2026-10-03, passes 15-16)
+
+Run on the current text after section 10's edits, together with WP5 (the 9.3 settlement).
+
+| Pass | Result |
+|---|---|
+| 15 | 0 blockers, 0 major, 7 minor: stale passages that still called the user-side verification action open, the old B5 and "formulas in YAML" bullets, a repeated status line for `normatives-formula-contract` 1.4-1.7, the opening of task 7.2, the untracked `01-recon.md:97` cited in `proposal.md`, a long DOR line. All fixed (struck through with a dated "Superseded"/"Closed" note, one status line kept). **READY for DOR** |
+| 16 | 0 blockers, 0 major, 2 minor (wording of "No hardcoding" as former WP5 text; the antecedent in task 7.2). Both fixed. **READY for DOR** |
+
+`openspec validate --all --strict`: 19/19. No requirement or scenario changed.
+
+## 12. Engine feature: GO, review and merge (2026-10-03)
+
+`feature/calculation-engine/backend` (backend tasks of sections 2-5, 6.1, 6.1a, 6.1b, 6.2,
+7.1a, 7.1b), with `develop` merged into it at `ae9d486`.
+
+| Step | Result |
+|---|---|
+| `tester` | **GO** at `ae9d486`: `backend/check.sh` 343 passed, 0 skipped; branch coverage 100%; ruff and mypy clean; every task and verify clause mapped to tests; all 31 `calculation-engine` scenarios and `security` "Invalid input rejected" covered; purity (file, socket, clock, random, uuid patched to raise), determinism (three `PYTHONHASHSEED` subprocess runs) and the pilot literal scan pass; only `backend/` changed; UI/UX N/A (no UI) |
+| `orchestrator` review | **APPROVED**: no blocker, no major. Checked sound: interpreter safety (closed node and function sets, limits and bindings checked on the whole tree before evaluation, no `eval`/`exec`/`sympify`, non-finite values caught per node), applicability with three outcomes, rounding by `Decimal(repr(value))` on outputs only, `input_hash` per decision 6, envelope order and dedup per decision 17, verdict, layer order (`engine` imports only `schemas` and `core`), no norm literal in the pilot, units converted once at the boundary |
+| Merge | `8c001b9` into `develop`; `check.sh` on `develop` after the merge: 343 passed, coverage 100% |
+
+`tester` minor findings, accepted: `params/*.yaml` is checked by a key whitelist and
+forbidden words, not a literal scan (task 7.1a asks for that); `submit` with an input
+outside the method's range is covered end to end by the `calculation-api` tests; the
+unknown-node-kind cases fail at parsing, before any evaluation.
+
+Review minor findings, follow-ups after the three backend branches are merged (planned
+`fix/calculation-engine/backend`, with tests):
+
+1. `engine/rounding.py`: `RoundingRule.decimals` has no upper bound, so `quantize` can
+   raise `decimal.InvalidOperation` (a `500`, not a `DECError`) for many decimals or a
+   very large value. Bound `decimals` or quantize in a local context and raise
+   `CalculationError`.
+2. `engine/steps.py`: the units of a formula's symbols are checked after evaluation, so a
+   unit mismatch can surface as a non-finite value. Check units first.
+3. `engine/hashing.py`: stale docstring about task 1.8. Already fixed on
+   `feature/calculation-api/backend` (`cc70f7d`).
+4. `engine/pipeline.py`: a refusal is detected by `outcome.result is None`; test
+   `outcome.refusal is not None`, as decision 3 names it.
+5. The step union type is spelled out five times and `Operator` twice; keep one alias
+   each in `schemas`.
+6. `schemas/resolved.py`: `TableValue` does not carry the values that selected it, so the
+   engine cannot confirm that a table entry belongs to the given input. Goes to
+   `normative-catalog-backend` (task 7.1c), together with the exact-match row lookup.
+7. `schemas/parameters.py` (WP5): `EngineerRule` accepts empty strings and is not frozen;
+   add `min_length=1` and `frozen=True`.
+
+Open in this change: the report feature (`feature/report-generator/backend`, tasks
+6.2a-6.4), the frontend feature (3.4, 3.5, 5.4), task 7.2, and the archive (8.3) after
+`retarget-mvp-domain`.

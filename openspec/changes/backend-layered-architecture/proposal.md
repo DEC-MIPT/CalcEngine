@@ -20,15 +20,16 @@ and normative coefficients get hardcoded in Python.
 - A minimal runnable backend: `GET /health`, fail-fast configuration from environment
   variables, a `DECError` hierarchy, the `dec_app` transactional database session and
   migration tree, and the `Calculator` interface with its registry.
-- Split out on 2026-09-28 into planned changes, not part of this one: the normative
-  database `dec_normatives` with ingestion and full-text search, the isolated `ml/`
-  zone, Docker, and the pilot calculation. See `tasks.md`, "Moved out of this change".
+- Split out on 2026-09-28 into planned changes, not part of this one: the backend's
+  read path into the normative database `dec_normatives` (ingestion and full-text
+  search are Egor's pipeline, settled 2026-10-03), the isolated `ml/` zone, Docker, and
+  the pilot calculation. See `tasks.md`, "Moved out of this change".
 
 ## Non-goals
 
 - No ML in the calculation path (explicitly rejected by the passport).
 - This change builds no normative database, no ingestion, no search, and no NLP/RAG
-  parsing: the normative pipeline (`normatives_pipeline/`, Egor's zone) owns parsing,
+  parsing: the normative pipeline (`ml/src/normatives_pipeline/`, Egor's zone) owns parsing,
   and the backend's reading side is a planned change (`normative-catalog-backend`).
 - This change builds no `ml/` zone and no Docker configuration (Egor's zones).
 - No cloud provisioning — local only.
@@ -45,5 +46,5 @@ and normative coefficients get hardcoded in Python.
 - Affects: `backend/` directory layout and `params/` (engineer-set values).
 - No existing code is modified; this establishes the skeleton contract for all
   backend work.
-- Sections that moved out touch `docker-compose.yml`, `.gitignore` (ML artifacts), and
+- Sections that moved out touch `infra/docker-compose.yml` (at the root until 2026-10-03), `.gitignore` (ML artifacts), and
   the normative pipeline's zone; they are decided in their own changes.

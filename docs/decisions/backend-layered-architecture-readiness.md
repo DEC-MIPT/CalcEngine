@@ -311,3 +311,35 @@ demands behavior from them yet).
 
 DOR is met: `openspec validate --strict` passes and this pass found no blocker or major
 finding.
+
+## Fifth and sixth passes, 2026-10-03 (after the 9.3 settlement)
+
+Egor answered `normative-catalog-backend-questions-akim.md` on 2026-10-03 (item 1: the
+contract between the zones is the database; Egor owns read-only views and the role
+`dec_normatives_reader`; the backend reads the views through its own repository, with no
+loader and no Alembic tree for `dec_normatives`) and moved his pipeline into `ml/` and the
+compose file into `infra/`. Commit `80a684a` recorded that in decision 5 and in the paths.
+
+**Fifth pass: 0 blockers, 2 major, 8 minor (NOT READY).**
+- Major 1: the "Moved out" row 4.1-4.3 still handed `normative-catalog-backend` ORM models,
+  an Alembic tree for `dec_normatives` and a manual loader. Fixed: the row now names a
+  read-only repository over Egor's views and DTOs, and says what was dropped.
+- Major 2: decision 4 still said the `dec_normatives` half moves "with migrations", and
+  decision 5 opened with the manual loader. Fixed: decision 4 says the Alembic tree is
+  `dec_app`'s only; decision 5 is rewritten as the settled contract, the loader kept as one
+  "Superseded plan" line.
+- Minors fixed: 5a and 9.4 speak of DTOs over the views; decisions 2 and 6 shortened
+  (`ml/` as Egor's project directory); `infra/docker-compose.yml` in `proposal.md`; the
+  stale follow-ups on `CLAUDE.md` and on WP2 task 5.1 closed; task 2.1 notes that Egor's
+  code still reads `DEC_DATABASE_URL` and that he agreed to rename it.
+- Not changed, with the reviewer's agreement in the sixth pass: the requirement
+  "Transactional application database" ("an Alembic migration tree for it, separate from
+  any normative database migrations") is still true, so the spec delta is untouched.
+
+**Sixth pass: 0 blockers, 0 major, 6 minor. READY for DOR.** Fixed: the views are Egor's
+and the repository is `normative-catalog-backend`'s (decision 5); the scope note, the
+proposal and task 9.2 say that only the read path moved out, since ingestion and search
+are Egor's pipeline; the "Moves with" marker wording; the DOR line records these passes.
+Left as is (optional): the wording of the spec clause above.
+
+`openspec validate --all --strict`: 19/19.
