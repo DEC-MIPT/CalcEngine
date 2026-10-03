@@ -1,10 +1,17 @@
 import datetime
+from io import BytesIO
 from typing import Any
 
 import pytest
+from docx import Document
 from pydantic import ValidationError
 
-from app.schemas.report import ReportRequest, Signatory, TitleBlockData
+from app.schemas.report import (
+    ReportRequest,
+    Signatory,
+    TitleBlockData,
+    writable_character,
+)
 
 DAY = datetime.date(2026, 9, 30)
 
@@ -88,3 +95,29 @@ def test_unicode_letters_and_signs_are_not_control_characters() -> None:
     accepted = request(title=title(designation="ПР-01/2026 «Основания» №5"))
 
     assert accepted.title.designation == "ПР-01/2026 «Основания» №5"
+
+
+@pytest.mark.parametrize(
+    "character", [chr(0xFFFE), chr(0xFFFF), chr(0xD800), chr(0xDFFF)], ids=["fffe", "ffff", "surrogate-low", "surrogate-high"]
+)
+@pytest.mark.parametrize("field", ["designation", "document_name", "organization", "surname"])
+def test_a_character_xml_does_not_allow_is_rejected(field: str, character: str) -> None:
+    text = f"a{character}b"
+    changes = {"developer": person(surname=text)} if field == "surname" else {"title": title(**{field: text})}
+
+    with pytest.raises(ValidationError, match="XML 1.0"):
+        request(**changes)
+
+
+def test_every_character_the_schema_accepts_can_be_written_to_a_docx() -> None:
+    accepted = "".join(
+        chr(code)
+        for code in [*range(0x10000), 0x10000, 0x1F600, 0x10FFFD]
+        if writable_character(chr(code))
+    )
+    document = Document()
+
+    document.add_paragraph(accepted)
+    document.save(BytesIO())
+
+    assert len(accepted) == 0x10000 - 0x20 - 0x21 - 0x800 - 2 + 3

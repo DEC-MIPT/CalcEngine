@@ -93,6 +93,29 @@ def test_formula_step_rejects_a_value_in_another_unit() -> None:
         formula_step("y", synthetic_formula(), VALUES | {"x": QuantityValue(value=3.0, unit="MPa")})
 
 
+def test_a_wrong_unit_is_reported_even_when_the_evaluation_would_fail() -> None:
+    dividing = synthetic_formula(
+        latex=r"y = x / (b - b)",
+        tree=parse_expression(
+            {
+                "kind": "div",
+                "left": {"kind": "symbol", "name": "x"},
+                "right": {
+                    "kind": "sub",
+                    "left": {"kind": "symbol", "name": "b"},
+                    "right": {"kind": "symbol", "name": "b"},
+                },
+            }
+        ),
+        units={"x": "kPa", "b": "kPa", "y": "1"},
+    )
+
+    with pytest.raises(UnitError, match="'b'"):
+        formula_step("y", dividing, {"x": kpa(3.0), "b": QuantityValue(value=4.0, unit="MPa")})
+    with pytest.raises(ExpressionError, match="no finite value"):
+        formula_step("y", dividing, {"x": kpa(3.0), "b": kpa(4.0)})
+
+
 def test_formula_step_names_a_symbol_without_a_value() -> None:
     values = {name: value for name, value in VALUES.items() if name != "b"}
 

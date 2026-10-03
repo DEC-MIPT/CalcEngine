@@ -1,4 +1,5 @@
 from app.reporting.format import (
+    VERDICT_TEXTS,
     format_bound,
     format_engineer_rule,
     format_norm_ref,
@@ -15,7 +16,6 @@ RESPONSIBILITY = (
 )
 """Фраза об ответственности инженера из "Result accountability block"."""
 
-VERDICT_NAMES = {"pass": "выполнено", "fail": "не выполнено", "refused": "расчёт отклонён"}
 NONE = "нет"
 
 
@@ -64,7 +64,7 @@ def accountability_lines(section: AccountabilitySection) -> list[str]:
         *_list("Выходные величины (outputs)", outputs),
         *_list("Нормативные ссылки (norm_refs)", [format_norm_ref(reference) for reference in envelope.norm_refs]),
         *_list("Правила инженера (engineer_rules)", [format_engineer_rule(rule) for rule in envelope.engineer_rules]),
-        f"Вердикт (verdict): {VERDICT_NAMES[envelope.verdict]}; основание (verdict_reason): {_reason(envelope)}",
+        f"Вердикт (verdict): {VERDICT_TEXTS[envelope.verdict][0]}; основание (verdict_reason): {_reason(envelope)}",
         *_list("Предупреждения (warnings)", warnings),
         f"Шагов с непроверенными ссылками (unverified_step_count): {envelope.unverified_step_count}",
     ]

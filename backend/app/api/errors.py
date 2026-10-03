@@ -46,7 +46,8 @@ MESSAGES = {
 SERVER_NAMED = ("calculation_type_not_registered", "parameter_source_unavailable")
 """Коды, сообщение которых называет известный серверу тип расчёта, а не значение клиента."""
 
-LOGGED = (422, 500, 503)
+LOGGED = (422, 503)
+"""Коды, для которых ``_response`` пишет строку лога; ``500`` пишет одну свою строку с типом исключения."""
 
 STATIC_MESSAGE_TYPES = frozenset(
     {
@@ -73,6 +74,10 @@ STATIC_MESSAGE_TYPES = frozenset(
 def _route(request: Request) -> str:
     route = request.scope.get("route")
     return getattr(route, "path", "unmatched")
+
+
+def _log_internal_error(request: Request, exc: BaseException) -> None:
+    logger.error("code=internal_error route=%s error=%s", _route(request), type(exc).__name__)
 
 
 def _response(
@@ -144,7 +149,7 @@ async def _on_database_error(request: Request, exc: Exception) -> JSONResponse:
 
 
 async def _on_unexpected(request: Request, exc: Exception) -> JSONResponse:
-    logger.error("error=%s", type(exc).__name__)
+    _log_internal_error(request, exc)
     return _response(request, 500, "internal_error", MESSAGES["internal_error"], None)
 
 
@@ -155,7 +160,8 @@ class UnexpectedErrors:
     пишет полный traceback с текстом ошибки, где может быть SQL с параметрами, то есть
     данные клиента (``calculation-api`` "Error responses", design.md, решение 5). Эта
     прослойка стоит внутри CORS, поэтому ответ ``500`` получает заголовки CORS, а в лог
-    попадают только код, маршрут и тип исключения.
+    попадает одна строка с кодом, маршрутом и типом исключения — и тогда, когда ответ
+    уже начат.
     """
 
     def __init__(self, app: ASGIApp) -> None:
@@ -176,9 +182,10 @@ class UnexpectedErrors:
         try:
             await self.app(scope, receive, tracked)
         except Exception as exc:  # noqa: BLE001 - the boundary catches everything by design
-            logger.error("error=%s", type(exc).__name__)
+            request = Request(scope)
+            _log_internal_error(request, exc)
             if not started:
-                response = _response(Request(scope), 500, "internal_error", MESSAGES["internal_error"], None)
+                response = _response(request, 500, "internal_error", MESSAGES["internal_error"], None)
                 await response(scope, receive, send)
 
 

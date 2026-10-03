@@ -94,19 +94,26 @@ class TableStep(_TraceStep):
     kind: Literal["table"] = "table"
 
 
+Operator = Literal["le", "lt", "ge", "gt"]
+"""Оператор сравнения шага проверки или ветви метода."""
+
+
 class CheckStep(_TraceStep):
     """Сравнение ``result`` (левого значения) с ``right``."""
 
     kind: Literal["check"] = "check"
-    operator: Literal["le", "lt", "ge", "gt"]
+    operator: Operator
     right: QuantityValue
     passed: bool
 
 
-TraceStep = Annotated[FormulaStep | TableStep | CheckStep, Field(discriminator="kind")]
+Step = FormulaStep | TableStep | CheckStep
+"""Любой шаг трассы."""
+
+TraceStep = Annotated[Step, Field(discriminator="kind")]
 
 
-def unverified_steps(trace: Sequence[FormulaStep | TableStep | CheckStep]) -> int:
+def unverified_steps(trace: Sequence[Step]) -> int:
     """Считает шаги, которые не считаются проверенными; ни один шаг не пропускается.
 
     Args:
@@ -119,7 +126,7 @@ def unverified_steps(trace: Sequence[FormulaStep | TableStep | CheckStep]) -> in
 
 
 def verdict_of(
-    trace: Sequence[FormulaStep | TableStep | CheckStep],
+    trace: Sequence[Step],
 ) -> tuple[Literal["pass", "fail"], str]:
     """Определяет вердикт выполненного расчёта и ``step_id`` решающей проверки.
 
@@ -144,12 +151,17 @@ def verdict_of(
     return "pass", checks[-1].step_id
 
 
+MAX_DECIMALS = 15
+"""Предел числа знаков после запятой: столько значащих десятичных цифр гарантированно
+держит float; это ограничение реализации, а не значение нормы."""
+
+
 class RoundingRule(BaseModel):
     """Как округляется значение выхода; правило и его режим берутся из его источника."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    decimals: int = Field(ge=0)
+    decimals: int = Field(ge=0, le=MAX_DECIMALS)
     mode: Literal["half_up", "half_even"]
 
 
@@ -276,7 +288,7 @@ VerdictReason = Annotated[CheckReason | BoundViolation, Field(discriminator="kin
 
 
 def ordered_sources(
-    trace: Sequence[FormulaStep | TableStep | CheckStep],
+    trace: Sequence[Step],
     refusal: BoundViolation | None,
     outputs: Sequence[OutputValue],
     warnings: Sequence[ApplicabilityWarning],

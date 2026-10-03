@@ -5,6 +5,7 @@ from pydantic import ValidationError
 
 from app.parameters.param_schemas import ParameterFileSchema
 from app.schemas.calculation import MethodBound, NormRef, check_bounds
+from app.schemas.parameters import EngineerRule
 
 SOURCE = {"engineer": "И. И. Иванов", "rationale": "..."}
 
@@ -112,3 +113,20 @@ def test_check_bounds_applies_to_the_method_range_too() -> None:
     check_bounds((lower,))
     with pytest.raises(ValueError, match="is empty"):
         check_bounds((lower, upper))
+
+
+@pytest.mark.parametrize(
+    ("engineer", "rationale"),
+    [("", "<RATIONALE>"), ("   ", "<RATIONALE>"), ("<ENGINEER>", ""), ("<ENGINEER>", " \t")],
+    ids=["empty-engineer", "blank-engineer", "empty-rationale", "blank-rationale"],
+)
+def test_an_engineer_rule_needs_a_non_blank_engineer_and_rationale(engineer: str, rationale: str) -> None:
+    with pytest.raises(ValidationError):
+        EngineerRule(engineer=engineer, rationale=rationale)
+
+
+def test_an_engineer_rule_is_frozen() -> None:
+    rule = EngineerRule(engineer="<ENGINEER>", rationale="<RATIONALE>")
+
+    with pytest.raises(ValidationError):
+        rule.engineer = "<OTHER>"

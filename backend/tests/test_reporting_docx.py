@@ -100,7 +100,10 @@ def test_a_report_of_200_trace_steps_renders_in_under_a_minute() -> None:
     assert isinstance(trace, TraceSection)
     formula = next(step for step in trace.steps if isinstance(step, FormulaStep))
     steps = tuple(formula.model_copy(update={"step_id": f"s{index}"}) for index in range(200))
-    long = Report(request=model.request, body=(model.body[0], trace.model_copy(update={"steps": steps}), model.body[2]))
+    long = Report(
+        request=model.request,
+        body=(model.body[0], trace.model_copy(update={"steps": steps}), model.body[2], model.body[3]),
+    )
 
     started = time.perf_counter()
     paragraphs, _ = read_back(render_docx(long))
@@ -108,3 +111,4 @@ def test_a_report_of_200_trace_steps_renders_in_under_a_minute() -> None:
 
     assert elapsed < 60
     assert "200. Формула s199" in paragraphs
+    assert "4 Подотчётность результата" in paragraphs

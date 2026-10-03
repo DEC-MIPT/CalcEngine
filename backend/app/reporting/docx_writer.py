@@ -6,6 +6,7 @@ from docx.document import Document as DocumentObject
 from app.reporting.accountability import RESPONSIBILITY, accountability_lines
 from app.reporting.format import (
     OPERATORS,
+    VERDICT_TEXTS,
     format_bound,
     format_norm_ref,
     format_quantity,
@@ -28,16 +29,11 @@ SECTION_TITLES = {
     "accountability": "Подотчётность результата",
 }
 STEP_KINDS = {"formula": "Формула", "table": "Табличное значение", "check": "Проверка"}
-VERDICTS = {
-    "pass": "Все проверки выполнены.",
-    "fail": "Проверка не выполнена.",
-    "refused": "Расчёт отклонён: входное значение вне области применения метода.",
-}
 REFUSED_TRACE = "Расчёт не выполнялся: входное значение вне области применения метода."
 
 
 def _passed(passed: bool) -> str:
-    return "выполнено" if passed else "не выполнено"
+    return VERDICT_TEXTS["pass" if passed else "fail"][0]
 
 
 def _comparison(step: CheckStep) -> str:
@@ -84,7 +80,7 @@ def _violation_lines(violation: BoundViolation) -> list[str]:
 
 
 def conclusion_lines(section: ConclusionSection) -> list[str]:
-    lines = [VERDICTS[section.verdict]]
+    lines = [VERDICT_TEXTS[section.verdict][1]]
     if section.deciding_check is not None:
         check = section.deciding_check
         lines.append(f"Определяющая проверка {check.step_id}: {check.expression}; {_comparison(check)}.")

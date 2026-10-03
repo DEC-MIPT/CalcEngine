@@ -206,3 +206,55 @@ def test_a_given_session_factory_is_not_disposed(monkeypatch: pytest.MonkeyPatch
 
     assert disposed == []
     given.dispose()
+
+
+def internal_error_records(caplog: pytest.LogCaptureFixture) -> list[str]:
+    return [record.getMessage() for record in caplog.records if "internal_error" in record.getMessage()]
+
+
+def test_an_unexpected_error_writes_one_log_line_with_code_route_and_type(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    application = create_app(registry=CalculatorRegistry())
+
+    @application.get("/boom/{part}")
+    def boom(part: str) -> None:
+        raise RuntimeError(SENTINEL)
+
+    with caplog.at_level(logging.DEBUG), TestClient(application) as client:
+        client.get("/boom/x")
+
+    assert internal_error_records(caplog) == ["code=internal_error route=/boom/{part} error=RuntimeError"]
+    assert [record.levelname for record in caplog.records if record.name == "app.api"] == ["ERROR"]
+
+
+def test_an_error_after_the_response_started_also_logs_code_route_and_type(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    async def inner(scope: Scope, receive: Receive, send: Send) -> None:
+        await send({"type": "http.response.start", "status": 200, "headers": []})
+        raise ValueError(SENTINEL)
+
+    with caplog.at_level(logging.DEBUG):
+        run_boundary(inner)
+
+    assert internal_error_records(caplog) == ["code=internal_error route=unmatched error=ValueError"]
+
+
+def test_the_built_engine_is_disposed_when_the_lifespan_exits_with_an_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disposed = dispose_calls(monkeypatch)
+    application = create_app(registry=CalculatorRegistry())
+    engine = create_engine("sqlite://")
+
+    async def scenario() -> None:
+        async with application.router.lifespan_context(application):
+            application.state.session_factory = sessionmaker(bind=engine)
+            application.state.owns_session_factory = True
+            raise RuntimeError("stopping")
+
+    with pytest.raises(RuntimeError, match="stopping"):
+        asyncio.run(scenario())
+
+    assert disposed == [engine]

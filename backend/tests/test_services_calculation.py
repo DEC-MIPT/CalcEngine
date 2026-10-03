@@ -80,6 +80,11 @@ class WrongCalculator(Calculator[Mapping[str, QuantityValue], Any, Any]):
         return "not an output"
 
 
+class SilentCalculator(Calculator[Mapping[str, QuantityValue], Any, Any]):
+    def calculate(self, inputs: Mapping[str, QuantityValue], parameters: Any) -> Any:
+        return None
+
+
 def ids() -> Iterator[UUID]:
     for number in count(1):
         yield UUID(int=number)
@@ -90,6 +95,7 @@ def service() -> CalculationService:
     registry = CalculatorRegistry()
     registry.register(CONTRACT, SyntheticCalculator())
     registry.register(CONTRACT.model_copy(update={"name": "wrong"}), WrongCalculator())
+    registry.register(CONTRACT.model_copy(update={"name": "silent"}), SilentCalculator())
     return CalculationService(registry, new_id=ids().__next__)
 
 
@@ -149,3 +155,8 @@ def test_an_unknown_calculation_type_fails(service: CalculationService) -> None:
 def test_a_calculator_that_does_not_return_its_output_fails(service: CalculationService) -> None:
     with pytest.raises(CalculationError, match="not a CalculatorOutput"):
         service.run("wrong", b(1.0), PARAMETERS)
+
+
+def test_a_calculator_that_returns_nothing_is_not_taken_for_a_refusal(service: CalculationService) -> None:
+    with pytest.raises(CalculationError, match="returned NoneType"):
+        service.run("silent", b(1.0), PARAMETERS)

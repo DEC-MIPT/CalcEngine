@@ -1,4 +1,4 @@
-from decimal import ROUND_HALF_EVEN, ROUND_HALF_UP, Decimal
+from decimal import ROUND_HALF_EVEN, ROUND_HALF_UP, Decimal, localcontext
 
 from app.schemas.calculation import RoundingRule
 
@@ -10,7 +10,9 @@ def round_value(value: float, rule: RoundingRule) -> float:
 
     Число с плавающей точкой превращается в самую короткую десятичную запись, которая
     читается обратно в то же значение, поэтому ``2.675`` округляется как ``2.675``, а
-    не как его двоичный сосед. ``half_up`` округляет половину от нуля.
+    не как его двоичный сосед. ``half_up`` округляет половину от нуля. Точность
+    вычисления берётся по порядку значения и числу знаков, поэтому любое конечное
+    значение округляется без ``decimal.InvalidOperation``.
 
     Args:
         value: неокруглённое значение.
@@ -19,5 +21,7 @@ def round_value(value: float, rule: RoundingRule) -> float:
     Returns:
         Округлённое значение.
     """
-    exponent = Decimal(1).scaleb(-rule.decimals)
-    return float(Decimal(repr(value)).quantize(exponent, rounding=_MODES[rule.mode]))
+    exact = Decimal(repr(value))
+    with localcontext() as context:
+        context.prec = max(context.prec, exact.adjusted() + rule.decimals + 2)
+        return float(exact.quantize(Decimal(1).scaleb(-rule.decimals), rounding=_MODES[rule.mode]))
