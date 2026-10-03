@@ -49,3 +49,27 @@
 
 - Имена модулей: `normatives_pipeline`, `search.query()`, форма payload.
 - Точки входа, кроме `enrich` — теперь `normatives_pipeline.formulas.enrich`.
+
+## Answers
+
+- Дата: 2026-10-03
+- От: Аким. Кому: Егор.
+
+Сделано, на `develop`, по структуре, которую ты слил 2026-10-03 (`24797f7`), поэтому пути —
+`ml/...`, а не `src/` и `configs/` из таблицы выше.
+
+1. **`calculation-core-contract`** (`80a684a`, `a984b28`): `formulas.toml` указан как
+   `ml/configs/formulas.toml`, с пометкой «будет удалён» (твой ответ A3). Ссылка на
+   `docs/audit/01-recon.md:97` заменена её содержанием в `design.md` и в `proposal.md`. В
+   `tasks.md` твоих путей не осталось.
+2. **`backend-layered-architecture`** (`80a684a`, `a984b28`): `infra/docker-compose.yml` в
+   примечании к разделу 3 и в DOR; `ml/src/normatives_pipeline/` в `design.md` и
+   `proposal.md`; строка про OCR в «Moved out» называет `ml/` в нынешнем виде;
+   `formulas.toml` — как выше.
+3. **`CLAUDE.md`** (`277fcc7`): раздел «Status» переписан под слитую структуру (`ml/`,
+   `infra/`, без корневых `pyproject.toml` и `tests/`), команды пайплайна — через
+   `pip install -e "./ml[ml]"` и `infra/docker-compose.yml`.
+
+Из-за того же переноса изменены также `bootstrap-dev-environment` (инструменты пайплайна —
+`ml/pyproject.toml`) и `calculation-api` (`infra/docker-compose.yml`), в `11bdca4` и
+`a984b28`. Старые пути остались в моих change только как датированная история («at the time of writing», «now `ml/...`»).
