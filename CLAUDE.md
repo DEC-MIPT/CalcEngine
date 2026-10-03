@@ -9,20 +9,25 @@ what it does not say. Do not restate `AGENTS.md` here.
 
 ## Status (2026-10-03)
 
-- Code on `develop`: Akim's `backend/` (WP5 backend core, merged `53a4892`; WP6 backend
-  tooling) and `frontend/` (WP6 tooling skeleton), and Egor's `ml/` (normative pipeline
-  and collector under `ml/src/normatives_pipeline/`, with `ml/pyproject.toml`,
-  `ml/configs/`, `ml/research/`, `ml/tests/`; moved there 2026-10-03, `24797f7`) and
-  `infra/docker-compose.yml` (PostgreSQL `dec-postgres`, port 5433, single database
-  `dec`). The root has no `pyproject.toml`, `tests/` or `normatives_pipeline/` any more.
-  Akim's unmerged feature branches: `feature/calculation-engine/backend` and
-  `feature/report-generator/backend` (WP2), `feature/calculation-api/backend` (WP8, from
-  the report branch). `params/` does not exist; the pilot parameter file is under
-  `backend/` on the engine branch.
+- Code on `develop`: Akim's `backend/` — WP5 backend core (`53a4892`), WP6 backend
+  tooling, the WP2 calculation engine (`8c001b9`) and report generator (`9642d8d`), and
+  the WP8 calculation API (`23318c1`: `GET /calculation-types`, `POST /calculations`,
+  `GET /calculations/{result_id}`, `POST /calculations/{result_id}/report`, table
+  `calculation_result` in `dec_app`, Alembic head `ae350ead9bfd`), all with branch
+  coverage 100%; the pilot type `foundations_shallow_r` with its engineer-set file
+  `backend/params/foundations_shallow_r.yaml`; `frontend/` is still the WP6 tooling
+  skeleton. Egor's `ml/` (normative pipeline and collector under
+  `ml/src/normatives_pipeline/`, with `ml/pyproject.toml`, `ml/configs/`, `ml/research/`,
+  `ml/tests/`; moved there 2026-10-03, `24797f7`) and `infra/docker-compose.yml`
+  (PostgreSQL `dec-postgres`, port 5433, single database `dec`). The root has no
+  `pyproject.toml`, `tests/` or `normatives_pipeline/` any more. No catalog parameter
+  source exists yet, so `POST /calculations` for the pilot answers
+  `503 parameter_source_unavailable` until `normative-catalog-backend`. The three merged
+  feature branches still exist on `origin` (delete only on Akim's word).
 - Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
-  (WP2; task 1.8 closed 2026-10-03, so the engine branch can merge once its tasks pass),
-  `calculation-api` (WP8, sections 2-3 implemented on its branch),
-  `calculation-verification` (WP4), `bootstrap-dev-environment` (WP6),
+  (WP2; engine and report merged; open: the frontend feature 3.4, 3.5, 5.4, task 7.2,
+  archive after WP1), `calculation-api` (WP8; merged, only 6.5 sync and archive left,
+  after WP2), `calculation-verification` (WP4), `bootstrap-dev-environment` (WP6),
   `backend-layered-architecture` (WP5, all tasks done, not archived),
   `record-installed-skills-akim`. Planned by Akim: `normative-catalog-backend` (Akim and
   Egor; Egor answered its questions 2026-10-03, so the proposal can be written),
@@ -55,6 +60,16 @@ what it does not say. Do not restate `AGENTS.md` here.
 - Known issue: `.secrets.baseline` lists paths from before the move and misses newer
   backend files, so `pre-commit run --all-files` fails on `develop`; the fix is WP6 task
   4.5 on `feature/dev-environment/backend`.
+- Review follow-ups: 18 minor items from the `tester` and `orchestrator` reviews of the
+  three merged branches wait for a planned `fix/calculation-engine/backend`, listed in
+  `docs/decisions/calculation-core-contract-readiness.md` sections 12-14. First: the
+  report request accepts U+FFFE/U+FFFF, so `POST /calculations/{result_id}/report`
+  answers `500` instead of `422` (item 8). Item 6 (table entries carry no selector
+  values) goes to `normative-catalog-backend`.
+- Input form: the `web-platform` "Calculation input form" requirement (WP1 delta: fields
+  from the type's contract, nothing hard-coded) has no task in any change yet.
+  `GET /calculation-types` already lists each input's allowed `units` for it (WP8 task
+  5.2a); the form needs its own change in the `frontend-app` feature.
 - Branching model (Akim, 2026-09-28; Egor confirmed both rules 2026-09-29,
   `docs/decisions/pipeline-followup-answers-egor-rus.md`): documents (the "no code" list in
   `AGENTS.md`, including this file, `docs/reports/` and the code journals) are committed
@@ -136,9 +151,16 @@ Edit these only when the user explicitly says so; otherwise show a diff.
 - `openspec validate --all --strict` — validate all specs and changes (read-only).
 - `openspec list`, `openspec status --change <name>`, `openspec show <item>`.
 - Backend: `backend/check.sh` (`ruff`, `mypy`, `pytest` with branch coverage >= 95% on
-  `app`), using `backend/.venv`. On `feature/calculation-api/backend`, tests marked
-  `postgres` run only with `DEC_TEST_APP_DATABASE_URL` set to a hand-made database on
-  `dec-postgres`, and are skipped otherwise.
+  `app`), using `backend/.venv`. Tests marked `postgres` (migrations, JSON round-trip,
+  latency) run only with `DEC_TEST_APP_DATABASE_URL` set to a hand-made database on
+  `dec-postgres` (`dec_app_wp8_test` exists), and are skipped otherwise:
+  `docker start dec-postgres`, then from `backend/`
+  `DEC_TEST_APP_DATABASE_URL=postgresql://dec:<password>@localhost:5433/dec_app_wp8_test pytest -m postgres`.
+  Do not start `infra/docker-compose.yml` instead: its project name differs from the one
+  that created `dec-postgres`, so the container name would clash.
+- Backend server: `uvicorn app.main:app --host 127.0.0.1` from `backend/`, with
+  `DEC_APP_DATABASE_URL` pointing at a migrated `dec_app` (`alembic upgrade head`);
+  `DEC_CORS_ORIGINS` (comma-separated) and `DEC_PARAMS_ROOT` are optional.
 - Frontend: `frontend/check.sh` (`eslint`, `tsc -b`, `vitest run --coverage`).
 - Pre-commit: `pre-commit run --all-files` (`detect-secrets`; see the known issue above).
 - Egor's pipeline (his zone): `python -m normatives_pipeline.search --json "<query>"`
