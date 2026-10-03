@@ -88,3 +88,20 @@ documentation, close) remain open and are not covered.
 | Choice of `uv` vs `requirements.txt`+`.venv` (design.md, Open Questions) | Akim, deferred | Nothing; does not change the spec or task breakdown |
 | ESLint flat config vs legacy format (design.md, Open Questions) | Akim, deferred | Nothing; implementation detail of task 3.2 |
 | Review before merge (task 7.2): this change is not code-free, needs Egor's or the orchestrator's review | Egor / orchestrator | Task 7.1's full GO does not gate on it, but merge to `develop` does |
+
+## 5. Passes 3-4 after Egor's move to `ml/` (2026-10-03)
+
+Egor moved his pipeline into `ml/` (`ml/pyproject.toml`, `ml/tests/`) and the compose file
+into `infra/` (commit `24797f7`). Commit `11bdca4` updated the root-path wording.
+
+| Pass | Result |
+|---|---|
+| 3 | 0 blockers, 1 major, 5 minor (NOT READY). Major: the GO criterion "`pre-commit run --all-files` passes" is unmet, since `.secrets.baseline` names five files that moved and misses backend files merged after task 4.2 (confirmed by Akim on a copy of the baseline: the hook reports new findings). Fixed by the new task 4.5 (regenerate and hand-review the baseline on `feature/dev-environment/backend`, a note on Egor's files in `docs/decisions/secrets-baseline-egor-files.md`), which task 7.1 now needs. Minors fixed: stale paths in task 4.2's record, task 2.3 re-checked (`pytest backend/tests` from the root: 32 passed), the context sentence and decision 1 title, `proposal.md` wording |
+| 4 | 0 blockers, 0 major, 3 minor (the note's file name and its check, the note going to `develop`, the trigger for a re-scan after a later move). All fixed. **READY for DOR** |
+
+The baseline itself is code and is fixed by task 4.5, not by this edit. Until then,
+`pre-commit run --all-files` fails on `develop`.
+
+| Item | Owner | Blocks |
+|---|---|---|
+| Task 4.5 (regenerate `.secrets.baseline`) | Akim | Task 7.1 (full GO) |

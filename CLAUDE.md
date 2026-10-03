@@ -7,57 +7,54 @@ what it does not say. Do not restate `AGENTS.md` here.
 @AGENTS.md
 @agent-docs/domain-constraints.md
 
-## Status (2026-09-29)
+## Status (2026-10-03)
 
-- Application code on `develop`: only Egor's normative pipeline (`normatives_pipeline/`,
-  merged 2026-09-27, `02a33de`), with the root `pyproject.toml` (ruff exclude, pytest,
-  branch coverage), `tests/`, and `docker-compose.yml` (PostgreSQL `dec-postgres` on
-  port 5433, database `dec`). His collector is still on
-  `feature/normative-collector/data`. `backend/`, `frontend/`, `params/`, `ml/` do not
-  exist. What the pipeline means for Akim's work: `docs/akim/reports/egor-branches-analysis.md`
-  (untracked, Akim's own zone, see below).
+- Code on `develop`: Akim's `backend/` (WP5 backend core, merged `53a4892`; WP6 backend
+  tooling) and `frontend/` (WP6 tooling skeleton), and Egor's `ml/` (normative pipeline
+  and collector under `ml/src/normatives_pipeline/`, with `ml/pyproject.toml`,
+  `ml/configs/`, `ml/research/`, `ml/tests/`; moved there 2026-10-03, `24797f7`) and
+  `infra/docker-compose.yml` (PostgreSQL `dec-postgres`, port 5433, single database
+  `dec`). The root has no `pyproject.toml`, `tests/` or `normatives_pipeline/` any more.
+  Akim's unmerged feature branches: `feature/calculation-engine/backend` and
+  `feature/report-generator/backend` (WP2), `feature/calculation-api/backend` (WP8, from
+  the report branch). `params/` does not exist; the pilot parameter file is under
+  `backend/` on the engine branch.
 - Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
-  (WP2), `calculation-verification` (WP4), `bootstrap-dev-environment` (WP6, spec
-  phase GO, implementation not started), `record-installed-skills-akim`,
-  `backend-layered-architecture` (WP5, not yet retargeted; lead moved from Egor to
-  Akim 2026-09-28, since `backend/` is his zone — `docs/decisions/
-  backend-layered-architecture-lead-change.md`). WP5 was split on 2026-09-28 and Egor
-  acknowledged the split the same day (`docs/decisions/
-  backend-layered-architecture-split-egor{,-ack}.md`): it now holds only Akim's
-  scaffold, config, `DECError`, `dec_app` session and migrations, parameters layer for
-  engineer-set values, and `Calculator` registry (tasks 1.1-3.2, 5.1, 6.1). Moved out:
-  the `normatives/` package and the parameters layer's reading of formulas (item 9.3) go
-  to planned `normative-catalog-backend` (Akim and Egor); ML (`ml/`, item 9.7) to
-  planned `ml-model-storage` (Egor); Docker/DevOps (item 9.6) to Egor's infra change.
-  None of the three moved changes exists yet. WP5's task 3.x verify clauses run on a
-  `dec_app` database created by hand on `dec-postgres`. Item 9.3 is still open: Egor
-  wants the normative code to stay in `normatives_pipeline/`, not a second loader in
-  `backend/normatives/`; it is the first decision of `normative-catalog-backend`.
-  Led by Egor, with Akim's parts: `retarget-mvp-domain` (WP1; Akim's review tasks are
-  done, Egor applies the follow-ups in WP1 tasks 3.3 and 5.6). Egor:
-  `normatives-collector`, `normatives-parser`, `normatives-formula-contract`. Planned,
-  not created: `norm-source-traceability` (WP3).
-- `normatives-formula-contract`: Egor agreed to Akim's findings 11-15 on 2026-09-28
-  (`docs/decisions/normatives-formula-contract-review-egor.md`). The five `NormRef`
-  fields are fixed in code, `status` and `provenance` are stored per formula and per
-  coefficient, and the consuming backend and frontend tasks (old 4.1-4.2) left that
-  change: Akim adds them to his own change. The code is on `feature/normative-parser/ml`
-  (which also moves `normatives_pipeline/` to a `src/` layout), not on `develop`. The
-  user-side verification action is dropped: Egor sets every formula to "verified" himself
-  (his fallback, accepted by Akim 2026-09-29, `docs/decisions/
-  pipeline-followup-answers-akim.md`), so Akim adds no flag endpoint, counter or button.
-  Egor's `formulas.toml` is to be deleted. Egor's variable for the norms database is
-  `DEC_NORMATIVES_DATABASE_URL`; Akim's `Settings` keeps `DEC_DATABASE_URL` for `dec_app`.
-- Repo layout (Egor's proposal, accepted by Akim 2026-09-29, moves pending on Egor's
-  side): `backend/` (with `backend/tests/`) and `frontend/` stay in the root; `ml/` is
-  Egor's (`pyproject.toml`, `src/normatives_pipeline/`, `configs/`, `research/`,
-  `tests/`); `docker-compose.yml` moves to `infra/`. No shared root `tests/`. Until the
-  moves are on `develop`, the root `pyproject.toml` and `docker-compose.yml` are
-  unchanged; Akim edits the root `pyproject.toml` (`testpaths`, coverage `source`) on a
-  feature branch after Egor's move, with a diff shown first. `.gitignore` keeps
-  `norm-docs/` until `feature/normative-parser/ml` is merged (it replaces the line with
-  `docs/normative-base/`); the develop code still reads `norm-docs/`. Update the paths in
-  this file when the moves land.
+  (WP2; task 1.8 closed 2026-10-03, so the engine branch can merge once its tasks pass),
+  `calculation-api` (WP8, sections 2-3 implemented on its branch),
+  `calculation-verification` (WP4), `bootstrap-dev-environment` (WP6),
+  `backend-layered-architecture` (WP5, all tasks done, not archived),
+  `record-installed-skills-akim`. Planned by Akim: `normative-catalog-backend` (Akim and
+  Egor; Egor answered its questions 2026-10-03, so the proposal can be written),
+  `user-accounts-auth` (test accounts made by an admin command, login, JWT, Argon2id;
+  tiers, trial and billing deferred). Led by Egor, with Akim's parts: `retarget-mvp-domain` (WP1;
+  Akim's review tasks are done, Egor applies the follow-ups in WP1 tasks 3.3 and 5.6).
+  Egor: `normatives-collector`, `normatives-parser`, `normatives-formula-contract`.
+  Planned, not created: `norm-source-traceability` (WP3), `ml-model-storage` and an
+  infra change (both Egor's).
+- Normative catalog contract (Egor, 2026-10-03,
+  `docs/decisions/normative-catalog-backend-questions-akim.md`, "Answers"): the
+  contract between the zones is the database. Egor owns read-only views and the role
+  `dec_normatives_reader` in `dec_normatives`, the binding of a calculation type to its
+  norms, and table row/column headings with units; the backend reads only the views,
+  through its own repository, with `DEC_NORMATIVES_DATABASE_URL`, and never imports
+  `ml/`. Old WP5 item 9.3 is settled this way. The exact JSON of the expression tree is
+  fixed together in `normative-catalog-backend`. Egor named the end of 2026-10-04 for
+  `normatives-formula-contract` 1.4-1.7, the views and WP1 task 3.1.
+- Formula status: the pipeline writes `status = unverified` and
+  `provenance = machine-extracted` (stored per formula and coefficient,
+  `normatives-formula-contract` task 1.6, not done yet); the backend builds
+  `NormRef.status` from `provenance`. Pilot steps are shown as unverified
+  (`docs/decisions/pipeline-open-items-questions-akim.md`, "Answers", 2b). There is no
+  user-side verification action. Egor's `formulas.toml` is to be deleted (still at
+  `ml/configs/formulas.toml`).
+- Variables: Akim's `Settings` reads `DEC_APP_DATABASE_URL` (`dec_app`) and
+  `DEC_NORMATIVES_DATABASE_URL`. Egor's code still reads `DEC_DATABASE_URL`; he agreed to
+  rename it to `DEC_NORMATIVES_DATABASE_URL`. `dec_app` is not in the compose file:
+  backend verify clauses run on a database created by hand on `dec-postgres`.
+- Known issue: `.secrets.baseline` lists paths from before the move and misses newer
+  backend files, so `pre-commit run --all-files` fails on `develop`; the fix is WP6 task
+  4.5 on `feature/dev-environment/backend`.
 - Branching model (Akim, 2026-09-28; Egor confirmed both rules 2026-09-29,
   `docs/decisions/pipeline-followup-answers-egor-rus.md`): documents (the "no code" list in
   `AGENTS.md`, including this file, `docs/reports/` and the code journals) are committed
@@ -77,7 +74,7 @@ what it does not say. Do not restate `AGENTS.md` here.
   code-free GO path are in `openspec/specs/development-process/spec.md` and `AGENTS.md`
   section 4, so spec-only changes can get their `tester` verdict.
 - Session state for continuing the work: `docs/akim/reports/session-state-2026-09-27.md`
-  (untracked).
+  (untracked); WP code journals in `docs/akim/reports/WP<N>-code-journal.md`.
 - Norm editions for the MVP domain come from the team and are `unverified` until
   checked against source texts.
 
@@ -127,8 +124,7 @@ Edit these only when the user explicitly says so; otherwise show a diff.
 - `openspec/**` (specs and changes are shared with Egor; extend, never contradict).
 - `AGENTS.md`, `.gitignore`, `README.md`, `.kilo/**`, `.kilocode/**`,
   `.claude/agents/*` other than the two subagents added for Claude Code.
-- Anything in Egor's zones: normative pipeline, NLP/RAG, ML, DevOps.
-- The root `pyproject.toml` (shared with Egor's pipeline).
+- Anything in Egor's zones: normative pipeline, NLP/RAG, ML, DevOps (`ml/`, `infra/`).
 
 ## Language
 
@@ -139,15 +135,19 @@ Edit these only when the user explicitly says so; otherwise show a diff.
 
 - `openspec validate --all --strict` — validate all specs and changes (read-only).
 - `openspec list`, `openspec status --change <name>`, `openspec show <item>`.
-- Egor's pipeline (his zone): `.venv/bin/python -m normatives_pipeline.search --json
-  "<query>"` with `DEC_DATABASE_URL` set, as in
-  `docs/decisions/normatives-pilot-usage-akim.md`. Its PostgreSQL is defined in
-  `docker-compose.yml`. Ingestion and the pipeline's `pytest` are Egor's to run.
+- Backend: `backend/check.sh` (`ruff`, `mypy`, `pytest` with branch coverage >= 95% on
+  `app`), using `backend/.venv`. On `feature/calculation-api/backend`, tests marked
+  `postgres` run only with `DEC_TEST_APP_DATABASE_URL` set to a hand-made database on
+  `dec-postgres`, and are skipped otherwise.
+- Frontend: `frontend/check.sh` (`eslint`, `tsc -b`, `vitest run --coverage`).
+- Pre-commit: `pre-commit run --all-files` (`detect-secrets`; see the known issue above).
+- Egor's pipeline (his zone): `python -m normatives_pipeline.search --json "<query>"`
+  after `pip install -e "./ml[ml]"`, with `DEC_DATABASE_URL` set, as in `README.md`
+  and `docs/decisions/normatives-pilot-usage-akim.md`. Its PostgreSQL is
+  `infra/docker-compose.yml`. Ingestion and the pipeline's `pytest` are Egor's to run.
 
-TBD, see planned change `bootstrap-dev-environment`: Akim's backend and frontend tooling
-(`pytest` for the backend, `vitest`, `playwright`, `ruff`, `mypy`, `eslint`, `tsc`,
-build). Do not invent or run commands from this list; none of them is set up for Akim's
-zone yet.
+Not set up yet: `playwright`, and the frontend build for shipping. Do not invent
+commands for them.
 
 ## Subagents (also mirrored in `.kilo/agent/`)
 

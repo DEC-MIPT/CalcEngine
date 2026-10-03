@@ -1,0 +1,140 @@
+# Реестр — проверенное подмножество формул (human-verified), а не полный каталог.
+# OCR-пайплайн (pix2text + DocLayout-YOLO, DPI 400) авто-извлекает latex/expression
+# со статусом machine-extracted/unverified; сюда входят только формулы, проверенные
+# человеком до 100% точности (для исполняемого пути в движке).
+# expression строится явно по таблице символов (не из LaTeX — parse_latex ломает греческие).
+
+[[formula]]
+designation = "СП 22.13330.2016"
+number = "5.1"
+clause = "5.3.16"
+latex = "X = \\frac{X_n}{\\gamma_g}"
+expression = "X_n/gamma_g"
+output = "X"
+
+[[formula.symbols]]
+id = "X"
+latex = "X"
+meaning = "расчетное значение характеристики грунта"
+unit = ""
+kind = "output"
+
+[[formula.symbols]]
+id = "X_n"
+latex = "X_n"
+meaning = "нормативное значение данной характеристики"
+unit = ""
+kind = "input"
+
+[[formula.symbols]]
+id = "gamma_g"
+latex = "\\gamma_g"
+meaning = "коэффициент надежности по грунту"
+unit = ""
+kind = "input"
+
+[[formula]]
+designation = "СП 22.13330.2016"
+number = "5.7"
+clause = "5.6.7"
+latex = "R = \\frac{\\gamma_{c1}\\gamma_{c2}}{k}\\left[M_{\\gamma} k_z b \\gamma_{II} + M_q d_1 \\gamma'_{II} + (M_q - 1) d_b \\gamma'_{II} + M_c c_{II}\\right]"
+expression = "(gamma_c1*gamma_c2/k)*(M_gamma*k_z*b*gamma_II + M_q*d_1*gamma_II_prime + (M_q - 1)*d_b*gamma_II_prime + M_c*c_II)"
+output = "R"
+
+[[formula.symbols]]
+id = "R"
+latex = "R"
+meaning = "расчетное сопротивление грунта основания"
+unit = "кПа"
+kind = "output"
+
+[[formula.symbols]]
+id = "gamma_c1"
+latex = "\\gamma_{c1}"
+meaning = "коэффициент условий работы"
+unit = ""
+kind = "input"
+
+[[formula.symbols]]
+id = "gamma_c2"
+latex = "\\gamma_{c2}"
+meaning = "коэффициент условий работы"
+unit = ""
+kind = "input"
+
+[[formula.symbols]]
+id = "k"
+latex = "k"
+meaning = "коэффициент"
+unit = ""
+kind = "input"
+
+[[formula.symbols]]
+id = "M_gamma"
+latex = "M_{\\gamma}"
+meaning = "коэффициент, принимаемый по таблице 5.5"
+unit = ""
+kind = "input"
+
+[[formula.symbols]]
+id = "k_z"
+latex = "k_z"
+meaning = "коэффициент"
+unit = ""
+kind = "input"
+
+[[formula.symbols]]
+id = "b"
+latex = "b"
+meaning = "ширина подошвы фундамента"
+unit = "м"
+kind = "input"
+
+[[formula.symbols]]
+id = "gamma_II"
+latex = "\\gamma_{II}"
+meaning = "удельный вес грунта ниже подошвы фундамента"
+unit = "кН/м³"
+kind = "input"
+
+[[formula.symbols]]
+id = "M_q"
+latex = "M_q"
+meaning = "коэффициент, принимаемый по таблице 5.5"
+unit = ""
+kind = "input"
+
+[[formula.symbols]]
+id = "d_1"
+latex = "d_1"
+meaning = "глубина заложения фундамента"
+unit = "м"
+kind = "input"
+
+[[formula.symbols]]
+id = "gamma_II_prime"
+latex = "\\gamma'_{II}"
+meaning = "удельный вес грунта выше подошвы фундамента"
+unit = "кН/м³"
+kind = "input"
+
+[[formula.symbols]]
+id = "d_b"
+latex = "d_b"
+meaning = "глубина подвала"
+unit = "м"
+kind = "input"
+
+[[formula.symbols]]
+id = "M_c"
+latex = "M_c"
+meaning = "коэффициент, принимаемый по таблице 5.5"
+unit = ""
+kind = "input"
+
+[[formula.symbols]]
+id = "c_II"
+latex = "c_{II}"
+meaning = "расчетное значение удельного сцепления грунта"
+unit = "кПа"
+kind = "input"

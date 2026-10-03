@@ -91,8 +91,9 @@ that domain.
 
 Re-checked on 2026-09-26 after `NormRef` was agreed on Akim's word, and on 2026-09-27
 after Egor agreed in writing (`docs/decisions/normref-questions-egor.md`, commit
-`a1a896c`); his answers change none of the items below. Re-check again if that change
-alters an item:
+`a1a896c`); his answers change none of the items below. Re-checked on 2026-10-03 after
+he accepted the `input_hash` algorithm (`calculation-core-contract` task 1.8): only its
+row changes. Re-check again if that change alters an item:
 
 | Item | Used by | Status |
 |---|---|---|
@@ -100,7 +101,7 @@ alters an item:
 | Definition of "verified" (`normatives-catalog` "Norm reference status") | metric "traceability completeness" | in the unarchived `retarget-mvp-domain`, draft; the field `status = verified` is now defined by `NormRef` |
 | Trace step fields (`step_id`, `expression`, `substitutions`, `result`, `norm_refs`) | metric "traceability completeness" | defined in `calculation-core-contract` |
 | Envelope fields `outputs`, `verdict`, `norm_refs`, `engineer_rules`, `unverified_step_count` | reference comparison, regression, traceability | defined in `calculation-core-contract` |
-| `input_hash` algorithm (SHA-256 over canonical serialization) | regression corpus | "a proposal, open for review" |
+| `input_hash` algorithm (SHA-256 over canonical serialization) | regression corpus | accepted 2026-10-03 (Egor's acknowledgement, `calculation-core-contract` task 1.8; it was "a proposal, open for review") |
 | `engine_version` meaning | regression corpus | released version of the engine package |
 | `result_id` excluded from comparison | regression, reproducibility | stated in "Pure calculation function" |
 | Requirement "Pure calculation function" | invariants, reproducibility | stable |
@@ -108,9 +109,9 @@ alters an item:
 
 Nothing in this change waits for `NormRef` any more. Requirement 3 and the traceability
 metric use the envelope and `NormRef` as defined in `calculation-core-contract`. Open
-points: the `input_hash` algorithm is still "a proposal, open for review" there; the wider
-definition of "verified" is in the draft `retarget-mvp-domain`; the latency test waits for
-a definition of "typical calculation". Soft dependencies: reference comparison and
+points: the wider definition of "verified" is in the draft `retarget-mvp-domain`, and the
+latency test waits for a definition of "typical calculation". The `input_hash` algorithm
+is no longer open (accepted 2026-10-03, `calculation-core-contract` task 1.8). Soft dependencies: reference comparison and
 reproducibility use the envelope's `outputs` and the exclusion of `result_id`, and the
 unit-change invariant uses "Explicit units at the boundary".
 
