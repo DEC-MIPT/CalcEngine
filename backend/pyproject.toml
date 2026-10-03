@@ -15,6 +15,9 @@ warn_unused_ignores = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+    "postgres: needs DEC_TEST_APP_DATABASE_URL, a hand-made dec_app on dec-postgres (skipped otherwise)",
+]
 
 [tool.coverage.run]
 source = ["app"]

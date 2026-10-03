@@ -3,6 +3,7 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import OperationalError
 from starlette.exceptions import HTTPException
 
 from app.core.exceptions import (
@@ -96,6 +97,11 @@ async def _on_http_error(request: Request, exc: Exception) -> JSONResponse:
     return _response(request, exc.status_code, code, MESSAGES[code], None)
 
 
+async def _on_database_error(request: Request, exc: Exception) -> JSONResponse:
+    """A database that does not answer; the driver's text can hold the URL, so it is dropped."""
+    return _response(request, 503, "database_unavailable", MESSAGES["database_unavailable"], None)
+
+
 async def _on_unexpected(request: Request, exc: Exception) -> JSONResponse:
     logger.error("error=%s", type(exc).__name__)
     return _response(request, 500, "internal_error", MESSAGES["internal_error"], None)
@@ -105,4 +111,5 @@ def install_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(RequestValidationError, _on_request_validation)
     app.add_exception_handler(DECError, _on_dec_error)
     app.add_exception_handler(HTTPException, _on_http_error)
+    app.add_exception_handler(OperationalError, _on_database_error)
     app.add_exception_handler(Exception, _on_unexpected)
