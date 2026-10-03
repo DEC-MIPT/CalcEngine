@@ -75,11 +75,15 @@ def test_a_request_without_a_body_passes(client: TestClient) -> None:
     assert client.get("/plain").json() == {"ok": "yes"}
 
 
-def test_the_application_has_the_limit() -> None:
+@pytest.mark.parametrize(
+    "path", ["/health", "/calculations", "/calculations/00000000-0000-0000-0000-000000000001/report"]
+)
+def test_the_application_has_the_limit_on_every_route(path: str, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("DEC_APP_DATABASE_URL", raising=False)
     with TestClient(create_app()) as client:
-        response = client.post("/health", content=b"x" * (BODY_LIMIT + 1))
+        response = client.post(path, content=b"x" * (BODY_LIMIT + 1), headers={"content-type": "application/json"})
 
-    assert response.status_code == 413
+    assert (response.status_code, response.json()["code"]) == (413, "payload_too_large")
 
 
 def run_asgi(messages: list[Message], limit: int = 10) -> tuple[list[Message], list[Message]]:

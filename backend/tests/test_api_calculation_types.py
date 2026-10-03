@@ -13,6 +13,7 @@ from test_services_submit import CONTRACT, FixedSource, SyntheticCalculator, req
 
 from app.api.dependencies import get_service
 from app.core.config import PARAMS_ROOT, ApiSettings
+from app.core.exceptions import DECError
 from app.engine import foundations_shallow_r
 from app.engine.registry import CalculatorRegistry
 from app.main import create_app
@@ -170,3 +171,28 @@ def test_a_session_is_not_opened_by_the_listing(monkeypatch: pytest.MonkeyPatch)
 
     assert get_types(application) == (200, [])
     assert opened == []
+
+
+def test_a_validated_range_bound_without_its_engineer_stops_the_start_up(tmp_path: Path) -> None:
+    (tmp_path / f"{foundations_shallow_r.NAME}.yaml").write_text(
+        """\
+rounding_rules:
+  R:
+    rule: {decimals: 1, mode: half_up}
+    source: {engineer: "<ENGINEER>", rationale: "<RATIONALE>"}
+validated_range:
+  - quantity: b
+    kind: max
+    value: 3.0
+    inclusive: true
+    source: {rationale: "<RATIONALE>"}
+""",
+        encoding="utf-8",
+    )
+    application = create_app(ApiSettings.model_validate({"DEC_PARAMS_ROOT": tmp_path}))
+
+    with pytest.raises(DECError) as raised, TestClient(application):
+        pass
+
+    assert f"{foundations_shallow_r.NAME}.yaml" in str(raised.value)
+    assert "validated_range.0.source.engineer" in str(raised.value)

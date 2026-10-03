@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from collections.abc import Iterator
 from typing import Any
@@ -348,3 +349,30 @@ def test_the_report_of_a_result_whose_type_is_gone_is_409(engine: Engine) -> Non
     assert (response.status_code, payload["code"]) == (409, "calculation_type_not_registered")
     assert "'synthetic'" in payload["message"]
     assert unchanged.json() == created
+
+
+SENTINEL = "client-value-7f3a"
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        body(b={"value": SENTINEL, "unit": "m"}),
+        body(b={"value": 1.5, "unit": SENTINEL}),
+        body() | {SENTINEL: SENTINEL},
+        body(b={"value": 1.5, "unit": "m", "note": SENTINEL}),
+    ],
+    ids=["value", "unit", "unknown-field", "extra-input-field"],
+)
+def test_a_422_on_the_real_route_echoes_no_client_value(
+    client: TestClient, caplog: pytest.LogCaptureFixture, data: dict[str, Any]
+) -> None:
+    with caplog.at_level(logging.INFO, logger="app.api"):
+        response = client.post("/calculations", json=data)
+
+    logged = "\n".join(record.getMessage() for record in caplog.records)
+    assert response.status_code == 422
+    for field in response.json()["fields"]:
+        assert SENTINEL not in field["message"]
+    assert SENTINEL not in response.json()["message"]
+    assert SENTINEL not in logged and "code=validation_error" in logged
