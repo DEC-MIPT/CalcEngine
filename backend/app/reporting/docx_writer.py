@@ -33,7 +33,7 @@ REFUSED_TRACE = "Расчёт не выполнялся: входное знач
 
 
 def _passed(passed: bool) -> str:
-    return "выполнено" if passed else "не выполнено"
+    return VERDICT_TEXTS["pass" if passed else "fail"][0]
 
 
 def _comparison(step: CheckStep) -> str:

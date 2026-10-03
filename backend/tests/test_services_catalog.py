@@ -197,11 +197,20 @@ def test_each_input_lists_the_units_of_its_dimension() -> None:
     assert all(item.base_unit in item.units for item in view.inputs)
 
 
-def test_an_empty_engineer_in_the_parameter_file_stops_the_start_up(tmp_path: Path) -> None:
-    write_params(tmp_path, VALID_RULE.replace('engineer: "<ENGINEER>"', 'engineer: ""'))
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("engineer", '""'), ("engineer", '"   "'), ("rationale", '""'), ("rationale", '"   "')],
+    ids=["empty-engineer", "blank-engineer", "empty-rationale", "blank-rationale"],
+)
+def test_a_blank_engineer_rule_field_in_the_parameter_file_stops_the_start_up(
+    tmp_path: Path, field: str, value: str
+) -> None:
+    write_params(tmp_path, VALID_RULE.replace(f'{field}: "<{field.upper()}>"', f"{field}: {value}"))
 
     with pytest.raises(DECError) as raised:
         build_registry(tmp_path)
 
-    assert FILE_NAME in str(raised.value)
-    assert "rounding_rules.R.source.engineer" in str(raised.value)
+    message = str(raised.value)
+    assert FILE_NAME in message
+    assert f"rounding_rules.R.source.{field}" in message
+    assert f"input_value={value.replace(chr(34), chr(39))}" in message
