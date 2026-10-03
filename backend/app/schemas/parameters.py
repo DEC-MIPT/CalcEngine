@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict
 
 
 class EngineerRule(BaseModel):
@@ -14,28 +14,3 @@ class EngineerRule(BaseModel):
 
     engineer: str
     rationale: str
-
-
-class RoundingRule(EngineerRule):
-    """How many decimal places an output quantity is rounded to."""
-
-    decimals: int = Field(ge=0)
-
-
-class ValidatedRange(EngineerRule):
-    """A narrower, engineer-set range within the method's own bounds."""
-
-    min_value: float | None = None
-    max_value: float | None = None
-
-    @model_validator(mode="after")
-    def _has_at_least_one_bound(self) -> "ValidatedRange":
-        if self.min_value is None and self.max_value is None:
-            raise ValueError("a validated range needs min_value, max_value, or both")
-        if (
-            self.min_value is not None
-            and self.max_value is not None
-            and self.min_value > self.max_value
-        ):
-            raise ValueError("min_value must not be greater than max_value")
-        return self

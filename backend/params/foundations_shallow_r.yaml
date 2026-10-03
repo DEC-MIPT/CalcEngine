@@ -1,0 +1,13 @@
+# Engineer-set parameters of the pilot calculation type (calculation-core-contract task 7.1a).
+# Only values the engineer sets belong here; formulas, coefficients and the method's
+# bounds come from the normative catalog (backend-layered-architecture design.md, decision 3).
+rounding_rules:
+  R:
+    rule:
+      decimals: 1
+      mode: half_up
+    source:
+      engineer: "Аким"
+      rationale: "Решение инженера для пилотного типа WP2 (2026-09-30): округление до десятых кПа; до проверки по эталонным примерам WP4"
+# Empty until the verification of calculation-verification (WP4) sets it (design.md, decision 8).
+validated_range: []

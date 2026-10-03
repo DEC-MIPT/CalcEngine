@@ -1,0 +1,5 @@
+rounding_rules:
+  R:
+    decimals: 2
+    engineer: "И. И. Иванов"
+    rationale: "..."
