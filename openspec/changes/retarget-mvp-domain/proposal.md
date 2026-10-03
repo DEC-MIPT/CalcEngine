@@ -8,7 +8,7 @@
 
 The specs and the AI context (`openspec/config.yaml`) still target a placeholder domain,
 while the confirmed MVP domains are shallow foundations and internal water supply.
-The verified roadmap (`docs/audit/03-verified-roadmap.md`, section 3.1) records this as:
+The verified roadmap (`docs/reports/verified-roadmap.md`, section 3.1) records this as:
 
 - **A1 (Critical, confirmed):** the placeholder domain appears in more places than the
   audit reported: the `product-vision` MVP scope, the `config.yaml` context, an engine

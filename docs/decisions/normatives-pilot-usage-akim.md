@@ -7,19 +7,19 @@
 ## Prereqs
 
 - Docker Postgres `dec-postgres` on port 5433 — see `normatives-postgres-storage.md`.
-- The repo venv `.venv` with dependencies installed.
-- Pilot PDFs live in `norm-docs/` (gitignored; full texts are not redistributed).
+- The repo venv `.venv` with the package installed editable: `.venv/bin/pip install -e ".[ml]"`.
+- Pilot PDFs live in `docs/normative-base/` (gitignored; full texts are not redistributed).
 
 ## 1. Get the pilot file
 
-Pilot documents are already in `norm-docs/` (СП 22.13330.2016, СП 24/30/31/45.13330,
-СНиП scans). New downloads fall into `norm-docs/` too (the collector writes there).
+Pilot documents are already in `docs/normative-base/` (СП 22.13330.2016, СП 24/30/31/45.13330,
+СНиП scans). New downloads fall into `docs/normative-base/` too (the collector writes there).
 
 ## 2. Process (ingest into Postgres)
 
 ```bash
 cd /home/malkinte/CalcEngine
-.venv/bin/python -m normatives_pipeline.ingest --force "norm-docs/СП 22.13330.2016.pdf"
+.venv/bin/python -m normatives_pipeline.ingest --force "docs/normative-base/СП 22.13330.2016.pdf"
 ```
 
 Idempotent: re-running without `--force` prints `[skip] … уже в хранилище`.
@@ -41,7 +41,7 @@ Idempotent: re-running without `--force` prints `[skip] … уже в храни
 
 ## Returned contract
 
-The output shape is config-driven: `normatives_pipeline/parser.toml` → `[output]`
+The output shape is config-driven: `configs/parser.toml` → `[output]`
 (`formula_keys`, `norm_ref_keys`, `symbol_keys`, `default_symbol_kind`).
 
 ```json
@@ -69,7 +69,7 @@ The output shape is config-driven: `normatives_pipeline/parser.toml` → `[outpu
 not the shallow-foundation pilot СП 22.13330.2016. To search piles, ingest СП 24 first:
 
 ```bash
-.venv/bin/python -m normatives_pipeline.ingest --force "norm-docs/СП 24.13330.2021.pdf"
+.venv/bin/python -m normatives_pipeline.ingest --force "docs/normative-base/СП 24.13330.2021.pdf"
 .venv/bin/python -m normatives_pipeline.search --json "допускаемая нагрузка на сваю"
 ```
 

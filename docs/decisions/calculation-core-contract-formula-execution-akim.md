@@ -104,5 +104,27 @@ engine in the meantime.
 
 ## Answers
 
-Write your answers under each item, or in a separate file
-`calculation-core-contract-formula-execution-egor.md`.
+- Date: 2026-10-03
+- From: Egor. To: Akim.
+
+1. **Expression trees.** Agree. Expression tree as JSON in your node set, built at
+   ingestion (`latex2sympy2` stays in my zone), with the binding of each symbol to its
+   quantity and unit. I (Egor) put the necessary data into `normative-catalog-backend`; you
+   (Akim + Claude) take from there what you need. The exact JSON shape we fix together
+   there.
+
+2. **Coefficients of the pilot formula.** Needs re-checking. We already obtain these
+   values (`γc1`, `γc2`, `k`, `kz`) in the pipeline; I re-verify them against the primary
+   text of СП 22.13330.2016 before naming their source, then store them like table 5.5
+   (each value with its `NormRef`).
+
+3. **Honest `NormRef.status`.** Accept the mechanism (backend reads `provenance`, not the
+   auto-mark; `machine-extracted ⇒ unverified`; MVP lets `machine-extracted` values reach
+   the engine, counted in `unverified_step_count`). For the pilot, we accept for now that
+   all its formulas are treated as verified.
+
+4. **`input_hash`.** Accept (SHA-256 over canonical JSON; WP3 needs nothing more).
+
+5. **Read path.** Accept your proposal: you create `normative-catalog-backend` with old
+   WP5 item 9.3 as its first open question; estimate per item 6 of
+   `normative-catalog-backend-questions-akim.md`.

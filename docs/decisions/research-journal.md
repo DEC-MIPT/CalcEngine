@@ -126,3 +126,39 @@ New model:
 Verification flow (open question for Akim, `formula-verification-akim.md`): on the user side, the
 engineer sees the normative excerpt + the extracted LaTeX + notation and marks "верно"/"косяк"
 (fixing on error). On the pilots there were no errors.
+
+## Entry 11 — Decision: CNN detection + pix2text recognition (2026-09-27)
+
+Why this final shape. The PDFs are text-based (not scans), so the symbols exist in the text
+layer — but the formula STRUCTURE (fractions, subscripts, superscripts) is encoded only in
+character positions and font size, not in the text content (ML journal Entry 20). Two options:
+
+1. Coordinate-based layout reconstruction (deterministic): group chars by baseline, detect
+   sub/superscript by size/offset, detect fractions by numerator/denominator. Attempted as
+   `parser/formula_layout.py` — the first version misclassified subscripts (`^{c}` instead of
+   `_{c1}`), missed fractions, and leaked the «где» block into the result. Fixing it means
+   re-implementing a fragile layout engine.
+2. CNN detection + OCR recognition: DocLayout-YOLO (pretrained on DocStructBench) finds the
+   formula bbox on the rendered page (DPI 400); pix2text (LatexOCR mfr-1.5, ONNX) reconstructs
+   the LaTeX structure from that crop. This is what the research notebook validated — pilots 5.5
+   and 5.7 match semantically via `latex2sympy2`.
+
+Decision: option 2. The CNN reliably finds the position (no coordinate heuristics), and pix2text
+reliably reconstructs the structure (no fragile layout engine). Cost: ML (CPU ONNX, ~5 s/formula)
+and the `machine-extracted`/`unverified` status — accepted, because verification is user-side
+(`formula-verification-akim.md`). Parameters (DPI 400, conf 0.25, imgsz 1024) live in
+`parser.toml` `[formula_ocr]`. The `ocr/` package and `ocr.toml` are removed; the pipeline is
+`normatives_pipeline/formula_ocr.py` (detection + recognition + `correct_latex`).
+
+## Entry 12 — Model lifecycle: lazy singletons + warm-up (2026-09-27)
+
+What: `formula_ocr.py` loads DocLayout-YOLO (detector) and pix2text (recognizer) lazily as
+module-level singletons (`_get_detector` / `_get_recognizer`), plus a `warm_up()` that forces
+both loads.
+
+Why: the models are heavy (weights + ONNX session); loading on every call/formula would be
+unacceptable. A singleton loads once per process; `hf_hub_download` caches the weights on disk
+(HF cache) so nothing re-downloads.
+
+For what: a long-lived service calls `warm_up()` at startup, so the first request is already warm;
+the batch CLI (`enrich.py`) amortizes the same one-time load across the whole document.

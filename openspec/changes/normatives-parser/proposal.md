@@ -14,8 +14,8 @@ verification gate.
 - New capability `normatives-parser`: extraction of formulas, tables, clauses, notation,
   applicability bounds, and cross-references.
 - New component `normatives-pipeline/parser/` (batch/CLI, no public API): per-type
-  adapters (text PDF vs scan); `pdfplumber`/regex baseline + ML fallback (`pix2tex`,
-  Table Transformer).
+  adapters (text PDF vs scan); `pdfplumber`/regex baseline + ML fallback (DocLayout-YOLO
+  detection + pix2text recognition for formulas, Table Transformer for tables).
 - Formula → executable validation (H6): a throwaway SymPy executor proves extracted
   formulas compute on a control example. Production binding/execution is the engine
   (Akim's zone), out of scope.

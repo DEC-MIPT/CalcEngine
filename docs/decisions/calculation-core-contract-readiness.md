@@ -3,7 +3,7 @@
 - Date: 2026-09-26; updated 2026-09-27 (tasks 6.5 and 7.3, reviewer passes 5-8, checker pass 3; Egor's written `NormRef` agreement; formula path and pipeline risks; tester GO for the spec phase)
 - Change: `openspec/changes/calculation-core-contract/`
 - Owner: Akim. Egor (data engineer) confirms `NormRef` only.
-- Criteria: `docs/audit/03-verified-roadmap.md`, section 3.2, "Ready when".
+- Criteria: `docs/reports/verified-roadmap.md`, section 3.2, "Ready when".
 
 ## Final status
 
@@ -241,3 +241,66 @@ step", "Explicit units at the boundary", "Applicability check with three outcome
 Open: task 1.8 (Egor's acknowledgement of the resolution 2 amendment, decision 11 and
 decision 6). Task 6.2 is checked off only after it; task 7.1c waits for the items in
 `tasks.md` "Dependencies".
+
+## 9. Report amendment (2026-09-30, task 1.9)
+
+Before starting the report (tasks 6.3-6.4), Akim found that no task built the report
+itself (title block, input table, trace, conclusion), although the scenarios of 6.4
+check the order of all sections. Akim's decisions: the missing body and title block
+become their own tasks; formulas print as LaTeX text; the title block is the full form of
+GOST R 21.101-2026 (edition unverified), form 5 on the first sheet and form 6 on the
+following sheets; the signature block is the rows of columns 10-13 of form 5, not a
+separate section; columns 20-22 and the dashed optional columns are out of the MVP.
+
+Changes: `design.md` decision 10 refined and decision 18 added; `report-generator` delta:
+"GOST report structure" rewritten (frame and forms 5/6, signatories from the request,
+rejection rules, refused-calculation and checker scenarios), new requirement "Report
+values, formulas and dates"; `tasks.md`: new 1.9 and 6.2a-6.2f, 6.3 and 6.4 reworded with
+tests, a follow-up for title-block length limits.
+
+| Check | Result |
+|---|---|
+| `openspec validate --all --strict` | 18/18 |
+| `spec-reviewer` pass 12 | 0 blockers, 6 major, 7 minor: signatory data source, refused-report scenario, references section, base 2020 edition, task size, 6.3 without tests; all fixed |
+| `spec-reviewer` pass 13 | 0 blockers, 1 major (generation-time test waited for the pilot; now a synthetic envelope of 200 steps), 5 minor; all fixed |
+| `spec-reviewer` pass 14 | 0 blockers, 0 major, 3 minor (fixed). **READY for DOR** |
+| `norm-traceability-checker`, three passes | 0 blockers; the two majors of the first pass (the 185 mm width and the frame without Annex Zh) fixed; no norm number fixed. Minors left: the Russian unit designations are `source: unverified` (for WP3); the base spec still names GOST R 21.101-2020 (recorded WP3 handoff) |
+
+Open: none for task 1.9. Task 6.2a may start on `feature/report-generator/backend`.
+
+## 10. Egor's acknowledgement (2026-10-03, task 1.8)
+
+Egor answered in the "Answers" section of
+`calculation-core-contract-formula-execution-akim.md` (commit `a01af6f`):
+
+- Item 1 (decision 11, the expression tree): agreed. The pipeline builds the tree as JSON
+  in the engine's node set at ingestion and stores the binding of each symbol to its
+  quantity and unit; the exact JSON shape is fixed together in `normative-catalog-backend`.
+- Item 3 (resolution 2 amendment): accepted. For the pilot, the steps stay unverified
+  (`pipeline-open-items-questions-akim.md`, "Answers", 2b).
+- Item 4 (decision 6, `input_hash`): accepted with no change.
+- Item 2 (the other coefficients of the pilot formula): Egor re-verifies them against the
+  primary text before naming their source; this waits in `normative-catalog-backend`, not
+  here.
+
+Changes: `design.md` decisions 6 and 11, the `NormRef` invariant and the resolution 2
+amendment record the acknowledgement; the "Consistency with other specs" and "Risks"
+sections record the merge of `feature/normative-parser/ml` into `develop` (`0184450`) and
+the new path `ml/configs/formulas.toml`; the citation of the untracked recon notes in the
+design note on the declarative input model is replaced by its content. `tasks.md`: 1.8 and
+6.2 checked off (6.2 was implemented in `ae096cd` and waited only for 1.8), the DOR
+dependency line closed. No requirement and no scenario changed.
+
+Open: none for task 1.8. Task 7.1c and its waits are in the planned
+`normative-catalog-backend`.
+
+## 11. `spec-reviewer` after Egor's answers (2026-10-03, passes 15-16)
+
+Run on the current text after section 10's edits, together with WP5 (the 9.3 settlement).
+
+| Pass | Result |
+|---|---|
+| 15 | 0 blockers, 0 major, 7 minor: stale passages that still called the user-side verification action open, the old B5 and "formulas in YAML" bullets, a repeated status line for `normatives-formula-contract` 1.4-1.7, the opening of task 7.2, the untracked `01-recon.md:97` cited in `proposal.md`, a long DOR line. All fixed (struck through with a dated "Superseded"/"Closed" note, one status line kept). **READY for DOR** |
+| 16 | 0 blockers, 0 major, 2 minor (wording of "No hardcoding" as former WP5 text; the antecedent in task 7.2). Both fixed. **READY for DOR** |
+
+`openspec validate --all --strict`: 19/19. No requirement or scenario changed.

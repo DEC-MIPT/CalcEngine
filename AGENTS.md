@@ -215,6 +215,9 @@ Zone-to-agent mapping:
 
 - **Language**: all specs, agents, skills, and commit messages are in English.
 - **Commits**: Conventional Commits (`feat:`, `fix:`, `chore:`, `test:`, `docs:`).
+- **Answers to questions**: when answering questions that a team member recorded in a
+  `docs/decisions/` file, write the answers into the same file where the question was
+  asked (append an `## Answers` section), not into a separate file.
 - **Never commit, merge, or push without the working developer's explicit consent.**
   Prepare and show the changes (diff) and the intended commit message, then wait for
   approval before running `git commit`, `git merge`, or `git push`.
