@@ -158,8 +158,8 @@ Code journal: `docs/akim/reports/WP8-code-journal.md`, created before task 2.1.
 - [x] 6.3 `tester` issues the GO for `feature/calculation-api/backend`: `backend/check.sh`
   passes (`ruff`, `mypy`, `pytest`, ≥ 95% branch coverage), and the `postgres` module
   passes against a hand-made `dec_app` (backend) (2026-10-03: **GO** on `2b3edc8` (612 passed, 1 skipped, branch coverage 100%; `postgres` module 5/5; every scenario mapped to a test; UI/UX N/A, no UI); its three minor findings closed by tests in `8ebf870` (619 passed); see `docs/decisions/calculation-api-readiness.md`)
-- [ ] 6.4 Review by the orchestrator or Egor, then merge into `develop` after both WP2
-  features (backend)
+- [x] 6.4 Review by the orchestrator or Egor, then merge into `develop` after both WP2
+  features (backend) (2026-10-03: first `orchestrator` review at `a24ea10` CHANGES REQUESTED, fixed in `8bdf261` with the session-before-schema deviation recorded in `design.md` decision 3; `tester` GO and `orchestrator` APPROVED at `8bdf261`; merged into `develop` in `23318c1`, after `8c001b9` (engine) and `9642d8d` (report))
 - [ ] 6.5 (spec) `spec-keeper` syncs the delta into `openspec/specs/calculation-api/` and
   archives the change after `calculation-core-contract` is archived
 

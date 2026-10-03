@@ -389,3 +389,15 @@ one type); the two-sheet test checks structure, not real page breaks (the spec a
 
 Open in this change: the frontend feature (3.4, 3.5, 5.4), task 7.2, and the archive (8.3)
 after `retarget-mvp-domain`.
+
+## 14. Follow-ups from the `calculation-api` review (2026-10-03)
+
+The three backend branches are merged (`8c001b9`, `9642d8d`, `23318c1`), so the planned
+`fix/calculation-engine/backend` can start. Two more items from the second
+`calculation-api` review:
+
+17. `api/errors.py`: an unexpected error writes two log lines (`error=<Type>` and
+    `code=internal_error route=…`), and only the type when the response had already
+    started; design.md decision 5 asks for one line with code, route and type. Log once.
+18. `main.py`: the engine the application built is not disposed if shutdown fails after
+    `yield`; wrap the `yield` in `try`/`finally`.

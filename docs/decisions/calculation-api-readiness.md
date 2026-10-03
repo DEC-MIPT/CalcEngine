@@ -144,3 +144,17 @@ docstrings, and this branch's merge brings the translation for all three.
 | lint and types | `ruff` and `mypy`: no finding |
 | docstring content | every `Args:` entry of 65 functions names a real parameter; `Attributes:` match the fields; norm citations, `design.md` decisions and requirement names kept |
 | UI/UX | N/A: no UI |
+
+## Review and merge (task 6.4), 2026-10-03
+
+| Step | Result |
+|---|---|
+| `develop` merged into the branch | `a24ea10`, no conflict, `backend/` unchanged |
+| `orchestrator` review 1 at `a24ea10` | **CHANGES REQUESTED**: major 1, unhandled errors were re-raised by Starlette's `ServerErrorMiddleware`, so the server logged a traceback whose text could hold SQL parameters (client inputs), and the 500 had no CORS headers; minor 2-6: 503 before 422 when `dec_app` is not configured, `405` without `Allow`, the UUID parse message echoed path characters, the lazy engine build had no lock and the engine was never disposed, `fastapi` unpinned |
+| Fixes `8bdf261` | an ASGI layer `UnexpectedErrors` answers `500 internal_error` without re-raising and logs only type, code and route, inside CORS; `hide_parameters=True` on the engine; `Allow` kept on `405`; pydantic messages only for an allow-list of error types; lock and dispose of the engine the app built; `fastapi>=0.141`; 11 tests in `test_api_error_boundary.py`, the main one checked to fail on the old code. Minor 2 recorded as an accepted deviation in `design.md` decision 3 (`cc1b8d3`) |
+| `tester` at `8bdf261` | **GO**, no finding: 630 passed, 1 skipped; branch coverage 100%; ruff and mypy clean; `postgres` module 5/5, median 4.0 ms; no regression in the error scenarios; only `backend/` changed; UI/UX N/A |
+| `orchestrator` review 2 at `8bdf261` | **APPROVED**: all six findings resolved (minor 2 by the deviation, found accurate); two new minor findings, follow-ups 17-18 in `calculation-core-contract-readiness.md`, section 14 |
+| Merge | `23318c1` into `develop`; on `develop` after the merge: `check.sh` 630 passed, coverage 100%, `postgres` module 5/5, no English docstring left |
+
+Open in this change: task 6.5 (sync and archive) after `calculation-core-contract` is
+archived.
