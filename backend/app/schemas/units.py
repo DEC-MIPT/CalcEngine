@@ -60,3 +60,15 @@ def _in_vocabulary(symbol: str) -> str:
 
 
 UnitSymbol = Annotated[str, AfterValidator(_in_vocabulary)]
+
+
+def units_of(dimension: Dimension) -> tuple[str, ...]:
+    """Перечисляет единицы словаря одной размерности.
+
+    Args:
+        dimension: размерность.
+
+    Returns:
+        Обозначения единиц этой размерности в порядке словаря.
+    """
+    return tuple(symbol for symbol, unit in UNITS.items() if unit.dimension is dimension)

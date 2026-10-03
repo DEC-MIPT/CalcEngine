@@ -51,13 +51,13 @@ def test_a_field_error_needs_a_location_and_a_message() -> None:
 def test_a_calculation_type_view_lists_inputs_and_outputs() -> None:
     view = CalculationTypeView(
         name="t",
-        inputs=(InputView(name="b", base_unit="m", dimension=Dimension.LENGTH),),
+        inputs=(InputView(name="b", base_unit="m", dimension=Dimension.LENGTH, units=("m", "mm")),),
         outputs=(OutputView(name="R", base_unit="kPa"),),
     )
 
     assert view.model_dump(mode="json") == {
         "name": "t",
-        "inputs": [{"name": "b", "base_unit": "m", "dimension": "length"}],
+        "inputs": [{"name": "b", "base_unit": "m", "dimension": "length", "units": ["m", "mm"]}],
         "outputs": [{"name": "R", "base_unit": "kPa"}],
     }
 
@@ -66,4 +66,19 @@ def test_a_view_rejects_a_unit_outside_the_vocabulary() -> None:
     with pytest.raises(ValidationError):
         OutputView(name="R", base_unit="furlong")
     with pytest.raises(ValidationError):
-        InputView.model_validate({"name": "b", "base_unit": "m", "dimension": "mass"})
+        InputView.model_validate({"name": "b", "base_unit": "m", "dimension": "mass", "units": ["m"]})
+
+
+@pytest.mark.parametrize(
+    "units",
+    [(), ("mm",), ("m", "kPa"), ("m", "furlong")],
+    ids=["no-units", "base-unit-not-listed", "unit-of-another-dimension", "unit-outside-vocabulary"],
+)
+def test_an_input_view_rejects_units_that_do_not_fit(units: tuple[str, ...]) -> None:
+    with pytest.raises(ValidationError):
+        InputView(name="b", base_unit="m", dimension=Dimension.LENGTH, units=units)
+
+
+def test_an_input_view_rejects_a_dimension_other_than_its_base_unit_s() -> None:
+    with pytest.raises(ValidationError, match="dimension"):
+        InputView(name="b", base_unit="m", dimension=Dimension.PRESSURE, units=("m",))

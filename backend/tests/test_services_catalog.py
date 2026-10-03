@@ -16,7 +16,11 @@ from app.schemas.calculation import (
 )
 from app.schemas.parameters import EngineerRule
 from app.schemas.units import Dimension
-from app.services.catalog import build_registry, calculation_types
+from app.services.catalog import (
+    build_registry,
+    calculation_types,
+    load_validated_ranges,
+)
 
 PARAMS_ROOT = Path(__file__).resolve().parents[1] / "params"
 FILE_NAME = f"{foundations_shallow_r.NAME}.yaml"
@@ -162,6 +166,32 @@ def test_types_are_listed_in_registration_order() -> None:
     assert [view.name for view in views] == ["second", "first"]
     assert views[0] == CalculationTypeView(
         name="second",
-        inputs=(InputView(name="x", base_unit="m", dimension=Dimension.LENGTH),),
+        inputs=(InputView(name="x", base_unit="m", dimension=Dimension.LENGTH, units=("m", "cm", "mm")),),
         outputs=(OutputView(name="y", base_unit="m"),),
     )
+
+
+def test_validated_ranges_are_read_for_every_registered_type(tmp_path: Path) -> None:
+    write_params(tmp_path, VALID_RULE)
+    registry = build_registry(tmp_path)
+
+    assert load_validated_ranges(registry, tmp_path) == {foundations_shallow_r.NAME: ()}
+    assert load_validated_ranges(CalculatorRegistry(), tmp_path) == {}
+
+
+def test_a_registered_type_without_a_parameter_file_has_no_range(tmp_path: Path) -> None:
+    registry = CalculatorRegistry()
+    registry.register(synthetic_contract("synthetic"), IdentityCalculator())
+
+    with pytest.raises(DECError, match="synthetic.yaml"):
+        load_validated_ranges(registry, tmp_path)
+
+
+def test_each_input_lists_the_units_of_its_dimension() -> None:
+    (view,) = calculation_types(build_registry(PARAMS_ROOT))
+
+    units = {item.name: item.units for item in view.inputs}
+    assert units["b"] == ("m", "cm", "mm")
+    assert units["phi_II"] == ("rad", "deg")
+    assert units["gamma_II"] == ("N/m3", "kN/m3")
+    assert all(item.base_unit in item.units for item in view.inputs)

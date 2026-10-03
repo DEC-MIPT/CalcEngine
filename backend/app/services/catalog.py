@@ -5,7 +5,8 @@ from app.engine import foundations_shallow_r
 from app.engine.registry import CalculatorRegistry
 from app.parameters.loader import load_parameters
 from app.schemas.api import CalculationTypeView, InputView, OutputView
-from app.schemas.units import UNITS
+from app.schemas.calculation import ValidatedBound
+from app.schemas.units import UNITS, units_of
 
 
 def _register_foundations_shallow_r(registry: CalculatorRegistry, params_root: Path) -> None:
@@ -33,6 +34,32 @@ def build_registry(params_root: Path) -> CalculatorRegistry:
     return registry
 
 
+def load_validated_ranges(
+    registry: CalculatorRegistry, params_root: Path
+) -> dict[str, tuple[ValidatedBound, ...]]:
+    """Читает проверенный диапазон каждого зарегистрированного типа из его ``.yaml``.
+
+    Вызывается при старте вместе с ``build_registry``, поэтому ошибка в файле
+    останавливает приложение, а не первый запрос (``calculation-api`` design.md,
+    решения 2 и 3).
+
+    Args:
+        registry: реестр типов расчёта.
+        params_root: каталог файлов параметров.
+
+    Returns:
+        Для каждого типа — границы проверенного диапазона в порядке файла.
+
+    Raises:
+        NotFoundError: если у зарегистрированного типа нет файла параметров.
+        ParameterValidationError: если файл не проходит проверку схемы.
+    """
+    return {
+        contract.name: load_parameters(contract.name, params_root).validated_range
+        for contract in registry.contracts()
+    }
+
+
 def calculation_types(registry: CalculatorRegistry) -> tuple[CalculationTypeView, ...]:
     """Описывает зарегистрированные типы расчёта для формы ввода.
 
@@ -44,7 +71,8 @@ def calculation_types(registry: CalculatorRegistry) -> tuple[CalculationTypeView
 
     Returns:
         По одному описанию на тип в порядке регистрации; входы и выходы в порядке
-        контракта, размерность входа берётся из словаря единиц.
+        контракта; размерность входа и допустимые для него единицы берутся из
+        словаря единиц.
     """
     return tuple(
         CalculationTypeView(
@@ -54,6 +82,7 @@ def calculation_types(registry: CalculatorRegistry) -> tuple[CalculationTypeView
                     name=quantity.name,
                     base_unit=quantity.base_unit,
                     dimension=UNITS[quantity.base_unit].dimension,
+                    units=units_of(UNITS[quantity.base_unit].dimension),
                 )
                 for quantity in contract.inputs
             ),

@@ -2,6 +2,8 @@ from collections.abc import Callable, Mapping, Sequence
 from types import MappingProxyType
 from uuid import UUID, uuid4
 
+from sqlalchemy.orm import Session
+
 from app.core.exceptions import (
     CalculationTypeNotRegisteredError,
     NotFoundError,
@@ -203,3 +205,32 @@ class CalculationService:
             validated_range=validated_range,
         )
         return self.envelope(result)
+
+
+def calculation_service(
+    session: Session,
+    registry: CalculatorRegistry,
+    *,
+    sources: Mapping[str, ParameterSource],
+    validated_ranges: Mapping[str, Sequence[ValidatedBound]],
+) -> CalculationService:
+    """Собирает сервис для одного запроса с репозиторием на его сессии.
+
+    Слой ``api`` не импортирует ``repositories`` (``backend-architecture``, порядок
+    слоёв), поэтому репозиторий создаётся здесь.
+
+    Args:
+        session: сессия ``dec_app`` этого запроса.
+        registry: реестр типов расчёта.
+        sources: источник нормативных параметров для каждого типа.
+        validated_ranges: проверенный диапазон каждого типа.
+
+    Returns:
+        Сервис, который пишет и читает результаты через эту сессию.
+    """
+    return CalculationService(
+        registry,
+        sources=sources,
+        validated_ranges=validated_ranges,
+        results=CalculationResultRepository(session),
+    )

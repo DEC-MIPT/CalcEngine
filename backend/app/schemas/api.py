@@ -1,6 +1,6 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.schemas.units import Dimension, UnitSymbol
+from app.schemas.units import UNITS, Dimension, UnitSymbol
 
 
 class FieldError(BaseModel):
@@ -26,13 +26,30 @@ class ErrorBody(BaseModel):
 
 
 class InputView(BaseModel):
-    """A declared input of a calculation type, as the input form needs it."""
+    """Объявленный вход типа расчёта в том виде, какой нужен форме ввода.
+
+    Attributes:
+        name: имя входа.
+        base_unit: базовая единица входа.
+        dimension: размерность базовой единицы.
+        units: все единицы словаря этой размерности; форма предлагает их на выбор и
+            не держит своей копии словаря (``calculation-api`` design.md, решение 10).
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     name: str = Field(min_length=1)
     base_unit: UnitSymbol
     dimension: Dimension
+    units: tuple[UnitSymbol, ...] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _units_fit_the_dimension(self) -> "InputView":
+        if self.base_unit not in self.units:
+            raise ValueError("the base unit must be one of the listed units")
+        if any(UNITS[unit].dimension != self.dimension for unit in (self.base_unit, *self.units)):
+            raise ValueError("every unit of an input must have the input's dimension")
+        return self
 
 
 class OutputView(BaseModel):
