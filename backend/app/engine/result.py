@@ -83,13 +83,30 @@ def assemble_result(
     validated_range: Sequence[ValidatedBound],
     refusal: BoundViolation | None = None,
 ) -> CalculationResult:
-    """Build a calculation result with its lists ordered (design.md decision 17).
+    """Собирает результат расчёта с упорядоченными списками (design.md, решение 17).
 
-    ``engine_version`` is the engine package's ``ENGINE_VERSION`` (decision 7).
+    ``engine_version`` — это ``ENGINE_VERSION`` пакета движка (решение 7).
+    ``outputs`` идут в объявленном порядке контракта, ``warnings`` — в объявленном
+    порядке ``validated_range``; в ``norm_refs`` и ``engineer_rules`` каждый источник
+    встречается один раз, в порядке первого использования. У отказного расчёта нет ни
+    трассы, ни выходов.
 
-    ``outputs`` follow the contract's declared order, ``warnings`` the declared order
-    of ``validated_range``; ``norm_refs`` and ``engineer_rules`` hold each source
-    once, in the order of first use. A refused calculation has no trace or outputs.
+    Args:
+        contract: контракт типа расчёта.
+        input_hash: хеш входных данных запуска.
+        trace: шаги трассы.
+        outputs: округлённые выходы.
+        warnings: предупреждения проверенного диапазона.
+        validated_range: границы проверенного диапазона, задающие порядок предупреждений.
+        refusal: нарушенная граница диапазона метода, если расчёт отказан.
+
+    Returns:
+        Результат расчёта.
+
+    Raises:
+        CalculationError: если части не складываются в корректный результат
+            (например, у отказа есть трасса или проверка не объявлена в контракте).
+        UnitError: если выход не в своей базовой единице.
     """
     ordered_warnings = _ordered_warnings(warnings, validated_range)
     verdict: Literal["pass", "fail", "refused"]

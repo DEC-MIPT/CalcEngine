@@ -83,7 +83,7 @@ def test_the_column_widths_add_up_to_the_width_of_the_form(form5: Table) -> None
 
 
 def line_middles_mm(form: Form) -> list[float]:
-    """Where each horizontal line of the form is drawn: below its row boundary."""
+    """Где рисуется каждая горизонтальная линия формы: под границей её строки."""
     lines = [OUTER_LINE, *(INNER_LINE,) * (len(form.row_heights_mm) - 1), OUTER_LINE]
     boundaries = [0.0]
     for height in row_heights_mm(form):

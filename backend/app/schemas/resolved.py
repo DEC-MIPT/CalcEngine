@@ -6,9 +6,9 @@ from app.schemas.units import UnitSymbol
 
 
 class Formula(BaseModel):
-    """A formula of a norm as a resolved parameter (design.md decision 11).
+    """Формула нормы как разрешённый параметр (design.md, решение 11).
 
-    ``units`` binds every symbol of the tree, and ``result_symbol``, to its unit.
+    ``units`` связывает с единицей каждый символ дерева и ``result_symbol``.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -30,10 +30,10 @@ class Formula(BaseModel):
 
 
 class Threshold(BaseModel):
-    """A value of a norm that decides which branch of a method runs (design.md decision 11).
+    """Значение нормы, решающее, какая ветвь метода выполняется (design.md, решение 11).
 
-    A branch is not a trace step; its threshold is a resolved parameter with its own
-    ``NormRef`` list, never a literal in code.
+    Ветвь — не шаг трассы; её порог — разрешённый параметр со своим списком
+    ``NormRef``, а не литерал в коде.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -44,7 +44,7 @@ class Threshold(BaseModel):
 
 
 class TableValue(BaseModel):
-    """One entry of a norm's table as a resolved parameter."""
+    """Одно значение из таблицы нормы как разрешённый параметр."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 

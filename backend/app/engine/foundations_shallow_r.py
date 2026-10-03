@@ -34,12 +34,12 @@ INPUTS = (
 
 
 class Parameters(BaseModel):
-    """The resolved parameters of the design soil resistance R (СП 22.13330.2016, clause 5.6.7, unverified).
+    """Разрешённые параметры расчётного сопротивления грунта R (СП 22.13330.2016, п. 5.6.7, unverified).
 
-    Every formula, table value and threshold comes from the normative catalog with its
-    ``NormRef`` list; none of them is written in this module (design.md decision 11).
-    ``d_1`` and ``d_b`` are inputs: formula (5.8) and note 5 of the clause are not part
-    of the pilot.
+    Каждая формула, табличное значение и порог приходят из нормативного каталога со
+    своим списком ``NormRef``; ни одно из них не записано в этом модуле (design.md,
+    решение 11). ``d_1`` и ``d_b`` — входы: формула (5.8) и примечание 5 пункта в
+    пилот не входят.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -64,7 +64,7 @@ def _bind(values: dict[str, QuantityValue], symbol: str, value: QuantityValue) -
 
 
 class FoundationsShallowR(Calculator[Mapping[str, QuantityValue], Parameters, CalculatorOutput]):
-    """The order of the method of clause 5.6.7: coefficients, then ``k_z``, then R, then p <= R."""
+    """Порядок метода п. 5.6.7: коэффициенты, затем ``k_z``, затем R, затем p <= R."""
 
     def calculate(self, inputs: Mapping[str, QuantityValue], parameters: Parameters) -> CalculatorOutput:
         values = dict(inputs)
@@ -88,7 +88,17 @@ class FoundationsShallowR(Calculator[Mapping[str, QuantityValue], Parameters, Ca
 
 
 def contract(rounding_rule: RoundingRule, rounding_source: Source) -> CalculationTypeContract:
-    """The pilot's contract; the rounding of R is the engineer's, from the parameter file."""
+    """Строит контракт пилота.
+
+    Округление R задаёт инженер в файле параметров.
+
+    Args:
+        rounding_rule: правило округления R.
+        rounding_source: источник правила (``EngineerRule``).
+
+    Returns:
+        Контракт типа ``foundations_shallow_r``.
+    """
     return CalculationTypeContract(
         name=NAME,
         inputs=INPUTS,

@@ -5,10 +5,10 @@ from app.schemas.parameters import EngineerRule
 
 
 class RoundingEntry(BaseModel):
-    """An engineer-set rounding rule of one output quantity and the engineer's source.
+    """Правило округления одной выходной величины, заданное инженером, и его источник.
 
-    A rule whose source is the norm comes from the normative catalog, never from
-    this file (``calculation-core-contract`` design.md decision 14).
+    Правило, источник которого — норма, приходит из нормативного каталога, а не из
+    этого файла (``calculation-core-contract`` design.md, решение 14).
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -18,23 +18,23 @@ class RoundingEntry(BaseModel):
 
 
 class EngineerBound(ValidatedBound):
-    """A bound of the validated range set by the engineer.
+    """Граница проверенного диапазона, заданная инженером.
 
-    A bound whose source is the norm comes from the normative catalog, never from
-    this file (``calculation-core-contract`` design.md decision 15).
+    Граница, источник которой — норма, приходит из нормативного каталога, а не из
+    этого файла (``calculation-core-contract`` design.md, решение 15).
     """
 
     source: EngineerRule
 
 
 class ParameterFileSchema(BaseModel):
-    """The shape of ``<params_root>/<calculation-type>.yaml``.
+    """Форма файла ``<params_root>/<calculation-type>.yaml``.
 
-    Values are the cross-layer types from ``app.schemas``; this file only
-    describes how they are grouped, and rejects any key the format does not
-    define. ``validated_range`` is ordered: warnings follow its order. A formula
-    or a coefficient the norm gives never belongs here (design.md decision 3):
-    their source is the normative catalog, not an engineer-set parameter file.
+    Значения — межслойные типы из ``app.schemas``; этот класс только описывает, как
+    они сгруппированы, и отклоняет любой ключ, которого формат не определяет.
+    ``validated_range`` упорядочен: предупреждения идут в его порядке. Формуле или
+    коэффициенту нормы здесь не место (design.md, решение 3): их источник —
+    нормативный каталог, а не файл параметров, заданных инженером.
     """
 
     model_config = ConfigDict(extra="forbid")

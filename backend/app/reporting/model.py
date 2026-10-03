@@ -20,7 +20,7 @@ class _Section(BaseModel):
 
 
 class InputRow(_Section):
-    """One input as the request gave it, before conversion to its base unit."""
+    """Один вход в том виде, в каком его дал запрос, до перевода в базовую единицу."""
 
     quantity: str = Field(min_length=1)
     value: QuantityValue
@@ -32,7 +32,7 @@ class InputSection(_Section):
 
 
 class TraceSection(_Section):
-    """The trace steps in run order, each with its ``norm_refs``; empty when refused."""
+    """Шаги трассы в порядке выполнения, каждый со своими ``norm_refs``; пусто при отказе."""
 
     kind: Literal["trace"] = "trace"
     refused: bool
@@ -40,7 +40,7 @@ class TraceSection(_Section):
 
 
 class ConclusionSection(_Section):
-    """The verdict and what decided it: the deciding check step, or the violated bound."""
+    """Вердикт и то, что его решило: решающий шаг проверки или нарушенная граница."""
 
     kind: Literal["conclusion"] = "conclusion"
     verdict: Literal["pass", "fail", "refused"]
@@ -49,7 +49,7 @@ class ConclusionSection(_Section):
 
 
 class AccountabilitySection(_Section):
-    """The result accountability block: the envelope's fields, printed after the conclusion."""
+    """Блок подотчётности результата: поля конверта, печатаемые после заключения."""
 
     kind: Literal["accountability"] = "accountability"
     envelope: ResultEnvelope
@@ -62,7 +62,7 @@ BodySection = Annotated[
 
 
 class Report(_Section):
-    """What a renderer writes: the request (title block, signatures) and the body sections."""
+    """Что записывает модуль вывода: запрос (основная надпись, подписи) и разделы тела."""
 
     request: ReportRequest
     body: tuple[BodySection, ...]
@@ -97,12 +97,20 @@ def build_report(
     envelope: ResultEnvelope,
     request: ReportRequest,
 ) -> Report:
-    """The report model of one result (``calculation-core-contract`` design.md decision 18).
+    """Строит модель отчёта по одному результату (``calculation-core-contract`` design.md, решение 18).
 
-    The body holds the input-data table in the contract's order of inputs, the trace,
-    the conclusion, and the result accountability block. A refused calculation keeps
-    every section: its trace section holds no step, and its conclusion names the
-    violated bound.
+    Тело содержит таблицу исходных данных в порядке входов контракта, трассу,
+    заключение и блок подотчётности результата. У отказного расчёта остаются все
+    разделы: в разделе трассы нет шагов, а заключение называет нарушенную границу.
+
+    Args:
+        contract: контракт типа расчёта.
+        inputs: входы в том виде, в каком их дал запрос.
+        envelope: конверт результата.
+        request: данные основной надписи и подписей.
+
+    Returns:
+        Модель отчёта.
     """
     return Report(
         request=request,

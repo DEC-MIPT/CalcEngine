@@ -1,30 +1,51 @@
 class DECError(Exception):
-    """Base class for every backend-defined exception."""
+    """Базовый класс всех исключений бэкенда."""
 
 
 class NotFoundError(DECError):
-    """Raised when a requested resource does not exist."""
+    """Запрошенного ресурса не существует."""
 
 
 class AlreadyRegisteredError(DECError):
-    """Raised when a name is registered twice."""
+    """Имя регистрируется второй раз."""
 
 
 class ParameterValidationError(DECError):
-    """Raised when parameter data fails schema validation."""
+    """Данные параметров не проходят проверку схемы."""
 
 
 class ExpressionError(DECError):
-    """Raised when a formula's expression tree cannot be checked or evaluated."""
+    """Дерево выражения формулы не проходит проверку или не вычисляется."""
 
 
 class UnitError(DECError):
-    """Raised when a value does not carry the unit the calculation expects."""
+    """Значение не в той единице, которую ожидает расчёт."""
 
 
 class CalculationError(DECError):
-    """Raised when the parts a calculator produced do not form a valid result."""
+    """Части, которые выдал калькулятор, не складываются в корректный результат."""
 
 
 class InputValidationError(DECError):
-    """Raised when a calculation request does not fit its calculation type's contract."""
+    """Запрос на расчёт не подходит к контракту своего типа расчёта.
+
+    Attributes:
+        fields: по одной записи на каждый неподходящий вход (``FieldError`` из
+            ``app.schemas.api``); обработчик ошибок API кладёт их в тело ``422``.
+    """
+
+    def __init__(self, message: str, fields: tuple[object, ...] = ()) -> None:
+        super().__init__(message)
+        self.fields = fields
+
+
+class ParameterSourceUnavailableError(DECError):
+    """У зарегистрированного типа расчёта не настроен источник параметров."""
+
+
+class CalculationTypeNotRegisteredError(DECError):
+    """Тип расчёта сохранённого результата больше не зарегистрирован."""
+
+
+class DatabaseUnavailableError(DECError):
+    """База приложения не настроена или не отвечает."""

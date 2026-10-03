@@ -11,35 +11,43 @@ from docx.shared import Mm, Pt
 from docx.table import Table
 
 SHEET_MM = (210, 297)
-"""A4 portrait (GOST R 21.101-2026, edition unverified, Annex Zh, figure Zh.1 a)."""
+"""A4 книжной ориентации (GOST R 21.101-2026, edition unverified, приложение Ж, рисунок Ж.1 а)."""
 
 FRAME_MM: MappingProxyType[str, int] = MappingProxyType(
     {"left": 20, "top": 5, "right": 5, "bottom": 5}
 )
-"""Distances of the inner frame from the sheet edges, as figure Zh.1 a) shows them."""
+"""Расстояния внутренней рамки от краёв листа, как их показывает рисунок Ж.1 а)."""
 
 FRAME_LINE_EIGHTHS_PT = 12
-"""Width of the frame line in eighths of a point; a layout choice, not a norm value."""
+"""Толщина линии рамки в восьмых долях пункта; выбор вёрстки, а не значение нормы."""
 
 BODY_INDENT_MM = 5
-"""The body text keeps this far off the frame on every side; at the top and bottom as
-an empty line of this height in the header and above the title block."""
+"""На таком расстоянии текст тела держится от рамки со всех сторон; сверху и снизу —
+пустой строкой этой высоты в верхнем колонтитуле и над основной надписью."""
 BODY_FONT = "Arial"
 BODY_SIZE_PT = 12
 
 
 def line_mm(eighths_pt: int) -> float:
-    """A line width given in eighths of a point, in millimetres."""
+    """Переводит толщину линии из восьмых долей пункта в миллиметры.
+
+    Args:
+        eighths_pt: толщина в восьмых долях пункта.
+
+    Returns:
+        Толщина в миллиметрах.
+    """
     return eighths_pt / 8 * 25.4 / 72
 
 
 FRAME_LINE_MM = line_mm(FRAME_LINE_EIGHTHS_PT)
-"""A page border lies outside the text area, so each margin is the frame distance plus
-half of this width, and the middle of the line falls on the frame."""
+"""Граница страницы лежит вне области текста, поэтому каждое поле — расстояние до рамки
+плюс половина этой толщины, и середина линии приходится на рамку."""
 
 FRAME_SIDES = ("top", "left", "right")
-"""The lower frame line is the lower line of the title block, which spans the frame on
-every sheet; a page border there would lie under the footer, beside that line."""
+"""Нижняя линия рамки — это нижняя линия основной надписи, которая на каждом листе
+идёт по всей ширине рамки; граница страницы там легла бы под колонтитулом, рядом с этой
+линией."""
 
 
 def _page_borders() -> BaseOxmlElement:
@@ -56,7 +64,7 @@ def _page_borders() -> BaseOxmlElement:
 
 
 def _top_gap(header: _Header) -> None:
-    """The header is one empty line that keeps the first line of the sheet off the top frame line."""
+    """Делает верхний колонтитул одной пустой строкой, которая отодвигает первую строку листа от верхней линии рамки."""
     paragraph = header.paragraphs[0]
     paragraph.paragraph_format.left_indent = paragraph.paragraph_format.right_indent = Mm(0)
     paragraph.paragraph_format.line_spacing_rule = WD_LINE_SPACING.EXACTLY
@@ -64,12 +72,15 @@ def _top_gap(header: _Header) -> None:
 
 
 def apply_sheet(document: Document) -> None:
-    """A4 portrait with the frame as a page border whose line is centred on the frame.
+    """Задаёт лист A4 книжной ориентации с рамкой в виде границы страницы, линия которой по центру рамки.
 
-    The text area is the inside of the frame line, so the border is drawn on its edge.
-    The title block sets the footer distance, since its lower line closes the frame.
-    Body text keeps a small indent from the frame, at the top through the header, which
-    starts on the top frame line.
+    Область текста — внутренняя сторона линии рамки, поэтому граница рисуется по её
+    краю. Отступ нижнего колонтитула задаёт основная надпись: её нижняя линия
+    замыкает рамку. Текст тела держит небольшой отступ от рамки, сверху — за счёт
+    верхнего колонтитула, который начинается на верхней линии рамки.
+
+    Args:
+        document: документ python-docx.
     """
     section = document.sections[0]
     section.orientation = WD_ORIENT.PORTRAIT
@@ -93,7 +104,11 @@ def apply_sheet(document: Document) -> None:
 
 
 def fit_table(table: Table) -> None:
-    """Keep a body table inside the frame: indented like the text, columns of equal width."""
+    """Удерживает таблицу тела внутри рамки: с отступом, как у текста, и колонками равной ширины.
+
+    Args:
+        table: таблица тела отчёта.
+    """
     indent = OxmlElement("w:tblInd")
     indent.set(qn("w:w"), str(Mm(BODY_INDENT_MM).twips))
     indent.set(qn("w:type"), "dxa")
@@ -109,10 +124,21 @@ def fit_table(table: Table) -> None:
 
 
 def margin_mm(side: str) -> float:
-    """The page margin on one side: the frame distance and half of the frame line."""
+    """Вычисляет поле страницы с одной стороны: отступ рамки плюс половина толщины её линии.
+
+    Args:
+        side: сторона листа (ключ ``FRAME_MM``).
+
+    Returns:
+        Поле в миллиметрах.
+    """
     return FRAME_MM[side] + FRAME_LINE_MM / 2
 
 
 def body_width_mm() -> float:
-    """The width of the text inside the frame line, less the body indent on both sides."""
+    """Вычисляет ширину текста внутри линии рамки за вычетом отступа тела с обеих сторон.
+
+    Returns:
+        Ширина в миллиметрах.
+    """
     return SHEET_MM[0] - margin_mm("left") - margin_mm("right") - 2 * BODY_INDENT_MM

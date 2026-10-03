@@ -2,12 +2,12 @@ from pydantic import BaseModel, ConfigDict
 
 
 class EngineerRule(BaseModel):
-    """A rule the design engineer sets where the norm gives none.
+    """Правило, которое инженер-проектировщик задаёт там, где норма его не даёт.
 
-    Allowed only as the source of a rounding rule or a validated range
-    (`calculation-core-contract` design.md, `NormRef` resolution 3); the engine
-    never chooses one itself. Both fields are required: the rule is visible in
-    the envelope and the report as engineer-set, never silent.
+    Допускается только как источник правила округления или проверенного диапазона
+    (`calculation-core-contract` design.md, `NormRef`, резолюция 3); движок сам
+    такое правило не выбирает. Оба поля обязательны: в конверте и отчёте правило
+    видно как заданное инженером, а не молча принятое.
     """
 
     model_config = ConfigDict(extra="forbid")

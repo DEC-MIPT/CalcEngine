@@ -27,10 +27,22 @@ def _normalized(data: object) -> object:
 
 
 def canonical_json(data: object) -> str:
-    """JSON with sorted keys, no insignificant whitespace, and every number a float.
+    """Сериализует данные в канонический JSON.
 
-    Floats are written by ``repr``, the shortest string that reads back to the same
-    value, so ``1`` and ``1.0`` serialize alike (design.md decision 6).
+    Ключи отсортированы, лишних пробелов нет, каждое число — float. Числа пишутся
+    через ``repr``, самой короткой строкой, которая читается обратно в то же
+    значение, поэтому ``1`` и ``1.0`` сериализуются одинаково (design.md, решение 6).
+
+    Args:
+        data: модели pydantic, словари, списки, кортежи, строки, числа, ``bool`` и
+            ``None`` в любой вложенности.
+
+    Returns:
+        Каноническую JSON-строку.
+
+    Raises:
+        CalculationError: если в данных есть не конечное число или значение
+            неподдерживаемого типа.
     """
     return json.dumps(
         _normalized(data), sort_keys=True, separators=(",", ":"), ensure_ascii=False
@@ -42,16 +54,31 @@ def _sha256(data: object) -> str:
 
 
 def parameter_set_id(parameters: object) -> str:
-    """The identity of a resolved parameter set, with every reference it carries."""
+    """Вычисляет идентичность набора разрешённых параметров со всеми их ссылками.
+
+    Args:
+        parameters: набор разрешённых параметров.
+
+    Returns:
+        SHA-256 канонического JSON набора, шестнадцатеричной строкой.
+    """
     return _sha256(parameters)
 
 
 def input_hash(
     calculation_type: str, inputs: Mapping[str, QuantityValue], parameters: object
 ) -> str:
-    """SHA-256 of the calculation type, the inputs in base units, and the parameter set.
+    """Вычисляет ``input_hash``: SHA-256 типа расчёта, входов в базовых единицах и набора параметров.
 
-    The algorithm is a proposal until Egor acknowledges it (task 1.8).
+    Алгоритм принят Егором 2026-10-03 без изменений (задача 1.8).
+
+    Args:
+        calculation_type: имя типа расчёта.
+        inputs: входы в базовых единицах.
+        parameters: набор разрешённых параметров.
+
+    Returns:
+        Шестнадцатеричную строку из 64 символов.
     """
     return _sha256(
         {

@@ -26,7 +26,21 @@ def _substitution(symbol: str, value: QuantityValue) -> Substitution:
 def formula_step(
     step_id: str, formula: Formula, values: Mapping[str, QuantityValue]
 ) -> FormulaStep:
-    """Evaluate a formula; each value must carry the unit the formula binds to its symbol."""
+    """Вычисляет формулу и записывает шаг трассы.
+
+    Args:
+        step_id: идентификатор шага.
+        formula: формула с деревом выражения, LaTeX, единицами символов и ``NormRef``.
+        values: значения символов; у каждого — та единица, которую формула связывает с
+            его символом.
+
+    Returns:
+        Шаг формулы с подстановками и результатом.
+
+    Raises:
+        ExpressionError: если дерево не проходит проверку или значение не конечное.
+        UnitError: если единица значения не та, что связана с символом.
+    """
     result = evaluate_expression(
         formula.tree, {name: value.value for name, value in values.items()}, step_id
     )
@@ -47,7 +61,16 @@ def formula_step(
 
 
 def table_step(step_id: str, entry: TableValue, selectors: Mapping[str, QuantityValue]) -> TableStep:
-    """Record a table entry and the values that selected it."""
+    """Записывает шаг трассы для табличного значения и значений, которые его выбрали.
+
+    Args:
+        step_id: идентификатор шага.
+        entry: табличное значение со своими ``NormRef``.
+        selectors: входы, по которым выбрана строка таблицы.
+
+    Returns:
+        Шаг таблицы.
+    """
     arguments = ", ".join(selectors)
     expression = rf"{entry.latex} = {entry.latex}\left({arguments}\right)" if selectors else entry.latex
     return TableStep(
@@ -62,7 +85,20 @@ def table_step(step_id: str, entry: TableValue, selectors: Mapping[str, Quantity
 def compare(
     step_id: str, left: QuantityValue, operator: Operator, right: QuantityValue
 ) -> bool:
-    """Compare two values in the same unit, for a check step or a branch of a method."""
+    """Сравнивает два значения в одной единице — для шага проверки или ветви метода.
+
+    Args:
+        step_id: шаг, который называется в ошибке.
+        left: левое значение.
+        operator: оператор сравнения.
+        right: правое значение.
+
+    Returns:
+        Результат сравнения.
+
+    Raises:
+        UnitError: если единицы значений различаются.
+    """
     if left.unit != right.unit:
         raise UnitError(f"step {step_id!r} compares {left.unit!r} with {right.unit!r}")
     return {
@@ -80,7 +116,21 @@ def check_step(
     right: tuple[str, QuantityValue],
     norm_refs: NormRefs,
 ) -> CheckStep:
-    """Compare two values in the same unit; ``left`` and ``right`` pair a LaTeX symbol with a value."""
+    """Записывает шаг проверки: сравнение двух значений в одной единице.
+
+    Args:
+        step_id: идентификатор проверки, объявленный в контракте.
+        left: пара из символа LaTeX и значения слева.
+        operator: оператор сравнения.
+        right: пара из символа LaTeX и значения справа.
+        norm_refs: ссылки на нормы, из которых взята проверка.
+
+    Returns:
+        Шаг проверки с обоими значениями и итогом ``passed``.
+
+    Raises:
+        UnitError: если единицы значений различаются.
+    """
     (left_symbol, left_value), (right_symbol, right_value) = left, right
     passed = compare(step_id, left_value, operator, right_value)
     return CheckStep(

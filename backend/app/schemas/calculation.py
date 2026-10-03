@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.core.exceptions import InputValidationError
+from app.schemas.api import FieldError
 from app.schemas.parameters import EngineerRule
 from app.schemas.units import UNITS, UnitSymbol
 
@@ -12,7 +13,7 @@ UNVERIFIED: Literal["unverified"] = "unverified"
 
 
 class QuantityDeclaration(BaseModel):
-    """A quantity of a calculation type and the base unit it is held in."""
+    """Величина типа расчёта и базовая единица, в которой она хранится."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -21,7 +22,7 @@ class QuantityDeclaration(BaseModel):
 
 
 class QuantityValue(BaseModel):
-    """A finite value with its unit from the unit vocabulary."""
+    """Конечное значение с единицей из словаря единиц."""
 
     model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False)
 
@@ -30,16 +31,16 @@ class QuantityValue(BaseModel):
 
 
 class Substitution(QuantityValue):
-    """The value with its unit substituted for one symbol of a step."""
+    """Значение с единицей, подставленное вместо одного символа шага."""
 
     symbol: str = Field(min_length=1)
 
 
 class NormRef(BaseModel):
-    """A reference to one locator of a norm document (design.md, section "NormRef").
+    """Ссылка на одно место нормативного документа (design.md, раздел "NormRef").
 
-    ``edition`` and ``clause`` are a concrete string or the reserved literal
-    ``unverified``; ``document`` is always concrete.
+    ``edition`` и ``clause`` — конкретная строка или зарезервированное значение
+    ``unverified``; ``document`` всегда конкретный.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -77,24 +78,24 @@ class _TraceStep(BaseModel):
 
     @property
     def verified(self) -> bool:
-        """A step counts as verified only when every one of its references is verified."""
+        """Шаг считается проверенным, только если проверена каждая его ссылка."""
         return all(reference.status == "verified" for reference in self.norm_refs)
 
 
 class FormulaStep(_TraceStep):
-    """A step that evaluates a formula; ``expression`` is the formula's LaTeX."""
+    """Шаг, вычисляющий формулу; ``expression`` — LaTeX формулы."""
 
     kind: Literal["formula"] = "formula"
 
 
 class TableStep(_TraceStep):
-    """A step that takes one entry of a norm's table, selected by its substitutions."""
+    """Шаг, берущий одно значение из таблицы нормы, выбранное по его подстановкам."""
 
     kind: Literal["table"] = "table"
 
 
 class CheckStep(_TraceStep):
-    """A comparison of ``result`` (the left value) with ``right``."""
+    """Сравнение ``result`` (левого значения) с ``right``."""
 
     kind: Literal["check"] = "check"
     operator: Literal["le", "lt", "ge", "gt"]
@@ -106,17 +107,33 @@ TraceStep = Annotated[FormulaStep | TableStep | CheckStep, Field(discriminator="
 
 
 def unverified_steps(trace: Sequence[FormulaStep | TableStep | CheckStep]) -> int:
-    """The number of steps that do not count as verified; none is dropped."""
+    """Считает шаги, которые не считаются проверенными; ни один шаг не пропускается.
+
+    Args:
+        trace: шаги трассы.
+
+    Returns:
+        Число непроверенных шагов.
+    """
     return sum(not step.verified for step in trace)
 
 
 def verdict_of(
     trace: Sequence[FormulaStep | TableStep | CheckStep],
 ) -> tuple[Literal["pass", "fail"], str]:
-    """The verdict of a calculation that ran, and the ``step_id`` of its deciding check.
+    """Определяет вердикт выполненного расчёта и ``step_id`` решающей проверки.
 
-    ``fail`` is decided by the first check step that did not pass, ``pass`` by the
-    last check step ("Automatic correctness validation").
+    ``fail`` решает первая не пройденная проверка, ``pass`` — последняя проверка
+    ("Automatic correctness validation").
+
+    Args:
+        trace: шаги трассы выполненного расчёта.
+
+    Returns:
+        Вердикт и ``step_id`` решающей проверки.
+
+    Raises:
+        ValueError: если в трассе нет ни одной проверки.
     """
     checks = [step for step in trace if isinstance(step, CheckStep)]
     if not checks:
@@ -128,7 +145,7 @@ def verdict_of(
 
 
 class RoundingRule(BaseModel):
-    """How an output value is rounded; the rule and its mode come from its source."""
+    """Как округляется значение выхода; правило и его режим берутся из его источника."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -137,20 +154,19 @@ class RoundingRule(BaseModel):
 
 
 class OutputDeclaration(QuantityDeclaration):
-    """An output quantity with the rule it is rounded by and the source of that rule."""
+    """Выходная величина с правилом округления и источником этого правила."""
 
     rounding_rule: RoundingRule
     rounding_source: Source
 
 
 class CalculationTypeContract(BaseModel):
-    """What the registry holds for a calculation type besides its calculator.
+    """Что реестр хранит о типе расчёта, кроме калькулятора.
 
-    Base units and quantity names are data the engineer fills, never values of a
-    norm. ``checks`` names the check steps of the type; at least one is required,
-    so a result that is not refused always has a deciding check. Every output
-    declares its rounding rule and its source, so a type without them cannot be
-    registered.
+    Базовые единицы и имена величин — данные, которые заполняет инженер, а не значения
+    нормы. ``checks`` называет шаги проверки типа; нужен хотя бы один, чтобы у
+    неотказного результата всегда была решающая проверка. Каждый выход объявляет своё
+    правило округления и его источник, поэтому тип без них зарегистрировать нельзя.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -172,7 +188,7 @@ class CalculationTypeContract(BaseModel):
 
 
 class _Bound(BaseModel):
-    """A lower (``min``) or upper (``max``) bound of one input, in its base unit."""
+    """Нижняя (``min``) или верхняя (``max``) граница одного входа в его базовой единице."""
 
     model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False)
 
@@ -183,19 +199,26 @@ class _Bound(BaseModel):
 
 
 class MethodBound(_Bound):
-    """A bound of the method's range; its source is always the norm."""
+    """Граница диапазона метода; её источник — всегда норма."""
 
     source: NormRefs
 
 
 class ValidatedBound(_Bound):
-    """A bound of the validated range, from the norm or set by the engineer."""
+    """Граница проверенного диапазона — из нормы или заданная инженером."""
 
     source: Source
 
 
 def check_bounds(bounds: Sequence[MethodBound | ValidatedBound]) -> None:
-    """A range has at most one lower and one upper bound per quantity, and is not empty."""
+    """Проверяет, что у каждой величины не больше одной нижней и одной верхней границы и диапазон не пуст.
+
+    Args:
+        bounds: границы одного диапазона.
+
+    Raises:
+        ValueError: если у величины две границы одного вида или её диапазон пуст.
+    """
     sides: dict[tuple[str, str], MethodBound | ValidatedBound] = {}
     for bound in bounds:
         key = (bound.quantity, bound.kind)
@@ -214,7 +237,7 @@ def check_bounds(bounds: Sequence[MethodBound | ValidatedBound]) -> None:
 
 
 class OutputValue(QuantityValue):
-    """An output quantity in its base unit, rounded by its rule."""
+    """Выходная величина в базовой единице, округлённая по своему правилу."""
 
     quantity: str = Field(min_length=1)
     rounding_rule: RoundingRule
@@ -222,7 +245,7 @@ class OutputValue(QuantityValue):
 
 
 class ApplicabilityWarning(BaseModel):
-    """An input inside the method's range but outside the validated range."""
+    """Вход внутри диапазона метода, но вне проверенного диапазона."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -231,7 +254,7 @@ class ApplicabilityWarning(BaseModel):
 
 
 class CheckReason(BaseModel):
-    """The check step that decided a ``pass`` or ``fail`` verdict."""
+    """Шаг проверки, решивший вердикт ``pass`` или ``fail``."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -240,7 +263,7 @@ class CheckReason(BaseModel):
 
 
 class BoundViolation(BaseModel):
-    """The bound of the method's range that refused the calculation."""
+    """Граница диапазона метода, по которой расчёт отказан."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -258,10 +281,19 @@ def ordered_sources(
     outputs: Sequence[OutputValue],
     warnings: Sequence[ApplicabilityWarning],
 ) -> tuple[tuple[NormRef, ...], tuple[EngineerRule, ...]]:
-    """Every source used, each once, in the order of first use (design.md decision 17).
+    """Перечисляет все использованные источники, каждый один раз, в порядке первого использования.
 
-    Trace steps in order, then the bound that refused the calculation, then the
-    rounding sources in the order of ``outputs``, then the warnings.
+    Порядок: шаги трассы, затем граница отказа, затем источники округления в порядке
+    ``outputs``, затем предупреждения (design.md, решение 17).
+
+    Args:
+        trace: шаги трассы.
+        refusal: граница отказа или ``None``.
+        outputs: выходы с источниками округления.
+        warnings: предупреждения проверенного диапазона.
+
+    Returns:
+        Ссылки на нормы и правила инженера, без повторов.
     """
     sources: list[NormRefs | EngineerRule] = [step.norm_refs for step in trace]
     if refusal is not None:
@@ -282,7 +314,7 @@ def ordered_sources(
 
 
 class CalculationResult(BaseModel):
-    """What the pure calculation function returns: the envelope without ``result_id``."""
+    """Что возвращает чистая функция расчёта: конверт без ``result_id``."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -344,17 +376,17 @@ class CalculationResult(BaseModel):
 
 
 class ResultEnvelope(CalculationResult):
-    """A calculation result with the ``result_id`` the service layer assigns."""
+    """Результат расчёта с ``result_id``, который назначает слой сервисов."""
 
     result_id: UUID
 
 
 class CalculationRequest(BaseModel):
-    """A request to run a calculation type, validated before the engine runs.
+    """Запрос на запуск типа расчёта, проверяемый до запуска движка.
 
-    The schema rejects a malformed request, a non-finite value and a unit outside
-    the vocabulary; ``check_against`` rejects inputs that do not fit the type's
-    contract (``security`` "Input validation", design.md decisions 12 and 13).
+    Схема отклоняет некорректный запрос, не конечное значение и единицу вне словаря;
+    ``check_against`` отклоняет входы, не подходящие к контракту типа (``security``
+    "Input validation", design.md, решения 12 и 13).
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -363,14 +395,44 @@ class CalculationRequest(BaseModel):
     inputs: dict[str, QuantityValue]
 
     def check_against(self, contract: CalculationTypeContract) -> None:
+        """Проверяет входы запроса по контракту типа расчёта.
+
+        Собирает все неподходящие входы сразу, а не останавливается на первом
+        (``calculation-api`` design.md, решение 5): пропущенные в порядке контракта,
+        затем необъявленные и входы в единице другой размерности в порядке запроса.
+
+        Args:
+            contract: контракт типа расчёта из реестра.
+
+        Raises:
+            InputValidationError: если хотя бы один вход не подходит. Сообщение
+                называет все такие входы, а ``fields`` содержит по записи на каждый
+                с местом ``("body", "inputs", <имя входа>)``.
+        """
         declared = {quantity.name: quantity.base_unit for quantity in contract.inputs}
-        if set(self.inputs) != set(declared):
-            raise InputValidationError(
-                f"inputs {sorted(self.inputs)} do not match the declared inputs {sorted(declared)}"
-            )
+        problems: list[tuple[str, str, str]] = []
+        for name in declared:
+            if name not in self.inputs:
+                problems.append((name, f"{name!r} is missing", "Missing input."))
         for name, value in self.inputs.items():
+            if name not in declared:
+                problems.append((name, f"{name!r} is not declared", "Undeclared input."))
+                continue
             given, base = UNITS[value.unit].dimension, UNITS[declared[name]].dimension
             if given != base:
-                raise InputValidationError(
-                    f"input {name!r} is in {value.unit!r} ({given}), not a unit of {base}"
+                problems.append(
+                    (
+                        name,
+                        f"{name!r} is in {value.unit!r} ({given}), not a unit of {base}",
+                        f"Expected a unit of {base}.",
+                    )
                 )
+        if problems:
+            raise InputValidationError(
+                f"inputs do not fit the declared inputs {sorted(declared)}: "
+                + "; ".join(text for _, text, _ in problems),
+                fields=tuple(
+                    FieldError(location=("body", "inputs", name), message=message)
+                    for name, _, message in problems
+                ),
+            )

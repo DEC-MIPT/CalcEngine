@@ -12,7 +12,15 @@ from app.schemas.calculation import (
 
 
 def is_inside(value: float, bound: MethodBound | ValidatedBound) -> bool:
-    """Whether a value in its base unit is on the allowed side of a bound."""
+    """Проверяет, лежит ли значение по разрешённую сторону границы.
+
+    Args:
+        value: значение в базовой единице.
+        bound: граница диапазона метода или проверенного диапазона.
+
+    Returns:
+        ``True``, если значение допустимо; при равенстве решает ``inclusive``.
+    """
     if value == bound.value:
         return bound.inclusive
     return value > bound.value if bound.kind == "min" else value < bound.value
@@ -35,11 +43,21 @@ def check_applicability(
     method_range: Sequence[MethodBound],
     validated_range: Sequence[ValidatedBound],
 ) -> tuple[BoundViolation | None, tuple[ApplicabilityWarning, ...]]:
-    """The three outcomes of "Applicability check with three outcomes".
+    """Проверяет применимость с тремя исходами ("Applicability check with three outcomes").
 
-    Inputs are in their base units. Returns the first violated bound of the method's
-    range in declared order (a refusal), or none; and a warning for every violated
-    bound of the validated range, in declared order.
+    Args:
+        inputs: входы в базовых единицах.
+        method_range: границы диапазона метода в объявленном порядке.
+        validated_range: границы проверенного диапазона в объявленном порядке.
+
+    Returns:
+        Первую нарушенную границу диапазона метода в объявленном порядке (отказ) или
+        ``None``, и предупреждение для каждой нарушенной границы проверенного
+        диапазона в объявленном порядке.
+
+    Raises:
+        CalculationError: если диапазон противоречив или граница стоит на величине,
+            которой нет среди входов.
     """
     _checked(inputs, method_range)
     _checked(inputs, validated_range)

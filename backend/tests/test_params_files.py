@@ -28,7 +28,7 @@ FORBIDDEN_WORDS = ("formula", "coefficient", "tree", "latex", "expression")
 
 
 def format_keys(data: Any, quantity_names: bool = False) -> set[str]:
-    """Every key of the file's format; the output names under ``rounding_rules`` are skipped."""
+    """Все ключи формата файла; имена выходов под ``rounding_rules`` пропускаются."""
     if isinstance(data, dict):
         found: set[str] = set()
         for key, value in data.items():

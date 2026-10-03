@@ -19,7 +19,12 @@ from app.schemas.calculation import (
 
 @dataclass(frozen=True)
 class CalculatorOutput:
-    """What a calculation type computes: its trace and its unrounded outputs."""
+    """Что вычисляет тип расчёта: трассу и неокруглённые выходы.
+
+    Attributes:
+        trace: шаги трассы по порядку.
+        outputs: неокруглённые выходы по именам величин.
+    """
 
     trace: tuple[FormulaStep | TableStep | CheckStep, ...]
     outputs: Mapping[str, QuantityValue]
@@ -34,11 +39,27 @@ def calculate[ParametersT](
     method_range: Sequence[MethodBound] = (),
     validated_range: Sequence[ValidatedBound] = (),
 ) -> CalculationResult:
-    """The pure calculation function: typed inputs and resolved parameters in, a result out.
+    """Чистая функция расчёта: на входе типизированные входы и разрешённые параметры, на выходе результат.
 
-    Units are converted and applicability is checked at the boundary; a refusal is a
-    result, not an exception (design.md decisions 1-3). ``result_id`` is not part of
-    it: the service layer assigns it (decision 12).
+    Единицы переводятся и применимость проверяется на границе; отказ — это результат,
+    а не исключение (design.md, решения 1–3). ``result_id`` в результат не входит: его
+    назначает слой сервисов (решение 12).
+
+    Args:
+        contract: контракт типа расчёта.
+        calculator: калькулятор типа.
+        inputs: входы со своими единицами.
+        parameters: разрешённые параметры калькулятора.
+        method_range: границы диапазона метода.
+        validated_range: границы проверенного диапазона.
+
+    Returns:
+        Результат расчёта без ``result_id``.
+
+    Raises:
+        CalculationError: если калькулятор вернул не ``CalculatorOutput`` или его
+            части не складываются в корректный результат.
+        UnitError: если единицу входа нельзя перевести в базовую.
     """
     outcome = run(
         contract,

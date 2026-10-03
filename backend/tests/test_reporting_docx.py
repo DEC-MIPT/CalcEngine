@@ -11,7 +11,7 @@ from app.schemas.calculation import FormulaStep
 
 
 def read_back(data: bytes) -> tuple[list[str], list[list[str]]]:
-    """The paragraph texts of the body and the cell texts of each table row."""
+    """Тексты абзацев тела и тексты ячеек каждой строки таблиц."""
     document = Document(BytesIO(data))
     paragraphs = [paragraph.text for paragraph in document.paragraphs]
     rows = [[cell.text for cell in row.cells] for table in document.tables for row in table.rows]

@@ -41,14 +41,38 @@ def _converted(value: float, source: str, target: str) -> float:
 
 
 def convert(value: QuantityValue, unit: str) -> QuantityValue:
-    """The same quantity in another unit of its dimension."""
+    """Выражает величину в другой единице той же размерности.
+
+    Args:
+        value: величина со своей единицей.
+        unit: целевая единица из словаря.
+
+    Returns:
+        Ту же величину в целевой единице.
+
+    Raises:
+        UnitError: если единицы нет в словаре, у неё другая размерность или
+            результат не конечное число.
+    """
     return QuantityValue(value=_converted(value.value, value.unit, unit), unit=unit)
 
 
 def inputs_to_base_units(
     contract: CalculationTypeContract, inputs: Mapping[str, QuantityValue]
 ) -> dict[str, QuantityValue]:
-    """Every declared input in its base unit, in the contract's order."""
+    """Переводит каждый объявленный вход в его базовую единицу.
+
+    Args:
+        contract: контракт типа расчёта.
+        inputs: входы запроса со своими единицами.
+
+    Returns:
+        Входы в базовых единицах в порядке контракта.
+
+    Raises:
+        CalculationError: если набор входов не совпадает с объявленным.
+        UnitError: если единицу входа нельзя перевести в базовую.
+    """
     declared = [quantity.name for quantity in contract.inputs]
     if set(inputs) != set(declared):
         raise CalculationError(
@@ -63,11 +87,21 @@ def inputs_to_base_units(
 def make_outputs(
     contract: CalculationTypeContract, values: Mapping[str, QuantityValue]
 ) -> tuple[OutputValue, ...]:
-    """The declared outputs as they leave the engine, in the contract's order.
+    """Собирает объявленные выходы в том виде, в каком они покидают движок.
 
-    Each unrounded value is converted to its base unit and rounded by the rule its
-    contract declares; the entry carries that rule and its source. Trace steps and
-    checks keep the unrounded values.
+    Каждое неокруглённое значение переводится в базовую единицу и округляется по
+    правилу, объявленному в контракте; запись несёт это правило и его источник. Шаги
+    трассы и проверки сохраняют неокруглённые значения.
+
+    Args:
+        contract: контракт типа расчёта.
+        values: неокруглённые выходы калькулятора.
+
+    Returns:
+        Выходы в порядке контракта.
+
+    Raises:
+        CalculationError: если набор выходов не совпадает с объявленным.
     """
     declared = [quantity.name for quantity in contract.outputs]
     if set(values) != set(declared):
@@ -90,12 +124,14 @@ def make_outputs(
 
 @dataclass(frozen=True)
 class Outcome[ResultT]:
-    """What the engine boundary gives back: the calculator's result, or a refusal.
+    """Что возвращает граница движка: результат калькулятора или отказ.
 
-    ``result`` is ``None`` exactly when ``refusal`` is set; ``warnings`` hold the
-    validated-range warnings in either case. ``input_hash`` identifies the run by
-    its calculation type, inputs in base units, and resolved parameters, including
-    both ranges (design.md decision 6).
+    Attributes:
+        input_hash: идентичность запуска по типу расчёта, входам в базовых единицах и
+            разрешённым параметрам, включая оба диапазона (design.md, решение 6).
+        result: результат калькулятора; ``None`` ровно тогда, когда задан ``refusal``.
+        refusal: нарушенная граница диапазона метода или ``None``.
+        warnings: предупреждения проверенного диапазона, в обоих случаях.
     """
 
     input_hash: str
@@ -113,11 +149,27 @@ def run[ParametersT, ResultT](
     method_range: Sequence[MethodBound] = (),
     validated_range: Sequence[ValidatedBound] = (),
 ) -> Outcome[ResultT]:
-    """Convert the inputs to base units, check applicability, then run the calculator.
+    """Переводит входы в базовые единицы, проверяет применимость и запускает калькулятор.
 
-    A unit outside the vocabulary or of another dimension fails with a ``DECError``
-    before any step runs. An input outside the method's range refuses the
-    calculation, and the calculator does not run (design.md decisions 2 and 3).
+    Единица вне словаря или другой размерности приводит к ``DECError`` до первого
+    шага. Вход вне диапазона метода даёт отказ, и калькулятор не запускается
+    (design.md, решения 2 и 3).
+
+    Args:
+        contract: контракт типа расчёта.
+        calculator: калькулятор типа.
+        inputs: входы со своими единицами.
+        parameters: разрешённые параметры калькулятора.
+        method_range: границы диапазона метода.
+        validated_range: границы проверенного диапазона.
+
+    Returns:
+        Исход запуска: результат или отказ, предупреждения и ``input_hash``.
+
+    Raises:
+        CalculationError: если набор входов не совпадает с объявленным или диапазон
+            противоречив.
+        UnitError: если единицу входа нельзя перевести в базовую.
     """
     converted = inputs_to_base_units(contract, inputs)
     identity = input_hash(
