@@ -293,3 +293,14 @@ dependency line closed. No requirement and no scenario changed.
 
 Open: none for task 1.8. Task 7.1c and its waits are in the planned
 `normative-catalog-backend`.
+
+## 11. `spec-reviewer` after Egor's answers (2026-10-03, passes 15-16)
+
+Run on the current text after section 10's edits, together with WP5 (the 9.3 settlement).
+
+| Pass | Result |
+|---|---|
+| 15 | 0 blockers, 0 major, 7 minor: stale passages that still called the user-side verification action open, the old B5 and "formulas in YAML" bullets, a repeated status line for `normatives-formula-contract` 1.4-1.7, the opening of task 7.2, the untracked `01-recon.md:97` cited in `proposal.md`, a long DOR line. All fixed (struck through with a dated "Superseded"/"Closed" note, one status line kept). **READY for DOR** |
+| 16 | 0 blockers, 0 major, 2 minor (wording of "No hardcoding" as former WP5 text; the antecedent in task 7.2). Both fixed. **READY for DOR** |
+
+`openspec validate --all --strict`: 19/19. No requirement or scenario changed.

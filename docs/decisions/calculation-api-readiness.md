@@ -64,3 +64,11 @@ rounding rule carries its source (added, with a scenario and a check in task 4.1
 
 - The calculation engine and the report generator stay synchronous; background jobs in
   `worker` remain a non-goal (2026-10-02).
+
+## Re-review after Egor's answers (2026-10-03)
+
+Two `spec-reviewer` passes on the current text after commit `11bdca4` (task 1.8 of
+`calculation-core-contract` closed with the `input_hash` algorithm unchanged; Egor's
+pipeline moved to `ml/` and `infra/`). First pass: 0 blockers, 0 major, wording minors
+(task 1.8 passages in the present tense, paths, the open-points paragraph), all fixed.
+Second pass: 0 blockers, 0 major, no finding. **READY for DOR.**

@@ -190,9 +190,9 @@ Code journal: `docs/akim/reports/WP8-code-journal.md`, created before task 2.1.
   below)
 - [x] Branch defined (header)
 - [x] Dependencies satisfied (below): every WP2 part this change uses is implemented on
-  `feature/report-generator/backend`; the open WP2 items (task 6.2 waiting for Egor's
-  task 1.8) decide only the merge order, not the start of this change (2026-10-03: task
-  1.8 closed and 6.2 checked off, the hash algorithm unchanged)
+  `feature/report-generator/backend`; the WP2 items left open then (task 6.2, which
+  waited for Egor's task 1.8) were closed on 2026-10-03 with the hash algorithm
+  unchanged, so only the merge order is left
 
 ## DOD and Go / No-Go
 
@@ -219,11 +219,9 @@ Code journal: `docs/akim/reports/WP8-code-journal.md`, created before task 2.1.
   6.2a-6.4). All are implemented on `feature/report-generator/backend`, which this
   branch starts from, so the change can start now. This branch merges after
   `feature/calculation-engine/backend` and `feature/report-generator/backend`. The
-  engine's task 6.2 (`input_hash`) waits only for Egor's acknowledgement (task 1.8); if
-  his answer changes the hash algorithm, the stored `input_hash` follows the engine, and
-  no stored data exists before the merge. Update 2026-10-03: Egor acknowledged task 1.8
-  with no change to the algorithm (`a01af6f`), and task 6.2 is checked off; only the merge
-  order is left.
+  engine's task 6.2 (`input_hash`) waited for Egor's acknowledgement (task 1.8), which
+  he gave on 2026-10-03 with no change to the algorithm (`a01af6f`); task 6.2 is checked
+  off, and the stored `input_hash` is the engine's.
 - `normative-catalog-backend` (planned, Akim and Egor): implements `ParameterSource` for
   the catalog. This change does not wait for it; until it exists, a real request for the
   pilot answers `503`.

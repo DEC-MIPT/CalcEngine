@@ -10,7 +10,7 @@ should be invented or run. `calculation-core-contract` (WP2) and `calculation-ve
 requiring >= 95% branch coverage per `development-process`'s "Test gate" requirement, but
 that requirement names no tool and no command a developer or an agent can actually run to
 check it. The normative pipeline (Egor's zone) already has a working command set (`ruff`,
-`mypy`-typed code, `pytest` with branch coverage, at the repository root, in `ml/` since
+`mypy`-typed code, `pytest` with branch coverage), in `ml/` (at the repository root until
 2026-10-03); Akim's zones
 (backend, frontend) have none. This change wires up the smallest command set that lets
 the first backend and frontend code meet the DOD, without touching Egor's zone.
@@ -30,7 +30,8 @@ the first backend and frontend code meet the DOD, without touching Egor's zone.
 - Adds a pre-commit hook that scans staged changes for secrets, and requires
   `.env.example` to list every variable the backend's configuration reads.
 - Backend tooling gets its own `backend/pyproject.toml`, separate from the pipeline's
-  `pyproject.toml` (at the root then, `ml/pyproject.toml` since 2026-10-03): each zone's lint, type, and coverage configuration and command
+  `ml/pyproject.toml` (at the repository root until 2026-10-03): each zone's lint, type,
+  and coverage configuration and command
   stays scoped to its own code, so neither zone's coverage number or lint pass mixes
   with the other's, and edits to one zone's tooling never touch the other's file.
 

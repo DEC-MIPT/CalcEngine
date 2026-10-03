@@ -4,9 +4,10 @@
 
 See `proposal.md` (Why) for the motivation. Two facts shape this design:
 
-- The normative pipeline (Egor's zone) already has a working root `pyproject.toml`
-  (`ruff`, `mypy`-typed code, `pytest` with branch coverage scoped to
-  `normatives_pipeline`) and a root `tests/`. Neither `backend/` nor `frontend/`
+- The normative pipeline (Egor's zone) already has a working `pyproject.toml` (`ruff`,
+  `mypy`-typed code, `pytest` with branch coverage scoped to `normatives_pipeline`) and
+  its own `tests/`, both at the repository root when this was written and in `ml/`
+  since 2026-10-03. Neither `backend/` nor `frontend/`
   exists yet; the app code for both is other changes' work
   (`backend-layered-architecture` for the backend layout;
   `calculation-core-contract`/`calculation-verification` for calculation code; no
@@ -43,9 +44,10 @@ See `proposal.md` (Why) for the motivation. Two facts shape this design:
 
 ## Decisions
 
-1. **`backend/pyproject.toml`, separate from the root file.** Backend `ruff`, `mypy`,
-   `pytest`, and `coverage` configuration lives in `backend/pyproject.toml`, not the
-   root one. Rationale: keeps each zone's coverage number and lint pass scoped to its
+1. **`backend/pyproject.toml`, separate from the pipeline's file** (the root
+   `pyproject.toml` when this was decided, `ml/pyproject.toml` since 2026-10-03).
+   Backend `ruff`, `mypy`, `pytest`, and `coverage` configuration lives in
+   `backend/pyproject.toml`, not the pipeline's. Rationale: keeps each zone's coverage number and lint pass scoped to its
    own code (a shared file and a shared number would violate `AGENTS.md`'s "code MUST
    NOT overlap across zones"), and means neither developer ever edits the other's
    tooling file. Alternative considered: one root file with per-directory

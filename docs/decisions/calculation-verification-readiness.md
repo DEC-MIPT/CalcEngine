@@ -77,3 +77,11 @@ This verdict covers the spec phase only. Sections 2 and 3 (implementation: refer
 | ~~`input_hash` algorithm in `calculation-core-contract` is still "a proposal, open for review"~~ Closed 2026-10-03: accepted by Egor with no change (`calculation-core-contract` task 1.8, `a01af6f`) | Akim/Egor, via that change | Nothing now (was: regression corpus, tasks 3.2-3.3) |
 | Reference examples, invariants, and the definition of "typical calculation" for `foundations-shallow` | Akim (engineer) | Sections 2-3; see `docs/decisions/reference-examples-foundations.md` |
 | A dedicated `norm-traceability-checker` pass on the current text was never run (only the spec-reviewers' and tester's content checks) | — | Nothing today; noted for the next content edit |
+
+## Re-review after Egor's answers (2026-10-03)
+
+Two `spec-reviewer` passes on the current text after commit `11bdca4` (task 1.8 of
+`calculation-core-contract` closed with the `input_hash` algorithm unchanged; Egor's
+pipeline moved to `ml/` and `infra/`). First pass: 0 blockers, 0 major, wording minors
+(task 1.8 passages in the present tense, paths, the open-points paragraph), all fixed.
+Second pass: 0 blockers, 0 major, no finding. **READY for DOR.**

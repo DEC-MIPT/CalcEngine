@@ -73,7 +73,7 @@ this change references that requirement by name and adds its HTTP scenarios in
 - PDF output (a `product-vision` non-goal before the defense).
 - Background jobs in `worker`: a calculation and its report run within the request
   (`report-generator` "Non-functional — generation time": under 1 minute).
-- Docker, the `dec_app` service in `docker-compose.yml`, and deployment (Egor's
+- Docker, the `dec_app` database in `infra/docker-compose.yml`, and deployment (Egor's
   infrastructure change).
 - The `import-linter` contracts that check the layer order (`bootstrap-dev-environment`
   task 5.1, its own feature branch).

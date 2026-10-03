@@ -22,8 +22,10 @@ roadmap (`docs/reports/verified-roadmap.md`, section 3.2, WP2) records:
 - **C4 (High):** the report has no statement of engineer responsibility, and the spec
   contradicts itself: the requirement calls the signature fields optional
   (`report-generator/spec.md:22`) while its scenario requires them (`:26-27`).
-- **C10 (Medium):** the team intends one declarative input model (`01-recon.md:97`), and
-  no spec contains it.
+- **C10 (Medium):** the team intends one declarative input model, from which the
+  validation rules of the backend, the frontend and the calculation core are generated
+  (stated by the team at the project recon; the recon notes are not tracked), and no
+  spec contains it.
 - **B5 (Medium):** task 6.2 of `backend-layered-architecture` ("reading parameters from
   the parameters layer") implies I/O inside the engine, which contradicts its own design.
   Resolved in WP5 on 2026-09-28: its task 6.2 moved to this change's task 7.1.

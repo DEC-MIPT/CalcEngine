@@ -3,8 +3,8 @@
 Owner: Akim (tooling commands and pre-commit, this change; Docker Compose and CI are
 Egor's and not part of this change). Branch: sections 2-4.3 were done on `feature/bootstrap-dev-environment/backend` and
 `feature/bootstrap-dev-environment/frontend` and are already merged into `develop`. The
-remaining code (4.4 and 5.1, both blocked on WP5) goes on `feature/dev-environment/backend`
-from `develop`; documents (section 6) go directly to `develop`. Checkboxes in this file are ticked in `develop` as each subtask is done on the feature branch; the code reaches `develop` only when the whole feature is done (`AGENTS.md`, Branching rules).
+remaining code (4.4 and 5.1, both blocked on WP5, and 4.5) goes on `feature/dev-environment/backend`
+from `develop`; documents (section 6, and the note of task 4.5) go directly to `develop`. Checkboxes in this file are ticked in `develop` as each subtask is done on the feature branch; the code reaches `develop` only when the whole feature is done (`AGENTS.md`, Branching rules).
 
 Marker **[blocked: WP5]**: the task needs `backend-layered-architecture`'s layered
 `backend/app` structure (its task 1.1) or its config module (its task 2.1) before it
@@ -33,7 +33,9 @@ can be implemented; until then it is not started, not stubbed as a no-op.
   errors)
 - [x] 2.3 Add `backend/tests/` with one smoke test asserting the venv and pytest
   config work; verify `pytest backend/tests` collects and passes it (2026-09-27:
-  `test_smoke.py` added, `1 passed` from both the repo root and `backend/`)
+  `test_smoke.py` added, `1 passed` from both the repo root and `backend/`; re-checked
+  2026-10-03 on `develop` with no root `pyproject.toml`: `pytest backend/tests` from the
+  root takes `backend/pyproject.toml` as its config, `32 passed`)
 - [x] 2.4 Add `backend/check.sh` running `ruff check`, `mypy`, then `pytest`, per
   `design.md` decision 3; verify it exits 0 on a clean checkout with only the smoke
   test present. The coverage gate (`--cov=app --cov-branch --cov-fail-under=95`) only
@@ -104,9 +106,10 @@ can be implemented; until then it is not started, not stubbed as a no-op.
   10 files, all hand-reviewed, none a real secret: the repeated "Basic Auth
   Credentials"/"Secret Keyword" hits are the single shared `dec:dec` local-only
   Postgres dev credential already used across `docker-compose.yml`,
-  `tests/conftest.py`, and several `docs/decisions/`/`docs/akim/reports/` files (confirmed
+  `tests/conftest.py` (now `infra/docker-compose.yml` and `ml/tests/conftest.py`, moved
+  2026-10-03; see 4.5), and several `docs/decisions/`/`docs/akim/reports/` files (confirmed
   by reading each flagged line); the "Base64 High Entropy String" in
-  `normatives_pipeline/research/research.ipynb` is a base64 PNG image output
+  `normatives_pipeline/research/research.ipynb` (now `ml/research/research.ipynb`) is a base64 PNG image output
   (confirmed via the notebook's own JSON); the "Hex High Entropy String" in
   `skills-lock.json` is a skill content hash. Regenerated once more after 4.3 added
   `.env.example`'s own placeholder credential (see 4.3))
@@ -125,6 +128,17 @@ can be implemented; until then it is not started, not stubbed as a no-op.
 - [ ] 4.4 [blocked: WP5] Add a local pre-commit hook comparing
   `backend/app/core/config.py`'s Pydantic settings fields against `.env.example` keys;
   verify a field missing from `.env.example` fails `pre-commit run`
+- [ ] 4.5 Regenerate `.secrets.baseline` (added 2026-10-03, `spec-reviewer` finding):
+  after Egor's move of 2026-10-03 (`ml/`, `infra/`) the baseline names five files that
+  no longer exist, and it does not cover the backend files merged after 4.2, so
+  `pre-commit run --all-files` fails on `develop`. Re-run the scan of 4.2 on
+  `feature/dev-environment/backend`, hand-review every finding (file, line, why it is not
+  a real secret, as in 4.2), and record in `docs/decisions/secrets-baseline-egor-files.md`
+  (committed to `develop`) which files of Egor's zone the baseline lists, so he knows the
+  hook covers them; the baseline is Akim's file, and no file of Egor's zone is edited
+  (backend); verify: `pre-commit run --all-files` exits 0 on that branch after
+  `git merge develop`, a staged fake key still fails it, every path in the baseline
+  exists, and the note exists on `develop`
 
 ## 5. Import contract (backend)
 
@@ -175,6 +189,10 @@ can be implemented; until then it is not started, not stubbed as a no-op.
   `backend-layered-architecture` (WP5) tasks 1.1 and 2.1 respectively; they stay
   `[blocked: WP5]` until then and do not gate this change's own GO.
 - Task 7.3 (archive) needs 7.1 and 7.2.
+- Task 7.1 needs 4.5, since `pre-commit run --all-files` is part of the verdict. Task 4.5
+  needs nothing else. A later move of files in either zone makes the hook fail again on
+  the moved files; that failure is the trigger, and the developer who sees it re-runs the
+  scan of 4.5 (a manual step, no automation).
 
 ## DOR checklist
 

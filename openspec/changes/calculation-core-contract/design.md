@@ -463,38 +463,43 @@ later design and is not fixed here.
     `dec_normatives` to the resolved parameters.
   - "Parameters stored in YAML" says the parameters layer passes parameters to the
     engine as typed arguments. This agrees with "Pure calculation function".
-  - Task 6.2 ("reference implementation reading parameters from the parameters layer")
+  - ~~Task 6.2 ("reference implementation reading parameters from the parameters layer")
     implies I/O inside the engine and conflicts with "Pure calculation function" (B5).
     Decision 7 of its `design.md` names a placeholder-domain reference implementation.
-    Neither file is edited here; `tasks.md` holds the sync task for WP5.
-  - "No hardcoding" says formulas are not written in code but read from configuration or
-    a parameter file. If formulas live in YAML, the engine becomes an expression
+    Neither file is edited here; `tasks.md` holds the sync task for WP5.~~ Superseded
+    2026-09-28 (update above): WP5 task 6.2 moved to this change's task 7.1, and WP5
+    decision 7 names the pure function.
+  - Formerly, "No hardcoding" said formulas are not written in code but read from
+    configuration or a parameter file. ~~If formulas live in YAML, the engine becomes an expression
     evaluator, which changes where a step's `expression` comes from. This is an open
-    question for WP5 and is not decided here; task 7.2 settles it. Egor agreed on
+    question for WP5 and is not decided here; task 7.2 settles it.~~ Settled (updates
+    above, decision 11): formulas come from `dec_normatives` as expression trees, never
+    from YAML. Egor agreed on
     2026-09-27 (`docs/decisions/normatives-formula-contract-review-egor.md`, question 2):
     the pipeline writes formulas into `dec_normatives`; the parameters layer reads them,
     applies the `provenance` gate (resolution 2), and passes resolved parameters to the
     engine; the backend does not import pipeline code, so the zones stay apart. He owns
     the hand-entered formula registry (`formulas.toml`, merged to `develop` in `b44d6f3`;
-    at `ml/configs/formulas.toml` since the move of 2026-10-03), which stays the MVP path
-    for executable expressions. Its
+    at `ml/configs/formulas.toml` since the move of 2026-10-03), ~~which stays the MVP
+    path for executable expressions~~ (superseded 2026-09-29, below). Its
     `norm_ref` was also brought in line with the agreed `NormRef` in that commit. Egor
     agreed on 2026-09-28 to the remaining findings 11-15
     (`docs/decisions/normatives-formula-contract-review-egor.md`): a `NormRef` on every
     stored coefficient value, `status`/`provenance` stored per formula and per
     coefficient instead of constants, the five `NormRef` fields built unconditionally in
     code (config selects only extra fields), and no payload built from an empty
-    `document`. Applied on `feature/normative-parser/ml` (commit `a28cf0a`), not merged
-    into `develop` yet. Update 2026-10-03: that branch is merged into `develop`
-    (`0184450`); the code of findings 11-15 is `normatives-formula-contract` tasks
-    1.4-1.7, still open, which Egor named for the end of 2026-10-04.
+    `document`. Agreed on `feature/normative-parser/ml` (commit `a28cf0a`); that branch
+    was merged into `develop` on 2026-10-03 (`0184450`), but the code of findings 11-15
+    is `normatives-formula-contract` tasks 1.4-1.7, still open, which Egor named for the
+    end of 2026-10-04. This is the one status line for those tasks; "Risks" refers here.
     Since 2026-09-27 (his `research-journal.md`, entry 10) the direction changed: OCR
     (pix2text + DocLayout-YOLO) is now the main source of formulas at scale, each one
     entered as `provenance = machine-extracted`, `status = unverified`; the hand-entered
     registry becomes the checked subset, stored as `human-verified` at ingestion (answer
-    12). How a formula moves to `human-verified` by a user action, as opposed to the
+    12). ~~How a formula moves to `human-verified` by a user action, as opposed to the
     registry's own entries, is still the open question in
-    `docs/decisions/formula-verification-akim.md`, not yet answered.
+    `docs/decisions/formula-verification-akim.md`, not yet answered.~~ Closed 2026-09-29
+    (next update).
     Update 2026-09-29 (`docs/decisions/pipeline-followup-answers-akim.md`, A1 and A3):
     `formulas.toml` is deleted, so it is no longer the MVP path for executable
     expressions; that path is the expression tree of decision 11. The question of
@@ -541,10 +546,12 @@ later design and is not fixed here.
   (`docs/decisions/normatives-formula-contract-review-egor.md`, answer 12) to store
   `status` and `provenance` as columns per formula and per coefficient instead of
   constants, so the `provenance` gate has something to key on once that code reaches
-  `develop` (currently on `feature/normative-parser/ml`). Still open: the user action
-  that moves a formula to `human-verified` (`docs/decisions/formula-verification-akim.md`)
-  is not designed yet, so no value reaches `human-verified` except the hand-entered
-  registry, which his answer marks `human-verified` at ingestion, not by that action.
+  `develop` (tasks 1.4-1.7; status in "Consistency with other specs"). ~~Still open: the
+  user action that moves a formula to `human-verified`
+  (`docs/decisions/formula-verification-akim.md`) is not designed yet, so no value
+  reaches `human-verified` except the hand-entered registry, which his answer marks
+  `human-verified` at ingestion, not by that action.~~ Closed 2026-09-29: there is no
+  user-side verification action (resolution 2, amendment).
   Mitigation as first written (superseded by the next paragraph and by the amendment of
   resolution 2), to be fixed when task 7.2 settles where formulas live: expressions are
   parsed against a whitelist of symbols and operations, never passed to `eval`-based
@@ -568,9 +575,8 @@ later design and is not fixed here.
   СП 22.13330.2016, `unverified`) and agreed on 2026-09-28
   (`docs/decisions/normatives-formula-contract-review-egor.md`, answer 11) to add a
   `NormRef` per stored coefficient value, starting with that same table
-  (`normatives-formula-contract` tasks 1.4-1.7). Not merged into `develop` yet (update
-  2026-10-03: the branch is merged, tasks 1.4-1.7 are still open); until it
-  is, he takes `M_γ`, `M_q`, `M_c` for the pilot from his own manually transcribed copy
+  (`normatives-formula-contract` tasks 1.4-1.7; status in "Consistency with other
+  specs"). Until that code is on `develop`, he takes `M_γ`, `M_q`, `M_c` for the pilot from his own manually transcribed copy
   of that table in the registry (his answer to question 7), which is a stopgap for the
   pilot, not a primary-source check. Update 2026-09-29: the registry `formulas.toml` is
   deleted, so that stopgap is gone, and the other coefficients of the formula have no

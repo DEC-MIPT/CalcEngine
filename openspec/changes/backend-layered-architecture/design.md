@@ -8,11 +8,12 @@ prevents hardcoding and mixing. Local-first, with a later path to a Russian clou
 
 Scope note (2026-09-28): this change was split. It now covers the layered scaffold,
 configuration, the `dec_app` database, the parameters layer for engineer-set values, and
-the `Calculator` interface and registry. The normative database (`dec_normatives`) with
-ingestion and search, the isolated `ml/` zone, and Docker moved to planned changes
-(`tasks.md`, "Moved out of this change"). Decisions 4-6 below keep the record of what was
-agreed with Egor for those parts; a decision marked "Moves with" is implemented by the
-named later change, not by this one.
+the `Calculator` interface and registry. The backend's read path into the normative
+database (`dec_normatives`), the isolated `ml/` zone, and Docker moved to planned changes
+(`tasks.md`, "Moved out of this change"); ingestion and search are Egor's pipeline
+(decision 5). Decisions 4-6 below keep the record of what was agreed with Egor for those
+parts; a decision about a part that moved out is implemented by the named later change,
+not by this one.
 
 ## Goals / Non-Goals
 
@@ -76,12 +77,11 @@ named later change, not by this one.
    `parameters` holds only the schema of the YAML file and builds the `schemas` types.
 
    `parameters` may import `repositories`, because it will read `dec_normatives`
-   (decision 3) once `normative-catalog-backend` adds that path. The `normatives/`
-   package is not placed in the order here: its location was open item 9.3, decided by
-   that change. Settled 2026-10-03 (decision 5): there is no `normatives/` package with
-   its own loader; the backend reads Egor's read-only views in `dec_normatives` through
-   its own repository, placed by that change. `ml/` sits outside `backend/app` and has no import relationship in either
-   direction (decision 6).
+   (decision 3) once `normative-catalog-backend` adds that path. There is no
+   `normatives/` package (old item 9.3, settled 2026-10-03, decision 5): the backend
+   reads Egor's read-only views in `dec_normatives` through its own repository, which
+   that change places. `ml/` sits outside `backend/app` and has no import relationship
+   in either direction (decision 6).
    - Rationale: keeps the calculation engine and data access swappable and testable, and
      gives `bootstrap-dev-environment` task 5.1 a complete contract to encode as an
      `import-linter` "layers" contract (siblings as independent layers) plus forbidden
@@ -124,19 +124,20 @@ named later change, not by this one.
 4. **Two PostgreSQL databases in one instance** (`dec_app` is built here; the
    `dec_normatives` parts move, see below) — `dec_app` (transactional: users,
    calculations, reports) and `dec_normatives` (documents, revisions, clauses,
-   formulas, coefficients). Separate Alembic migration trees, and a role per zone.
-   Update 2026-10-03 (decision 5): `dec_normatives` has no Alembic tree of the backend;
-   Egor's ingestion creates its schema and the read-only views, versioned with the
-   ingestion. The Alembic tree is `dec_app`'s only.
-   `dec_app` is implemented here (tasks 3.1-3.2). The `dec_normatives` half moves with
-   `normative-catalog-backend` (migrations) and Egor's infra change (compose, roles).
+   formulas, coefficients), with a role per zone. The backend's Alembic tree is
+   `dec_app`'s only; `dec_normatives` has no Alembic tree of the backend: Egor's
+   ingestion creates its schema and its read-only views, versioned with the ingestion
+   (decision 5; until 2026-10-03 this decision planned a second Alembic tree for it).
+   `dec_app` is implemented here (tasks 3.1-3.2). The backend's read path into
+   `dec_normatives` is `normative-catalog-backend`'s; the database, its rename and the
+   roles are Egor's infra change (compose, roles).
    - Rationale: isolating the document catalog from the app keeps ingestion and search
      concerns clean. `pgvector` extension enabled for future RAG embeddings.
    - Alternative: one database with schemas — rejected, weaker isolation.
    - Confirmed by Egor on 2026-09-27 (question 5 of the review file): his pipeline's
      single database (still named `dec` in `docker-compose.yml` at the time of
-     writing) becomes `dec_normatives`; `dec_app` is added when the backend needs it,
-     since `backend/` does not exist yet. The rename and the role per zone are old task 9.6
+     writing) becomes `dec_normatives`; `dec_app` is added when the backend needs it.
+     The rename and the role per zone are old task 9.6
      (Egor, `docker-compose.yml`, moved to his infra change), not yet applied. Closes
      task 9.1. Update 2026-10-03: the compose file is now `infra/docker-compose.yml`
      (service `dec-postgres`, port 5433), still with the single database `dec`; the
@@ -149,28 +150,28 @@ named later change, not by this one.
      reserved for later semantic retrieval; neither side uses it today. Closes task
      9.2.
 
-5. **Normative ingestion** (moves with `normative-catalog-backend`) — a manual `normatives/ingestion/loader.py` reads a source
-   file (`.docx`/`.pdf`/`.yaml`) and populates `dec_normatives`. One pilot file for the
-   MVP.
-   - Rationale: matches the passport "manual monitoring for now" decision.
-   - Settled 2026-10-03 (old task 9.3, the first decision of `normative-catalog-backend`;
-     `docs/decisions/normative-catalog-backend-questions-akim.md`, "Answers", item 1):
-     the contract between the zones is the database, not Python code. Egor's pipeline
-     (`ml/src/normatives_pipeline/`, raw SQL, no Alembic) ingests into what becomes
-     `dec_normatives` and owns read-only SQL views or functions there and the read-only
-     role `dec_normatives_reader` (`SELECT` only), created idempotently and versioned
-     with the ingestion. The backend has no `normatives/ingestion/loader.py` and no
-     Alembic tree for `dec_normatives`: it reads only those views, through its own
-     repository (SQLAlchemy Core, parameterized queries), with
-     `DEC_NORMATIVES_DATABASE_URL`. The backend never imports `ml/`, and `ml/` never
-     imports `backend/`. The manual loader of this decision is dropped; the views and the
-     repository are `normative-catalog-backend`'s.
+5. **Normative ingestion is Egor's pipeline; the backend only reads** (settled
+   2026-10-03, old task 9.3, the first decision of `normative-catalog-backend`;
+   `docs/decisions/normative-catalog-backend-questions-akim.md`, "Answers", item 1) —
+   the contract between the zones is the database, not Python code. Egor's pipeline
+   (`ml/src/normatives_pipeline/`, raw SQL, no Alembic) ingests into what becomes
+   `dec_normatives` and owns read-only SQL views or functions there and the read-only
+   role `dec_normatives_reader` (`SELECT` only), created idempotently and versioned with
+   the ingestion. The backend has no loader and no Alembic tree for `dec_normatives`: it
+   reads only those views, through its own repository (SQLAlchemy Core, parameterized
+   queries), with `DEC_NORMATIVES_DATABASE_URL`. The backend never imports `ml/`, and
+   `ml/` never imports `backend/`. The views are Egor's; the repository and the
+   agreement on what the views return are `normative-catalog-backend`'s.
+   - Rationale: one writer per database; no second loader duplicating the pipeline.
+   - Superseded plan (until 2026-10-03): a manual `normatives/ingestion/loader.py` in the
+     backend, reading one pilot source file into `dec_normatives`.
 
-5a. **Catalog models track the pipeline's evolving schema, not a separate design**
-   (task 9.4; moves with `normative-catalog-backend`). `Document`, `Revision`, `Clause`,
-   `Formula`, `Coefficient` (old task 4.1)
-   correspond to the pipeline's `document`, `clause`, `formula`, `notation_entry` (for
-   symbols), `cross_ref`, `coefficient` tables. Two gaps, both open:
+5a. **The backend's catalog types follow Egor's views, not a separate design**
+   (task 9.4; moves with `normative-catalog-backend`). Since decision 5 the backend has
+   no ORM models of `dec_normatives`: the DTOs it reads (documents, clauses, formulas,
+   coefficients; old task 4.1 planned ORM `Document`, `Revision`, `Clause`, `Formula`,
+   `Coefficient`) mirror the views, which Egor builds over his `document`, `clause`,
+   `formula`, `notation_entry`, `cross_ref` and `coefficient` tables. Two gaps, both open:
    - `Revision` does not exist in the pipeline yet. Egor confirmed on 2026-09-27
      (question 6): the current schema is provisional, and revisions (`Revision` with
      `amendment_no`, stored additively per his `NormRef` answer 7) land in
@@ -181,17 +182,16 @@ named later change, not by this one.
      tracked as questions 11-13 of
      `docs/decisions/normatives-formula-contract-review-egor.md`, not closed here.
      Update 2026-10-03: Egor's branch is merged into `develop` (`0184450`), but the
-     fields are `normatives-formula-contract` tasks 1.4-1.7, still open.
+     fields are `normatives-formula-contract` tasks 1.4-1.7, still open; the views carry
+     them once they exist.
 
-6. **Isolated ML zone** (moves with the planned `ml-model-storage`, Egor's zone) — `ml/` at repo root with `models/` (gitignored artifacts),
-   `registry.yaml` (metadata), `experiments/`, `serving/`. No imports from `backend/`,
-   and none from `backend/` into `ml/` (spec "Strict dependency direction").
+6. **Isolated ML zone** (Egor's zone) — `ml/` at the repository root, Egor's project
+   directory (`pyproject.toml`, `src/normatives_pipeline/`, `configs/`, `research/`,
+   `tests/`; on `develop` since 2026-10-03, commit `24797f7`). Its inner layout is his to
+   decide (planned `ml-model-storage`). No imports from `ml/` into `backend/`, and none
+   from `backend/` into `ml/` (spec "Strict dependency direction").
    - Rationale: R&D can proceed without risking the deterministic engine. A model that
      later reaches production is served by a separate service over API/queue.
-   - Update 2026-10-03: `ml/` exists on `develop` as Egor's project directory
-     (`pyproject.toml`, `src/normatives_pipeline/`, `configs/`, `research/`, `tests/`;
-     commit `24797f7`). Its inner layout is his to decide (planned `ml-model-storage`);
-     the import rule of this decision stands.
 
 7. **Calculation engine isolation** — `engine/` defines a `Calculator` interface, generic over
    its input, parameter and result types, with one method that is a pure function:
