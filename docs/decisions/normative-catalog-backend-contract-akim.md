@@ -72,3 +72,58 @@ you cannot convert is not stored as bound.
 - Branch: `feature/normative-catalog/data`.
 - **Your side:** agree with the split and the verify clauses, or say what to change; and
   give a date for section 2 on `develop`.
+
+## Answers
+
+- Date: 2026-10-04
+- From: Egor. To: Akim.
+- Note to Akim: each item states an explicit agree/disagree and, where relevant, the
+  current state of the pipeline on `develop`, so the decision is unambiguous.
+
+1. **Schema, role, database (decision 1) — Agree, no changes.** I accept every element
+   as written: the single schema `catalog_read`, the role `dec_normatives_reader` with
+   only `USAGE` on the schema, `SELECT` on its views and `EXECUTE` on the function, and
+   the `REVOKE CREATE ON SCHEMA public FROM PUBLIC` plus `REVOKE ALL` on my tables from
+   `PUBLIC` (PostgreSQL 14 default). I do not propose another schema name, variable name
+   or owner. Concretely:
+   - I create the schema, views, function and role idempotently in ingestion
+     (`CREATE SCHEMA IF NOT EXISTS`, `CREATE OR REPLACE VIEW`, role created only if it
+     does not exist).
+   - Until my infrastructure change splits the databases, everything lives in my current
+     database `dec`; your `DEC_NORMATIVES_DATABASE_URL` points there with the reader
+     role, and only the URL changes at the split.
+   - Ingestion runs as the database owner (the compose user). It already connects as
+     that owner through `DEC_DATABASE_URL`; I keep that variable and add no second owner
+     URL.
+   - The reader's password comes from `DEC_NORMATIVES_READER_PASSWORD`, set with
+     `ALTER ROLE ... PASSWORD`, and is never printed, logged or committed.
+
+2. **The columns (decision 2) — Agree, no column changes.** I accept every view and
+   every column exactly as listed in decision 2; nothing in that table needs to change
+   before task 3.1. The pilot's parameters map onto the views as follows:
+   - `type_table_values`: `gamma_c1`, `gamma_c2`, `k` (no heading) and `m_gamma`,
+     `m_q`, `m_c` (heading `phi_II`, stored in `deg` — the input's base unit);
+   - `type_thresholds`: `k_z_threshold`;
+   - `type_formulas`: `k_z_below`, `k_z_from`, `r`;
+   - `type_checks`: `check_norm_refs`;
+   - `type_method_bounds`: the pilot's method range.
+   Each parameter appears in exactly one view. Statement of current state (not a change
+   request): the schema on `develop` does not yet have the `tree`, the stored
+   `status`/`provenance`, the `coefficient` `NormRef`/heading/unit, the binding table or
+   the method bounds. Those gaps are exactly my tasks 2.1–2.6, so you can start task 3.1
+   against the synthetic contract without waiting for them.
+
+3. **The expression tree (decision 3) — Agree, no additional nodes.** `latex2sympy2`
+   output (a SymPy expression) converts into the node set your `parse_expression` reads,
+   at ingestion and not in the backend. I need no extra node kinds and no extra
+   functions. A formula I cannot convert — a function outside the closed list, an
+   unrecognized LaTeX construct, or a tree over the depth (64) or node (4096) limits —
+   is not stored as bound; the type is then answered as having no usable parameter
+   source, per the spec.
+
+4. **My tasks (section 2) — Agree with the split and the verify clauses.** One
+   clarification about the branch point: `feature/normative-catalog/data` branches from
+   `develop`, because my pipeline is already on `develop`
+   (`ml/src/normatives_pipeline/`); there is no need to branch it from
+   `feature/normative-parser/ml`. I deliver section 2 on `develop` by the end of Sunday
+   2026-10-04.
