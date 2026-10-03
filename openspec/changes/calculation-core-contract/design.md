@@ -164,7 +164,12 @@ the frame and the title blocks from GOST R 21.101-2026 and adds no norm value of
     or `half_even`; both come from the rule's source, never from the implementer. The
     float value is turned into `decimal.Decimal(repr(value))`, the shortest decimal that
     reads back to the same float, and rounded with `Decimal.quantize` in the rule's mode;
-    the float `round()` is not used. Only the values in the envelope's `outputs` are
+    the float `round()` is not used. Since 2026-10-03 (task 9.2) the number of decimal
+    places is at most 15 (`MAX_DECIMALS`): a float holds that many significant decimal
+    digits, so this is an implementation limit, not a norm value; and the quantization
+    runs in a local `decimal` context whose precision covers the value's magnitude plus
+    the decimal places, so any finite float is rounded without `InvalidOperation`. Only
+    the values in the envelope's `outputs` are
     rounded. Trace steps and check steps use unrounded values, so the verdict does not
     depend on presentation. This is an engine design choice with no norm source: it
     treats `rounding_rule` as a rule for presenting an output, which is what the

@@ -422,3 +422,22 @@ why. No norm value is fixed.
 | `openspec validate --all --strict` | 19/19 |
 | `spec-reviewer`, pass 17 | 0 blockers, 2 major (this record not yet written; the fix branch missing from the branch headers), 7 minor (DOD sections, the api section 7 closure and coverage row, the reason for item 9, 9.7 not checkable as one task, the bound of 9.2, the WP5 schema in 9.6). All fixed |
 | `spec-reviewer`, pass 18 | 0 blockers, 0 major, 2 minor (9.9 verify clause for the docstrings, one overlong line), both fixed. **READY for DOR** for both changes, with this record |
+
+## 16. Review follow-ups: GO, review and merge (2026-10-03)
+
+`fix/calculation-engine/backend` (this change's tasks 9.1-9.9, `calculation-api` tasks
+7.1-7.2), committed in `5d487a1`.
+
+| Step | Result |
+|---|---|
+| `tester` at `5d487a1` | **GO**: 669 passed, 1 skipped; branch coverage 100%; `postgres` module 5/5, median 3.9 ms; every behaviour fix (9.1, 9.2, 9.3, 9.4, 9.6, api 7.1, 7.2) checked both ways in a throwaway copy (its new tests fail on `develop`'s file and pass on the branch); a fuzz of `round_value` on about 200 000 finite floats raised nothing; the pass, fail, refused and default reports render identical `word/*` parts except the random `result_id`; `python-docx` 1.2.0; only `backend/` changed; UI/UX N/A |
+| `orchestrator` review at `5d487a1` | **APPROVED**: the XML 1.0 set (Cc, surrogates, U+FFFE, U+FFFF) is right and no other untrusted text reaches the report; the rounding precision cannot fail for a finite float (200 000 probes); the "symbol without a value" error is kept; dropping the duplicate first-page setting is safe for the only caller; no `500` log line is lost. Two minor findings |
+| Review fixes `57aacc4` | the check outcome words come from `VERDICT_TEXTS` (9.7b literally met); the start-up test covers empty and blank `engineer` and `rationale`; decision 14 records the decimal-places limit and the local precision |
+| `tester` at `57aacc4` | **GO** reconfirmed: 672 passed, 1 skipped, coverage 100%, report XML unchanged |
+| Merge | `1027627` into `develop`; on `develop` after the merge: `check.sh` 672 passed, coverage 100%, `postgres` module 5/5 |
+
+Of the 18 follow-ups of sections 12-14, item 3 was fixed in `cc70f7d`, item 6 waits in
+`normative-catalog-backend` (task 7.1c), item 9 (per-column length limits) stays the
+follow-up in `tasks.md` "Dependencies"; all others are done. Open in this change: the
+frontend feature (3.4, 3.5, 5.4), task 7.2, and the archive (8.3) after
+`retarget-mvp-domain`.

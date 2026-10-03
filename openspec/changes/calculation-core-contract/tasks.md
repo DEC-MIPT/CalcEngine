@@ -101,48 +101,48 @@ item 9 (per-column length limits) stays the follow-up listed in "Dependencies", 
 it needs a decision on how many characters each title-block column holds and adds new
 request rejections with their own scenario; item 3 is already fixed in `cc70f7d`.
 
-- [ ] 9.1 (item 8, first) Reject in the report request's `Text` every character that XML
+- [x] 9.1 (item 8, first) Reject in the report request's `Text` every character that XML
   1.0 does not allow, besides category Cc ("GOST report structure", scenario "Text that
   cannot be written to the document") (backend); verify: U+0000, U+0009, U+FFFE, U+FFFF
   in a title-block or signature text are rejected by the schema; Cyrillic and other
   printable text passes; `POST /calculations/{result_id}/report` with U+FFFF answers
-  `422 validation_error`, not `500`
-- [ ] 9.2 (item 1) Bound `RoundingRule.decimals` and round in a context with enough
+  `422 validation_error`, not `500` (done 2026-10-03 on `fix/calculation-engine/backend`, `5d487a1`, review fixes `57aacc4`; merged in `1027627`)
+- [x] 9.2 (item 1) Bound `RoundingRule.decimals` and round in a context with enough
   precision, raising `CalculationError` instead of `decimal.InvalidOperation` (backend);
   the bound is an implementation limit of a float output (its significant digits), not a
   norm value; verify: a rule at the bound is accepted and one above it is rejected by the
   schema; rounding a very large value by an allowed rule gives its value or a
-  `CalculationError`, never `InvalidOperation`
-- [ ] 9.3 (item 2) Check the units of a formula's symbols before the tree is evaluated
+  `CalculationError`, never `InvalidOperation` (done 2026-10-03 on `fix/calculation-engine/backend`, `5d487a1`, review fixes `57aacc4`; merged in `1027627`)
+- [x] 9.3 (item 2) Check the units of a formula's symbols before the tree is evaluated
   (backend); verify: a formula whose evaluation would fail (division by zero) and whose
-  symbol has a wrong unit fails with `UnitError` naming the symbol, not `ExpressionError`
-- [ ] 9.4 (item 4) Detect a refusal by `outcome.refusal is not None` in
+  symbol has a wrong unit fails with `UnitError` naming the symbol, not `ExpressionError` (done 2026-10-03 on `fix/calculation-engine/backend`, `5d487a1`, review fixes `57aacc4`; merged in `1027627`)
+- [x] 9.4 (item 4) Detect a refusal by `outcome.refusal is not None` in
   `engine/pipeline.py`, as `design.md` decision 3 names it (backend); verify: the refusal
-  and completion tests still pass
-- [ ] 9.5 (item 5) One alias for the trace-step union and one `Operator` literal, both in
+  and completion tests still pass (done 2026-10-03 on `fix/calculation-engine/backend`, `5d487a1`, review fixes `57aacc4`; merged in `1027627`)
+- [x] 9.5 (item 5) One alias for the trace-step union and one `Operator` literal, both in
   `schemas` (backend); verify: each is defined once (`grep`), and `ruff`, `mypy` and the
-  tests pass
-- [ ] 9.6 (item 7) `EngineerRule`: `engineer` and `rationale` at least one character, and
+  tests pass (done 2026-10-03 on `fix/calculation-engine/backend`, `5d487a1`, review fixes `57aacc4`; merged in `1027627`)
+- [x] 9.6 (item 7) `EngineerRule`: `engineer` and `rationale` at least one character, and
   the model frozen (backend); this changes a schema of `backend-layered-architecture`
   (WP5, `schemas/parameters.py`), which this change already extends; verify: an empty
   engineer or rationale is rejected, also in a parameter file, which then stops the
-  start-up naming the file and the value
-- [ ] 9.7a (items 10-11) Label `FORMAT_BOX_MM` as a layout choice, not a norm value, and
+  start-up naming the file and the value (done 2026-10-03 on `fix/calculation-engine/backend`, `5d487a1`, review fixes `57aacc4`; merged in `1027627`)
+- [x] 9.7a (items 10-11) Label `FORMAT_BOX_MM` as a layout choice, not a norm value, and
   rename the title block's `FRAME_SIDES` to `FRAME_DRAWN_SIDES` (backend); verify: the
   label is in the constant's docstring, no `FRAME_SIDES` is left in `title_block.py`, and
-  the report tests pass unchanged
-- [ ] 9.7b (items 12-13) Take the font and the repeated sheet setting from `layout`, and
+  the report tests pass unchanged (done 2026-10-03 on `fix/calculation-engine/backend`, `5d487a1`, review fixes `57aacc4`; merged in `1027627`)
+- [x] 9.7b (items 12-13) Take the font and the repeated sheet setting from `layout`, and
   keep the verdict words in one table (backend); verify: the font name and each verdict
-  word appear once in `app/reporting` (`grep`), and the report tests pass unchanged
-- [ ] 9.8 (item 14) Pin `python-docx>=1.2,<2` in `backend/requirements.txt` (backend);
-  verify: the installed version satisfies it and the tests pass
-- [ ] 9.9 (items 15-16) The timing and two-sheet report tests include the accountability
+  word appear once in `app/reporting` (`grep`), and the report tests pass unchanged (done 2026-10-03 on `fix/calculation-engine/backend`, `5d487a1`, review fixes `57aacc4`; merged in `1027627`)
+- [x] 9.8 (item 14) Pin `python-docx>=1.2,<2` in `backend/requirements.txt` (backend);
+  verify: the installed version satisfies it and the tests pass (done 2026-10-03 on `fix/calculation-engine/backend`, `5d487a1`, review fixes `57aacc4`; merged in `1027627`)
+- [x] 9.9 (items 15-16) The timing and two-sheet report tests include the accountability
   section, and the docstrings of `FRAME_MM`, `ROW_HEIGHT_MM`, `FORM6_ROW_HEIGHTS_MM` say
   "edition unverified" (backend); verify: the 200-step timing test, now with the
   accountability block, stays under 1 minute, and the three docstrings contain "edition
-  unverified" (`grep`)
-- [ ] 9.10 `tester` issues the GO for `fix/calculation-engine/backend`, `orchestrator`
-  reviews it, then it merges into `develop` (backend)
+  unverified" (`grep`) (done 2026-10-03 on `fix/calculation-engine/backend`, `5d487a1`, review fixes `57aacc4`; merged in `1027627`)
+- [x] 9.10 `tester` issues the GO for `fix/calculation-engine/backend`, `orchestrator`
+  reviews it, then it merges into `develop` (backend) (2026-10-03: `tester` GO at `5d487a1`, reconfirmed at `57aacc4`; `orchestrator` APPROVED at `5d487a1`, its two minor findings closed in `57aacc4` and in decision 14; merged into `develop` in `1027627`)
 
 ## Dependencies
 

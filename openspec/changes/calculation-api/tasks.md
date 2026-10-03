@@ -173,13 +173,13 @@ Added 2026-10-03 from the second `orchestrator` review (items 17-18 in
 `fix/calculation-engine/backend`, with `calculation-core-contract` section 9. The GO, the
 review and the merge of this section are `calculation-core-contract` task 9.10.
 
-- [ ] 7.1 (item 17) An unexpected error writes one log line with the code, the route and
+- [x] 7.1 (item 17) An unexpected error writes one log line with the code, the route and
   the exception type, also when the response had already started (`design.md` decision 5)
   (backend); verify: one log record per unexpected error, holding
-  `code=internal_error`, the route template and the type, in both cases
-- [ ] 7.2 (item 18) Dispose the engine the application built also when the lifespan exits
+  `code=internal_error`, the route template and the type, in both cases (done 2026-10-03 on `fix/calculation-engine/backend`, `5d487a1`, review fixes `57aacc4`; merged in `1027627`)
+- [x] 7.2 (item 18) Dispose the engine the application built also when the lifespan exits
   with an error (`try`/`finally` around `yield`) (backend); verify: the engine is disposed
-  when an exception is thrown into the lifespan at `yield`
+  when an exception is thrown into the lifespan at `yield` (done 2026-10-03 on `fix/calculation-engine/backend`, `5d487a1`, review fixes `57aacc4`; merged in `1027627`)
 
 ## Requirement coverage
 
