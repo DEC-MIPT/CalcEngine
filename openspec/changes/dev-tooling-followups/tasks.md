@@ -97,24 +97,21 @@ branch, so `tasks.md` may run ahead of the code on `develop`.
 
 ## 5. Documents (spec, directly on `develop`)
 
-- [ ] 5.1 Ask Egor, in a new file in `docs/decisions/`, to acknowledge the second
-  sentence of decision 1 (`AGENTS.md` section 4 and "Go/No-Go verdict and archive": a
-  line-only baseline refresh does not make a change a change with code); his answer of
-  2026-10-04 covers only the section 2 sentence; verify the file exists on `develop` and
-  his acknowledgement is recorded under its `## Answers` before 5.2
-- [ ] 5.2 Add the two sentences of decision 1 to `AGENTS.md` sections 2 and 4, only after
+- [ ] 5.1 Add the two sentences of decision 1 to `AGENTS.md` sections 2 and 4, only after
   Akim's explicit agreement to that edit (`CLAUDE.md`, "Do not change without
   agreement"), only after 6.2 and in the same session as 6.3, so `AGENTS.md` and the base
-  spec change on `develop` together; verify Akim's agreement and Egor's acknowledgement
-  of 5.1 are on record, the sentences match decision 1 and the spec delta, and the
-  commit message cites Egor's two answers
-- [ ] 5.3 Fix `CLAUDE.md`: replace "Egor installs it after he answers the baseline
+  spec change on `develop` together; verify Akim's agreement is on record, the sentences
+  match decision 1 and the spec delta, and the commit message cites Egor's answer of
+  2026-10-04 (part 3) for the section 2 sentence
+- [ ] 5.2 Fix `CLAUDE.md`: replace "Egor installs it after he answers the baseline
   question" with what Egor's answer says (he marks his two files and adds the `ml/` ->
   `app` check; installing the hook is his own step, not yet stated), and describe the
-  refresh rule once 5.2 is in; verify the lines read as stated
-- [ ] 5.4 Tell Egor in a new file in `docs/decisions/` that the notebook exclusion and
-  the refresh rule are in place and that the hook needs `python3.12` on `PATH`; verify
-  the file names the merge commit and the two files he marks himself
+  refresh rule once 5.1 is in; verify the lines read as stated
+- [ ] 5.3 Tell Egor in a new file in `docs/decisions/` that the notebook exclusion and
+  the refresh rule are in place, quote the section 4 sentence added without a separate
+  acknowledgement and invite his objection, and say that the hook needs `python3.12` on
+  `PATH`; verify the file names the merge commit, the two files he marks himself, and
+  the section 4 sentence
 
 ## 6. Close
 
@@ -125,7 +122,7 @@ branch, so `tasks.md` may run ahead of the code on `develop`.
   and the review by Egor or the orchestrator, then the merge into `develop`; verify the
   GO and the review are recorded in `docs/decisions/dev-tooling-followups-readiness.md`
 - [ ] 6.3 `spec-keeper` syncs the delta into `openspec/specs/development-process/spec.md`
-  and archives the change, in the same session as 5.2; verify `openspec validate --all
+  and archives the change, in the same session as 5.1; verify `openspec validate --all
   --strict` passes after the archive, the base spec and `AGENTS.md` state the same rule,
   and `pre-commit run --all-files` passes on the moved files
 
@@ -133,9 +130,8 @@ branch, so `tasks.md` may run ahead of the code on `develop`.
 
 - None to start: WP6 is merged and archived; Egor's answer is on `develop` (`dc09e57`).
 - Order: 2.1 and 2.2 before 2.3 (one scan covers the final files); 2.3 before 2.4;
-  6.1 needs sections 2-4; 6.2 needs 6.1; 5.1 any time before 5.2; 5.2 after 6.2 and in
-  the same session as 6.3; 5.3 after 5.2; 5.4 after 5.2 (the rule is in place only
-  then).
+  6.1 needs sections 2-4; 6.2 needs 6.1; 5.1 after 6.2 and in the same session as 6.3;
+  5.2 and 5.3 after 5.1 (the rule is in place only then).
 - `normative-catalog-backend` (WP9) adds tests with placeholder passwords
   (`test_db_catalog.py`, `test_services_catalog_unavailable.py`, `test_api_normatives.py`)
   that this change's baseline does not list. Whichever of the two features merges
@@ -174,6 +170,7 @@ branch, so `tasks.md` may run ahead of the code on `develop`.
 - NO-GO: validation fails; an open blocker or major review finding; a check fails;
   coverage below 95%; a real secret in the baseline or in a marked line; a file in `ml/`
   or `infra/` changed.
-- Archive (6.3) and the `AGENTS.md` edit (5.2) are blocked without Akim's explicit
-  agreement to the edit and Egor's acknowledgement of task 5.1; 5.2's verify checks both.
+- Archive (6.3) and the `AGENTS.md` edit (5.1) are blocked without Akim's explicit
+  agreement to the edit; 5.1's verify checks it. An objection from Egor to the section 4
+  sentence, raised after the note of 5.3, reopens that sentence.
 - Archive (6.3) happens only after GO.

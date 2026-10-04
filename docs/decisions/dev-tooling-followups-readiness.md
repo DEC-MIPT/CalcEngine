@@ -70,6 +70,18 @@ PASS. No formula, coefficient, limit or tolerance; every number in the change is
 process or tooling value (the 95% coverage gate, Python 3.12, tool versions, exit codes,
 an Alembic revision id). No norm document is mentioned.
 
-## 4. Implementation evidence
+## 4. Change after DOR (2026-10-04)
+
+Akim decided not to ask Egor for a separate acknowledgement of the section 4 sentence
+(former task 5.1): `CLAUDE.md` lets Akim edit `AGENTS.md` on his explicit word, a change
+with code needs the `tester` GO and a review (Egor or the orchestrator), not the second
+developer's acknowledgement, and the sentence follows from Egor's answer, part 3. Egor
+is told in the note of task 5.3, which invites his objection. Section 5 is renumbered:
+the `AGENTS.md` edit is now 5.1, the `CLAUDE.md` fix 5.2, the note to Egor 5.3; the
+references in section 2 above keep the numbering of the passes. `design.md` decision 1,
+`proposal.md`, "Dependencies" and "DOD and Go / No-Go" updated; no requirement or
+scenario of the delta changed, so the DOR stands.
+
+## 5. Implementation evidence
 
 Task 2.4 records its probe output here when it runs.

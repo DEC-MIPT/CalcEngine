@@ -81,9 +81,13 @@ scenario "Allowed line removed by a document commit" is revised before the archi
 it does not), and `git diff .secrets.baseline`
 shows only changed `line_number` values, removed entries, or a new `generated_at`.
 
-Egor agreed to the section 2 sentence on 2026-10-04; the section 4 sentence follows
-from it but is a second edit of a shared file, so task 5.1 asks for his acknowledgement
-before it is made (a new file in `docs/decisions/`).
+Egor agreed to the section 2 sentence on 2026-10-04. The section 4 sentence follows
+from it and only narrows the "no code" rule for that case. Akim decided on 2026-10-04
+to make it without a separate acknowledgement: `CLAUDE.md` lets Akim edit `AGENTS.md`
+on his explicit word, and a change with code needs the `tester` GO and a review (by Egor
+or the orchestrator), not the second developer's acknowledgement. Egor is told in the
+note of task 5.3, which invites his objection; an objection reopens the sentence before
+the archive.
 
 - **Why:** Egor's answer, part 3 (2026-10-04). The baseline holds no secret, and a
   line-number change carries no review decision. Without the section 4 sentence a
@@ -238,7 +242,7 @@ layers contract keeps `engine` where that decision puts it.
   `python3.12` on `PATH`, Egor's included] → It is the backend's version and
   `backend/.venv` provides it where the setup line of `CLAUDE.md` was followed; an
   unpinned interpreter older than 3.10 would fail anyway on the script's annotations.
-  The note to Egor (task 5.4) says it.
+  The note to Egor (task 5.3) says it.
 - [WP9 adds a top-level `app.*` module or package] → Checked when the second of the two
   features merges (`tasks.md`, "Dependencies"); the exhaustive contract then names it.
 
@@ -246,7 +250,7 @@ layers contract keeps `engine` where that decision puts it.
 
 - Order on the branch: markers and the notebook exclusion, then the regenerated
   baseline, so one scan covers the final files.
-- `AGENTS.md` (task 5.2) is edited only after GO and the review (task 6.2), in the same
+- `AGENTS.md` (task 5.1) is edited only after GO and the review (task 6.2), in the same
   session as the archive (task 6.3), so `AGENTS.md` and the base spec change on
   `develop` together. Until then the old rule applies: a line shift in a listed document
   waits for this change or goes through a fix branch.

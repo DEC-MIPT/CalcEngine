@@ -23,8 +23,8 @@ backend package.
   with code. A new finding still needs a hand review and a scan on a feature or fix
   branch. Recorded in `AGENTS.md` sections 2 and 4 and in the `development-process`
   requirements "Documents commit directly to develop" and "Go/No-Go verdict and archive"
-  (Egor's answer, part 3; his acknowledgement of the section 4 sentence is asked in
-  task 5.1).
+  (Egor's answer, part 3; the section 4 sentence follows from it and Egor is told of it
+  in the note of task 5.3).
 - **Research notebooks out of the scan.** `ml/research/*.ipynb` is excluded from
   `detect-secrets` in `.pre-commit-config.yaml`; the notebooks keep their executed
   outputs (Egor's answer, part 2). Credentials stay out of notebooks by convention.
@@ -91,7 +91,7 @@ None.
 - Documents (directly on `develop`): `AGENTS.md` sections 2 and 4 (edited only with
   Akim's explicit agreement, `CLAUDE.md` "Do not change without agreement", after GO and
   together with the archive; Egor agreed to the section 2 sentence on 2026-10-04 and is
-  asked to acknowledge the section 4 sentence), `CLAUDE.md`, two notes to Egor in
-  `docs/decisions/`.
+  told of the section 4 sentence in the note of task 5.3), `CLAUDE.md`, one note to Egor
+  in `docs/decisions/`.
 - Egor: no file of his zone changes. The notebook exclusion and the refresh rule apply
   to his commits once he installs the hook.
