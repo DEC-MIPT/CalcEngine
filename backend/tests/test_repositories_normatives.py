@@ -1,5 +1,6 @@
 from collections.abc import Iterator
 from typing import Any
+from unittest import mock
 
 import pytest
 from catalog_fixture import (
@@ -160,3 +161,24 @@ def test_a_search_hit_has_a_known_kind() -> None:
     assert hit.kind == "clause"
     with pytest.raises(ValidationError):
         SearchHit.model_validate(hit.model_dump() | {"kind": "table"})
+
+
+def test_the_search_sends_one_statement_with_bound_values() -> None:
+    session = mock.Mock(spec=Session)
+    found = {
+        "kind": "clause",
+        "document_id": 1,
+        "designation": PLACEHOLDER_DOCUMENTS[0],
+        "edition": "unverified",
+        "number": PLACEHOLDER_CLAUSES[1],
+        "title": None,
+    }
+    session.execute.return_value.mappings.return_value = [found]
+
+    hits = NormativesRepository(session).search("x' OR '1'='1", 5)
+
+    ((statement, parameters),) = [call.args for call in session.execute.call_args_list]
+    assert hits == (SearchHit.model_validate(found),)
+    assert parameters == {"query": "x' OR '1'='1", "max_rows": 5}
+    assert "catalog_read.search(:query, :max_rows)" in str(statement) and "'1'" not in str(statement)
+    assert 'ORDER BY rank DESC, designation COLLATE "C", number COLLATE "C" NULLS FIRST' in str(statement)

@@ -8,6 +8,7 @@ from sqlalchemy import (
     Table,
     Text,
     select,
+    text,
 )
 from sqlalchemy.orm import Session
 
@@ -17,6 +18,7 @@ from app.schemas.normatives import (
     DocumentView,
     FormulaRow,
     MethodBoundRow,
+    SearchHit,
     TableValueRow,
     ThresholdRow,
 )
@@ -31,6 +33,13 @@ metadata = MetaData(schema=SCHEMA)
 """
 
 NUMBER = Numeric(asdecimal=False)
+
+SEARCH = text(
+    "SELECT kind, document_id, designation, edition, number, title"
+    f" FROM {SCHEMA}.search(:query, :max_rows)"
+    ' ORDER BY rank DESC, designation COLLATE "C", number COLLATE "C" NULLS FIRST'
+)
+"""Поиск функцией каталога; порядок равных по рангу — по обозначению и номеру побайтно, без локали базы."""
 
 documents = Table(
     "documents",
@@ -224,6 +233,22 @@ class NormativesRepository:
             .order_by(table.c.quantity, table.c.kind)
         )
         return tuple(MethodBoundRow(**row) for row in rows.mappings())
+
+    def search(self, query: str, max_rows: int) -> tuple[SearchHit, ...]:
+        """Ищет документы, пункты и формулы функцией ``catalog_read.search``.
+
+        Запрос уходит одним оператором, текст клиента — связанным параметром
+        (спецификация "Normative search endpoint").
+
+        Args:
+            query: текст поиска как его написал клиент.
+            max_rows: наибольшее число совпадений.
+
+        Returns:
+            Совпадения по убыванию ранга, затем по обозначению и номеру.
+        """
+        rows = self._session.execute(SEARCH, {"query": query, "max_rows": max_rows})
+        return tuple(SearchHit(**row) for row in rows.mappings())
 
     def document(self, document_id: int) -> DocumentView | None:
         """Документ каталога с пунктами в порядке документа.
