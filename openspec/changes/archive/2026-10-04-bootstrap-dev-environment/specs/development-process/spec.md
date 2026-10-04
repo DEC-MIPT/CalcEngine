@@ -74,7 +74,7 @@ reads, checked automatically rather than by manual review.
 - **WHEN** a commit is staged and the backend's configuration model declares an
   environment variable that `.env.example` does not list
 - **THEN** the commit is blocked and the missing variable is named; this check runs as
-  a pre-commit hook, not as part of the backend tooling command
+  a pre-commit hook, and the backend tooling command may also run it
 
 #### Scenario: Configuration model not yet present
 - **WHEN** the backend's configuration model does not exist yet

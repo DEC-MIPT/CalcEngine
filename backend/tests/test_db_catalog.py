@@ -17,7 +17,7 @@ from app.db.catalog import READ_ONLY_OPTIONS, CatalogSessions, get_catalog_engin
 from app.engine.registry import CalculatorRegistry
 from app.main import create_app
 
-URL = "postgresql://dec_normatives_reader:hunter2@127.0.0.1:1/dec"
+URL = "postgresql://dec_normatives_reader:hunter2@127.0.0.1:1/dec"  # pragma: allowlist secret
 
 
 @pytest.fixture
@@ -68,7 +68,7 @@ def test_an_unset_variable_raises_without_a_url(monkeypatch: pytest.MonkeyPatch)
     assert str(exc_info.value) == "the normative catalog is not configured"
 
 
-@pytest.mark.parametrize("url", ["not a url", "postgresql://dec_normatives_reader:hunter2@127.0.0.1:port/dec"])
+@pytest.mark.parametrize("url", ["not a url", "postgresql://dec_normatives_reader:hunter2@127.0.0.1:port/dec"])  # pragma: allowlist secret
 def test_an_unparsable_url_raises_without_the_url(url: str, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DEC_NORMATIVES_DATABASE_URL", url)
 

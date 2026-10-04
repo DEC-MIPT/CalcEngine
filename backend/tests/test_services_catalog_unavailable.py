@@ -20,7 +20,7 @@ from app.models.calculation_result import CalculationResultRow
 from app.repositories.normatives import NormativesRepository
 from app.services.catalog_source import CatalogParameterSource
 
-CLOSED = "postgresql://dec_normatives_reader:hunter2@127.0.0.1:1/dec"
+CLOSED = "postgresql://dec_normatives_reader:hunter2@127.0.0.1:1/dec"  # pragma: allowlist secret
 MESSAGE = f"The normative catalog is not available for the calculation type '{PILOT}'."
 LINE = f"code=catalog_unavailable type={PILOT}"
 

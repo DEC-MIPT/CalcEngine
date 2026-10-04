@@ -23,7 +23,7 @@ from app.models import Base
 from app.repositories.normatives import NormativesRepository
 from app.schemas.normatives import SearchHit
 
-CLOSED = "postgresql://dec_normatives_reader:hunter2@127.0.0.1:1/dec"
+CLOSED = "postgresql://dec_normatives_reader:hunter2@127.0.0.1:1/dec"  # pragma: allowlist secret
 UNAVAILABLE = {"code": "catalog_unavailable", "message": "The normative catalog is not available."}
 
 HITS = tuple(

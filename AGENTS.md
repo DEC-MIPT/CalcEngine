@@ -63,7 +63,14 @@ Every task in this project MUST be recorded in specs through OpenSpec. There is 
   sub-branch and no merge commit for them: the other developer reads `develop`, so a
   document is current as soon as it is committed. Before every commit and every push run
   `git fetch --all` and `git pull --ff-only`; if `develop` has diverged, stop and resolve
-  it before going on.
+  it before going on. One exception for `.secrets.baseline`: when the pre-commit secret
+  scan only rewrites line numbers in it or drops the entries of removed lines (exit 3,
+  "The baseline file was updated", no "Potential secrets" report, and a diff of only
+  `line_number` values, removed entries and `generated_at`), the rewritten baseline is
+  committed together with the change that caused it, on that change's branch, `develop`
+  included. A new finding is never added to the baseline in such a commit: it is removed
+  from the file or marked there as a placeholder, or the baseline is regenerated with a
+  hand review on a feature or fix branch.
 - **Code goes only through a feature branch.** A feature is a component or a stage of
   the plan (for example the calculation engine, the report generator, the backend core,
   the frontend), named in the `tasks.md` of the one OpenSpec change it belongs to; a change
@@ -157,7 +164,9 @@ takes the code-free path below instead.
 - **No code** means the change adds or edits no file outside `openspec/`, `docs/`,
   `agent-docs/`, the agent and skill definitions under `.claude/`, `.kilo/`, and
   `.kilocode/`, and `AGENTS.md`, `CLAUDE.md`, `README.md`, `.editorconfig`. Agent
-  settings (for example `.claude/settings.json`) and `.gitignore` are not on the list.
+  settings (for example `.claude/settings.json`) and `.gitignore` are not on the list. A
+  refresh of `.secrets.baseline` that adds no finding, committed with a document under
+  the exception of section 2, does not make a change a change with code.
 - **NO-GO** — any of: test failure, coverage < 95%, unvalidated OpenSpec artifacts,
   UI/UX defects blocking the user flow, or security findings; for a change with no
   code, also a missing acknowledgement, an open blocker or major review finding, or a

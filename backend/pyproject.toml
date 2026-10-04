@@ -20,8 +20,58 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["app"]
+source = ["app", "scripts"]
 branch = true
 
 [tool.coverage.report]
 show_missing = true
+exclude_also = ['if __name__ == "__main__":']
+
+[tool.importlinter]
+root_package = "app"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Layers follow backend-layered-architecture design.md decision 2"
+type = "layers"
+containers = ["app"]
+exhaustive = true
+exhaustive_ignores = ["main"]
+layers = [
+    "api | worker",
+    "services",
+    "engine | parameters | reporting",
+    "repositories",
+    "db",
+    "models | schemas",
+    "core",
+]
+
+[[tool.importlinter.contracts]]
+name = "api and worker do not import repositories or models"
+type = "forbidden"
+source_modules = ["app.api", "app.worker"]
+forbidden_modules = ["app.repositories", "app.models"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "engine imports from the application only schemas and core"
+type = "forbidden"
+source_modules = ["app.engine"]
+forbidden_modules = [
+    "app.api",
+    "app.worker",
+    "app.services",
+    "app.parameters",
+    "app.reporting",
+    "app.repositories",
+    "app.db",
+    "app.models",
+    "app.main",
+]
+
+[[tool.importlinter.contracts]]
+name = "the backend does not import the normative pipeline"
+type = "forbidden"
+source_modules = ["app"]
+forbidden_modules = ["normatives_pipeline"]

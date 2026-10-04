@@ -114,7 +114,7 @@ from the backend's `schemas/units.py` list (for example `kPa`, `m`, `deg`, `1`).
 |---|---|---|
 | `catalog_read.documents` | `document_id int`, `designation text`, `title text`, `edition text`, `year int null`, `source_url text null` | One row per document. |
 | `catalog_read.clauses` | `document_id int`, `position int`, `number text`, `title text null`, `page int null` | `position` gives document order. |
-| `catalog_read.search(query text, max_rows int)` | returns `kind text` (`document`, `clause`, `formula`), `document_id int`, `designation text`, `edition text`, `number text null`, `title text null`, `rank real` | Egor's ranking (`pg_trgm`); at most `max_rows` rows. |
+| `catalog_read.search(query text, max_rows int)` | returns `kind text` (`document`, `clause`, `formula`), `document_id int`, `designation text`, `edition text`, `number text null`, `title text null`, `rank real` | Egor's ranking (`pg_trgm` `similarity`, 0..1); rows ordered by `rank DESC`, then `designation COLLATE "C"`, then `number COLLATE "C" NULLS FIRST`, and `LIMIT max_rows` applied after that order. |
 | `catalog_read.type_formulas` | `calculation_type text`, `parameter text`, `result_symbol text`, `latex text`, `tree jsonb`, `units jsonb` (symbol id → unit, including the result symbol), `norm_refs jsonb` | One row per formula parameter. |
 | `catalog_read.type_table_values` | `calculation_type text`, `parameter text`, `symbol text`, `latex text`, `value numeric`, `unit text`, `heading_symbol text null`, `heading_value numeric null`, `heading_unit text null`, `norm_refs jsonb` | One row per table row for a selected parameter, one row with null headings for a parameter that no input selects. |
 | `catalog_read.type_thresholds` | `calculation_type text`, `parameter text`, `latex text`, `value numeric`, `unit text`, `norm_refs jsonb` | |
@@ -136,6 +136,12 @@ reference status":
 - One parameter appears in exactly one of the four `type_*` parameter views, the one
   that matches the kind its field has in the parameters model (`Formula`, `TableValue`,
   `Threshold`, `NormRefs`).
+- `search` orders ties inside the function, before its `LIMIT`: the backend sorts only
+  the rows it gets back, so a tie at the cut would otherwise drop the hit that the spec
+  "Normative search endpoint" puts first. The backend keeps the same `ORDER BY` on its
+  side. Agreed with Egor on 2026-10-04
+  (`docs/decisions/normative-catalog-search-order-questions-akim.md`, "Answers"); he
+  implements it in task 2.6, Akim's synthetic function follows it (task 4.4).
 - A selected table has one heading per parameter: every row of a parameter carries the
   same `heading_symbol`, or no row does. A selection by two inputs needs new columns and
   a change to this decision.
@@ -177,9 +183,13 @@ Every transaction is therefore read-only, even if the role were wrong.
 
 Errors map like this:
 
-- the variable is unset, or a connection error (`OperationalError`, `InterfaceError`)
-  occurs: `CatalogUnavailableError` on the catalog endpoints;
+- the variable is unset, a connection error (`OperationalError`, `InterfaceError`)
+  occurs, or the database refuses the read with `ProgrammingError` (the schema
+  `catalog_read` or a view is missing, or the role lacks a privilege, as after the
+  rollback of "Migration Plan"): `CatalogUnavailableError` on the catalog endpoints;
 - the same conditions inside a parameter source: `ParameterSourceUnavailableError`.
+
+The driver's text is dropped in both cases (`from None`), because it may hold the URL.
 
 - **Why:** the spec "Catalog unavailability". This is the WP8 decision 7 pattern for
   `dec_app`.
@@ -333,8 +343,10 @@ text.
 `DEC_ERRORS`, with the fixed message "The normative catalog is not available.". The
 search `q` is an `Annotated[str, StringConstraints(strip_whitespace=True, min_length=2,
 max_length=200)]`, so its errors are of the static types (`string_too_short`,
-`string_too_long`, `missing`) and never echo the value. `document_id` is a `Path(gt=0)`
-integer.
+`string_too_long`, `missing`) and never echo the value. `limit` is a `Query(ge=1,
+le=50)` integer and `document_id` a `Path(gt=0)` integer; their errors (`int_type`,
+`int_parsing`, `greater_than`, `greater_than_equal`, `less_than_equal`) name the limit,
+not the value, so `STATIC_MESSAGE_TYPES` passes their text on as well.
 
 ### 9. Testing without Egor's database
 
