@@ -1,11 +1,14 @@
+import importlib.metadata
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
+import yaml
 
 from scripts.check_env_example import (
     CONFIG,
+    ROOT,
     TEMPLATE,
     UNREADABLE,
     SettingsVariables,
@@ -16,130 +19,152 @@ from scripts.check_env_example import (
     template_keys,
 )
 
-SETTINGS = '''
-from typing import ClassVar
+HEADER = """
+from typing import Annotated, ClassVar
 
-import pydantic
-import pydantic_settings
-from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
-
-
-class Settings(BaseSettings):
-    model_config: SettingsConfigDict = SettingsConfigDict(env_file=".env")
-    LIMIT: ClassVar[int] = 3
-    NAMES: ClassVar = ("a",)
-    url: str = Field(validation_alias="DEC_URL")
-    other: str = Field(alias="DEC_OTHER")
-    plain: int = 1
-    again: str = Field(validation_alias="DEC_URL")
-    computed: str = Field(default="x")
-    qualified: str = pydantic.Field(validation_alias="DEC_QUALIFIED")
-    bare: str
-    unannotated = "not a field"
-
-    def method(self) -> None: ...
+from pydantic import AliasChoices, Field
+from pydantic_settings import BaseSettings, EnvSettingsSource, SettingsConfigDict
+"""
 
 
-class Other(pydantic_settings.BaseSettings):
-    model_config = {"case_sensitive": True}
-    both: str = Field(alias="DEC_ALIAS", validation_alias="DEC_VALIDATION")
-    reversed_order: str = Field(validation_alias="DEC_FIRST", alias="DEC_SECOND")
+def module(tmp_path: Path, body: str) -> Path:
+    path = tmp_path / "config.py"
+    path.write_text(HEADER + body, encoding="utf-8")
+    return path
 
 
-class Helper:
-    ignored: str = Field(validation_alias="DEC_IGNORED")
-'''
-
-READABLE = [
-    "DEC_URL",
-    "DEC_OTHER",
-    "PLAIN",
-    "COMPUTED",
-    "DEC_QUALIFIED",
-    "BARE",
-    "DEC_VALIDATION",
-    "DEC_FIRST",
-]
-
-
-def write(folder: Path, config: str | None, template: str | None) -> tuple[Path, Path]:
-    config_path, template_path = folder / "config.py", folder / ".env.example"
-    if config is not None:
-        config_path.write_text(config, encoding="utf-8")
-    if template is not None:
-        template_path.write_text(template, encoding="utf-8")
-    return config_path, template_path
-
-
-def test_the_variables_are_read_like_pydantic_reads_them() -> None:
-    assert settings_variables(SETTINGS) == SettingsVariables(names=READABLE, unreadable=[])
+@pytest.mark.parametrize(
+    ("body", "names"),
+    [
+        (
+            (
+                "class S(BaseSettings):\n"
+                '    a: str = Field(validation_alias="DEC_A")\n'
+                '    b: str = Field(alias="DEC_B")\n'
+                '    c: str = Field(alias="DEC_ALIAS", validation_alias="DEC_C")\n'
+                "    plain: int = 1\n"
+                "    LIMIT: ClassVar[int] = 3\n"
+                "    _private: str = 'x'\n"
+            ),
+            ["DEC_A", "DEC_B", "DEC_C", "PLAIN"],
+        ),
+        (
+            'class S(BaseSettings):\n    a: str = Field(validation_alias=AliasChoices("DEC_A", "DEC_A2"))\n',
+            ["DEC_A", "DEC_A2"],
+        ),
+        ('class S(BaseSettings):\n    model_config = SettingsConfigDict(env_prefix="DEC_")\n    a: str\n', ["DEC_A"]),
+        (
+            (
+                "class S(BaseSettings):\n"
+                "    model_config = SettingsConfigDict(alias_generator=lambda name: 'DEC_' + name.upper())\n"
+                "    a: str\n"
+            ),
+            ["DEC_A"],
+        ),
+        ("class S(BaseSettings):\n    model_config = SettingsConfigDict(case_sensitive=True)\n    a: str\n", ["a"]),
+        (
+            (
+                "class S(BaseSettings):\n"
+                "    model_config = SettingsConfigDict(populate_by_name=True)\n"
+                '    a: str = Field(validation_alias="DEC_A")\n'
+            ),
+            ["DEC_A", "A"],
+        ),
+        ('def env(name):\n    return Field("d", alias=name)\n\nclass S(BaseSettings):\n    a: str = env("DEC_A")\n', ["DEC_A"]),
+        ('Url = Annotated[str, Field(alias="DEC_URL")]\n\nclass S(BaseSettings):\n    a: Url\n', ["DEC_URL"]),
+        (
+            (
+                "class Base(BaseSettings):\n"
+                '    model_config = SettingsConfigDict(env_prefix="DEC_")\n'
+                "    a: str\n\n"
+                "class Child(Base):\n"
+                "    b: str\n"
+            ),
+            ["DEC_A", "DEC_B"],
+        ),
+    ],
+    ids=[
+        "aliases-and-skipped-attributes",
+        "alias-choices",
+        "env-prefix",
+        "alias-generator",
+        "case-sensitive",
+        "populate-by-name",
+        "field-from-a-helper",
+        "type-alias",
+        "inherited-prefix",
+    ],
+)
+def test_the_names_are_the_ones_pydantic_settings_reads(tmp_path: Path, body: str, names: list[str]) -> None:
+    assert settings_variables(module(tmp_path, body)) == SettingsVariables(names=names, unreadable=[])
 
 
 @pytest.mark.parametrize(
     ("body", "unreadable"),
     [
-        ('    a: str = Field(validation_alias=AliasChoices("A", "B"))\n', ["S.a"]),
-        ('    a: str = Field(alias=AliasPath("a", 0))\n', ["S.a"]),
-        ("    a: str = Field(validation_alias=NAME)\n", ["S.a"]),
-        ("    a: str = Field(validation_alias=None)\n", ["S.a"]),
-        ('    a: str = Field(validation_alias=CHOICES, alias="DEC_A")\n', ["S.a"]),
-        ('    model_config = SettingsConfigDict(env_prefix="DEC_")\n    a: str\n    b: int = 1\n', ["S.a", "S.b"]),
-        ('    model_config = {"env_prefix": "DEC_"}\n    a: str\n', ["S.a"]),
-        ("    model_config = SettingsConfigDict(**OPTIONS)\n    a: str\n", ["S.a"]),
-        ("    model_config = {KEY: 1}\n    a: str\n", ["S.a"]),
-        ("    model_config = OPTIONS\n    a: str\n", ["S.a"]),
-        ("    a: str = Field(**OPTIONS)\n", ["S.a"]),
-        ('    a: Annotated[str, Field(**OPTIONS)]\n', ["S.a"]),
-        ('    a: Annotated[str, Field(alias="DEC_A")] = Field(validation_alias="DEC_B")\n', ["S.a"]),
+        (
+            (
+                "class S(BaseSettings):\n"
+                "    a: str\n\n"
+                "    @classmethod\n"
+                "    def settings_customise_sources(\n"
+                "        cls, settings_cls, init_settings, env_settings, dotenv_settings, file_secret_settings\n"
+                "    ):\n"
+                '        return (EnvSettingsSource(settings_cls, env_prefix="P_"),)\n'
+            ),
+            ["S.*"],
+        ),
+        (
+            (
+                "class S(BaseSettings):\n"
+                "    a: str\n\n"
+                "    def __init__(self, **values):\n"
+                '        super().__init__(_env_prefix="P_", **values)\n'
+            ),
+            ["S.*"],
+        ),
+        (
+            (
+                "class S(BaseSettings):\n"
+                "    a: str\n\n"
+                "    @classmethod\n"
+                "    def _settings_init_sources(cls, *args, **kwargs):\n"
+                "        return super()._settings_init_sources(*args, **kwargs)\n"
+            ),
+            ["S.*"],
+        ),
+        ('raise RuntimeError("broken")\n', ["<module> (RuntimeError)"]),
+        ("import sys\nsys.exit(0)\n", ["<module> (SystemExit)"]),
     ],
-    ids=[
-        "alias-choices",
-        "alias-path",
-        "name",
-        "none",
-        "validation-alias-not-constant-next-to-alias",
-        "env-prefix-call",
-        "env-prefix-dict",
-        "config-kwargs",
-        "config-dict-key-not-constant",
-        "config-name",
-        "field-kwargs",
-        "annotated-field-kwargs",
-        "two-fields",
-    ],
+    ids=["customised-sources", "custom-init", "private-init-sources", "module-fails", "module-exits"],
 )
-def test_a_name_that_cannot_be_read_is_reported_not_guessed(body: str, unreadable: list[str]) -> None:
-    found = settings_variables(f"class S(BaseSettings):\n{body}")
-
-    assert found == SettingsVariables(names=[], unreadable=unreadable)
+def test_names_set_by_code_or_a_broken_module_are_unreadable(tmp_path: Path, body: str, unreadable: list[str]) -> None:
+    assert settings_variables(module(tmp_path, body)) == SettingsVariables(names=[], unreadable=unreadable)
 
 
-def test_a_class_derived_from_another_settings_class_is_unreadable_at_any_depth() -> None:
-    source = (
-        "class Grand(Child):\n    g: str\n\n"
-        "class Base(BaseSettings):\n    a: str\n\n"
-        "class Child(Base):\n    b: str\n\n"
-        "class Empty(Base):\n    pass\n\n"
-        "class Plain(Helper):\n    c: str\n"
-    )
+def test_a_field_pydantic_settings_cannot_resolve_is_unreadable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from pydantic_settings import EnvSettingsSource
 
-    assert settings_variables(source) == SettingsVariables(
-        names=["A"], unreadable=["Grand.g", "Child.b", "Empty.*"]
-    )
+    def broken(self: object, field: object, field_name: str) -> list[tuple[str, str, bool]]:
+        raise ValueError(field_name)
+
+    monkeypatch.setattr(EnvSettingsSource, "_extract_field_info", broken)
+
+    found = settings_variables(module(tmp_path, "class S(BaseSettings):\n    a: str\n"))
+
+    assert found == SettingsVariables(names=[], unreadable=["S.a"])
 
 
-def test_a_field_in_annotated_metadata_is_read_and_private_fields_are_skipped() -> None:
-    source = (
-        "class S(BaseSettings):\n"
-        '    a: Annotated[str, Field(validation_alias="DEC_A")]\n'
-        '    b: Annotated[list[str], NoDecode] = Field(validation_alias="DEC_B")\n'
-        "    c: Annotated[str, NoDecode]\n"
-        "    d: Optional[str] = None\n"
-        "    _private: str = 'x'\n"
-    )
+def test_a_class_used_twice_in_the_module_is_read_once(tmp_path: Path) -> None:
+    found = settings_variables(module(tmp_path, "class S(BaseSettings):\n    a: str\n\nAlias = S\n"))
 
-    assert settings_variables(source) == SettingsVariables(names=["DEC_A", "DEC_B", "C", "D"], unreadable=[])
+    assert found == SettingsVariables(names=["A"], unreadable=[])
+
+
+def test_a_path_that_is_not_a_module_cannot_be_loaded(tmp_path: Path) -> None:
+    assert settings_variables(tmp_path) == SettingsVariables(names=[], unreadable=["<module> (ImportError)"])
 
 
 def test_active_and_commented_keys_are_listed() -> None:
@@ -151,52 +176,53 @@ def test_active_and_commented_keys_are_listed() -> None:
 def test_a_variable_missing_from_the_template_exits_1_with_its_name(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    config, template = write(tmp_path, SETTINGS, "DEC_URL=x\n# DEC_OTHER=y\nPLAIN=1\nDEC_QUALIFIED=\nBARE=\n")
+    config = module(tmp_path, 'class S(BaseSettings):\n    a: str = Field(alias="DEC_A")\n    b: str\n')
+    template = tmp_path / ".env.example"
+    template.write_text("# DEC_A=x\n", encoding="utf-8")
 
     code = main([], config, template)
 
     assert code == 1
-    assert capsys.readouterr().out.splitlines() == [
-        ".env.example: missing COMPUTED, read by config.py",
-        ".env.example: missing DEC_VALIDATION, read by config.py",
-        ".env.example: missing DEC_FIRST, read by config.py",
-    ]
+    assert capsys.readouterr().out.splitlines() == [".env.example: missing B, read by config.py"]
 
 
-def test_an_unreadable_name_exits_2_and_names_the_class_and_field(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    config, template = write(tmp_path, 'class S(BaseSettings):\n    a: str = Field(alias=X)\n    b: str\n', "")
+def test_something_unreadable_exits_2_and_names_it(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    config = module(tmp_path, 'raise RuntimeError("broken")\n')
 
-    code = main([], config, template)
+    code = main([], config, tmp_path / ".env.example")
 
     assert code == UNREADABLE == 2
-    assert capsys.readouterr().out.splitlines() == [
-        "config.py: cannot read the variable name of S.a",
-        ".env.example: missing B, read by config.py",
-    ]
+    assert capsys.readouterr().out.splitlines() == ["config.py: cannot read the variable names of <module> (RuntimeError)"]
 
 
 def test_a_complete_template_exits_0(tmp_path: Path) -> None:
-    config, template = write(tmp_path, SETTINGS, "".join(f"{name}=\n" for name in READABLE))
+    config = module(tmp_path, 'class S(BaseSettings):\n    a: str = Field(alias="DEC_A")\n')
+    template = tmp_path / ".env.example"
+    template.write_text("DEC_A=\n", encoding="utf-8")
 
     assert main([], config, template) == 0
 
 
 def test_without_the_settings_module_nothing_is_checked(tmp_path: Path) -> None:
-    config, template = write(tmp_path, None, None)
-
-    assert check(config, template) == SettingsVariables()
+    assert check(tmp_path / "config.py", tmp_path / ".env.example") == SettingsVariables()
 
 
 def test_without_the_template_every_variable_is_missing(tmp_path: Path) -> None:
-    config, template = write(tmp_path, SETTINGS, None)
+    config = module(tmp_path, "class S(BaseSettings):\n    a: str\n    b: str\n")
 
-    assert missing(config, template) == READABLE
+    assert missing(config, tmp_path / ".env.example") == ["A", "B"]
 
 
 def test_the_repository_settings_are_readable_and_listed() -> None:
     assert check(CONFIG, TEMPLATE) == SettingsVariables()
+
+
+def test_the_hook_pins_the_installed_pydantic_versions() -> None:
+    hooks = yaml.safe_load((ROOT / ".pre-commit-config.yaml").read_text(encoding="utf-8"))
+    (hook,) = [hook for repo in hooks["repos"] for hook in repo["hooks"] if hook["id"] == "env-example-matches-settings"]
+    pins = dict(requirement.split("==") for requirement in hook["additional_dependencies"])
+
+    assert pins == {name: importlib.metadata.version(name) for name in ("pydantic", "pydantic-settings")}
 
 
 def test_the_script_runs_as_a_program() -> None:

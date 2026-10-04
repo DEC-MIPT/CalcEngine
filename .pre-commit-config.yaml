@@ -12,5 +12,6 @@ repos:
         entry: python backend/scripts/check_env_example.py
         language: python
         language_version: python3.12
+        additional_dependencies: ['pydantic==2.13.5', 'pydantic-settings==2.15.0']
         files: ^(backend/app/core/config\.py|\.env\.example)$
         pass_filenames: false

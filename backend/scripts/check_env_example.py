@@ -2,18 +2,20 @@
 
 Хук pre-commit (``bootstrap-dev-environment`` design.md, решение 5; спецификация
 ``development-process`` "Pre-commit secret scan and documented configuration"). Модуль
-настроек разбирается через ``ast``, без импорта приложения, поэтому хуку не нужны
-зависимости бэкенда. Имя переменной читается так, как его разрешает ``pydantic``; имя,
-которое нельзя прочитать статически, не угадывается (``dev-tooling-followups`` design.md,
-решение 4).
+настроек загружается, и имена переменных берутся у самого ``pydantic-settings`` — тем же
+кодом, которым приложение читает окружение, поэтому имя не угадывается
+(``dev-tooling-followups`` design.md, решение 4).
 """
 
-import ast
+import importlib.util
 import re
 import sys
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import ModuleType
+
+from pydantic_settings import BaseSettings, EnvSettingsSource
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "backend" / "app" / "core" / "config.py"
@@ -23,7 +25,13 @@ KEY = re.compile(r"^\s*(?:#\s*)?([A-Z][A-Z0-9_]*)\s*=")
 """Ключ строки шаблона; закомментированная строка ``# KEY=...`` описывает необязательную переменную."""
 
 UNREADABLE = 2
-"""Код выхода, когда имя переменной нельзя прочитать статически; недостающая переменная — ``1``."""
+"""Код выхода, когда имена переменных нельзя получить; недостающая переменная — ``1``."""
+
+MODULE = "_dec_settings_under_check"
+"""Имя, под которым модуль настроек загружается на время проверки."""
+
+SOURCE_METHODS = ("settings_customise_sources", "_settings_init_sources", "_settings_build_values", "__init__")
+"""Методы ``BaseSettings``, которые выбирают источники или строят значения; их подмена задаёт имена кодом."""
 
 
 @dataclass
@@ -31,137 +39,84 @@ class SettingsVariables:
     """Что модуль настроек говорит о своих переменных окружения.
 
     Attributes:
-        names: прочитанные имена переменных в порядке полей, без повторов.
-        unreadable: поля ``<Класс>.<поле>``, имя переменной которых не прочитать без
-            запуска кода; ``<Класс>.*`` — класс без своих полей.
+        names: имена переменных в порядке классов и полей, без повторов; без учёта
+            регистра — в верхнем регистре, с ``case_sensitive=True`` — как есть.
+        unreadable: что не удалось прочитать: ``<Класс>.*`` (класс подменяет источники
+            настроек или ``__init__``), ``<Класс>.<поле>`` (``pydantic-settings`` не дал
+            имён) или ``<module> (<Исключение>)`` (модуль не загрузился).
     """
 
     names: list[str] = field(default_factory=list)
     unreadable: list[str] = field(default_factory=list)
 
 
-def _named(node: ast.expr, name: str) -> bool:
-    return (isinstance(node, ast.Name) and node.id == name) or (
-        isinstance(node, ast.Attribute) and node.attr == name
-    )
+def _load(config: Path) -> ModuleType:
+    spec = importlib.util.spec_from_file_location(MODULE, config)
+    if spec is None or spec.loader is None:
+        raise ImportError(str(config))
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[MODULE] = module
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.modules.pop(MODULE, None)
+    return module
 
 
-def _is_class_var(annotation: ast.expr) -> bool:
-    return _named(annotation, "ClassVar") or (
-        isinstance(annotation, ast.Subscript) and _named(annotation.value, "ClassVar")
-    )
-
-
-def _target(statement: ast.stmt) -> tuple[str, ast.expr | None] | None:
-    if isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name):
-        return statement.target.id, statement.value
-    if isinstance(statement, ast.Assign) and len(statement.targets) == 1 and isinstance(statement.targets[0], ast.Name):
-        return statement.targets[0].id, statement.value
-    return None
-
-
-def _has_prefix(config: ast.expr | None) -> bool:
-    """Задаёт ли ``model_config`` префикс; значение, которое не прочитать, считается префиксом."""
-    if isinstance(config, ast.Call):
-        return any(keyword.arg in ("env_prefix", None) for keyword in config.keywords)
-    if isinstance(config, ast.Dict):
-        return any(not isinstance(key, ast.Constant) or key.value == "env_prefix" for key in config.keys)
-    return True
-
-
-def _is_field(node: ast.expr | None) -> bool:
-    return isinstance(node, ast.Call) and _named(node.func, "Field")
-
-
-def _fields(annotation: ast.expr, value: ast.expr | None) -> list[ast.Call]:
-    """Вызовы ``Field(...)`` поля: в значении и в метаданных ``Annotated[...]``."""
-    found = [value] if isinstance(value, ast.Call) and _is_field(value) else []
-    if isinstance(annotation, ast.Subscript) and _named(annotation.value, "Annotated"):
-        metadata = annotation.slice.elts[1:] if isinstance(annotation.slice, ast.Tuple) else []
-        found += [item for item in metadata if isinstance(item, ast.Call) and _is_field(item)]
+def _settings_classes(module: ModuleType) -> list[type[BaseSettings]]:
+    found: list[type[BaseSettings]] = []
+    for value in vars(module).values():
+        if isinstance(value, type) and issubclass(value, BaseSettings) and value is not BaseSettings and value not in found:
+            found.append(value)
     return found
 
 
-def _variable(name: str, annotation: ast.expr, value: ast.expr | None) -> str | None:
-    """Имя переменной поля или ``None``, если его не прочитать статически.
-
-    Два ``Field(...)`` у одного поля (в значении и в ``Annotated``) и ``Field(**...)``
-    нечитаемы: какой алиас победит, решает ``pydantic`` при запуске.
-    """
-    fields = _fields(annotation, value)
-    if not fields:
-        return name.upper()
-    if len(fields) > 1 or any(keyword.arg is None for keyword in fields[0].keywords):
-        return None
-    keywords = {keyword.arg: keyword.value for keyword in fields[0].keywords}
-    for key in ("validation_alias", "alias"):
-        if key in keywords:
-            alias = keywords[key]
-            return alias.value if isinstance(alias, ast.Constant) and isinstance(alias.value, str) else None
-    return name.upper()
+def _function(owner: type, name: str) -> object:
+    method = getattr(owner, name)
+    return getattr(method, "__func__", method)
 
 
-def _settings_classes(classes: list[ast.ClassDef]) -> set[str]:
-    """Имена классов настроек модуля: наследники ``BaseSettings`` на любой глубине."""
-    found = {node.name for node in classes if any(_named(base, "BaseSettings") for base in node.bases)}
-    while True:
-        more = {
-            node.name
-            for node in classes
-            if node.name not in found and any(isinstance(base, ast.Name) and base.id in found for base in node.bases)
-        }
-        if not more:
-            return found
-        found |= more
+def _overrides_sources(cls: type[BaseSettings]) -> bool:
+    """Подменяет ли класс выбор источников, построение значений или ``__init__``: тогда имена задаёт код."""
+    return any(_function(cls, name) is not _function(BaseSettings, name) for name in SOURCE_METHODS)
 
 
-def settings_variables(source: str) -> SettingsVariables:
-    """Переменные окружения, которые читают классы ``BaseSettings`` модуля.
+def settings_variables(config: Path) -> SettingsVariables:
+    """Переменные окружения, которые читают классы ``BaseSettings`` модуля настроек.
 
-    Имя переменной — ``validation_alias`` поля, иначе ``alias``, иначе имя поля в верхнем
-    регистре, как его ищет ``pydantic-settings`` без префикса. ``model_config`` и атрибуты
-    ``ClassVar`` переменными не считаются, поля с подчёркиванием в начале — тоже (для
-    ``pydantic`` они приватные). ``Field(...)`` читается и из значения, и из
-    ``Annotated[...]``. Неконстантный алиас, ``Field(**...)``, два ``Field`` у поля,
-    ``env_prefix`` в ``model_config`` и класс, унаследованный (на любой глубине) от
-    другого класса настроек модуля, делают имена полей нечитаемыми.
+    Модуль загружается, и для каждого поля имена берутся из
+    ``EnvSettingsSource._extract_field_info`` — с алиасами, ``AliasChoices``, префиксом,
+    регистром и ``populate_by_name``, как их разрешает ``pydantic-settings``. Класс,
+    подменяющий метод из ``SOURCE_METHODS``, и модуль, который не загружается (в том
+    числе через ``sys.exit``), — нечитаемы.
 
     Args:
-        source: текст модуля настроек.
+        config: модуль настроек бэкенда.
 
     Returns:
-        Прочитанные имена и нечитаемые поля.
+        Имена переменных и то, что прочитать не удалось.
     """
     found = SettingsVariables()
-    classes = [node for node in ast.walk(ast.parse(source)) if isinstance(node, ast.ClassDef)]
-    settings = _settings_classes(classes)
-    for node in classes:
-        if node.name not in settings:
+    try:
+        module = _load(config)
+    except BaseException as error:  # noqa: BLE001 - even SystemExit from the module is reported, never raised
+        found.unreadable.append(f"<module> ({type(error).__name__})")
+        return found
+    for cls in _settings_classes(module):
+        if _overrides_sources(cls):
+            found.unreadable.append(f"{cls.__name__}.*")
             continue
-        derived = any(isinstance(base, ast.Name) and base.id in settings for base in node.bases)
-        fields: list[tuple[str, ast.expr, ast.expr | None]] = []
-        prefixed = derived
-        for statement in node.body:
-            target = _target(statement)
-            if target is None:
+        source = EnvSettingsSource(cls)
+        for name, info in cls.model_fields.items():
+            try:
+                resolved = source._extract_field_info(info, name)
+            except Exception:  # noqa: BLE001 - a field pydantic-settings cannot resolve is reported
+                found.unreadable.append(f"{cls.__name__}.{name}")
                 continue
-            name, value = target
-            if name == "model_config":
-                prefixed = prefixed or _has_prefix(value)
-            elif (
-                isinstance(statement, ast.AnnAssign)
-                and not _is_class_var(statement.annotation)
-                and not name.startswith("_")
-            ):
-                fields.append((name, statement.annotation, value))
-        if derived and not fields:
-            found.unreadable.append(f"{node.name}.*")
-        for name, annotation, value in fields:
-            variable = None if prefixed else _variable(name, annotation, value)
-            if variable is None:
-                found.unreadable.append(f"{node.name}.{name}")
-            elif variable not in found.names:
-                found.names.append(variable)
+            for _, env_name, _ in resolved:
+                variable = env_name if source.case_sensitive else env_name.upper()
+                if variable not in found.names:
+                    found.names.append(variable)
     return found
 
 
@@ -178,20 +133,20 @@ def template_keys(text: str) -> set[str]:
 
 
 def check(config: Path, template: Path) -> SettingsVariables:
-    """Нечитаемые поля и переменные настроек, которых нет в шаблоне.
+    """Нечитаемое и переменные настроек, которых нет в шаблоне.
 
     Args:
         config: модуль настроек бэкенда.
         template: файл ``.env.example``.
 
     Returns:
-        В ``names`` — недостающие имена в порядке полей, в ``unreadable`` — нечитаемые
-        поля; оба пусты, если модуля настроек ещё нет.
+        В ``names`` — недостающие имена, в ``unreadable`` — то, что прочитать не удалось;
+        оба пусты, если модуля настроек ещё нет.
     """
     if not config.exists():
         return SettingsVariables()
     keys = template_keys(template.read_text(encoding="utf-8")) if template.exists() else set()
-    found = settings_variables(config.read_text(encoding="utf-8"))
+    found = settings_variables(config)
     return SettingsVariables([name for name in found.names if name not in keys], found.unreadable)
 
 
@@ -203,13 +158,13 @@ def missing(config: Path, template: Path) -> list[str]:
         template: файл ``.env.example``.
 
     Returns:
-        Недостающие имена в порядке полей; пустой список, если модуля настроек ещё нет.
+        Недостающие имена; пустой список, если модуля настроек ещё нет.
     """
     return check(config, template).names
 
 
 def main(argv: Sequence[str] | None = None, config: Path = CONFIG, template: Path = TEMPLATE) -> int:
-    """Печатает нечитаемые поля и недостающие переменные и возвращает код выхода хука.
+    """Печатает нечитаемое и недостающие переменные и возвращает код выхода хука.
 
     Args:
         argv: имена файлов, которые pre-commit передаёт хуку; не используются.
@@ -217,12 +172,12 @@ def main(argv: Sequence[str] | None = None, config: Path = CONFIG, template: Pat
         template: файл ``.env.example``.
 
     Returns:
-        ``2``, если имя какой-то переменной не прочитать; ``1``, если шаблон перечисляет
-        не все переменные; иначе ``0``.
+        ``2``, если что-то не прочитать; ``1``, если шаблон перечисляет не все
+        переменные; иначе ``0``.
     """
     found = check(config, template)
     for item in found.unreadable:
-        print(f"{config.name}: cannot read the variable name of {item}")
+        print(f"{config.name}: cannot read the variable names of {item}")
     for name in found.names:
         print(f"{template.name}: missing {name}, read by {config.name}")
     if found.unreadable:
