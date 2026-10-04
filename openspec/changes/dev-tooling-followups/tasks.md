@@ -123,7 +123,7 @@ branch, so `tasks.md` may run ahead of the code on `develop`.
 - [x] 6.1 Run `backend/check.sh`, `frontend/check.sh`, `pre-commit run --all-files` and
   `openspec validate --all --strict` on the branch after `git merge develop`; verify all
   pass and coverage of `app` and `scripts` is at least 95%
-- [ ] 6.2 `tester` GO for `feature/dev-tooling/backend` (UI/UX: N/A, no user interface)
+- [x] 6.2 `tester` GO for `feature/dev-tooling/backend` (UI/UX: N/A, no user interface)
   and the review by Egor or the orchestrator, then the merge into `develop`; verify the
   GO and the review are recorded in `docs/decisions/dev-tooling-followups-readiness.md`
 - [ ] 6.3 `spec-keeper` syncs the delta into `openspec/specs/development-process/spec.md`
