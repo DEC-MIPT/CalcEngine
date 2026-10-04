@@ -85,11 +85,12 @@ WHERE d.designation='СП 22.13330.2016' AND c.table_number='5.5'
 ORDER BY c.row_index, c.col_index;"
 ```
 
-Human eyeball check (throwaway tools under `ml/research/`, not part of the contract):
+Human eyeball check (the maintained reviews live under `ml/research/review/`, not part of the
+contract; regenerate with `python -m research.make_review_html`, see `ml/research/VERIFY.md`):
 
-- `ml/research/table_55.html` — table 5.5 with a φ₂ dropdown → M_γ, M_q, M_c.
-- `ml/research/all_tables.html` — every table of the pilot document, numbered.
-- Regenerate: `python -m research.table_55_viewer` / `python -m research.all_tables_viewer`.
+- `ml/research/review/sp22_13330_2016.html` — pilot СП 22.13330.2016: formula 5.7 and
+  table 5.5, PDF screenshot next to the DB payload and the rendered form.
+- `ml/research/review/sp31_13330_2021.html` — СП 31.13330.2021: formula 9 and table 30.
 
 ## 5. What is NOT here yet (WP9 section 2, Egor's next branch)
 
