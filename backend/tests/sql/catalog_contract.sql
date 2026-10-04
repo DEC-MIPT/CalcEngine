@@ -100,7 +100,7 @@ LANGUAGE sql STABLE AS $$
         JOIN catalog_read.documents AS d ON d.document_id = c.document_id
         WHERE strpos(lower(c.title), lower(query)) > 0
     ) AS hit
-    ORDER BY hit.rank DESC, hit.document_id, hit.number NULLS FIRST
+    ORDER BY hit.rank DESC, hit.designation COLLATE "C", hit.number COLLATE "C" NULLS FIRST
     LIMIT max_rows
 $$;
 

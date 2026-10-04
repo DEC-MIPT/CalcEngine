@@ -79,6 +79,13 @@ def test_the_search_is_capped_at_max_rows(repository: NormativesRepository) -> N
     assert [found.kind for found in hits] == ["document", "document"]
 
 
+@pytest.mark.parametrize("max_rows", [1, 2, 3, 4])
+def test_a_tie_at_the_cut_keeps_the_first_hits_in_the_spec_order(repository: NormativesRepository, max_rows: int) -> None:
+    every = repository.search("Синтетический", 10)
+
+    assert repository.search("Синтетический", max_rows) == every[:max_rows]
+
+
 def test_a_russian_word_finds_its_clause(repository: NormativesRepository) -> None:
     assert repository.search("грунтах", 10) == (hit("clause", 2, PLACEHOLDER_CLAUSES[1], "Синтетический пункт о грунтах"),)
 
@@ -216,7 +223,7 @@ def test_the_search_endpoint_ranks_caps_and_finds_russian_words(
     assert [(hit["kind"], hit["document_id"], hit["number"]) for hit in capped.json()["hits"]] == [
         ("document", 2, None),
         ("document", 1, None),
-        ("clause", 1, PLACEHOLDER_CLAUSES[1]),
+        ("clause", 2, PLACEHOLDER_CLAUSES[1]),
     ]
     assert russian.json()["hits"] == [hit("clause", 2, PLACEHOLDER_CLAUSES[1], "Синтетический пункт о грунтах").model_dump()]
     assert (hostile.status_code, hostile.json()) == (200, {"hits": []})
