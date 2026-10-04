@@ -1,12 +1,15 @@
+import os
 from collections.abc import Iterator
 from typing import Any
 
 import pytest
-from sqlalchemy import create_engine
+from catalog_fixture import load_postgres, load_sqlite
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 import app.services.calculation as service_module
+from app.db.session import as_psycopg_url
 from app.models import Base
 from app.schemas.calculation import CalculationTypeContract
 
@@ -33,3 +36,27 @@ def engine_calls(monkeypatch: pytest.MonkeyPatch) -> list[str]:
 
     monkeypatch.setattr(service_module, "calculate", spy)
     return calls
+
+
+@pytest.fixture
+def catalog_sqlite() -> Iterator[Engine]:
+    """Движок SQLite с синтетическим контрактом каталога в подключённой базе ``catalog_read``."""
+    engine = create_engine("sqlite://", poolclass=StaticPool)
+    load_sqlite(engine)
+    yield engine
+    engine.dispose()
+
+
+@pytest.fixture(scope="module")
+def catalog_postgres() -> Iterator[Engine]:
+    """Движок тестовой базы PostgreSQL с синтетическим контрактом под её владельцем.
+
+    Без ``DEC_TEST_NORMATIVES_DATABASE_URL`` тест пропускается.
+    """
+    url = os.environ.get("DEC_TEST_NORMATIVES_DATABASE_URL")
+    if url is None:
+        pytest.skip("DEC_TEST_NORMATIVES_DATABASE_URL is not set")
+    engine = create_engine(as_psycopg_url(url))
+    load_postgres(engine)
+    yield engine
+    engine.dispose()
