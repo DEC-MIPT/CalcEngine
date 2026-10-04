@@ -78,8 +78,9 @@ what it does not say. Do not restate `AGENTS.md` here.
   `docs/decisions/secrets-baseline-refresh-questions-akim.md`; until he answers, the
   baseline changes only on a feature or fix branch. Merging WP9 adds test files with
   placeholder passwords that the baseline does not list, so the scan of WP6 task 4.5 is
-  re-run on the WP9 branch after `git merge develop`. `pre-commit install` is not done on
-  Akim's machine yet (decided 2026-10-04 to install it later).
+  re-run on the WP9 branch after `git merge develop`. `pre-commit install` is done on
+  Akim's machine (2026-10-04, hook from `backend/.venv`); Egor installs it after he
+  answers the baseline question.
 - Review follow-ups (the 18 minor items of
   `docs/decisions/calculation-core-contract-readiness.md` sections 12-14): done on
   `fix/calculation-engine/backend` (WP2 tasks 9.1-9.10, WP8 tasks 7.1-7.2), `tester` GO,
