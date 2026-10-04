@@ -1,7 +1,7 @@
 # Readiness review: `bootstrap-dev-environment` (WP6)
 
 - Date: 2026-09-27
-- Change: `openspec/changes/bootstrap-dev-environment/`
+- Change: `openspec/changes/archive/2026-10-04-bootstrap-dev-environment/` (archived 2026-10-04; was `openspec/changes/bootstrap-dev-environment/`)
 - Owner: Akim. No shared-file edits outside `openspec/` and `docs/` at the spec phase;
   implementation touches only `backend/`, `frontend/`, and root files not in Egor's zone
   (`.pre-commit-config.yaml`, `.env.example`, `.secrets.baseline`).
@@ -12,6 +12,13 @@
 Russian version: `bootstrap-dev-environment-readiness-rus.md`.
 
 ## Final status
+
+**Archived — 2026-10-04.** Merged into `develop` in `bec3d43` after the review (task 7.2,
+section 7); synced into `openspec/specs/development-process/spec.md` and archived by
+`spec-keeper` (task 7.3, section 8).
+
+**GO (implementation, task 7.1) — 2026-10-04**, for `feature/dev-environment/backend`;
+see section 6.
 
 **GO (spec phase, task 1.4) — 2026-09-27**
 
@@ -105,3 +112,118 @@ The baseline itself is code and is fixed by task 4.5, not by this edit. Until th
 | Item | Owner | Blocks |
 |---|---|---|
 | Task 4.5 (regenerate `.secrets.baseline`) | Akim | Task 7.1 (full GO) |
+
+## 6. Implementation verdict (task 7.1, 2026-10-04)
+
+Tasks 4.6, 4.4, 5.1 and 4.5 were done in that order on `feature/dev-environment/backend`
+(`9dca91e`); the note on Egor's files is on `develop` (`8526040`), tasks 6.1-6.2 too
+(`40096fc`). The `tester` ran on `9dca91e` with `origin/develop` merged in, uncommitted
+(a temporary worktree, removed afterwards), as the verify clause of task 4.5 asks.
+
+**Verdict: GO** for the feature and for task 7.1. UI/UX: N/A, the frontend is unchanged
+(`git diff --stat origin/develop -- frontend` is empty).
+
+| Criterion | Evidence | Result |
+|---|---|---|
+| `backend/check.sh` | exit 0; ruff and mypy clean; `lint-imports`: 4 kept, 0 broken; pytest 685 passed, 1 skipped (the postgres module, no `DEC_TEST_APP_DATABASE_URL`) | pass |
+| Backend branch coverage | `app`: 1637 statements, 320 branches, 100.00%. `backend/scripts/check_env_example.py`, outside the gate, measured by the `tester`: 97% branch (only the `__main__` guard, run in a subprocess) | pass |
+| `frontend/check.sh` | exit 0; branches 100% (0 of 0), the only threshold in `vite.config.ts`; statements 50%, functions 33.33%, lines 66.66% | pass under the project rule (branch coverage) |
+| `pre-commit run --all-files` | exit 0, both hooks passed | pass |
+| 4.5 | a staged fake AWS key fails `detect-secrets`; all 22 paths of the baseline exist; a fresh scan gives the same findings | pass |
+| 4.4 | removing `# DEC_PARAMS_ROOT=` or `DEC_APP_DATABASE_URL=` fails the hook, naming the variable | pass |
+| 5.1 | `test_import_contracts.py` 5 passed; end to end, an `engine` import of `parameters` stops `check.sh` at `lint-imports` and names the import | pass |
+| 4.6 | `.env.example` names `dec_normatives_reader`, database `dec`, a placeholder password | pass |
+| OpenSpec | `validate bootstrap-dev-environment --strict` and `--all --strict` (20/20) pass | pass |
+| Egor's zone | no file under `ml/` or `infra/` changed | pass |
+
+### Decision: the open question on the backend coverage gate
+
+- Question (`design.md`, "Open Questions", last item; task 7.1): how the base
+  `development-process` requirements "Test gate with >= 95% branch coverage" and
+  "Go/No-Go verdict and archive" apply while `backend/app/` does not exist and
+  `backend/check.sh` produces no coverage number.
+- Resolution: moot. `backend/app/` exists since `backend-layered-architecture` (WP5) was
+  merged (`53a4892`); since then `backend/check.sh` runs
+  `pytest --cov=app --cov-branch --cov-fail-under=95`, so the backend zone is gated like
+  any other. No team exception to the 95% rule was needed and none is granted. This
+  closes the item in "Open Questions" and the condition of task 7.1 and the DOD.
+- Evidence: the verdict above, `check.sh` exit 0, branch coverage 100.00%.
+- The `else pytest` branch of `check.sh` and the spec's "not yet present" scenarios no
+  longer apply on `develop`; they stay as written, and `spec-keeper` decides at task 7.3
+  whether to trim them.
+- Gate scope: `app` only. Scripts under `backend/scripts/` are covered by their tests
+  in `check.sh` and their coverage is measured by the `tester` at each verdict.
+- Decided by Akim on 2026-10-04, on the `tester`'s GO.
+
+### Minor findings, none blocking
+
+1. The scenario "Config variable missing from the template" says the check runs as a
+   pre-commit hook, not in the backend command; `test_check_env_example.py` also
+   enforces it in `check.sh`. Stricter than the spec; `spec-keeper` rewords or notes it
+   at task 7.3.
+2. `backend/scripts/` is outside the automatic coverage gate (see the decision above).
+3. The `engine` contract is a deny-list of today's top-level packages; a new top-level
+   `app.*` package has to be added to it.
+4. `check_env_example.py` reads only constant `validation_alias`/`alias`, classes based on
+   the name `BaseSettings`, and only `backend/app/core/config.py`; `env_prefix`,
+   `AliasChoices`, settings subclasses or settings in another module would need an
+   update. None applies to the current code or the WP9 branch.
+5. The frontend threshold covers branches only and is met with 0 of 0 branches; the
+   `frontend-app` feature decides on statement, function and line thresholds.
+6. Tasks 4.4-4.6, 5.1 and 6.1-6.2 are not ticked in `tasks.md` yet (deferred batch);
+   they are ticked before the archive.
+
+| Item | Owner | Blocks |
+|---|---|---|
+| Task 7.2: review before merge (Egor or the orchestrator) | Egor / orchestrator | Merge of `feature/dev-environment/backend` |
+| Re-run the scan of task 4.5 after WP9 is merged (its tests add placeholder passwords) | Akim | `pre-commit run --all-files` on `develop` after that merge |
+| Task 7.3: sync and archive | `spec-keeper` | Needs 7.1 and 7.2 |
+
+## 7. Review before merge (task 7.2, 2026-10-04)
+
+Reviewer: the `orchestrator` agent, read-only, on `9dca91e` with `origin/develop`
+(`7fd2f06`) merged in a scratch clone. **Outcome: APPROVED WITH FOLLOW-UPS.** No
+blocker. The merge is conflict-free; on the merged tree `backend/check.sh` exits 0
+(4 contracts kept, 685 passed, branch coverage 100.00%) and `pre-commit run --all-files`
+passes. Every one of the 32 baseline findings was read on its line; none is a real
+secret. No file in `ml/` or `infra/` changed. The reviewer agrees with the six minor
+findings of section 6 (the sixth was already closed by `7fd2f06`).
+
+| # | Severity | Finding | Action |
+|---|---|---|---|
+| 1 | Major | `detect-secrets` matches by file and line. (a) Archiving this change moves `tasks.md`, so the `user:password@` placeholder in task 4.3 becomes a new finding; (b) any edit that shifts a flagged line in one of the 22 listed files fails the hook with exit 3 while it rewrites the baseline, and the baseline is code, so a document commit cannot carry the refresh; (c) the note to Egor named only moves and renames | (a) done before merge: tasks 4.3 and 4.6 reworded without a URL with credentials, baseline re-scanned on the branch; (b) asked in `docs/decisions/secrets-baseline-refresh-questions-akim.md`; (c) corrected in `secrets-baseline-egor-files.md` |
+| 2 | Minor | Only backend -> `normatives_pipeline` is encoded; the reverse direction (`ml/` importing `app`) belongs to Egor's tooling | Recorded here; part of the question file of 1(b) |
+| 3 | Minor | `check_env_example.py` takes the first of `validation_alias`/`alias` (pydantic prefers `validation_alias`) and guesses the name for `AliasChoices`, `pydantic.Field`, `env_prefix` | Deferred (Akim, 2026-10-04): prefer `validation_alias`, fail loudly when the name cannot be read |
+| 4 | Minor | A new top-level `app.*` package falls under no contract | Deferred: `containers = ["app"]`, `exhaustive = true` in the layers contract |
+| 5 | Note | The local hook has no `language_version`; on Python < 3.10 the script fails | Deferred: `language_version: python3.12` |
+| 6 | Note | `test_import_contracts.py` finds `lint-imports` next to `sys.executable` without a clear failure message | Deferred |
+| 7 | Note | The template regex accepts any commented `# NAME=`; stale keys are not reported | Within the spec, no action |
+| 8 | Note | One commit covers four subtasks | Order and content consistent, no action |
+| 9 | Note | `CLAUDE.md` (the known issue, "on `feature/dev-environment/backend` also `lint-imports`") goes stale on merge | Updated on `develop` after the merge |
+
+Deferred items 3-6 and the coverage of `backend/scripts/` (section 6, finding 2) go to
+a later tooling change or the WP6 backlog; they would need a new `tester` run.
+
+## 8. Sync and archive (task 7.3, 2026-10-04)
+
+`spec-keeper` checked the preconditions (tasks 1.1-7.2 ticked, sections 6 and 7,
+`openspec validate --all --strict` 20/20), then:
+
+- reworded the scenario "Config variable missing from the template" in the delta to
+  "this check runs as a pre-commit hook, and the backend tooling command may also run
+  it" (section 6, finding 1);
+- kept the three "not yet present" scenarios: the guards they describe are still in
+  `backend/check.sh` and `backend/scripts/check_env_example.py`, so they state correct
+  behavior; they are trimmed only if a later change removes the guards;
+- ticked 7.3 and ran `openspec archive bootstrap-dev-environment --yes`: four requirements
+  added to `development-process` ("Backend tooling command", "Frontend tooling
+  command", "Import contract check", "Pre-commit secret scan and documented
+  configuration"), nothing else in the base spec changed.
+
+After the archive: `openspec validate --all --strict` 19/19 (`calculation-verification`
+and `record-installed-skills-akim` still valid); `pre-commit run --all-files` passes,
+including `detect-secrets` on the moved files.
+
+Not tracked by any active change yet: section 6 finding 2 (coverage of
+`backend/scripts/`), section 7 items 3-6, and the answers to
+`secrets-baseline-refresh-questions-akim.md`; they go to a later tooling change.

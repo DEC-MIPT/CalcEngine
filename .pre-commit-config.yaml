@@ -4,3 +4,11 @@ repos:
     hooks:
       - id: detect-secrets
         args: ['--baseline', '.secrets.baseline']
+  - repo: local
+    hooks:
+      - id: env-example-matches-settings
+        name: .env.example lists every backend settings variable
+        entry: python backend/scripts/check_env_example.py
+        language: python
+        files: ^(backend/app/core/config\.py|\.env\.example)$
+        pass_filenames: false

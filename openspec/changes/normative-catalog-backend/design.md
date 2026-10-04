@@ -21,7 +21,7 @@ See `proposal.md` "Why". The state this design starts from:
     4096 nodes).
   - `Settings.dec_normatives_database_url` exists and is optional, but `Settings` also
     requires `DEC_APP_DATABASE_URL`. Nothing reads that field yet.
-- **Egor's pipeline** (`feature/normative-parser/ml`, not on `develop`):
+- **Egor's pipeline** (on `develop` under `ml/src/normatives_pipeline/` since 2026-10-03):
   - tables `document`, `clause`, `formula` (LaTeX and an `expression` string, no tree),
     `notation_entry` (symbol, unit), `coefficient` (`row_index`, `col_index`,
     `value TEXT`);
@@ -30,6 +30,9 @@ See `proposal.md` "Why". The state this design starts from:
   - Egor's answers of 2026-10-03 (`normative-catalog-backend-questions-akim.md`) agree
     to the read contract, the binding, and the exact-match lookup, and name the end of
     2026-10-04 for his parts.
+  - Egor's answers of 2026-10-04 (`normative-catalog-backend-contract-akim.md`,
+    "Answers") confirm decisions 1-3 without changes and agree to his section 2 of
+    `tasks.md`; the gaps listed above are his tasks 2.1-2.6.
 - **Rules that shape the design:**
   - the layer order of WP5 decision 2 (`api` must not import `repositories`);
   - no import between `backend/` and `ml/`;
@@ -79,15 +82,21 @@ databases:
   `DEC_NORMATIVES_DATABASE_URL` points at it with the reader role.
 - The ingestion runs as the database owner (the compose user), which may create the
   schema and the role. The backend never uses that user.
-- The reader's password comes from an environment variable of the ingestion
-  (proposed name `DEC_NORMATIVES_READER_PASSWORD`, Egor confirms it in task 1.4). The
+- The ingestion connects as the owner through `DEC_DATABASE_URL`, which Egor keeps, and
+  has no second owner URL. The two variables stay distinct: `DEC_DATABASE_URL` is the
+  owner's URL of the ingestion, `DEC_NORMATIVES_DATABASE_URL` the reader's URL of the
+  backend. This replaces Egor's plan of 2026-09-29 to rename his variable to
+  `DEC_NORMATIVES_DATABASE_URL` (WP5 task 2.1).
+- The reader's password comes from an environment variable of the ingestion,
+  `DEC_NORMATIVES_READER_PASSWORD` (confirmed by Egor on 2026-10-04). The
   ingestion sets it with `ALTER ROLE ... PASSWORD` and never prints or logs it. Akim puts
   the same password into his local `DEC_NORMATIVES_DATABASE_URL`; neither is committed.
 - When the infrastructure change creates a separate `dec_normatives` database, only the
   URL changes; the schema, the role and the views keep their names.
 
-- **Why:** Egor's answer 1. The backend cannot import his package (WP5), and he keeps
-  the freedom to change his tables behind the views.
+- **Why:** Egor's answer 1 (2026-10-03), confirmed without changes on 2026-10-04. The
+  backend cannot import his package (WP5), and he keeps the freedom to change his tables
+  behind the views.
 - **Alternatives:**
   - Read Egor's tables directly. Every change to his schema would break the backend.
   - A small HTTP service in his zone. This adds a process, a port, and a deployment for
@@ -131,7 +140,9 @@ reference status":
   same `heading_symbol`, or no row does. A selection by two inputs needs new columns and
   a change to this decision.
 - **Why:** the views map one to one onto `schemas/resolved.py` and `MethodBound`, so the
-  backend only validates. Egor's answer 2 lists the same content.
+  backend only validates. Egor's answer 2 lists the same content; on 2026-10-04 he
+  confirmed every column without changes and placed each pilot parameter in exactly one
+  view.
 - **Alternative:** one generic `type_parameters` view with a `kind` column and nullable
   columns per kind. It is harder to validate, and the per-kind views stay small.
 
@@ -144,6 +155,8 @@ cannot convert.
 
 - **Why:** the user's decision of 2026-10-03, and WP2 task 1.8, which Egor
   acknowledged. The engine already evaluates this form, so the backend parses no text.
+  On 2026-10-04 Egor confirmed that `latex2sympy2` output converts into this node set
+  at ingestion and that he needs no other node kinds or functions.
 - **Alternatives:** SymPy `srepr`, or MathML. Both would need a parser in the backend,
   which WP2 decision 11 rules out.
 
@@ -164,9 +177,13 @@ Every transaction is therefore read-only, even if the role were wrong.
 
 Errors map like this:
 
-- the variable is unset, or a connection error (`OperationalError`, `InterfaceError`)
-  occurs: `CatalogUnavailableError` on the catalog endpoints;
+- the variable is unset, a connection error (`OperationalError`, `InterfaceError`)
+  occurs, or the database refuses the read with `ProgrammingError` (the schema
+  `catalog_read` or a view is missing, or the role lacks a privilege, as after the
+  rollback of "Migration Plan"): `CatalogUnavailableError` on the catalog endpoints;
 - the same conditions inside a parameter source: `ParameterSourceUnavailableError`.
+
+The driver's text is dropped in both cases (`from None`), because it may hold the URL.
 
 - **Why:** the spec "Catalog unavailability". This is the WP8 decision 7 pattern for
   `dec_app`.
@@ -320,8 +337,10 @@ text.
 `DEC_ERRORS`, with the fixed message "The normative catalog is not available.". The
 search `q` is an `Annotated[str, StringConstraints(strip_whitespace=True, min_length=2,
 max_length=200)]`, so its errors are of the static types (`string_too_short`,
-`string_too_long`, `missing`) and never echo the value. `document_id` is a `Path(gt=0)`
-integer.
+`string_too_long`, `missing`) and never echo the value. `limit` is a `Query(ge=1,
+le=50)` integer and `document_id` a `Path(gt=0)` integer; their errors (`int_type`,
+`int_parsing`, `greater_than`, `greater_than_equal`, `less_than_equal`) name the limit,
+not the value, so `STATIC_MESSAGE_TYPES` passes their text on as well.
 
 ### 9. Testing without Egor's database
 
