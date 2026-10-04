@@ -6,7 +6,7 @@ services:
     container_name: dec-postgres
     environment:
       POSTGRES_USER: dec
-      POSTGRES_PASSWORD: dec
+      POSTGRES_PASSWORD: dec  # pragma: allowlist secret
       POSTGRES_DB: dec
     ports:
       - "5433:5432"
