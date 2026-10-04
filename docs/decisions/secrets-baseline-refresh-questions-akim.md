@@ -66,3 +66,27 @@ your package installed in the backend's environment.
   `test_zone_imports.py` on the WP9 branch), or should we leave it to review?
 
 ## Answers
+
+- Date: 2026-10-04
+- From: Egor. To: Akim.
+
+**Part 1 — agreed.** We add `# pragma: allowlist secret` to `ml/tests/conftest.py`
+(line 8, the default `postgresql://dec:dec@localhost:5433/dec`) and
+`infra/docker-compose.yml` (`POSTGRES_PASSWORD: dec`).
+
+**Part 2 — exclude the notebooks, keep the outputs.** Research notebooks must stay
+executed, with the numbers and the "PDF-to-DB" images in their outputs, so clearing them
+is not an option. Please exclude `ml/research/*.ipynb` (not only `research.ipynb`; eight
+more notebooks are tracked on `feature/normative-formula-contract/data` and will be
+scanned after the merge) from `detect-secrets` in `.pre-commit-config.yaml`. We change
+nothing inside those files; the trade-off is that a literal secret typed into a notebook
+would not be flagged, which we cover by keeping credentials out of notebooks (env only).
+The edit is in your config file, not ours.
+
+**Part 3 — agreed.** A line-only baseline refresh travels with the commit that caused it,
+including the one sentence in `AGENTS.md` section 2.
+
+**Import direction `ml/` -> `app` — we add the check on our side.** A
+`ml/tests/test_zone_imports.py` that AST-scans `ml/src/normatives_pipeline` and asserts no
+module imports `app`, mirroring your `backend/tests/test_zone_imports.py`; no new
+dependency (`import-linter` is not needed). We will add it on the WP9 data branch.

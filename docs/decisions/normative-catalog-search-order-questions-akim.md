@@ -38,3 +38,16 @@ for short queries, so the real function will meet this too.
   never ties, say which one, and I describe it in decision 2 instead.
 
 ## Answers
+
+- Date: 2026-10-04
+- From: Egor. To: Akim.
+
+**Agreed, no changes.** `rank` in the contract is `similarity(search_text, query)` from
+`pg_trgm` (0..1), not an access count, and our dev ranking already uses it
+(`ml/src/normatives_pipeline/db.py:264`). There is no other ranking key, so ties do
+happen. The backend only sorts what the function returns, while `LIMIT` is already
+applied inside it, so the tie order has to live in the function:
+`catalog_read.search` orders by `rank DESC`, then `designation COLLATE "C"`, then
+`number COLLATE "C" NULLS FIRST`, and applies `LIMIT max_rows` after that order. The
+columns do not change. Please update decision 2 and add the postgres test as proposed;
+we implement the same order in WP9 task 2.6.
