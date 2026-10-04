@@ -1,4 +1,8 @@
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 from pathlib import Path
+
+from pydantic import BaseModel
 
 from app.core.exceptions import ParameterValidationError
 from app.engine import foundations_shallow_r
@@ -19,7 +23,36 @@ def _register_foundations_shallow_r(registry: CalculatorRegistry, params_root: P
     foundations_shallow_r.register(registry, entry.rule, entry.source)
 
 
-REGISTRATIONS = (_register_foundations_shallow_r,)
+@dataclass(frozen=True)
+class Registration:
+    """Известный тип расчёта: как его зарегистрировать и какой моделью проверять его параметры.
+
+    Модель нужна источнику параметров каталога (``normative-catalog-backend`` design.md,
+    решение 5): он собирает из строк каталога поля и проверяет их ею.
+
+    Attributes:
+        name: имя типа расчёта в реестре.
+        register: регистрация со значениями из файла параметров.
+        parameters: модель разрешённых параметров калькулятора.
+    """
+
+    name: str
+    register: Callable[[CalculatorRegistry, Path], None]
+    parameters: type[BaseModel]
+
+
+REGISTRATIONS = (
+    Registration(
+        name=foundations_shallow_r.NAME,
+        register=_register_foundations_shallow_r,
+        parameters=foundations_shallow_r.Parameters,
+    ),
+)
+
+PARAMETER_MODELS: Mapping[str, type[BaseModel]] = {
+    registration.name: registration.parameters for registration in REGISTRATIONS
+}
+"""Модель разрешённых параметров каждого известного типа расчёта."""
 
 
 def build_registry(params_root: Path) -> CalculatorRegistry:
@@ -40,8 +73,8 @@ def build_registry(params_root: Path) -> CalculatorRegistry:
             правила округления выхода.
     """
     registry = CalculatorRegistry()
-    for register in REGISTRATIONS:
-        register(registry, params_root)
+    for registration in REGISTRATIONS:
+        registration.register(registry, params_root)
     return registry
 
 
