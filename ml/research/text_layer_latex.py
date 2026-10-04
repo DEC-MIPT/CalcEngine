@@ -114,6 +114,11 @@ def transliterate(text: str) -> str:
 
 _REL = {"=", "≥", "≤", "≠", "<", ">", "≈", "\uf0b3", "\uf0a3", "\uf0b9", "\uf0bb"}
 
+# N-ary суммирование: PUA Symbol 0xF0E5 + литеральные ∑/Σ.
+_SUM_GLYPHS = {"\uf0e5", "∑", "Σ"}
+# Крупные разделители/операторы: их размер завышен относительно переменных.
+_BIG_TOKENS = set("()[]{}|") | _SUM_GLYPHS
+
 
 def _cluster(chars: list[dict], tol: float = 2.0) -> list[dict]:
     """Группирует символы в строки по вертикали (``top``)."""
@@ -169,12 +174,30 @@ def _marker(chars: list[dict], number: str) -> tuple[float, float] | None:
     return None
 
 
+def _base_size(chars: list[dict]) -> float:
+    """Размер базовой линии без крупных разделителей/операторов.
+
+    ``(` ``)`` и ``Σ`` в формулах крупнее переменных (18.6 против 11.9 при базе 11.9);
+    если брать максимум по всем, переменные ошибочно уезжают в подстрочные.
+    """
+    sizes = [
+        c["size"]
+        for c in chars
+        if c["size"] > 0
+        and c["text"] not in _BIG_TOKENS
+        and not any(0xF0E6 <= ord(ch) <= 0xF0FF for ch in c["text"])
+    ]
+    if not sizes:
+        sizes = [c["size"] for c in chars if c["size"] > 0]
+    return max(sizes, default=0.0)
+
+
 def _assemble(chars: list[dict]) -> str:
     """Собирает символы одной строки в LaTeX: ``size``/``top`` → base/sub/sup."""
     keep = sorted((c for c in chars if c["text"].strip()), key=lambda c: c["x0"])
     if not keep:
         return ""
-    base_size = max(c["size"] for c in keep)
+    base_size = _base_size(keep)
     top = min(
         (c["top"] for c in keep if c["size"] >= 0.9 * base_size), default=keep[0]["top"]
     )
@@ -235,6 +258,49 @@ def _has_rel(chars: list[dict]) -> bool:
     return any(c["text"] in _REL for c in chars)
 
 
+def _sum_groups(
+    band: list[dict], consumed: set[int]
+) -> list[tuple[float, float, str, set[int]]]:
+    """Σ-группы ``\\sum_{...}^{...}``: глиф плюс мелкие пределы над/под ним.
+
+    Пределы ``n`` (сверху) и ``i=1`` (снизу) вёрстаны отдельными строками и по центру
+    колонки Σ. ``i=1`` содержит ``=`` и без выделения читается как отдельная формула.
+    """
+    base_size = _base_size(band)
+    out: list[tuple[float, float, str, set[int]]] = []
+    for s in band:
+        if s["text"] not in _SUM_GLYPHS or id(s) in consumed:
+            continue
+        lo, hi = s["x0"] - 1.5, s["x1"] + 1.5
+
+        def small(c: dict, s: dict = s, lo: float = lo, hi: float = hi) -> bool:
+            ctr = (c["x0"] + c["x1"]) / 2
+            return (
+                id(c) != id(s)
+                and id(c) not in consumed
+                and lo <= ctr <= hi
+                and c["size"] < 0.8 * base_size
+            )
+        sup = [
+            c
+            for c in band
+            if small(c) and s["top"] - 12 <= c["top"] and c["bottom"] <= s["top"] + 1.5
+        ]
+        sub = [
+            c
+            for c in band
+            if small(c) and s["bottom"] - 1.5 <= c["top"] <= s["bottom"] + 12
+        ]
+        latex = "\\sum"
+        if sub:
+            latex += "_{" + _assemble(sorted(sub, key=lambda c: c["x0"])) + "}"
+        if sup:
+            latex += "^{" + _assemble(sorted(sup, key=lambda c: c["x0"])) + "}"
+        used = {id(s)} | {id(c) for c in sup + sub}
+        out.append((s["x0"], s["top"], latex, used))
+    return out
+
+
 def _has_brace(chars: list[dict]) -> bool:
     """Фигурная скобка системы уравнений (литеральная или PUA Symbol 0xF0E6..0xF0FF)."""
     for c in chars:
@@ -268,10 +334,13 @@ def _looks_like_prose(line: dict, run: int = 4) -> bool:
     return False
 
 
-def _line_latex(line: dict, rest: list[dict], fraction: list[tuple[float, str]]) -> str:
+def _line_latex(line: dict, rest: list[dict], fraction: list[tuple[float, float, str]]) -> str:
     inner = line["chars"]
     left = min(c["x0"] for c in inner)
-    right = max(c["x1"] for c in inner)
+    # Атомы (дроби/Σ), вертикально принадлежащие строке, расширяют её правую границу:
+    # в «стопке» (5.19) базовая линия `s=β` короче дроби, стоящей справа.
+    near = [(x, latex) for x, y, latex in fraction if line["top"] - 5 <= y <= line["top"] + 14]
+    right = max([max(c["x1"] for c in inner)] + [x for x, _ in near])
     seg = sorted(
         (
             c
@@ -281,8 +350,9 @@ def _line_latex(line: dict, rest: list[dict], fraction: list[tuple[float, str]])
         ),
         key=lambda c: c["x0"],
     )
-    inserted = sorted((x, latex) for x, latex in fraction if left - 1 <= x <= right + 3)
-    base_size = max((c["size"] for c in line["chars"]), default=0.0)
+    inserted = sorted((x, latex) for x, latex in near if left - 1 <= x <= right + 3)
+    rel = [c["size"] for c in line["chars"] if c["text"] in _REL and c["size"] > 0]
+    base_size = max(rel) if rel else _base_size(line["chars"])
     tokens: list[tuple[str, str]] = []
     fi = 0
     for c in seg:
@@ -316,13 +386,17 @@ def reconstruct_latex(page, number: str) -> str | None:
     if marker is None:
         return None
     top, marker_x = marker
+    bars = _bars(page, top - 25, top + 25, 60, marker_x - 2)
     # Пробелы не несут смысла и тянут в полосу соседнюю строку текста, ломая base_size.
-    # Окно ±25 накрывает системы из двух строк (номер по центру между ними).
+    # Базовое окно ±25 накрывает системы из двух строк; запас ±14 вокруг дробных черт
+    # удерживает подстрочные знаменателя, сидящие ниже окна (``E_i`` при маркере 183.5).
+    y_lo = min([top - 25] + [b["top"] - 14 for b in bars])
+    y_hi = max([top + 25] + [b["bottom"] + 14 for b in bars])
     band = [
         c
         for c in chars
         if c["text"].strip()
-        and top - 25 <= c["top"] <= top + 25
+        and y_lo <= c["top"] <= y_hi
         and c["x0"] < marker_x - 2
         and c["x0"] > 60
         and c["size"] > 0
@@ -330,14 +404,17 @@ def reconstruct_latex(page, number: str) -> str | None:
     if not band:
         return None
 
-    fraction: list[tuple[float, str]] = []
+    fraction: list[tuple[float, float, str]] = []
     consumed: set[int] = set()
-    for bar in _bars(page, top - 25, top + 25, 60, marker_x - 2):
+    for bar in bars:
         result = _frac(band, bar)
         if result is None:
             continue
         x, latex, used = result
-        fraction.append((x, latex))
+        fraction.append((x, bar["top"], latex))
+        consumed |= used
+    for x, y, latex, used in _sum_groups(band, consumed):
+        fraction.append((x, y, latex))
         consumed |= used
     rest = [c for c in band if id(c) not in consumed]
 
