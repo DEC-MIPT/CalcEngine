@@ -54,23 +54,41 @@ merge (`bec3d43`) and its archive (`6186bc2`):
 
 ## Decisions
 
-### 1. The line-only refresh is an exception in the branching rule, not a new document
+### 1. The line-only refresh is an exception in the branching rule and the "no code" list
 
-`AGENTS.md` section 2 ("Documents are committed directly to `develop`") gains one
-sentence, and the `development-process` requirement "Documents commit directly to
-develop" gains the same exception and two scenarios (see the delta):
+Two places change together:
 
-> When the pre-commit secret scan only rewrites line numbers in `.secrets.baseline`
-> (no new finding), the rewritten baseline is committed together with the change that
-> shifted them, on that change's branch, `develop` included; a new finding is handled on
-> a feature or fix branch with a hand review, as before.
+- `AGENTS.md` section 2 ("Documents are committed directly to `develop`") gains one
+  sentence, and the requirement "Documents commit directly to develop" gains the same
+  exception and three scenarios (see the delta):
 
-How a developer knows it is line-only: the hook prints "The baseline file was updated"
-with exit 3 and no "Potential secrets" report, and `git diff .secrets.baseline` shows
-only `line_number` changes (and `generated_at`, if present).
+  > When the pre-commit secret scan only rewrites line numbers in `.secrets.baseline`
+  > or drops entries of removed lines (no new finding), the rewritten baseline is
+  > committed together with the change that caused it, on that change's branch,
+  > `develop` included; a new finding is handled on a feature or fix branch with a hand
+  > review, as before.
+
+- `AGENTS.md` section 4 ("No code" means ...) and the requirement "Go/No-Go verdict and
+  archive" gain one sentence: such a refresh does not make a change a change with code,
+  so a spec-only change keeps its code-free GO path.
+
+How a developer knows the refresh qualifies: the hook prints "The baseline file was
+updated" with exit 3 and no "Potential secrets" report (in detect-secrets 1.5,
+`pre_commit_hook.should_update_baseline` trims the entries of the staged files against a
+fresh scan and returns true whenever the collection changed, so a removed allowed line
+gives the same exit as a shifted one; task 2.4 confirms it on this repository, and the
+scenario "Allowed line removed by a document commit" is revised before the archive if
+it does not), and `git diff .secrets.baseline`
+shows only changed `line_number` values, removed entries, or a new `generated_at`.
+
+Egor agreed to the section 2 sentence on 2026-10-04; the section 4 sentence follows
+from it but is a second edit of a shared file, so task 5.1 asks for his acknowledgement
+before it is made (a new file in `docs/decisions/`).
 
 - **Why:** Egor's answer, part 3 (2026-10-04). The baseline holds no secret, and a
-  line-number change carries no review decision.
+  line-number change carries no review decision. Without the section 4 sentence a
+  spec-only change that hits the case would lose its code-free GO path (`spec-reviewer`
+  finding 1).
 - **Alternatives:** put `.secrets.baseline` on the "no code" list (too wide: a new
   finding would then skip the branch and the review); refresh it only on a `fix/`
   branch (a branch and a merge for a line number).
@@ -88,7 +106,8 @@ filter keeps a manual `detect-secrets scan` consistent with the hook.
   outputs; eight more notebooks arrive from `feature/normative-formula-contract/data`.
   The pattern covers them without listing names.
 - **Trade-off:** a literal secret typed into a notebook is not flagged. Covered by the
-  rule that credentials go to the environment, never into a notebook (spec delta).
+  convention Egor stated in his answer: credentials go to the environment, never into a
+  notebook. It is a convention of his zone, not a checked requirement.
 - **Alternative:** clear the outputs (Egor declined), or list each finding (eight more
   notebooks of images would flood the baseline).
 
@@ -113,15 +132,19 @@ stay.
 
 `check_env_example.py`:
 
-- for each field of a settings class, reads `Field(...)` called as `Field` or as
-  `<module>.Field`; takes `validation_alias` if it is a string constant, else `alias`
-  if it is a string constant, else the upper-cased field name when neither keyword is
-  given;
+- does not treat the class-level configuration as a variable: an annotated or plain
+  `model_config`, and any attribute annotated `ClassVar[...]`; `model_config` is still
+  inspected for `env_prefix` (below);
+- for each other annotated attribute of a settings class, reads `Field(...)` called as
+  `Field` or as `<module>.Field`. If `validation_alias` is given, it is the name when it
+  is a string constant and the name is unreadable otherwise, whatever `alias` says. If
+  only `alias` is given, the same rule applies to it. With neither, the name is the
+  upper-cased field name;
 - treats as unreadable, and reports as `config.py: cannot read the variable name of
-  <Class>.<field>`: a `validation_alias` or `alias` that is not a string constant
-  (`AliasChoices`, `AliasPath`, a name), a `model_config` with `env_prefix` in a settings
-  class, and a class that derives from another settings class of the module (its
-  inherited fields and prefix would need the parent);
+  <Class>.<field>`: a non-constant alias as above (`AliasChoices`, `AliasPath`, a
+  name), a `model_config` with `env_prefix` in a settings class (reported for each
+  field of that class), and a class that derives from another settings class of the
+  module (its inherited fields and prefix would need the parent);
 - recognises a settings class by a base named `BaseSettings` or
   `<module>.BaseSettings`;
 - exits 2 when any name is unreadable (the commit is blocked, the message names class
@@ -152,26 +175,34 @@ layers = [
 ]
 ```
 
-`app.main` is the composition root above every layer and stays outside the order. The
-engine deny-list contract stays as it is; with the exhaustive layers contract a new
-package must first be placed in a layer, and the review that places it also decides
-whether `engine` may import it.
+`app.main` is the composition root above every layer and stays outside the order. A
+top-level module other than `main` falls under the same check (`exhaustive_ignores`
+names only `main`). The engine deny-list contract stays as it is. The exhaustive layers
+contract does not close the engine gap by itself: a new package placed in a layer below
+`engine` (for example next to `core`) is importable by `engine` until the deny-list
+names it. So the task that adds a top-level package also reviews the engine contract,
+and the test helper that probes contracts can create a package (`app/<name>/__init__.py`)
+as well as a module.
 
 - **Why:** review item 4 of WP6.
 - **Alternative:** turn the engine contract into an allow-list ("engine imports only
-  schemas and core"): `import-linter` has no allow-list contract type; the exhaustive
-  layers contract closes the same gap.
+  schemas and core"): `import-linter` 2.15 has no allow-list contract type, so the
+  deny-list stays and is reviewed with each new package.
 
 ### 6. Small fixes
 
 - The local hook gets `language_version: python3.12`, the backend's version
   (`backend/pyproject.toml` `requires-python`).
-- `test_import_contracts.py` finds `lint-imports` with `shutil.which` (the venv's `bin/`
-  first, then `PATH`) and fails with "lint-imports not found; install
-  backend/requirements-dev.txt" when it is missing.
+- `test_import_contracts.py` finds `lint-imports` through a helper that tries the
+  directory of `sys.executable`, then `shutil.which` on `PATH`, and calls `pytest.fail`
+  with "lint-imports not found; install backend/requirements-dev.txt" when neither has
+  it. Its own test monkeypatches `sys.executable` to a temporary directory and `PATH` to
+  an empty one.
 - Coverage: `[tool.coverage.run] source = ["app", "scripts"]`, `check.sh` passes
   `--cov=app --cov=scripts`, and `[tool.coverage.report] exclude_also` drops the
-  `if __name__ == "__main__":` guard, which the tests run in a subprocess.
+  `if __name__ == "__main__":` guard, which the tests run in a subprocess. This
+  supersedes the WP6 decision "Gate scope: `app` only"
+  (`docs/decisions/bootstrap-dev-environment-readiness.md`, section 6).
 
 ### 7. The C/C++ boundary does not move
 
@@ -184,7 +215,8 @@ layers contract keeps `engine` where that decision puts it.
 - **Security:** no new secret, no new place that prints values; the notebook exclusion
   is the one weakening and is bounded by decision 2's rule. The settings check prints
   class and field names only.
-- **Performance:** both hooks stay sub-second; no application code runs at commit time.
+- **Performance:** no application code runs at commit time; the hooks add no new tool
+  run beyond the two that exist.
 - **Coverage:** branch coverage of `app` and `backend/scripts/` together >= 95% in
   `check.sh`.
 - **Accessibility:** not applicable; no user interface.
@@ -202,11 +234,20 @@ layers contract keeps `engine` where that decision puts it.
   the prefix, deliberately.
 - [Egor's files keep their baseline entries until he marks them] → Decision 1 covers
   their line shifts meanwhile.
+- [Pinning `python3.12` breaks the hook environment on a machine without a
+  `python3.12` on `PATH`, Egor's included] → It is the backend's version and
+  `backend/.venv` provides it where the setup line of `CLAUDE.md` was followed; an
+  unpinned interpreter older than 3.10 would fail anyway on the script's annotations.
+  The note to Egor (task 5.4) says it.
+- [WP9 adds a top-level `app.*` module or package] → Checked when the second of the two
+  features merges (`tasks.md`, "Dependencies"); the exhaustive contract then names it.
 
 ## Migration Plan
 
 - Order on the branch: markers and the notebook exclusion, then the regenerated
   baseline, so one scan covers the final files.
-- `AGENTS.md` and the base requirement change on `develop` only through this change's
-  archive (the delta) and its documents task; until then the old rule applies.
+- `AGENTS.md` (task 5.2) is edited only after GO and the review (task 6.2), in the same
+  session as the archive (task 6.3), so `AGENTS.md` and the base spec change on
+  `develop` together. Until then the old rule applies: a line shift in a listed document
+  waits for this change or goes through a fix branch.
 - Rollback: revert the feature's merge commit; the old baseline comes back with it.

@@ -19,10 +19,12 @@ backend package.
 
 - **Baseline refresh rule.** A `.secrets.baseline` update that changes only line numbers
   (no new finding) is committed together with the change that shifted them, on whatever
-  branch that change is, `develop` included. A new finding still needs a hand review and
-  a scan on a feature or fix branch. Recorded in `AGENTS.md` section 2 and in the
-  `development-process` requirement "Documents commit directly to develop" (Egor's
-  answer, part 3).
+  branch that change is, `develop` included, and it does not make a change a change
+  with code. A new finding still needs a hand review and a scan on a feature or fix
+  branch. Recorded in `AGENTS.md` sections 2 and 4 and in the `development-process`
+  requirements "Documents commit directly to develop" and "Go/No-Go verdict and archive"
+  (Egor's answer, part 3; his acknowledgement of the section 4 sentence is asked in
+  task 5.1).
 - **Research notebooks out of the scan.** `ml/research/*.ipynb` is excluded from
   `detect-secrets` in `.pre-commit-config.yaml`; the notebooks keep their executed
   outputs (Egor's answer, part 2). Credentials stay out of notebooks by convention.
@@ -71,6 +73,8 @@ None.
 - `development-process`:
   - "Documents commit directly to develop": a line-number-only refresh of
     `.secrets.baseline` travels with the commit that caused it, `develop` included.
+  - "Go/No-Go verdict and archive": such a refresh does not make a change a change
+    with code.
   - "Backend tooling command": the coverage gate also measures `backend/scripts/`.
   - "Import contract check": a backend package outside every layer fails the check.
   - "Pre-commit secret scan and documented configuration": research notebooks are not
@@ -84,8 +88,10 @@ None.
   `backend/scripts/check_env_example.py`, `backend/alembic.ini`, backend tests with
   placeholders, `backend/tests/test_check_env_example.py`,
   `backend/tests/test_import_contracts.py`.
-- Documents (directly on `develop`): `AGENTS.md` section 2 (edited only with Akim's
-  explicit agreement, `CLAUDE.md` "Do not change without agreement"; Egor agreed to the
-  sentence on 2026-10-04), `CLAUDE.md`.
+- Documents (directly on `develop`): `AGENTS.md` sections 2 and 4 (edited only with
+  Akim's explicit agreement, `CLAUDE.md` "Do not change without agreement", after GO and
+  together with the archive; Egor agreed to the section 2 sentence on 2026-10-04 and is
+  asked to acknowledge the section 4 sentence), `CLAUDE.md`, two notes to Egor in
+  `docs/decisions/`.
 - Egor: no file of his zone changes. The notebook exclusion and the refresh rule apply
   to his commits once he installs the hook.
