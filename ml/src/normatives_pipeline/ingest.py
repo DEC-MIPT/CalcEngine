@@ -85,10 +85,11 @@ def ingest(path: Path, force: bool = False) -> int:
             f_expression = m["expression"] if m else (
                 str(canonical_latex(f_latex)) if f_latex else ""
             )
+            f_clause = m["clause"] if m and m.get("clause") else f.clause
 
             meanings = [n.meaning for n in formula_notation.get(f.number, [])]
             search = normalize_text(
-                f"{label} {f.number} {heading.get(f.clause, '')} "
+                f"{label} {f.number} {heading.get(f_clause, '')} "
                 + " ".join(meanings)
                 + f" {f_latex}"
             )
@@ -98,7 +99,7 @@ def ingest(path: Path, force: bool = False) -> int:
                 status, provenance = "unverified", "machine-extracted"
             formula_rows.append(
                 (
-                    f.number, f.clause, f_latex, f_expression, f.raw_text, f.page,
+                    f.number, f_clause, f_latex, f_expression, f.raw_text, f.page,
                     search, status, provenance,
                 )
             )

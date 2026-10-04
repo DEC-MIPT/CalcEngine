@@ -93,7 +93,16 @@ def test_normalize_symbol_rejects_garbage(raw: str) -> None:
         ("Na и Ma", ["Na", "Ma"]),
         ("ξq, ξc, ξγ", ["ξq", "ξc", "ξγ"]),
         ("b´ и l´", ["b´", "l´"]),
+        ("ssl,g и Δssl,g", ["ssl,g", "Δssl,g"]),
+        ("hn,p и hsat,p", ["hn,p", "hsat,p"]),
+        ("σzp,i", ["σzp,i"]),
     ],
 )
 def test_split_symbols(raw: str, parts: list[str]) -> None:
     assert symbols.split_symbols(raw) == parts
+
+
+def test_split_symbols_keeps_compound_subscript_whole() -> None:
+    ident, latex = symbols.normalize_symbol("ssl,g")
+    assert latex == "s_{sl,g}"
+    assert ident == "s_sl_g"

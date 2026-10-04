@@ -26,7 +26,7 @@ def _is_cyrillic(ch: str) -> bool:
 
 
 def split_symbols(raw: str) -> list[str]:
-    parts = re.split(r"\s*,\s*|\s+и\s+|\s*;\s*", raw)
+    parts = re.split(r",\s+|\s+и\s+|\s*;\s*", raw)
     return [p.strip() for p in parts if p.strip()]
 
 
