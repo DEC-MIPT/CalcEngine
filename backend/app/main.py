@@ -10,6 +10,7 @@ from app.api.errors import install_error_handlers
 from app.api.health import router as health_router
 from app.api.limits import BodySizeLimit
 from app.core.config import ApiSettings
+from app.db.catalog import CatalogSessions
 from app.engine.registry import CalculatorRegistry
 from app.schemas.calculation import ValidatedBound
 from app.services.catalog import build_registry, load_validated_ranges
@@ -22,15 +23,18 @@ def create_app(
     sources: Mapping[str, ParameterSource] | None = None,
     session_factory: sessionmaker[Session] | None = None,
     validated_ranges: Mapping[str, Sequence[ValidatedBound]] | None = None,
+    catalog_session_factory: sessionmaker[Session] | None = None,
 ) -> FastAPI:
     """Собирает приложение (``calculation-api`` design.md, решения 1 и 7).
 
     Здесь читаются только ``ApiSettings``; настройки базы читаются при первом
-    запросе, которому нужна ``dec_app``. Без переданного реестра при старте
-    собираются реестр и проверенные диапазоны из файлов параметров. CORS разрешает
+    запросе, которому нужна ``dec_app``, а настройки каталога норм — при первом
+    запросе к каталогу (``normative-catalog-backend`` design.md, решение 4). Без
+    переданного реестра при старте собираются реестр и проверенные диапазоны из
+    файлов параметров. CORS разрешает
     только источники из ``DEC_CORS_ORIGINS``, без учётных данных (решение 8); заголовки
     ``Location`` и ``Content-Disposition`` открыты браузеру. Тесты передают свои реестр,
-    диапазоны, источники и фабрику сессий.
+    диапазоны, источники и фабрики сессий.
 
     Args:
         api_settings: настройки API; по умолчанию читаются из окружения.
@@ -38,6 +42,8 @@ def create_app(
         sources: источник нормативных параметров для каждого типа.
         session_factory: готовая фабрика сессий ``dec_app``.
         validated_ranges: проверенные диапазоны к переданному реестру.
+        catalog_session_factory: готовая фабрика сессий каталога норм; приложение её не
+            освобождает.
 
     Returns:
         Приложение FastAPI.
@@ -59,12 +65,14 @@ def create_app(
         finally:
             if app.state.owns_session_factory:
                 app.state.session_factory.kw["bind"].dispose()
+            app.state.catalog.dispose()
 
     app = FastAPI(title="DEC", lifespan=lifespan)
     app.state.api_settings = settings
     app.state.sources = dict(sources or {})
     app.state.session_factory = session_factory
     app.state.owns_session_factory = False
+    app.state.catalog = CatalogSessions(catalog_session_factory)
     install_error_handlers(app)
     app.add_middleware(BodySizeLimit)
     app.add_middleware(

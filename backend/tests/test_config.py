@@ -1,3 +1,4 @@
+import ast
 from pathlib import Path
 
 import pytest
@@ -52,17 +53,23 @@ def test_normatives_url_is_read_without_the_app_url(monkeypatch: pytest.MonkeyPa
     assert "normpass" not in repr(settings) and "normpass" not in str(settings)
 
 
-def test_only_the_normatives_settings_read_the_normatives_variable() -> None:
-    readers = [
-        path.relative_to(APP_DIR).as_posix()
-        for path in sorted(APP_DIR.rglob("*.py"))
-        if "DEC_NORMATIVES_DATABASE_URL" in path.read_text(encoding="utf-8")
-    ]
+def _variable_literals(path: Path) -> int:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    return sum(
+        isinstance(node, ast.Constant) and node.value == "DEC_NORMATIVES_DATABASE_URL"
+        for node in ast.walk(tree)
+    )
 
-    assert readers == ["core/config.py"]
-    assert (APP_DIR / "core" / "config.py").read_text(encoding="utf-8").count(
-        'validation_alias="DEC_NORMATIVES_DATABASE_URL"'
-    ) == 1
+
+def test_only_the_normatives_settings_read_the_normatives_variable() -> None:
+    readers = {
+        path.relative_to(APP_DIR).as_posix(): count
+        for path in sorted(APP_DIR.rglob("*.py"))
+        if (count := _variable_literals(path))
+    }
+
+    assert readers == {"core/config.py": 1}
+    assert 'validation_alias="DEC_NORMATIVES_DATABASE_URL"' in (APP_DIR / "core" / "config.py").read_text(encoding="utf-8")
 
 
 def test_missing_app_url_raises_validation_error(monkeypatch: pytest.MonkeyPatch) -> None:
