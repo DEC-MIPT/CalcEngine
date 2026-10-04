@@ -84,6 +84,7 @@ symbol_keys = ["id", "latex", "meaning", "unit", "kind"]
 default_symbol_kind = "input"
 clause_prefix = "п."
 formula_prefix = "форм."
+table_prefix = "табл."
 
 [search]
 similarity_threshold = 0.1

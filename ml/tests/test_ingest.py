@@ -9,7 +9,7 @@ import pytest
 from normatives_pipeline import db
 from normatives_pipeline.ingest import ingest
 
-REPO = Path(__file__).resolve().parent.parent
+REPO = Path(__file__).resolve().parents[2]
 DOC = REPO / "docs/normative-base" / "СП 31.13330.2021.pdf"
 DESIGNATION = "СП 31.13330.2021"
 

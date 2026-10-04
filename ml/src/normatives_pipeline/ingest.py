@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from . import db
-from .config import formula_manifest, parser_config
+from .config import formula_manifest, output_config, parser_config
 from .parser import extractors, symbols, text_layer
 from .retrieval import normalize_text
 
@@ -17,7 +17,15 @@ def ingest(path: Path, force: bool = False) -> int:
     if not path.exists():
         print(f"нет файла: {path}")
         return 1
-    designation = path.stem
+
+    pages = text_layer.read_pages(path)
+    designation = text_layer.extract_designation(pages)
+    if not designation:
+        raise RuntimeError("не удалось извлечь обозначение документа с титульной страницы")
+    edition = text_layer.extract_edition_year(designation)
+    if not edition:
+        raise RuntimeError(f"не удалось извлечь год издания из обозначения {designation!r}")
+    year = int(edition)
 
     conn = db.connect()
     try:
@@ -28,7 +36,6 @@ def ingest(path: Path, force: bool = False) -> int:
         if force:
             db.delete_document(conn, designation)
 
-        pages = text_layer.read_pages(path)
         clauses = extractors.extract_clauses(pages)
 
         numbered = extractors.associate_formulas_to_clauses(
@@ -54,7 +61,7 @@ def ingest(path: Path, force: bool = False) -> int:
 
         heading = {c.number: c.text for c in clauses}
         label = parser_config()["formula_label"]
-        doc_id = db.upsert_document(conn, designation)
+        doc_id = db.upsert_document(conn, designation, edition=edition, year=year)
 
         clause_rows = [
             (c.number, c.text, c.page, normalize_text(c.text)) for c in clauses
@@ -78,8 +85,15 @@ def ingest(path: Path, force: bool = False) -> int:
                 + " ".join(meanings)
                 + f" {f_latex}"
             )
+            if m:
+                status, provenance = "verified", "human-verified"
+            else:
+                status, provenance = "unverified", "machine-extracted"
             formula_rows.append(
-                (f.number, f.clause, f_latex, f_expression, f.raw_text, f.page, search)
+                (
+                    f.number, f.clause, f_latex, f_expression, f.raw_text, f.page,
+                    search, status, provenance,
+                )
             )
 
             if m:
@@ -103,9 +117,16 @@ def ingest(path: Path, force: bool = False) -> int:
         ref_rows = [(r.clause, r.ref_type, r.value, r.url) for r in cross_refs]
         db.insert_cross_refs(conn, doc_id, ref_rows)
 
+        table_prefix = output_config()["table_prefix"]
         tables = extractors.extract_tables(path)
         coeff_rows = [
-            (t.number, t.page, ri, ci, value)
+            (
+                t.number, t.page, ri, ci, value,
+                "unverified",
+                f"{table_prefix} {t.number}" if t.number else "unverified",
+                "unverified",
+                "machine-extracted",
+            )
             for t in tables
             for ri, row in enumerate(t.rows)
             for ci, value in enumerate(row)

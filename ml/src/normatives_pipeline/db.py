@@ -42,9 +42,13 @@ CREATE TABLE IF NOT EXISTS formula (
     expression TEXT NOT NULL DEFAULT '',
     raw_text TEXT NOT NULL DEFAULT '',
     page INT,
-    search_text TEXT NOT NULL DEFAULT ''
+    search_text TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted'
 );
 ALTER TABLE formula ADD COLUMN IF NOT EXISTS expression TEXT NOT NULL DEFAULT '';
+ALTER TABLE formula ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'unverified';
+ALTER TABLE formula ADD COLUMN IF NOT EXISTS provenance TEXT NOT NULL DEFAULT 'machine-extracted';
 
 CREATE TABLE IF NOT EXISTS notation_entry (
     id SERIAL PRIMARY KEY,
@@ -75,8 +79,16 @@ CREATE TABLE IF NOT EXISTS coefficient (
     page INT,
     row_index INT NOT NULL,
     col_index INT NOT NULL,
-    value TEXT NOT NULL
+    value TEXT NOT NULL,
+    edition TEXT NOT NULL DEFAULT 'unverified',
+    clause TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted'
 );
+ALTER TABLE coefficient ADD COLUMN IF NOT EXISTS edition TEXT NOT NULL DEFAULT 'unverified';
+ALTER TABLE coefficient ADD COLUMN IF NOT EXISTS clause TEXT NOT NULL DEFAULT '';
+ALTER TABLE coefficient ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'unverified';
+ALTER TABLE coefficient ADD COLUMN IF NOT EXISTS provenance TEXT NOT NULL DEFAULT 'machine-extracted';
 
 CREATE INDEX IF NOT EXISTS idx_clause_doc ON clause(document_id);
 CREATE INDEX IF NOT EXISTS idx_formula_doc ON formula(document_id);
@@ -159,7 +171,8 @@ def insert_formulas(conn: Any, doc_id: int, rows: list[tuple]) -> None:
             cur,
             """
             INSERT INTO formula
-                (document_id, number, clause_number, latex, expression, raw_text, page, search_text)
+                (document_id, number, clause_number, latex, expression, raw_text, page,
+                 search_text, status, provenance)
             VALUES %s
             """,
             [(doc_id, *row) for row in rows],
@@ -200,7 +213,8 @@ def insert_coefficients(conn: Any, doc_id: int, rows: list[tuple]) -> None:
             cur,
             """
             INSERT INTO coefficient
-                (document_id, table_number, page, row_index, col_index, value)
+                (document_id, table_number, page, row_index, col_index, value,
+                 edition, clause, status, provenance)
             VALUES %s
             """,
             [(doc_id, *row) for row in rows],
@@ -212,10 +226,12 @@ def fetch_coefficients(conn: Any, doc_id: int, table_number: str) -> list[dict]:
     with conn.cursor() as cur:
         cur.execute(
             """
-            SELECT table_number, page, row_index, col_index, value
-            FROM coefficient
-            WHERE document_id = %s AND table_number = %s
-            ORDER BY row_index, col_index
+            SELECT d.designation, c.table_number, c.page, c.row_index, c.col_index,
+                   c.value, c.edition, c.clause, c.status, c.provenance
+            FROM coefficient c
+            JOIN document d ON d.id = c.document_id
+            WHERE c.document_id = %s AND c.table_number = %s
+            ORDER BY c.row_index, c.col_index
             """,
             (doc_id, table_number),
         )
@@ -226,7 +242,7 @@ def fetch_formulas(conn: Any, doc_id: int) -> list[dict]:
     with conn.cursor() as cur:
         cur.execute(
             """
-            SELECT id, number, clause_number, page
+            SELECT id, number, clause_number, page, status, provenance
             FROM formula
             WHERE document_id = %s
             ORDER BY id
@@ -264,7 +280,10 @@ def _trgm_search(
 
 
 def search_formulas(conn: Any, lemmas: str, k: int = 5) -> list[dict]:
-    cols = "f.number, f.clause_number, f.latex, f.expression, f.raw_text, f.page, d.edition"
+    cols = (
+        "f.number, f.clause_number, f.latex, f.expression, f.raw_text, f.page, "
+        "d.edition, f.status, f.provenance"
+    )
     return _trgm_search(conn, "formula", "f", cols, lemmas, k)
 
 
@@ -313,14 +332,20 @@ def _formula_locator(formula: dict) -> str:
 def build_formula_payload(conn: Any, formula: dict) -> dict:
     cfg = output_config()
 
+    document = formula.get("designation") or ""
+    if not document:
+        raise RuntimeError("формула без документа: payload не строится")
+
     norm_ref = {
-        "document": formula.get("designation", ""),
+        "document": document,
         "edition": formula.get("edition") or "unverified",
         "clause": _formula_locator(formula),
-        "status": "unverified",
-        "provenance": "machine-extracted",
+        "status": formula.get("status") or "unverified",
+        "provenance": formula.get("provenance") or "machine-extracted",
     }
-    norm_ref = {k: norm_ref[k] for k in cfg["norm_ref_keys"]}
+    for key in cfg["norm_ref_keys"]:
+        if key not in norm_ref and key in formula:
+            norm_ref[key] = formula[key]
 
     symbols = []
     for n in fetch_notation(conn, formula["document_id"], formula["number"]):
@@ -346,3 +371,27 @@ def build_formula_payload(conn: Any, formula: dict) -> dict:
         "cross_refs": cross_refs,
     }
     return {k: payload[k] for k in cfg["formula_keys"]}
+
+
+def build_coefficient_norm_ref(coefficient: dict) -> dict:
+    document = coefficient.get("designation") or ""
+    if not document:
+        raise RuntimeError("коэффициент без документа: NormRef не строится")
+    return {
+        "document": document,
+        "edition": coefficient.get("edition") or "unverified",
+        "clause": coefficient.get("clause") or "unverified",
+        "status": coefficient.get("status") or "unverified",
+        "provenance": coefficient.get("provenance") or "machine-extracted",
+    }
+
+
+def build_coefficient_payload(coefficient: dict) -> dict:
+    return {
+        "table_number": coefficient.get("table_number", ""),
+        "page": coefficient.get("page"),
+        "row_index": coefficient["row_index"],
+        "col_index": coefficient["col_index"],
+        "value": coefficient["value"],
+        "norm_ref": build_coefficient_norm_ref(coefficient),
+    }

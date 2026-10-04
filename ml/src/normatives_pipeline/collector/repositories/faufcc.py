@@ -21,9 +21,14 @@ class FaufccRepository:
             {"registry": self._registry, "search": term},
             ensure_ascii=False,
         )
+        params: dict[str, str | int] = {
+            "page": 1,
+            "filters": filters,
+            "include": "asset",
+        }
         resp = requests.get(
             f"{self._base}/registries/entries",
-            params={"page": 1, "filters": filters, "include": "asset"},
+            params=params,
             headers=self._headers,
             timeout=30,
         )
