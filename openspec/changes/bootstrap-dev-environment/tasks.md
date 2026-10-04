@@ -3,12 +3,14 @@
 Owner: Akim (tooling commands and pre-commit, this change; Docker Compose and CI are
 Egor's and not part of this change). Branch: sections 2-4.3 were done on `feature/bootstrap-dev-environment/backend` and
 `feature/bootstrap-dev-environment/frontend` and are already merged into `develop`. The
-remaining code (4.4 and 5.1, both blocked on WP5, and 4.5) goes on `feature/dev-environment/backend`
+remaining code (4.4, 4.5, 4.6 and 5.1) goes on `feature/dev-environment/backend`
 from `develop`; documents (section 6, and the note of task 4.5) go directly to `develop`. Checkboxes in this file are ticked in `develop` as each subtask is done on the feature branch; the code reaches `develop` only when the whole feature is done (`AGENTS.md`, Branching rules).
 
 Marker **[blocked: WP5]**: the task needs `backend-layered-architecture`'s layered
 `backend/app` structure (its task 1.1) or its config module (its task 2.1) before it
-can be implemented; until then it is not started, not stubbed as a no-op.
+can be implemented; until then it is not started, not stubbed as a no-op. Lifted
+2026-10-04: both WP5 tasks are done and merged into `develop` (`53a4892`), so tasks 4.4
+and 5.1 no longer carry the marker.
 
 ## 1. Spec readiness
 
@@ -125,9 +127,12 @@ can be implemented; until then it is not started, not stubbed as a no-op.
   `changeme` tripped `detect-secrets`' Basic Auth detector on the `dec_normatives` line,
   same as the team's existing `dec:dec` convention; folded into the 4.2 baseline after
   hand-review)
-- [ ] 4.4 [blocked: WP5] Add a local pre-commit hook comparing
+- [ ] 4.4 Add a local pre-commit hook comparing
   `backend/app/core/config.py`'s Pydantic settings fields against `.env.example` keys;
-  verify a field missing from `.env.example` fails `pre-commit run`
+  verify a field missing from `.env.example` fails `pre-commit run` (2026-10-04:
+  unblocked; the settings now span several classes, `Settings`, `ApiSettings` from
+  `calculation-api` and `NormativesSettings` from `normative-catalog-backend` task 3.1,
+  so which classes and keys the hook compares is settled when the task starts)
 - [ ] 4.5 Regenerate `.secrets.baseline` (added 2026-10-03, `spec-reviewer` finding):
   after Egor's move of 2026-10-03 (`ml/`, `infra/`) the baseline names five files that
   no longer exist, and it does not cover the backend files merged after 4.2, so
@@ -139,10 +144,22 @@ can be implemented; until then it is not started, not stubbed as a no-op.
   (backend); verify: `pre-commit run --all-files` exits 0 on that branch after
   `git merge develop`, a staged fake key still fails it, every path in the baseline
   exists, and the note exists on `develop`
+- [ ] 4.6 Align `DEC_NORMATIVES_DATABASE_URL` in `.env.example` with the read contract
+  of `normative-catalog-backend` (added 2026-10-04 from Egor's answers in
+  `docs/decisions/normative-catalog-backend-contract-akim.md`): the placeholder names
+  the reader role `dec_normatives_reader` and Egor's interim database `dec`
+  (`postgresql://dec_normatives_reader:changeme@localhost:5433/dec`), and the file's
+  comment says that `dec` holds the catalog until Egor's infrastructure change splits
+  the databases and that the password is the one his ingestion sets from
+  `DEC_NORMATIVES_READER_PASSWORD`. Egor's own variables (`DEC_DATABASE_URL`,
+  `DEC_NORMATIVES_READER_PASSWORD`) are not listed: the file describes the backend
+  (Akim, 2026-10-04). Done before 4.5, so its scan covers the changed line (backend);
+  verify: the line names the reader role, the database `dec` and a placeholder password,
+  no real credential, and `pre-commit run --all-files` passes after 4.5
 
 ## 5. Import contract (backend)
 
-- [ ] 5.1 [blocked: WP5] Add `[tool.importlinter]` contracts to `backend/pyproject.toml`,
+- [ ] 5.1 Add `[tool.importlinter]` contracts to `backend/pyproject.toml`,
   naming `backend-layered-architecture`'s layer packages and encoding its total layer
   order (`design.md` decision 2), and wire them into `backend/check.sh`: a "layers"
   contract (`api | worker`, `services`, `engine | parameters | reporting`,
@@ -185,9 +202,11 @@ can be implemented; until then it is not started, not stubbed as a no-op.
 
 ## Dependencies
 
-- None to start sections 1-4 and 6 (task 4.4 excepted). Section 5 and task 4.4 need
-  `backend-layered-architecture` (WP5) tasks 1.1 and 2.1 respectively; they stay
-  `[blocked: WP5]` until then and do not gate this change's own GO.
+- None to start sections 1-4 and 6. Section 5 and task 4.4 needed
+  `backend-layered-architecture` (WP5) tasks 1.1 and 2.1 respectively; both are merged
+  (`53a4892`), so the `[blocked: WP5]` marker is lifted (2026-10-04). They still do not
+  gate this change's own GO.
+- Task 4.6 comes before 4.5.
 - Task 7.3 (archive) needs 7.1 and 7.2.
 - Task 7.1 needs 4.5, since `pre-commit run --all-files` is part of the verdict. Task 4.5
   needs nothing else. A later move of files in either zone makes the hook fail again on
@@ -203,8 +222,8 @@ can be implemented; until then it is not started, not stubbed as a no-op.
 - [x] Each task is small enough for one session
 - [x] Acceptance and Go/No-Go criteria written (below)
 - [x] Branches defined (above)
-- [x] Dependencies satisfied to start: none; the two `[blocked: WP5]` tasks are named
-  and do not block this change's own GO
+- [x] Dependencies satisfied to start: none; the two tasks once `[blocked: WP5]` (4.4,
+  5.1) are unblocked since 2026-10-04 and do not block this change's own GO
 
 ## DOD and Go / No-Go
 
@@ -221,9 +240,8 @@ can be implemented; until then it is not started, not stubbed as a no-op.
   decision 3); whether that is acceptable for this change's own GO, or holds the GO
   until `backend/app/` exists, is the open question in `design.md` and must be
   resolved before task 7.1 is checked off — this DOD does not presuppose an answer.
-  Tasks 4.4 and 5.1 (`[blocked: WP5]`) are not required for this change's own GO; they
-  are picked up once `backend-layered-architecture` unblocks them, in a follow-up
-  change or task.
+  Tasks 4.4 and 5.1 (unblocked since 2026-10-04) are not required for this change's
+  own GO.
 - NO-GO: validation fails; an unresolved blocker; either `check.sh` exits non-zero on a
   clean checkout; frontend coverage below 95%; `pre-commit run --all-files` fails; a
   file in the pipeline's zone (`ml/`, including its `pyproject.toml` and `tests/`, which
