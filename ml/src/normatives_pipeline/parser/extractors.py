@@ -8,7 +8,7 @@ from pathlib import Path
 import pdfplumber
 
 from ..config import parser_config
-from .models import Clause, CrossRef, Formula, NotationEntry, Table
+from .models import Clause, Condition, CrossRef, Formula, NotationEntry, Table
 
 _CFG = parser_config()
 
@@ -23,6 +23,8 @@ FORMULA_MAX_LEN = int(_CFG["formula_max_len"])
 FORMULA_LOOKBACK = int(_CFG["formula_lookback"])
 NOTATION_SCAN_LINES = int(_CFG["notation_scan_lines"])
 SYNTHETIC_ID_TEMPLATE = _CFG["synthetic_id_template"]
+COND_CUES = tuple(p.strip().lower() for p in _CFG["condition_cues"] if p.strip())
+COND_MAX_LEN = int(_CFG.get("condition_max_len", 400))
 
 
 def _clauses_by_page(clauses: list[Clause]) -> dict[int, list[Clause]]:
@@ -282,3 +284,29 @@ def extract_tables(path: Path, max_pages: int | None = None) -> list[Table]:
 
 def extract_table_refs(text: str) -> list[str]:
     return TABLE_REF_RE.findall(text)
+
+
+def _cond_norm(text: str) -> str:
+    return re.sub(r"[,\s]+", " ", text.lower()).strip()
+
+
+def extract_conditions(pages: list[str], clauses: list[Clause]) -> list[Condition]:
+    """Условия применимости: строки с фразами-маркерами («при условии что», «при
+    соблюдении», «соблюдены следующие условия» и т. п.). Детерминированно, без моделей."""
+    by_page = _clauses_by_page(clauses)
+    out: list[Condition] = []
+    for page_no, text in enumerate(pages, start=1):
+        page_clauses = by_page.get(page_no, [])
+        for line_no, line in enumerate(text.splitlines()):
+            stripped = line.strip()
+            if not stripped or len(stripped) > COND_MAX_LEN:
+                continue
+            norm = _cond_norm(stripped)
+            if not any(cue in norm for cue in COND_CUES):
+                continue
+            preceding = [c for c in page_clauses if c.line <= line_no]
+            clause_num = preceding[-1].number if preceding else ""
+            out.append(
+                Condition(clause=clause_num, text=stripped, page=page_no, line=line_no)
+            )
+    return out

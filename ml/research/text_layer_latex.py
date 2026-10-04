@@ -167,10 +167,12 @@ def _marker(chars: list[dict], number: str) -> tuple[float, float] | None:
         is_prose = _looks_like_prose(line)
         hit = (c["top"], c["x0"])
         groups[0 if (is_end and not is_prose) else 1 if not is_prose else 2 if is_end else 3].append(hit)
-    for group in groups:
+    # Прозаическая ссылка «…по формуле (N)» — не определение формулы: если маркер стоит
+    # только внутри прозы (все вхождения — проза), формулы на этой странице нет. Раньше
+    # фолбэк брал прозаический маркер и реконструировал соседнюю (чужую) формулу.
+    for group in groups[:2]:
         if group:
             return max(group, key=lambda t: t[1])
-    return None
     return None
 
 
@@ -226,6 +228,71 @@ def _bars(page, y0: float, y1: float, x0: float, x1: float) -> list[dict]:
             center_y = seg["top"] + seg["height"] / 2
             if y0 <= center_y <= y1 and x0 <= seg["x0"] and seg["x1"] <= x1 + 2:
                 out.append(seg)
+    return out
+
+
+def _slashes(page, y0: float, y1: float, x0: float, x1: float) -> list[dict]:
+    """Наклонные векторные отрезки-слэши (деление, нарисованное линией, не глифом).
+
+    В части СП знак ``/`` отрисован вектором: небольшой наклонный отрезок
+    (примерно 5x15 pt). Дробные черты горизонтальны и отсечены в ``_bars``.
+    """
+    out = []
+    for seg in list(page.rects) + list(page.lines):
+        w, h = seg["width"], seg["height"]
+        if w <= 0 or not (2 <= w <= 12 and 6 <= h <= 25):
+            continue
+        if not (0.15 <= w / h <= 0.9):
+            continue
+        if y0 <= seg["top"] <= y1 and x0 <= seg["x0"] <= x1:
+            out.append(seg)
+    return out
+
+
+def _radicals(page, band: list[dict], bars: list[dict]) -> list[dict]:
+    """Радикалы, нарисованные вектором: винкулум (горизонталь) + диагональный штрих.
+
+    В части СП знак корня не глиф: горизонтальная черта над подкоренным выражением плюс
+    короткий диагональный штрих слева. Без распознавания диагональ уходит в ``_slashes``
+    как ``/``, а корень теряется. Признак радикала: у горизонтали **нет числителя сверху**,
+    но **есть подкоренное выражение снизу**, и к левому концу примыкает диагональ
+    (у дробной черты числитель есть — поэтому она сюда не попадает).
+    """
+    segs = list(page.rects) + list(page.lines)
+    out = []
+    for bar in bars:
+        # Штрихи радикала: короткие отрезки слева от винкулума, вертикально его накрывающие
+        # (диагональ + нижний крючок). Прямые горизонтальные «полки» сюда не попадают.
+        strokes = [
+            s
+            for s in segs
+            if s["width"] <= 8
+            and s["x1"] <= bar["x0"] + 1.5
+            and s["x0"] >= bar["x0"] - 8
+            and s["bottom"] >= bar["top"] - 2
+            and s["top"] <= bar["bottom"] + 20
+        ]
+        if not strokes:
+            continue
+        lo, hi = bar["x0"] - 1, bar["x1"] + 1
+
+        def inside(c: dict, lo: float = lo, hi: float = hi) -> bool:
+            return lo <= (c["x0"] + c["x1"]) / 2 <= hi
+
+        below = [c for c in band if inside(c) and bar["top"] - 1 <= c["top"] <= bar["top"] + 16]
+        above = [
+            c
+            for c in band
+            if inside(c) and bar["top"] - 12 <= c["bottom"] <= bar["top"] - 0.5
+        ]
+        if below and not above:
+            latex = "\\sqrt{" + _assemble(sorted(below, key=lambda c: c["x0"])) + "}"
+            used = {id(bar)} | {id(s) for s in strokes} | {id(c) for c in below}
+            out.append(
+                {"bar": bar, "strokes": strokes,
+                 "x": min(s["x0"] for s in strokes), "y": min(s["top"] for s in strokes),
+                 "latex": latex, "used": used}
+            )
     return out
 
 
@@ -353,6 +420,26 @@ def _line_latex(line: dict, rest: list[dict], fraction: list[tuple[float, float,
     inserted = sorted((x, latex) for x, latex in near if left - 1 <= x <= right + 3)
     rel = [c["size"] for c in line["chars"] if c["text"] in _REL and c["size"] > 0]
     base_size = max(rel) if rel else _base_size(line["chars"])
+    # Прозаические слова (>=3 базовых кириллических букв) внутри формульной строки:
+    # ведущее «при …» снимаем (условие), внутреннее «где …» обрезаем (дальше — легенда).
+    is_prose = [
+        c["size"] >= 0.9 * base_size and bool(_CYR_RE.fullmatch(c["text"])) for c in seg
+    ]
+    lead = 0
+    while lead < len(seg) and is_prose[lead]:
+        lead += 1
+    if lead >= 3:
+        seg, is_prose = seg[lead:], is_prose[lead:]
+    run = 0
+    cut_x = None
+    for j, p in enumerate(is_prose):
+        run = run + 1 if p else 0
+        if run >= 3:
+            seg = seg[: j - run + 1]
+            cut_x = seg[-1]["x1"] if seg else None
+            break
+    if cut_x is not None:
+        inserted = [t for t in inserted if t[0] <= cut_x + 3]
     tokens: list[tuple[str, str]] = []
     fi = 0
     for c in seg:
@@ -373,10 +460,16 @@ def _line_latex(line: dict, rest: list[dict], fraction: list[tuple[float, float,
     while fi < len(inserted):
         tokens.append(("frac", inserted[fi][1]))
         fi += 1
-    return "".join(
+    frags = [
         "_{" + t + "}" if k == "sub" else "^{" + t + "}" if k == "sup" else t
         for k, t in tokens
-    )
+    ]
+    # Операнд Σ оборачиваем в {} (``\sum{...}``), иначе выходит ``\sumq``.
+    for i, frag in enumerate(frags):
+        if frag.startswith("\\sum") and i + 1 < len(frags):
+            frags = frags[: i + 1] + ["{" + "".join(frags[i + 1:]) + "}"]
+            break
+    return "".join(frags)
 
 
 def reconstruct_latex(page, number: str) -> str | None:
@@ -403,26 +496,67 @@ def reconstruct_latex(page, number: str) -> str | None:
     ]
     if not band:
         return None
+    # Строку прозы над/под формулой нельзя принимать за числитель/знаменатель дроби или
+    # радикала: её буквы попадают в окно ±12 pt и рождают ``\frac{нач}{M_t}`` (5.3) и
+    # ``\frac{z:}{K_a}`` (9.5). Убираем прозаические строки из полосы до сборки атомов.
+    prose_ids = {
+        id(c) for ln in _cluster(band) if _looks_like_prose(ln) for c in ln["chars"]
+    }
+    band = [c for c in band if id(c) not in prose_ids]
+    if not band:
+        return None
 
     fraction: list[tuple[float, float, str]] = []
     consumed: set[int] = set()
+    radicals = _radicals(page, band, bars)
+    rad_bars = {id(r["bar"]) for r in radicals}
+    rad_diags = {id(s) for r in radicals for s in r["strokes"]}
+    for sl in _slashes(page, y_lo, y_hi, 60, marker_x - 2):
+        if id(sl) in rad_diags:
+            continue
+        fraction.append((sl["x0"], sl["top"], "/"))
     for bar in bars:
+        if id(bar) in rad_bars:
+            continue
         result = _frac(band, bar)
         if result is None:
             continue
         x, latex, used = result
         fraction.append((x, bar["top"], latex))
         consumed |= used
+    for r in radicals:
+        fraction.append((r["x"], r["y"], r["latex"]))
+        consumed |= r["used"]
     for x, y, latex, used in _sum_groups(band, consumed):
         fraction.append((x, y, latex))
         consumed |= used
     rest = [c for c in band if id(c) not in consumed]
 
     lines = _cluster(rest)
+    if not lines:
+        return None
+    # Формула может занимать несколько строк: строка-маркер плюс строки-продолжения без
+    # знака отношения (``2 A3 cosφ0]``). Берём связный блок не-прозаических строк вокруг
+    # строки маркера, ограниченный разрывами > 22 pt (конец формулы / соседняя строка).
+    marker_i = min(range(len(lines)), key=lambda i: abs(lines[i]["top"] - top))
+    block = [marker_i]
+    i = marker_i - 1
+    while i >= 0 and lines[i + 1]["top"] - lines[i]["top"] <= 22:
+        block.append(i)
+        i -= 1
+    i = marker_i + 1
+    while i < len(lines) and lines[i]["top"] - lines[i - 1]["top"] <= 22:
+        block.append(i)
+        i += 1
+    block.sort()
+    # Строка-маркер задаёт базовый кегль: подстрочные/надстрочные кластеры (мелкий кегль,
+    # свой ``top``) уже собраны в базовую строку в ``_line_latex`` — их как отдельные строки
+    # не берём, иначе они дублируются в хвосте формулы.
+    marker_base = _base_size(lines[marker_i]["chars"]) or _base_size(rest)
     math_lines = [
-        ln
-        for ln in lines
-        if _has_rel(ln["chars"]) and not _looks_like_prose(ln)
+        lines[i]
+        for i in block
+        if any(c["size"] >= 0.9 * marker_base for c in lines[i]["chars"])
     ]
     if not math_lines:
         return None
@@ -433,7 +567,12 @@ def reconstruct_latex(page, number: str) -> str | None:
     if _has_brace(band) and len(parts) > 1:
         body = "\\\\".join(parts)
         return "\\left.\\begin{aligned}" + body + "\\end{aligned}\\right\\}"
-    return "; ".join(parts)
+    # Завершающая запятая/точка с запятой — разделитель перечисления или признак
+    # следующей легенды «где …», не часть формулы: в LaTeX не тащим (в т.ч. внутри
+    # обёртки Σ: ``\sum{...1000,}`` → ``\sum{...1000}``).
+    body = " ".join(parts)
+    body = re.sub(r"[,;]+\}\s*$", "}", body)
+    return body.rstrip(" ,;.")
 
 
 _KNOWN_CMDS = sorted(

@@ -30,11 +30,24 @@ See `proposal.md`.
    (γ_c, R₀, …) to its source (input value | table lookup | derived from another formula).
    Alternatives to evaluate in the journal: auto-bind by notation-name match; auto-bind by
    table-header match.
-4. **Per-type adapters (H10).** text-PDF → `pdfplumber`/regex; scan → OCR (Surya);
-   formula → DocLayout-YOLO (detection) + pix2text (recognition); table → `pdfplumber`
-   (text) / Table Transformer (scan).
+4. **Per-type adapters (H10).** text-PDF → `pdfplumber`/regex. Formula LaTeX for text-PDF →
+   **deterministic reconstruction from the text layer** (`text_layer_latex`: pdfplumber
+   geometry + NFKC + Adobe Symbol table; Cyrillic kept as-is, transliterated to Latin for
+   SymPy only) — no OCR, no models. Scan → OCR (Surya); for formulas on scans only,
+   DocLayout-YOLO (detection) + pix2text (recognition). Table → `pdfplumber` (text) /
+   Table Transformer (scan). MinerU 4.0.10 was evaluated (research `nb09`) and **rejected as
+   a pipeline**: OCR heads corrupt Cyrillic (`h_зар`→`h_3arrom`) and the CLI reloads models
+   per call (≈31 s/formula page); only isolated ideas (formula number as `\tag{}`, unified
+   block representation) are taken.
 5. **Model strategy.** Deterministic baseline first; ML only where it fails; every ML
    output is `machine-extracted` and gated behind `human-verified`.
+6. **Unified parser entry point.** `normatives-pipeline/formulas/source.py` is the single
+   formula-LaTeX source: `text_layer.classify` (`text` vs `scan`) picks deterministic
+   reconstruction (`parser/latex_reconstruct.py`) for text PDFs or the deferred OCR step
+   (DocLayout-YOLO + pix2text) for scans. Both feed the same `Formula.latex`/`expression`
+   and the same payload contract. Applicability conditions are extracted deterministically
+   (`parser/extractors.extract_conditions`) by config-driven phrase cues and stored in the
+   `condition` table.
 
 ## Non-functional requirements
 

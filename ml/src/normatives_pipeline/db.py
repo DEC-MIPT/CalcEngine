@@ -72,6 +72,19 @@ CREATE TABLE IF NOT EXISTS cross_ref (
     url TEXT NOT NULL DEFAULT ''
 );
 
+CREATE TABLE IF NOT EXISTS condition (
+    id SERIAL PRIMARY KEY,
+    document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
+    clause_number TEXT NOT NULL DEFAULT '',
+    text TEXT NOT NULL,
+    page INT,
+    line INT,
+    kind TEXT NOT NULL DEFAULT 'condition',
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted'
+);
+ALTER TABLE condition ADD COLUMN IF NOT EXISTS line INT;
+
 CREATE TABLE IF NOT EXISTS coefficient (
     id SERIAL PRIMARY KEY,
     document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
@@ -200,6 +213,20 @@ def insert_cross_refs(conn: Any, doc_id: int, rows: list[tuple]) -> None:
             cur,
             """
             INSERT INTO cross_ref (document_id, clause_number, ref_type, ref_value, url)
+            VALUES %s
+            """,
+            [(doc_id, *row) for row in rows],
+        )
+    conn.commit()
+
+
+def insert_conditions(conn: Any, doc_id: int, rows: list[tuple]) -> None:
+    with conn.cursor() as cur:
+        execute_values(
+            cur,
+            """
+            INSERT INTO condition
+                (document_id, clause_number, text, page, line, kind, status, provenance)
             VALUES %s
             """,
             [(doc_id, *row) for row in rows],

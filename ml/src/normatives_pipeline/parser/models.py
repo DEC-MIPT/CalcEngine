@@ -49,6 +49,15 @@ class CrossRef:
 
 
 @dataclass(frozen=True)
+class Condition:
+    clause: str
+    text: str
+    page: int
+    line: int
+    kind: str = "condition"
+
+
+@dataclass(frozen=True)
 class Table:
     number: str
     rows: tuple[tuple[str, ...], ...]
