@@ -146,3 +146,23 @@ def test_coefficients_roundtrip(conn) -> None:
 def test_build_coefficient_norm_ref_missing_document_raises() -> None:
     with pytest.raises(RuntimeError):
         db.build_coefficient_norm_ref({"designation": ""})
+
+
+def test_update_formula_latex_expression(conn) -> None:
+    designation = "TEST-ОБНОВЛЕНИЕ"
+    db.delete_document(conn, designation)
+    doc_id = db.upsert_document(conn, designation, title="test")
+    db.insert_formulas(
+        conn,
+        doc_id,
+        [("5.1", "5.3", "old", "old", "raw", 1, "s", "unverified", "machine-extracted")],
+    )
+    formula_id = db.fetch_formulas(conn, doc_id)[0]["id"]
+    db.update_formula(conn, formula_id, "x = y", "x*y")
+    with conn.cursor() as cur:
+        cur.execute("SELECT latex, expression FROM formula WHERE id = %s", (formula_id,))
+        row = cur.fetchone()
+    assert row is not None
+    assert row["latex"] == "x = y"
+    assert row["expression"] == "x*y"
+    db.delete_document(conn, designation)

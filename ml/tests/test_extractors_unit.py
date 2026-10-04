@@ -73,3 +73,56 @@ def test_extract_cross_refs() -> None:
     refs = extractors.extract_cross_refs(PAGES, clauses)
     assert all(r.ref_type == "gost" for r in refs)
     assert any(r.value == "ГОСТ 20522" for r in refs)
+
+
+def test_extract_notation() -> None:
+    entries = extractors.extract_notation(["X – нормативное значение характеристики\n"])
+    assert [e.symbol for e in entries] == ["X"]
+
+
+def test_extract_table_refs() -> None:
+    assert extractors.extract_table_refs("по таблице 5.5 и таблицы 7.2") == ["5.5", "7.2"]
+
+
+def test_caption_search_and_line() -> None:
+    assert extractors._caption_search("см. Таблица 5.5 ниже") == "5.5"
+    assert extractors._caption_search("нет подписи") == ""
+    assert extractors._caption_line("Таблица 7.2") == "7.2"
+    assert extractors._caption_line("см. Таблица 7.2") == ""
+    assert extractors._caption_line("шапка\nТаблица 7.2\n") == "7.2"
+
+
+class _Crop:
+    def __init__(self, text: str) -> None:
+        self._text = text
+
+    def extract_text(self) -> str:
+        return self._text
+
+
+class _Page:
+    width = 100
+    height = 200
+
+    def __init__(self, text: str) -> None:
+        self._text = text
+
+    def within_bbox(self, bbox: tuple) -> _Crop:
+        return _Crop(self._text)
+
+
+def test_table_caption_from_page_and_previous_page() -> None:
+    assert extractors._table_caption(_Page("Таблица 5.5"), (0, 50, 100, 100)) == "5.5"
+    without = _Page("без подписи")
+    assert extractors._table_caption(without, (0, 50, 100, 100)) == ""
+    assert (
+        extractors._table_caption(without, (0, 50, 100, 100), _Page("хвост\nТаблица 7.2"))
+        == "7.2"
+    )
+
+
+def test_unnumbered_skips_non_formula_lines() -> None:
+    pages = ["где X – значение\n", ("а" * 200) + "\nгде Y – значение\n"]
+    clauses = extractors.extract_clauses(pages)
+    formulas, _ = extractors.extract_unnumbered_formulas(pages, clauses)
+    assert formulas == []
