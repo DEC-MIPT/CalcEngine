@@ -3,6 +3,7 @@ import pytest
 from app.core.exceptions import (
     AlreadyRegisteredError,
     CalculationTypeNotRegisteredError,
+    CatalogUnavailableError,
     DatabaseUnavailableError,
     DECError,
     NotFoundError,
@@ -28,7 +29,12 @@ def test_parameter_validation_error_is_a_dec_error() -> None:
 
 @pytest.mark.parametrize(
     "error",
-    [ParameterSourceUnavailableError, CalculationTypeNotRegisteredError, DatabaseUnavailableError],
+    [
+        ParameterSourceUnavailableError,
+        CalculationTypeNotRegisteredError,
+        DatabaseUnavailableError,
+        CatalogUnavailableError,
+    ],
 )
 def test_the_api_errors_are_dec_errors(error: type[DECError]) -> None:
     assert issubclass(error, DECError)

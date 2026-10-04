@@ -11,6 +11,7 @@ from app.core.exceptions import (
     AlreadyRegisteredError,
     CalculationError,
     CalculationTypeNotRegisteredError,
+    CatalogUnavailableError,
     DatabaseUnavailableError,
     DECError,
     ExpressionError,
@@ -67,6 +68,7 @@ def call(error: Exception) -> tuple[int, dict[str, object]]:
         (UnitError(SECRET), 422, "invalid_input"),
         (ParameterSourceUnavailableError("no parameter source for calculation type 't'"), 503, "parameter_source_unavailable"),
         (DatabaseUnavailableError(SECRET), 503, "database_unavailable"),
+        (CatalogUnavailableError(SECRET), 503, "catalog_unavailable"),
         (ParameterValidationError(SECRET), 500, "internal_error"),
         (ExpressionError(SECRET), 500, "internal_error"),
         (CalculationError(SECRET), 500, "internal_error"),
@@ -87,6 +89,15 @@ def test_a_server_known_type_is_named_in_the_message() -> None:
     _, body = call(ParameterSourceUnavailableError("no parameter source for calculation type 'foundations_shallow_r'"))
 
     assert "foundations_shallow_r" in str(body["message"])
+
+
+def test_an_unavailable_catalog_answers_its_fixed_message() -> None:
+    status, body = call(CatalogUnavailableError(SECRET))
+
+    assert (status, body) == (
+        503,
+        {"code": "catalog_unavailable", "message": "The normative catalog is not available."},
+    )
 
 
 def test_an_input_error_carries_its_fields() -> None:
@@ -133,7 +144,12 @@ def test_another_http_error_is_an_internal_error() -> None:
 
 @pytest.mark.parametrize(
     ("error", "code"),
-    [(InputValidationError(SECRET), "invalid_input"), (DatabaseUnavailableError(SECRET), "database_unavailable"), (RuntimeError(SECRET), "internal_error")],
+    [
+        (InputValidationError(SECRET), "invalid_input"),
+        (DatabaseUnavailableError(SECRET), "database_unavailable"),
+        (CatalogUnavailableError(SECRET), "catalog_unavailable"),
+        (RuntimeError(SECRET), "internal_error"),
+    ],
 )
 def test_the_log_line_names_the_code_and_route_only(error: Exception, code: str, caplog: pytest.LogCaptureFixture) -> None:
     with caplog.at_level(logging.INFO, logger="app.api"):
