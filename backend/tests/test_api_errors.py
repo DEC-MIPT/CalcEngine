@@ -22,7 +22,7 @@ from app.core.exceptions import (
 )
 from app.schemas.api import FieldError
 
-SECRET = "postgresql://user:hunter2@db/dec_app"
+SECRET = "postgresql://user:hunter2@db/dec_app"  # pragma: allowlist secret
 
 
 def _no_secret(text: str) -> str:

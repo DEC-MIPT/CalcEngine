@@ -6,7 +6,7 @@ ruff check .
 mypy .
 if [ -d app ]; then
   lint-imports
-  pytest --cov=app --cov-branch --cov-fail-under=95
+  pytest --cov=app --cov=scripts --cov-branch --cov-fail-under=95
 else
   pytest
 fi
