@@ -21,7 +21,7 @@ from app.schemas.calculation import (
 )
 from app.schemas.expression import parse_expression
 from app.schemas.parameters import EngineerRule
-from app.schemas.resolved import Formula, TableValue, Threshold
+from app.schemas.resolved import Formula, Selector, TableValue, Threshold
 from app.services.calculation import CalculationService
 from app.services.parameter_source import ResolvedParameters
 
@@ -58,8 +58,11 @@ def formula(latex: str, tree: dict[str, Any], result: str, units: dict[str, str]
     return Formula(latex=latex, tree=parse_expression(tree), result_symbol=result, units=units, norm_refs=(REF,))
 
 
-def entry(symbol: str, value: float) -> TableValue:
-    return TableValue(symbol=symbol, latex=symbol, value=QuantityValue(value=value, unit="1"), norm_refs=(REF,))
+def entry(symbol: str, value: float, phi_ii: float | None = None) -> TableValue:
+    selectors = () if phi_ii is None else (Selector(symbol="phi_II", value=QuantityValue(value=phi_ii, unit="deg")),)
+    return TableValue(
+        symbol=symbol, latex=symbol, value=QuantityValue(value=value, unit="1"), norm_refs=(REF,), selectors=selectors
+    )
 
 
 R_UNITS = {
@@ -93,9 +96,9 @@ def parameters(**changes: Any) -> pilot.Parameters:
         "gamma_c1": entry("gamma_c1", 2.0),
         "gamma_c2": entry("gamma_c2", 3.0),
         "k": entry("k", 4.0),
-        "m_gamma": entry("M_gamma", 0.5),
-        "m_q": entry("M_q", 5.0),
-        "m_c": entry("M_c", 10.0),
+        "m_gamma": entry("M_gamma", 0.5, 20.0),
+        "m_q": entry("M_q", 5.0, 20.0),
+        "m_c": entry("M_c", 10.0, 20.0),
         "k_z_threshold": Threshold(latex="b_0", value=QuantityValue(value=5.0, unit="m"), norm_refs=(REF,)),
         "k_z_below": formula(r"k_z = \kappa", num(3.0), "k_z", {"k_z": "1"}),
         "k_z_from": formula(r"k_z = b / 4", op("div", sym("b"), num(4.0)), "k_z", {"b": "m", "k_z": "1"}),

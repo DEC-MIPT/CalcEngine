@@ -1,6 +1,7 @@
 from collections.abc import Mapping
 
-from app.core.exceptions import UnitError
+from app.core.exceptions import CalculationError, UnitError
+from app.engine.boundary import convert
 from app.engine.expression import evaluate_expression
 from app.schemas.calculation import (
     CheckStep,
@@ -61,23 +62,54 @@ def formula_step(
     )
 
 
-def table_step(step_id: str, entry: TableValue, selectors: Mapping[str, QuantityValue]) -> TableStep:
-    """Записывает шаг трассы для табличного значения и значений, которые его выбрали.
+def confirm_selectors(entry: TableValue, inputs: Mapping[str, QuantityValue]) -> None:
+    """Подтверждает, что табличное значение выбрано по тем входам, которые получил движок.
+
+    Заголовок переводится в базовую единицу входа тем же ``convert``, что и при выборе
+    строки в источнике параметров, и сравнивается со входом точно
+    (``calculation-engine`` "Table value selectors"). Движок ничего не ищет — только
+    подтверждает выбор.
+
+    Args:
+        entry: табличное значение со своими ``selectors``.
+        inputs: входы в базовых единицах.
+
+    Raises:
+        CalculationError: если символ заголовка не вход, заголовок не переводится в
+            единицу входа или не равен ему.
+    """
+    for selector in entry.selectors:
+        if selector.symbol not in inputs:
+            raise CalculationError(f"table value {entry.symbol!r}: selector {selector.symbol!r} is not an input")
+        given = inputs[selector.symbol]
+        try:
+            heading = convert(selector.value, given.unit)
+        except UnitError:
+            raise CalculationError(
+                f"table value {entry.symbol!r}: selector {selector.symbol!r} cannot be expressed in {given.unit!r}"
+            ) from None
+        if heading.value != given.value:
+            raise CalculationError(f"table value {entry.symbol!r}: selector {selector.symbol!r} differs from the input")
+
+
+def table_step(step_id: str, entry: TableValue) -> TableStep:
+    """Записывает шаг трассы для табличного значения и заголовков, которые его выбрали.
+
+    Подстановки — заголовки из ``entry.selectors`` в их собственной единице.
 
     Args:
         step_id: идентификатор шага.
-        entry: табличное значение со своими ``NormRef``.
-        selectors: входы, по которым выбрана строка таблицы.
+        entry: табличное значение со своими ``NormRef`` и заголовками.
 
     Returns:
         Шаг таблицы.
     """
-    arguments = ", ".join(selectors)
-    expression = rf"{entry.latex} = {entry.latex}\left({arguments}\right)" if selectors else entry.latex
+    arguments = ", ".join(selector.symbol for selector in entry.selectors)
+    expression = rf"{entry.latex} = {entry.latex}\left({arguments}\right)" if entry.selectors else entry.latex
     return TableStep(
         step_id=step_id,
         expression=expression,
-        substitutions=tuple(_substitution(name, value) for name, value in selectors.items()),
+        substitutions=tuple(_substitution(selector.symbol, selector.value) for selector in entry.selectors),
         result=entry.value,
         norm_refs=entry.norm_refs,
     )

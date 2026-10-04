@@ -69,11 +69,11 @@ class FoundationsShallowR(Calculator[Mapping[str, QuantityValue], Parameters, Ca
     def calculate(self, inputs: Mapping[str, QuantityValue], parameters: Parameters) -> CalculatorOutput:
         values = dict(inputs)
         conditions = tuple(
-            table_step(entry.symbol, entry, {})
+            table_step(entry.symbol, entry)
             for entry in (parameters.gamma_c1, parameters.gamma_c2, parameters.k)
         )
         bearing = tuple(
-            table_step(entry.symbol, entry, {"phi_II": inputs["phi_II"]})
+            table_step(entry.symbol, entry)
             for entry in (parameters.m_gamma, parameters.m_q, parameters.m_c)
         )
         for step in (*conditions, *bearing):

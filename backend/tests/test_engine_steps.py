@@ -3,8 +3,9 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from app.core.exceptions import ExpressionError, UnitError
-from app.engine.steps import check_step, formula_step, table_step
+from app.core.exceptions import CalculationError, ExpressionError, UnitError
+from app.engine.boundary import convert
+from app.engine.steps import check_step, confirm_selectors, formula_step, table_step
 from app.schemas.calculation import (
     CalculationResult,
     CheckReason,
@@ -15,7 +16,7 @@ from app.schemas.calculation import (
     TableStep,
 )
 from app.schemas.expression import parse_expression, symbols
-from app.schemas.resolved import Formula, TableValue
+from app.schemas.resolved import Formula, Selector, TableValue
 
 HASH = "0" * 64
 
@@ -133,14 +134,21 @@ def test_a_formula_binds_every_symbol_to_a_unit(units: dict[str, str]) -> None:
         synthetic_formula(units=units)
 
 
-def table_entry() -> TableValue:
+PHI = Selector(symbol="phi", value=QuantityValue(value=20.0, unit="deg"))
+
+
+def table_entry(*selectors: Selector) -> TableValue:
     return TableValue(
-        symbol="k", latex=r"k_{t}", value=QuantityValue(value=0.5, unit="1"), norm_refs=(TABLE_REF,)
+        symbol="k",
+        latex=r"k_{t}",
+        value=QuantityValue(value=0.5, unit="1"),
+        norm_refs=(TABLE_REF,),
+        selectors=selectors,
     )
 
 
 def test_table_step_records_the_entry_and_its_selectors() -> None:
-    step = table_step("k", table_entry(), {"phi": QuantityValue(value=20.0, unit="deg")})
+    step = table_step("k", table_entry(PHI))
 
     assert step.expression == r"k_{t} = k_{t}\left(phi\right)"
     assert [(s.symbol, s.value, s.unit) for s in step.substitutions] == [("phi", 20.0, "deg")]
@@ -148,8 +156,61 @@ def test_table_step_records_the_entry_and_its_selectors() -> None:
     assert step.norm_refs == (TABLE_REF,)
 
 
+def test_table_step_lists_every_selector_in_order() -> None:
+    b = Selector(symbol="b", value=QuantityValue(value=2.0, unit="m"))
+
+    step = table_step("k", table_entry(PHI, b))
+
+    assert step.expression == r"k_{t} = k_{t}\left(phi, b\right)"
+    assert [(s.symbol, s.value, s.unit) for s in step.substitutions] == [("phi", 20.0, "deg"), ("b", 2.0, "m")]
+
+
+def test_a_table_value_has_one_selector_per_symbol() -> None:
+    with pytest.raises(ValidationError, match="one selector per symbol"):
+        table_entry(PHI, PHI)
+
+
+def test_a_heading_equal_to_the_input_is_confirmed() -> None:
+    confirm_selectors(table_entry(PHI), {"phi": QuantityValue(value=20.0, unit="deg")})
+
+
+def test_a_table_value_without_selectors_needs_no_input() -> None:
+    confirm_selectors(table_entry(), {})
+
+
+@pytest.mark.parametrize("given", [20.000000000000004, 21.0])
+def test_a_heading_that_differs_from_the_input_is_refused(given: float) -> None:
+    with pytest.raises(CalculationError, match="'phi' differs from the input"):
+        confirm_selectors(table_entry(PHI), {"phi": QuantityValue(value=given, unit="deg")})
+
+
+def test_a_heading_on_a_symbol_that_is_not_an_input_is_refused() -> None:
+    with pytest.raises(CalculationError, match="'phi' is not an input"):
+        confirm_selectors(table_entry(PHI), {"b": QuantityValue(value=20.0, unit="m")})
+
+
+def test_a_heading_of_another_dimension_is_refused() -> None:
+    heading = Selector(symbol="phi", value=QuantityValue(value=20.0, unit="m"))
+
+    with pytest.raises(CalculationError, match="cannot be expressed in 'deg'") as exc_info:
+        confirm_selectors(table_entry(heading), {"phi": QuantityValue(value=20.0, unit="deg")})
+
+    assert exc_info.value.__cause__ is None
+
+
+def test_a_heading_in_another_unit_is_confirmed_for_an_input_in_that_unit() -> None:
+    heading = Selector(symbol="phi", value=QuantityValue(value=0.3, unit="rad"))
+    base_unit_input = convert(QuantityValue(value=0.3, unit="rad"), "deg")
+
+    confirm_selectors(table_entry(heading), {"phi": base_unit_input})
+    step = table_step("k", table_entry(heading))
+
+    assert base_unit_input.value != 0.3
+    assert [(s.symbol, s.value, s.unit) for s in step.substitutions] == [("phi", 0.3, "rad")]
+
+
 def test_table_step_without_selectors() -> None:
-    step = table_step("k", table_entry(), {})
+    step = table_step("k", table_entry())
 
     assert step.expression == r"k_{t}"
     assert step.substitutions == ()
@@ -190,7 +251,7 @@ def test_check_step_rejects_two_units() -> None:
 
 
 def completed_calculation() -> CalculationResult:
-    k = table_step("k", table_entry(), {"phi": QuantityValue(value=20.0, unit="deg")})
+    k = table_step("k", table_entry(PHI))
     y = formula_step("y", synthetic_formula(), VALUES)
     check = check_step("check", ("y", y.result), "le", ("y_{max}", kpa(20.0)), (CHECK_REF,))
     return CalculationResult(
