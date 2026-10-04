@@ -86,7 +86,7 @@ def test_each_pilot_parameter_is_in_exactly_one_view(catalog_sqlite: Engine) -> 
 
 def test_the_selected_rows_agree_with_the_engine_tests_at_twenty_degrees(catalog_sqlite: Engine) -> None:
     expected = parameters()
-    rows = read(catalog_sqlite, "type_table_values")
+    rows = [row for row in read(catalog_sqlite, "type_table_values") if row["calculation_type"] == PILOT]
 
     for row in rows:
         entry = getattr(expected, row["parameter"])

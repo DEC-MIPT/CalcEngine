@@ -25,6 +25,8 @@ TEST_ROLE = "dec_catalog_test_reader"
 """
 
 PILOT = "foundations_shallow_r"
+OTHER = "synthetic_other"
+"""Второй синтетический тип: его строки не должны попадать в ответы для пилота."""
 PLACEHOLDER_DOCUMENTS = ("<NORM-DOC-PLACEHOLDER>", "<NORM-DOC-PLACEHOLDER-2>")
 PLACEHOLDER_CLAUSES = (
     "<CLAUSE-PLACEHOLDER>",
@@ -122,9 +124,11 @@ REFS = [
 ]
 
 
-def _table_value(parameter: str, symbol: str, value: float, heading: float | None = None) -> dict[str, Any]:
+def _table_value(
+    parameter: str, symbol: str, value: float, heading: float | None = None, calculation_type: str = PILOT
+) -> dict[str, Any]:
     return {
-        "calculation_type": PILOT,
+        "calculation_type": calculation_type,
         "parameter": parameter,
         "symbol": symbol,
         "latex": symbol,
@@ -137,9 +141,16 @@ def _table_value(parameter: str, symbol: str, value: float, heading: float | Non
     }
 
 
-def _formula(parameter: str, latex: str, tree: dict[str, Any], result: str, units: dict[str, str]) -> dict[str, Any]:
+def _formula(
+    parameter: str,
+    latex: str,
+    tree: dict[str, Any],
+    result: str,
+    units: dict[str, str],
+    calculation_type: str = PILOT,
+) -> dict[str, Any]:
     return {
-        "calculation_type": PILOT,
+        "calculation_type": calculation_type,
         "parameter": parameter,
         "result_symbol": result,
         "latex": latex,
@@ -149,9 +160,9 @@ def _formula(parameter: str, latex: str, tree: dict[str, Any], result: str, unit
     }
 
 
-def _bound(quantity: str, kind: str, value: float, unit: str) -> dict[str, Any]:
+def _bound(quantity: str, kind: str, value: float, unit: str, calculation_type: str = PILOT) -> dict[str, Any]:
     return {
-        "calculation_type": PILOT,
+        "calculation_type": calculation_type,
         "quantity": quantity,
         "kind": kind,
         "value": value,
@@ -184,15 +195,16 @@ ROWS: Mapping[str, Sequence[Mapping[str, Any]]] = {
         },
     ),
     "clauses": (
-        {"document_id": 1, "position": 1, "number": PLACEHOLDER_CLAUSES[1], "title": "Синтетический пункт об основаниях", "page": 1},
-        {"document_id": 1, "position": 2, "number": PLACEHOLDER_CLAUSES[2], "title": "Синтетический пункт о фундаментах", "page": 2},
         {"document_id": 1, "position": 3, "number": PLACEHOLDER_CLAUSES[3], "title": None, "page": None},
         {"document_id": 2, "position": 1, "number": PLACEHOLDER_CLAUSES[1], "title": "Синтетический пункт о грунтах", "page": None},
+        {"document_id": 1, "position": 1, "number": PLACEHOLDER_CLAUSES[1], "title": "Синтетический пункт об основаниях", "page": 1},
+        {"document_id": 1, "position": 2, "number": PLACEHOLDER_CLAUSES[2], "title": "Синтетический пункт о фундаментах", "page": 2},
     ),
     "type_formulas": (
         _formula("k_z_below", r"k_z = \kappa", num(3.0), "k_z", {"k_z": "1"}),
         _formula("k_z_from", r"k_z = b / 4", op("div", sym("b"), num(4.0)), "k_z", {"b": "m", "k_z": "1"}),
         _formula("r", r"R = \mathrm{synthetic}", SYNTHETIC_R, "R", dict(R_UNITS)),
+        _formula("x", "x = 2", num(2.0), "x", {"x": "1"}, OTHER),
     ),
     "type_table_values": (
         _table_value("gamma_c1", "gamma_c1", 2.0),
@@ -203,6 +215,7 @@ ROWS: Mapping[str, Sequence[Mapping[str, Any]]] = {
             for index, (parameter, symbol) in enumerate((("m_gamma", "M_gamma"), ("m_q", "M_q"), ("m_c", "M_c")))
             for heading, values in SELECTED.items()
         ),
+        _table_value("a", "a", 1.0, calculation_type=OTHER),
     ),
     "type_thresholds": (
         {
@@ -213,13 +226,18 @@ ROWS: Mapping[str, Sequence[Mapping[str, Any]]] = {
             "unit": "m",
             "norm_refs": REFS,
         },
+        {"calculation_type": OTHER, "parameter": "t", "latex": "t", "value": 2.0, "unit": "m", "norm_refs": REFS},
     ),
-    "type_checks": ({"calculation_type": PILOT, "parameter": "check_norm_refs", "norm_refs": REFS},),
+    "type_checks": (
+        {"calculation_type": PILOT, "parameter": "check_norm_refs", "norm_refs": REFS},
+        {"calculation_type": OTHER, "parameter": "c", "norm_refs": REFS},
+    ),
     "type_method_bounds": (
         _bound("b", "min", 1.0, "m"),
         _bound("b", "max", 10.0, "m"),
         _bound("phi_II", "min", 10.0, "deg"),
         _bound("phi_II", "max", 30.0, "deg"),
+        _bound("b", "min", 2.0, "m", OTHER),
     ),
 }
 """Строки каждого представления; ``jsonb`` — как объекты Python."""
@@ -228,7 +246,8 @@ JSON_COLUMNS = frozenset(
     (view, column) for view, columns in CATALOG_COLUMNS.items() for column, kind in columns if kind == "jsonb"
 )
 
-SQLITE_TYPES = {"integer": "INTEGER", "text": "TEXT", "jsonb": "JSON", "numeric": "NUMERIC", "boolean": "BOOLEAN"}
+SQLITE_TYPES = {"integer": "INTEGER", "text": "TEXT", "jsonb": "JSON", "numeric": "REAL", "boolean": "BOOLEAN"}
+"""``numeric`` — ``REAL``: у ``NUMERIC`` в SQLite ``2.0`` хранится как целое ``2``."""
 
 
 def _encoded(view: str, row: Mapping[str, Any]) -> dict[str, Any]:
