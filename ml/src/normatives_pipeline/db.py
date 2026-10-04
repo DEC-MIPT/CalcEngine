@@ -117,6 +117,84 @@ CREATE INDEX IF NOT EXISTS idx_clause_search ON clause
     USING gin (search_text gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_formula_search ON formula
     USING gin (search_text gin_trgm_ops);
+
+ALTER TABLE formula ADD COLUMN IF NOT EXISTS result_symbol TEXT NOT NULL DEFAULT '';
+ALTER TABLE formula ADD COLUMN IF NOT EXISTS tree JSONB;
+ALTER TABLE formula ADD COLUMN IF NOT EXISTS units JSONB;
+
+CREATE TABLE IF NOT EXISTS catalog_binding (
+    id SERIAL PRIMARY KEY,
+    calculation_type TEXT NOT NULL,
+    parameter TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
+    formula_number TEXT NOT NULL DEFAULT '',
+    table_number TEXT NOT NULL DEFAULT '',
+    heading_symbol TEXT NOT NULL DEFAULT '',
+    source_key TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted',
+    UNIQUE (calculation_type, parameter)
+);
+CREATE INDEX IF NOT EXISTS idx_binding_type ON catalog_binding(calculation_type);
+
+CREATE TABLE IF NOT EXISTS table_value (
+    id SERIAL PRIMARY KEY,
+    document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
+    calculation_type TEXT NOT NULL DEFAULT '',
+    parameter TEXT NOT NULL,
+    clause TEXT NOT NULL DEFAULT '',
+    symbol TEXT NOT NULL DEFAULT '',
+    latex TEXT NOT NULL DEFAULT '',
+    value NUMERIC NOT NULL,
+    unit TEXT NOT NULL DEFAULT '1',
+    heading_symbol TEXT NOT NULL DEFAULT '',
+    heading_value NUMERIC,
+    heading_unit TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted'
+);
+CREATE INDEX IF NOT EXISTS idx_table_value_param ON table_value(calculation_type, parameter);
+
+CREATE TABLE IF NOT EXISTS threshold_value (
+    id SERIAL PRIMARY KEY,
+    document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
+    calculation_type TEXT NOT NULL,
+    parameter TEXT NOT NULL,
+    clause TEXT NOT NULL DEFAULT '',
+    latex TEXT NOT NULL DEFAULT '',
+    value NUMERIC NOT NULL,
+    unit TEXT NOT NULL DEFAULT '1',
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted',
+    UNIQUE (calculation_type, parameter)
+);
+
+CREATE TABLE IF NOT EXISTS check_ref (
+    id SERIAL PRIMARY KEY,
+    document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
+    calculation_type TEXT NOT NULL,
+    parameter TEXT NOT NULL,
+    clause TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted',
+    UNIQUE (calculation_type, parameter)
+);
+
+CREATE TABLE IF NOT EXISTS method_bound (
+    id SERIAL PRIMARY KEY,
+    document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
+    calculation_type TEXT NOT NULL,
+    quantity TEXT NOT NULL,
+    clause TEXT NOT NULL DEFAULT '',
+    kind TEXT NOT NULL,
+    value NUMERIC NOT NULL,
+    unit TEXT NOT NULL DEFAULT '1',
+    inclusive BOOLEAN NOT NULL DEFAULT TRUE,
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted'
+);
+CREATE INDEX IF NOT EXISTS idx_method_bound_type ON method_bound(calculation_type);
 """
 
 
