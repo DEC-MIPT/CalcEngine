@@ -7,12 +7,12 @@ from app.db.session import as_psycopg_url, get_engine, get_session_factory
 
 def _fake_settings() -> Settings:
     return Settings(
-        dec_app_database_url=SecretStr("postgresql://user:pass@localhost/dec_app")
+        dec_app_database_url=SecretStr("postgresql://user:pass@localhost/dec_app")  # pragma: allowlist secret
     )
 
 
 def test_as_psycopg_url_normalizes_bare_postgresql_scheme() -> None:
-    url = as_psycopg_url("postgresql://user:pass@localhost/dec_app")
+    url = as_psycopg_url("postgresql://user:pass@localhost/dec_app")  # pragma: allowlist secret
     assert url.drivername == "postgresql+psycopg"
 
 
@@ -28,7 +28,7 @@ def test_get_engine_reads_settings_from_environment_when_not_given(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv(
-        "DEC_APP_DATABASE_URL", "postgresql://user:pass@localhost/dec_app"
+        "DEC_APP_DATABASE_URL", "postgresql://user:pass@localhost/dec_app"  # pragma: allowlist secret
     )
 
     engine = get_engine()

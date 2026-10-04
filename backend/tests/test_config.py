@@ -8,11 +8,11 @@ from app.core.config import PARAMS_ROOT, ApiSettings, Settings
 
 def test_settings_read_from_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv(
-        "DEC_APP_DATABASE_URL", "postgresql://app_user:apppass@localhost/dec_app"
+        "DEC_APP_DATABASE_URL", "postgresql://app_user:apppass@localhost/dec_app"  # pragma: allowlist secret
     )
     monkeypatch.setenv(
         "DEC_NORMATIVES_DATABASE_URL",
-        "postgresql://norm_user:normpass@localhost/dec_normatives",
+        "postgresql://norm_user:normpass@localhost/dec_normatives",  # pragma: allowlist secret
     )
 
     # mypy synthesizes Settings.__init__ from the model's fields and does not know
@@ -21,18 +21,18 @@ def test_settings_read_from_environment(monkeypatch: pytest.MonkeyPatch) -> None
 
     assert (
         settings.dec_app_database_url.get_secret_value()
-        == "postgresql://app_user:apppass@localhost/dec_app"
+        == "postgresql://app_user:apppass@localhost/dec_app"  # pragma: allowlist secret
     )
     assert settings.dec_normatives_database_url is not None
     assert (
         settings.dec_normatives_database_url.get_secret_value()
-        == "postgresql://norm_user:normpass@localhost/dec_normatives"
+        == "postgresql://norm_user:normpass@localhost/dec_normatives"  # pragma: allowlist secret
     )
 
 
 def test_normatives_url_is_optional(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv(
-        "DEC_APP_DATABASE_URL", "postgresql://app_user:apppass@localhost/dec_app"
+        "DEC_APP_DATABASE_URL", "postgresql://app_user:apppass@localhost/dec_app"  # pragma: allowlist secret
     )
     monkeypatch.delenv("DEC_NORMATIVES_DATABASE_URL", raising=False)
 
@@ -54,7 +54,7 @@ def test_missing_app_url_raises_validation_error(monkeypatch: pytest.MonkeyPatch
 def test_repr_and_str_hide_password(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv(
         "DEC_APP_DATABASE_URL",
-        "postgresql://app_user:supersecretpassword@localhost/dec_app",
+        "postgresql://app_user:supersecretpassword@localhost/dec_app",  # pragma: allowlist secret
     )
     monkeypatch.delenv("DEC_NORMATIVES_DATABASE_URL", raising=False)
 
