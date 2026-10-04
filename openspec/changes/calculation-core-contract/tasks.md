@@ -160,13 +160,16 @@ request rejections with their own scenario; item 3 is already fixed in `cc70f7d`
   `develop` (Egor); the expression-tree field and the symbol binding on stored formulas
   (Egor; agreed in task 1.8 on 2026-10-03, delivered through `normative-catalog-backend`);
   the selector values stored with each table entry, so that the engine can confirm that
-  an entry belongs to the given input (engine review, 2026-10-03, minor 6);
+  an entry belongs to the given input (engine review, 2026-10-03, minor 6; done in
+  `normative-catalog-backend` tasks 5.1a-5.1b on `feature/normative-catalog/backend`,
+  reaching `develop` with that feature's merge);
   a named source for every coefficient of the pilot formula (Egor re-verifies `γc1`,
   `γc2`, `k`, `kz` against the primary text of СП 22.13330.2016 and stores them like
   table 5.5, each with its `NormRef`; `a01af6f`, item 2); `retarget-mvp-domain` task 3.1
   (Egor); and the read path from `dec_normatives` in `normative-catalog-backend` (Akim
-  and Egor; Egor answered its questions on 2026-10-03, not created yet). Egor named the
-  end of 2026-10-04 for his parts. That change carries these waits; this change no
+  and Egor; on `develop` since 2026-10-03; Akim's sections 3-6 done on
+  `feature/normative-catalog/backend` on 2026-10-04, task 7.1 waits for Egor's
+  section 2). Egor named the end of 2026-10-04 for his parts. That change carries these waits; this change no
   longer does. Tasks 7.1a and 7.1b wait for none of these.
 
 ## DOR checklist

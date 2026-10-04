@@ -199,8 +199,10 @@ Egor may split these tasks further on his branch; each one stays in his zone.
 - [x] 6.4 Add the new endpoints' OpenAPI responses and a test that the application
   starts and serves `GET /health` and `GET /calculation-types` with the catalog
   unreachable, then serves a catalog request once it is back (spec "Catalog
-  unavailability") (backend); verify: the OpenAPI document lists `200`, `404`, `422`
-  and `503` with the error body for each new endpoint, and the recovery test passes
+  unavailability") (backend); verify: the OpenAPI document lists `200`, `422` and `503`
+  for `GET /normatives/search` and `200`, `404`, `422` and `503` for
+  `GET /normatives/documents/{document_id}`, each error with the error body, and the
+  recovery test passes
 - [x] 6.5 Run `backend/check.sh` and the two postgres modules (backend); verify: ruff,
   mypy and pytest pass, branch coverage is at least 95% (target 100%), and the import
   scan finds no backend import of the pipeline's package

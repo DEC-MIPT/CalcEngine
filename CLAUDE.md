@@ -20,11 +20,12 @@ what it does not say. Do not restate `AGENTS.md` here.
   `ml/src/normatives_pipeline/`, with `ml/pyproject.toml`, `ml/configs/`, `ml/research/`,
   `ml/tests/`; moved there 2026-10-03, `24797f7`) and `infra/docker-compose.yml`
   (PostgreSQL `dec-postgres`, port 5433, single database `dec`). The root has no
-  `pyproject.toml`, `tests/` or `normatives_pipeline/` any more. No catalog parameter
-  source exists yet, so `POST /calculations` for the pilot answers
-  `503 parameter_source_unavailable` until `normative-catalog-backend`. The review
-  follow-ups are merged too (`1027627`). The three merged feature branches and
-  `fix/calculation-engine/backend` still exist on `origin` (delete only on Akim's word).
+  `pyproject.toml`, `tests/` or `normatives_pipeline/` any more. `develop` has no
+  catalog parameter source yet, so `POST /calculations` for the pilot answers
+  `503 parameter_source_unavailable` there until `feature/normative-catalog/backend`
+  (WP9) is merged. The review follow-ups are merged too (`1027627`). The three merged
+  feature branches and `fix/calculation-engine/backend` still exist on `origin` (delete
+  only on Akim's word).
 - Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
   (WP2; engine and report merged; open: the frontend feature 3.4, 3.5, 5.4, task 7.2,
   archive after WP1), `calculation-api` (WP8; merged, only 6.5 sync and archive left,
@@ -32,8 +33,11 @@ what it does not say. Do not restate `AGENTS.md` here.
   `backend-layered-architecture` (WP5, all tasks done, not archived),
   `record-installed-skills-akim`, `normative-catalog-backend` (WP9, Akim and Egor; on
   `develop` since 2026-10-03, DOR met 2026-10-04 when Egor confirmed its read contract,
-  task 1.4; Akim's sections 3-6 run on the synthetic contract, section 7 waits for
-  Egor's section 2 on `feature/normative-catalog/data`). Planned by Akim:
+  task 1.4; Akim's sections 3-6 are done on `feature/normative-catalog/backend`
+  against the synthetic contract (2026-10-04, last code commit `226d44f`, ticked in
+  `tasks.md`): the catalog parameter source wired into `create_app`,
+  `GET /normatives/search` and `GET /normatives/documents/{document_id}`; section 7
+  waits for Egor's section 2 on `feature/normative-catalog/data`). Planned by Akim:
   `user-accounts-auth` (test accounts made by an admin command, login, JWT, Argon2id;
   tiers, trial and billing deferred). Led by Egor, with Akim's parts: `retarget-mvp-domain` (WP1;
   Akim's review tasks are done, Egor applies the follow-ups in WP1 tasks 3.3 and 5.6).
@@ -75,9 +79,10 @@ what it does not say. Do not restate `AGENTS.md` here.
   `fix/calculation-engine/backend` (WP2 tasks 9.1-9.10, WP8 tasks 7.1-7.2), `tester` GO,
   `orchestrator` review, merged into `develop` in `1027627` on 2026-10-03 (section 16;
   `check.sh` 672 passed, coverage 100%). Item 3 was fixed earlier (`cc70f7d`). Still
-  open: item 6 (table entries carry no selector values), fixed by
-  `normative-catalog-backend` tasks 5.1a-5.1b; item 9 (per-column length limits of the
-  title block), a follow-up in `calculation-core-contract` `tasks.md` "Dependencies".
+  open on `develop`: item 6 (table entries carry no selector values), fixed by
+  `normative-catalog-backend` tasks 5.1a-5.1b on its feature branch, not merged yet;
+  item 9 (per-column length limits of the title block), a follow-up in
+  `calculation-core-contract` `tasks.md` "Dependencies".
 - Input form: the `web-platform` "Calculation input form" requirement (WP1 delta: fields
   from the type's contract, nothing hard-coded) has no task in any change yet.
   `GET /calculation-types` already lists each input's allowed `units` for it (WP8 task
@@ -168,11 +173,16 @@ Edit these only when the user explicitly says so; otherwise show a diff.
   `dec-postgres` (`dec_app_wp8_test` exists), and are skipped otherwise:
   `docker start dec-postgres`, then from `backend/`
   `DEC_TEST_APP_DATABASE_URL=postgresql://dec:<password>@localhost:5433/dec_app_wp8_test pytest -m postgres`.
+  The catalog module (`test_normatives_postgres.py`, WP9 branch) also needs
+  `DEC_TEST_NORMATIVES_DATABASE_URL` pointing at `dec_normatives_test` (made by hand on
+  `dec-postgres`; the fixture refuses a database whose name does not end in `_test`).
   Do not start `infra/docker-compose.yml` instead: its project name differs from the one
   that created `dec-postgres`, so the container name would clash.
 - Backend server: `uvicorn app.main:app --host 127.0.0.1` from `backend/`, with
   `DEC_APP_DATABASE_URL` pointing at a migrated `dec_app` (`alembic upgrade head`);
-  `DEC_CORS_ORIGINS` (comma-separated) and `DEC_PARAMS_ROOT` are optional.
+  `DEC_CORS_ORIGINS` (comma-separated) and `DEC_PARAMS_ROOT` are optional. On the WP9
+  branch `DEC_NORMATIVES_DATABASE_URL` (the reader role) serves the catalog; without it
+  the app still starts, and the catalog paths answer `503`.
 - Frontend: `frontend/check.sh` (`eslint`, `tsc -b`, `vitest run --coverage`).
 - Pre-commit: `pre-commit run --all-files` (`detect-secrets`; see the known issue above).
 - Egor's pipeline (his zone): `python -m normatives_pipeline.search --json "<query>"`

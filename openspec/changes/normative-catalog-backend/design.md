@@ -177,9 +177,13 @@ Every transaction is therefore read-only, even if the role were wrong.
 
 Errors map like this:
 
-- the variable is unset, or a connection error (`OperationalError`, `InterfaceError`)
-  occurs: `CatalogUnavailableError` on the catalog endpoints;
+- the variable is unset, a connection error (`OperationalError`, `InterfaceError`)
+  occurs, or the database refuses the read with `ProgrammingError` (the schema
+  `catalog_read` or a view is missing, or the role lacks a privilege, as after the
+  rollback of "Migration Plan"): `CatalogUnavailableError` on the catalog endpoints;
 - the same conditions inside a parameter source: `ParameterSourceUnavailableError`.
+
+The driver's text is dropped in both cases (`from None`), because it may hold the URL.
 
 - **Why:** the spec "Catalog unavailability". This is the WP8 decision 7 pattern for
   `dec_app`.
@@ -333,8 +337,10 @@ text.
 `DEC_ERRORS`, with the fixed message "The normative catalog is not available.". The
 search `q` is an `Annotated[str, StringConstraints(strip_whitespace=True, min_length=2,
 max_length=200)]`, so its errors are of the static types (`string_too_short`,
-`string_too_long`, `missing`) and never echo the value. `document_id` is a `Path(gt=0)`
-integer.
+`string_too_long`, `missing`) and never echo the value. `limit` is a `Query(ge=1,
+le=50)` integer and `document_id` a `Path(gt=0)` integer; their errors (`int_type`,
+`int_parsing`, `greater_than`, `greater_than_equal`, `less_than_equal`) name the limit,
+not the value, so `STATIC_MESSAGE_TYPES` passes their text on as well.
 
 ### 9. Testing without Egor's database
 
