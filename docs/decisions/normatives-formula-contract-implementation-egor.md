@@ -107,6 +107,37 @@ WP9 tasks (`feature/normative-catalog/data`) and are NOT part of this change:
 Until 2.6 lands, Akim's backend has no `catalog_read` to read and must keep using its
 synthetic contract (WP9 decision 9). This change does not alter that.
 
+## 6a. WARNING to Akim: `symbols[].id` for Cyrillic symbols changed (honest heads-up)
+
+`symbols[].id` is the ASCII SymPy name of a quantity — the join key between a formula and its
+notation, and the identifier your backend uses inside `expression` and in SymPy. Before the
+fix `cyr_map` transliterated Cyrillic homographs to the same Latin letters (`с→s`, `а→a`, `е→e`,
+`р→r`, `у→u`, `к→k`), so a Cyrillic symbol and a Latin one produced the **same** `id`:
+`notation_entry.symbol` was ambiguous (one `id` → several different `latex`). On the pilot that
+was 8 collision groups in extraction (11 counting the manifest), all on indices/letters.
+
+The fix (`5918c30`, `parser/symbols.py`) adds a `_cyr` suffix, case preserved, to any symbol
+that contains Cyrillic; Latin is unchanged. `latex` still renders Cyrillic via `\text{…}`:
+
+| symbol | old `id` | new `id` | `latex` |
+|---|---|---|---|
+| Latin `s` | `s` | `s` | `s` |
+| Cyrillic `с` | `s` | `s_cyr` | `\text{с}` |
+| Cyrillic `а` | `a` | `a_cyr` | `\text{а}` |
+| Cyrillic `К` | `K` | `K_cyr` | `\text{К}` |
+| Cyrillic `Н` | `H` (via map) | `N_cyr` | `\text{Н}` |
+
+What this means for you, concretely:
+
+1. **Ids of Cyrillic symbols are different from before.** Any mapping or expression you wrote
+   against the old (colliding) ids must be updated to the `_cyr` id.
+2. **Auto-extracted Cyrillic ids are a separate namespace** from the plain Latin ids in your
+   hand-written `formulas.toml`. `s` (Latin) and `s_cyr` (Cyrillic `с`) are *different*
+   quantities; do not merge them unless the norm really uses one symbol.
+3. **The migration is manual and has NOT been run on the live `dec` DB.** New ingests get the
+   suffix automatically; existing rows keep the old ids until
+   `python -m normatives_pipeline.parser.cyrillic --apply` is run (dry-run by default).
+
 ## 6. Known baseline limits (not regressions of 1.4–1.7)
 
 - `extract_tables` stores table captions it cannot parse with an empty `table_number`;
