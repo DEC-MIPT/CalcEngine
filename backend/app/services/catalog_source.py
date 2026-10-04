@@ -4,8 +4,10 @@ from contextlib import contextmanager
 from itertools import groupby
 
 from pydantic import BaseModel
+from sqlalchemy.exc import InterfaceError, OperationalError, ProgrammingError
 
 from app.core.exceptions import (
+    CatalogUnavailableError,
     ExpressionError,
     InputValidationError,
     ParameterSourceUnavailableError,
@@ -44,6 +46,14 @@ VIEWS: Mapping[type[BaseModel], str] = {
     Threshold: "type_thresholds",
 }
 """Представление для поля модели по его виду; поле со ссылками проверки — ``type_checks``."""
+
+UNREACHABLE = (CatalogUnavailableError, OperationalError, InterfaceError, ProgrammingError)
+"""Каталог не настроен, не отвечает или в нём нет схемы ``catalog_read`` и прав на неё.
+
+``ProgrammingError`` — потому что после ``DROP SCHEMA catalog_read`` бэкенд должен отвечать
+``503`` (design.md, "Migration Plan"), а PostgreSQL сообщает об отсутствующей схеме и
+нехватке прав именно им.
+"""
 
 
 def _view(annotation: object) -> str:
@@ -248,7 +258,7 @@ class CatalogParameterSource:
         метода: вне диапазона источник отдаёт ``CatalogSnapshot`` вместо параметров, и
         движок сохраняет отказ (``201``); внутри диапазона вход отвергается (``422``).
         Нарушение контракта в строках каталога пишет одну строку лога с типом и
-        параметром, без значений (решение 7).
+        параметром, без значений (решение 7); недоступный каталог — одну строку с типом.
 
         Args:
             calculation_type: зарегистрированное имя типа расчёта.
@@ -260,17 +270,25 @@ class CatalogParameterSource:
         Raises:
             InputValidationError: если вход внутри диапазона метода не совпал ни с одной
                 строкой таблицы.
-            ParameterSourceUnavailableError: если строки каталога нарушают контракт.
+            ParameterSourceUnavailableError: если каталог не настроен или не отвечает (ни
+                URL, ни текст ошибки драйвера никуда не попадают, решение 4) или его строки
+                нарушают контракт.
         """
         contract = self._registry.contract(calculation_type)
         base_inputs = inputs_to_base_units(contract, inputs)
-        with self._sessions.factory()() as session:
-            repository = NormativesRepository(session)
-            formulas = repository.formulas(calculation_type)
-            table_values = repository.table_values(calculation_type)
-            thresholds = repository.thresholds(calculation_type)
-            checks = repository.checks(calculation_type)
-            bounds = repository.method_bounds(calculation_type)
+        try:
+            with self._sessions.factory()() as session:
+                repository = NormativesRepository(session)
+                formulas = repository.formulas(calculation_type)
+                table_values = repository.table_values(calculation_type)
+                thresholds = repository.thresholds(calculation_type)
+                checks = repository.checks(calculation_type)
+                bounds = repository.method_bounds(calculation_type)
+        except UNREACHABLE:
+            logger.warning("code=catalog_unavailable type=%s", calculation_type)
+            raise ParameterSourceUnavailableError(
+                f"The normative catalog is not available for the calculation type {calculation_type!r}."
+            ) from None
         base_units = {quantity.name: quantity.base_unit for quantity in contract.inputs}
         try:
             return self._resolved(
