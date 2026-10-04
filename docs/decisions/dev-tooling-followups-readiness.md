@@ -11,6 +11,9 @@ Russian version: `dev-tooling-followups-readiness-rus.md`.
 
 ## Status
 
+**GO (implementation, `tester`) — 2026-10-04** for `feature/dev-tooling/backend`, see
+section 6; the review (task 6.2) and the merge are next.
+
 **READY for DOR — 2026-10-04.** `openspec validate --all --strict` passes (20/20); the
 `spec-reviewer` report on the current version lists no blocker and no major finding;
 `norm-traceability-checker` passes. Implementation (sections 2-6) has not started.
@@ -119,3 +122,38 @@ fails on `develop` until this feature merges.
 Checks on the branch: `backend/check.sh` exit 0 (4 contracts kept, 700 passed, 1 skipped,
 branch coverage of `app` and `scripts` 100%); `frontend/check.sh` exit 0;
 `pre-commit run --all-files` exit 0; `openspec validate --all --strict` 20/20.
+
+## 6. `tester` verdict (task 6.2, 2026-10-04)
+
+Pass 1 on `a73b107` (`3605eaa` with `develop` merged, task 6.1), in a temporary worktree;
+pass 2 on `a73b107` plus the fix, later committed as `6ce32d7`. Both passes **GO**;
+UI/UX: N/A (no user interface; `frontend/` identical to `develop`).
+
+| Criterion | Evidence (pass 2 unless noted) | Result |
+|---|---|---|
+| `backend/check.sh` | exit 0; ruff, mypy clean; 4 contracts kept; 704 passed, 1 skipped; `app` + `scripts` 100% (`check_env_example.py` 107 statements, 48 branches) | pass |
+| postgres module (pass 1, migrations touched) | 5 passed on `dec_app_wp8_test` | pass |
+| `frontend/check.sh` | exit 0 | pass |
+| `pre-commit run --all-files` | exit 0, both hooks | pass |
+| 2.1 notebook exclusion (pass 1) | notebook in `ml/research/` skipped; the same fake key in another file, in a notebook outside `ml/research/`, or in a non-notebook inside it fails | pass |
+| 2.2 markers (pass 1) | 19 markers; scan of all of `backend/` and `.env.example` empty; `alembic heads` `ae350ead9bfd`; `ml/`, `infra/` unchanged | pass |
+| 2.3 baseline (pass 1) | 12 files, 12 findings; 11 hashes are the local `dec`, one a content hash; fresh two-step scan differs only in `generated_at` | pass |
+| 2.4 refresh (pass 1) | shift and delete: exit 3, diff only `line_number` / removed entry + `generated_at` | pass |
+| 3.1-3.3 settings check | 24 tests; probes of decision 4 incl. exit 0/1/2; repository `config.py` exit 0 under the venv and system Python; hook env `python3.12` | pass |
+| 4.1-4.3 contracts and coverage | unplaced `app/newpkg/`, `app/loose.py` break the layers contract; missing-tool message; an uncovered script drops the total to 89.69% and fails the gate | pass |
+| `openspec validate --all --strict` | 20/20 | pass |
+
+Pass-1 findings, fixed in `6ce32d7` and confirmed by pass 2:
+
+1. Minor: settings classes were found one level deep only. Now at any depth; every class
+   reached through another settings class is unreadable.
+2. Minor: `Annotated[str, Field(validation_alias=...)]` was read as the field name, and
+   `Field(**...)` was not refused. Now `Field` is read from the value and from
+   `Annotated` metadata; two `Field` calls or `Field(**...)` are unreadable.
+3. Info: a field with a leading underscore was reported as a variable. Now skipped, as
+   pydantic treats it as private.
+
+Left as they are (info, outside decision 4): redundant markers on
+`backend/tests/test_db_session.py:10,15`; a field inherited from a plain pydantic model
+(`class S(M, BaseSettings)`) is not seen; renamed imports (`Field as F`,
+`BaseSettings as BS`) are not recognised.
