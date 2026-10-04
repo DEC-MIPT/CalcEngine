@@ -36,5 +36,10 @@ Each finding was read on its line; none is a real secret.
   again. Whoever sees that failure re-runs the scan of task 4.5 and reviews the findings
   (`bootstrap-dev-environment` `tasks.md`, "Dependencies"); tell me if you would rather
   I do it.
+- Correction (2026-10-04, from the orchestrator's review of WP6): an edit that shifts a
+  flagged line also fails the hook. `detect-secrets` 1.5 then rewrites the line numbers
+  in `.secrets.baseline` itself and exits with code 3. Who refreshes the baseline after
+  such an edit, and on which branch, is asked in a separate file
+  (`secrets-baseline-refresh-questions-akim.md`).
 - The hook runs only where `pre-commit install` was done (WP6 task 6.2 records it as a
   one-time step per machine).

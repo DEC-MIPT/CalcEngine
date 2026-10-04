@@ -123,7 +123,9 @@ and 5.1 no longer carry the marker.
   is still pending — so this task picks `DEC_APP_DATABASE_URL` and
   `DEC_NORMATIVES_DATABASE_URL` as Akim's interim choice, noted in the file itself and
   in `design.md` decision 5, pending confirmation once task 2.1 lands. Both values are
-  `postgresql://<user>:changeme@localhost:5433/<db>` placeholders, no real credential —
+  PostgreSQL URLs on `localhost:5433` with a placeholder user and the password
+  `changeme`, no real credential (reworded 2026-10-04 so that this line holds no URL
+  with credentials, which `detect-secrets` would flag again after the archive move) —
   `changeme` tripped `detect-secrets`' Basic Auth detector on the `dec_normatives` line,
   same as the team's existing `dec:dec` convention; folded into the 4.2 baseline after
   hand-review)
@@ -147,8 +149,9 @@ and 5.1 no longer carry the marker.
 - [x] 4.6 Align `DEC_NORMATIVES_DATABASE_URL` in `.env.example` with the read contract
   of `normative-catalog-backend` (added 2026-10-04 from Egor's answers in
   `docs/decisions/normative-catalog-backend-contract-akim.md`): the placeholder names
-  the reader role `dec_normatives_reader` and Egor's interim database `dec`
-  (`postgresql://dec_normatives_reader:changeme@localhost:5433/dec`), and the file's
+  the reader role `dec_normatives_reader` and Egor's interim database `dec` (user
+  `dec_normatives_reader`, password `changeme`, `localhost:5433`, database `dec`), and
+  the file's
   comment says that `dec` holds the catalog until Egor's infrastructure change splits
   the databases and that the password is the one his ingestion sets from
   `DEC_NORMATIVES_READER_PASSWORD`. Egor's own variables (`DEC_DATABASE_URL`,
@@ -195,7 +198,7 @@ and 5.1 no longer carry the marker.
   "Go/No-Go verdict" requirements is an open question (`design.md`, Open Questions),
   not resolved by this change; resolve it (team decision recorded in
   `docs/decisions/`, or a follow-up spec change) before this task is checked off
-- [ ] 7.2 Reviewed by Egor or the orchestrator before merge to `develop`
+- [x] 7.2 Reviewed by Egor or the orchestrator before merge to `develop`
   (`development-process` "Review before merge"; this change is not code-free)
 - [ ] 7.3 `spec-keeper` syncs the delta into
   `openspec/specs/development-process/spec.md` and archives the change

@@ -174,3 +174,28 @@ Tasks 4.6, 4.4, 5.1 and 4.5 were done in that order on `feature/dev-environment/
 | Task 7.2: review before merge (Egor or the orchestrator) | Egor / orchestrator | Merge of `feature/dev-environment/backend` |
 | Re-run the scan of task 4.5 after WP9 is merged (its tests add placeholder passwords) | Akim | `pre-commit run --all-files` on `develop` after that merge |
 | Task 7.3: sync and archive | `spec-keeper` | Needs 7.1 and 7.2 |
+
+## 7. Review before merge (task 7.2, 2026-10-04)
+
+Reviewer: the `orchestrator` agent, read-only, on `9dca91e` with `origin/develop`
+(`7fd2f06`) merged in a scratch clone. **Outcome: APPROVED WITH FOLLOW-UPS.** No
+blocker. The merge is conflict-free; on the merged tree `backend/check.sh` exits 0
+(4 contracts kept, 685 passed, branch coverage 100.00%) and `pre-commit run --all-files`
+passes. Every one of the 32 baseline findings was read on its line; none is a real
+secret. No file in `ml/` or `infra/` changed. The reviewer agrees with the six minor
+findings of section 6 (the sixth was already closed by `7fd2f06`).
+
+| # | Severity | Finding | Action |
+|---|---|---|---|
+| 1 | Major | `detect-secrets` matches by file and line. (a) Archiving this change moves `tasks.md`, so the `user:password@` placeholder in task 4.3 becomes a new finding; (b) any edit that shifts a flagged line in one of the 22 listed files fails the hook with exit 3 while it rewrites the baseline, and the baseline is code, so a document commit cannot carry the refresh; (c) the note to Egor named only moves and renames | (a) done before merge: tasks 4.3 and 4.6 reworded without a URL with credentials, baseline re-scanned on the branch; (b) asked in `docs/decisions/secrets-baseline-refresh-questions-akim.md`; (c) corrected in `secrets-baseline-egor-files.md` |
+| 2 | Minor | Only backend -> `normatives_pipeline` is encoded; the reverse direction (`ml/` importing `app`) belongs to Egor's tooling | Recorded here; part of the question file of 1(b) |
+| 3 | Minor | `check_env_example.py` takes the first of `validation_alias`/`alias` (pydantic prefers `validation_alias`) and guesses the name for `AliasChoices`, `pydantic.Field`, `env_prefix` | Deferred (Akim, 2026-10-04): prefer `validation_alias`, fail loudly when the name cannot be read |
+| 4 | Minor | A new top-level `app.*` package falls under no contract | Deferred: `containers = ["app"]`, `exhaustive = true` in the layers contract |
+| 5 | Note | The local hook has no `language_version`; on Python < 3.10 the script fails | Deferred: `language_version: python3.12` |
+| 6 | Note | `test_import_contracts.py` finds `lint-imports` next to `sys.executable` without a clear failure message | Deferred |
+| 7 | Note | The template regex accepts any commented `# NAME=`; stale keys are not reported | Within the spec, no action |
+| 8 | Note | One commit covers four subtasks | Order and content consistent, no action |
+| 9 | Note | `CLAUDE.md` (the known issue, "on `feature/dev-environment/backend` also `lint-imports`") goes stale on merge | Updated on `develop` after the merge |
+
+Deferred items 3-6 and the coverage of `backend/scripts/` (section 6, finding 2) go to
+a later tooling change or the WP6 backlog; they would need a new `tester` run.
