@@ -32,10 +32,12 @@ backend package.
   revision ids in the backend tests, `backend/alembic.ini` and `.env.example` get
   `pragma: allowlist secret` markers, so they leave the baseline and no longer depend
   on line numbers (Egor's answer, part 1, Akim's side; Egor marks his own files).
-- **Settings hook reads names strictly.** `backend/scripts/check_env_example.py`
-  prefers `validation_alias` over `alias`, as pydantic does, and fails with a message
-  naming the class and field when it cannot read a variable name statically, instead of
-  guessing (review item 3).
+- **Settings hook reads names from the library.** `backend/scripts/check_env_example.py`
+  loads the settings module and takes each variable name from `pydantic-settings`
+  itself, so aliases, prefixes and case sensitivity are read exactly, never guessed; a
+  class that sets names in code it does not evaluate, or a module that does not load,
+  fails with a message (review item 3; changed on 2026-10-04 from a static reading after
+  four review rounds kept finding silent guesses).
 - **Every backend package sits in a layer.** The `import-linter` layers contract becomes
   exhaustive over `app`, so a new top-level package fails the backend command until it
   is placed in a layer (review item 4).
@@ -78,8 +80,9 @@ None.
   - "Backend tooling command": the coverage gate also measures `backend/scripts/`.
   - "Import contract check": a backend package outside every layer fails the check.
   - "Pre-commit secret scan and documented configuration": research notebooks are not
-    scanned; a settings variable whose name cannot be read statically blocks the commit
-    and is named.
+    scanned; names are read from the configuration library; a settings class whose
+    names cannot be read from it, or a settings module that does not load, blocks the
+    commit and is named.
 
 ## Impact
 

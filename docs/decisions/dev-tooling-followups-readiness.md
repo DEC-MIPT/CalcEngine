@@ -2,8 +2,8 @@
 
 - Date: 2026-10-04
 - Change: `openspec/changes/dev-tooling-followups/`
-- Owner: Akim. Feature branch `feature/dev-tooling/backend` (not created yet); documents
-  on `develop`. No file of Egor's zone changes.
+- Owner: Akim. Feature branch `feature/dev-tooling/backend` (created 2026-10-04 from
+  `8a5fd74`); documents on `develop`. No file of Egor's zone changes.
 - Criteria: `AGENTS.md` section 3 (DOR); `openspec/specs/development-process/spec.md`,
   "Planning before implementation".
 
@@ -11,8 +11,9 @@ Russian version: `dev-tooling-followups-readiness-rus.md`.
 
 ## Status
 
-**GO (implementation, `tester`) — 2026-10-04** for `feature/dev-tooling/backend`, see
-section 6; the review (task 6.2) and the merge are next.
+**GO (implementation, `tester`) and review APPROVED WITH FOLLOW-UPS — 2026-10-04** for
+`feature/dev-tooling/backend` at `6e08295`, see sections 6-8; the settings check was
+reworked after the review and the DOR re-confirmed on the revised delta (section 8).
 
 **READY for DOR — 2026-10-04.** `openspec validate --all --strict` passes (20/20); the
 `spec-reviewer` report on the current version lists no blocker and no major finding;
@@ -157,3 +158,52 @@ Left as they are (info, outside decision 4): redundant markers on
 `backend/tests/test_db_session.py:10,15`; a field inherited from a plain pydantic model
 (`class S(M, BaseSettings)`) is not seen; renamed imports (`Field as F`,
 `BaseSettings as BS`) are not recognised.
+
+## 7. Review before merge (task 6.2, 2026-10-04)
+
+Reviewer: the `orchestrator` agent, read-only, on `6ce32d7` merged with `develop`
+(`97a2c20`) in a scratch clone. **Outcome: APPROVED WITH FOLLOW-UPS**, no blocker, no
+major. The merge is conflict-free; on the merged tree `backend/check.sh`,
+`frontend/check.sh`, `pre-commit run --all-files` and `openspec validate --all --strict`
+pass, and `pre-commit run --all-files`, failing on `develop` (two lines of Egor's answer
+`dc09e57`), passes after the merge. All 12 baseline findings and 19 markers were read on
+their lines; none hides a real secret. No file in `ml/` or `infra/` changed.
+
+| # | Severity | Finding | Action |
+|---|---|---|---|
+| 1 | Minor | The settings check still guessed silently in some cases (`alias_generator`, `case_sensitive`, nested `class Config`, plain-model bases, renamed imports) | Fixed before merge by Akim's decision; after two more rounds the check was reworked to ask `pydantic-settings` (section 8) |
+| 2 | Minor | Task 6.1 not ticked before merge | Ticked; 6.2 ticked with the merge |
+| 3 | Note | WP9 merge: conflict in `backend/tests/test_config.py`, six new placeholder findings | "Dependencies" of this change extended; reciprocal entry added to `normative-catalog-backend` `tasks.md` (Akim agreed) |
+| 4 | Note | Repeated placeholders: every occurrence needs a marker | Kept the markers on `test_db_session.py:10,15`; written into both "Dependencies" |
+| 5 | Note | `^ml/research/.*\.ipynb$` also covers subfolders | Accepted (Akim, 2026-10-04); still only notebooks under `ml/research/` |
+| 6 | Note | Scenario "Placeholder marked in its file" vs the `nextline` form in `.env.example` | For `spec-keeper` at 6.3 |
+| 7 | Note | Stale header line of this record | Fixed |
+| 8 | Note | The hook reads only `backend/app/core/config.py` | Recorded among the known limits of decision 4 |
+
+## 8. Settings check reworked after the review (2026-10-04)
+
+The `tester` re-verified each fix of the settings check:
+
+| Pass | Version | Verdict | Main findings |
+|---|---|---|---|
+| 3 | `6ce32d7` + deny-list fix of review finding 1 | NO-GO | `model_config` built by a call read silently (major); renamed field, nested and aliased `Annotated`, unknown keys, class-body changes (minor) |
+| 4 | `6ce32d7` + allow-list rewrite | NO-GO | `Field` from a helper or constant, `settings_customise_sources` (major); decorators, imported aliases, string annotations, shadowed base (minor) |
+| 5 | `6ce32d7` + check that asks `pydantic-settings` | **GO** | `sys.exit` in `config.py` and overridden private source methods (minor, fixed in `6e08295`); four accepted limits added to decision 4 |
+
+Decision (Akim, 2026-10-04): a static reading cannot keep up with what Python allows, so
+the check loads `config.py` and takes the names from
+`EnvSettingsSource._extract_field_info`, with `pydantic` and `pydantic-settings` pinned
+in the hook's `additional_dependencies` and a test that the pins equal the installed
+versions. The delta's scenarios ("Name changed by the configuration", "Variable name that
+cannot be read", "Both aliases given", "Settings configuration attribute"), design
+decision 4 (approach, NFRs, risks, accepted limits), the proposal and tasks 3.1-3.2 were
+revised accordingly.
+
+`spec-reviewer` on the revised delta: pass 3 NOT READY (1 major: stale NFRs; 8 minor),
+all fixed; pass 4 **READY for DOR** (2 minor on the timing figure, fixed: the hook timing
+through pre-commit, 0.22 / 0.18 / 0.18 s, is recorded as informational).
+
+Re-run on the committed branch head `6e08295`: `backend/check.sh` exit 0 (4 contracts
+kept, 706 passed, 1 skipped, coverage of `app` and `scripts` 100%), `frontend/check.sh`
+exit 0, `pre-commit run --all-files` exit 0 (both hooks), `openspec validate --all
+--strict` 20/20.

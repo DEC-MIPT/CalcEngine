@@ -247,6 +247,23 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   and archives this change; verify: `openspec validate --all --strict` passes after the
   archive
 
+## Dependencies
+
+- `dev-tooling-followups` (added 2026-10-04, from the orchestrator's review of
+  `feature/dev-tooling/backend`): if `feature/normative-catalog/backend` merges after
+  `feature/dev-tooling/backend`, then after `git merge develop` on this branch:
+  `backend/tests/test_config.py` conflicts (keep this branch's tests and add the
+  markers); mark every line holding a placeholder password with
+  `# pragma: allowlist secret` in `test_api_normatives.py`, `test_db_catalog.py`,
+  `test_services_catalog_unavailable.py` and `test_config.py`; re-run the two-step scan
+  of `dev-tooling-followups` task 2.3 and confirm the baseline lists only its findings;
+  run `backend/scripts/check_env_example.py` on the merged `config.py` and confirm exit
+  0 (a new import there would need adding to the hook's `additional_dependencies`);
+  `pre-commit run --all-files` passes. The exhaustive layers contract and the stricter
+  settings check need no change (this branch adds no top-level `app.*` package or module,
+  and `NormativesSettings` is readable). If this branch merges first,
+  `dev-tooling-followups` does the same on its side.
+
 ## DOR checklist
 
 - [x] `proposal.md`, `specs/normatives-catalog/spec.md`,

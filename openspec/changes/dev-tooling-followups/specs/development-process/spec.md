@@ -178,7 +178,8 @@ the research notebooks under `ml/research/`, whose executed outputs (images, num
 the scan cannot tell from secrets. The configuration check SHALL read each variable name
 the way the configuration library resolves it, SHALL refuse to guess a name it cannot
 read, and SHALL treat class-level configuration (the settings model's own configuration
-attribute and class variables) as not being a variable.
+attribute, class variables and attributes whose name starts with an underscore) as not
+being a variable.
 
 #### Scenario: Secret staged
 - **WHEN** a file staged for commit matches a known secret pattern
@@ -199,24 +200,33 @@ attribute and class variables) as not being a variable.
 - **THEN** the commit is blocked and the missing variable is named; this check runs as
   a pre-commit hook, and the backend tooling command may also run it
 
+#### Scenario: Name changed by the configuration
+- **WHEN** a commit is staged and the backend's configuration model changes a variable
+  name through its configuration (a prefix, an alias generator, a choice of aliases,
+  case sensitivity, a parent settings class)
+- **THEN** every name the configuration library reads for that field, each choice of a
+  choice of aliases included, must be listed in `.env.example`: the commit is blocked
+  and each missing name is named, and it passes when all are listed
+
 #### Scenario: Variable name that cannot be read
-- **WHEN** a commit is staged and a field of the backend's configuration model takes its
-  environment variable name from something the check cannot read without running the
-  code (a computed alias, a choice of aliases, a prefix, an inherited settings class)
+- **WHEN** a commit is staged and a settings class sets its variable names in code the
+  check does not evaluate (a custom choice of settings sources, a custom constructor),
+  the configuration library cannot resolve the names of a field, or the settings module
+  cannot be loaded
 - **THEN** the commit is blocked with an exit status different from that of a missing
-  variable, and the message names the class and the field
+  variable, and the message names the class, the class and the field, or the module and
+  the error type
 
 #### Scenario: Settings configuration attribute
-- **WHEN** a settings class declares its configuration attribute or a class variable
-  with a type annotation
+- **WHEN** a settings class declares its configuration attribute, a class variable with
+  a type annotation, or an attribute whose name starts with an underscore
 - **THEN** the check does not treat it as an environment variable
 
 #### Scenario: Both aliases given
 - **WHEN** a field of the configuration model gives both a validation alias and a plain
   alias
-- **THEN** the check uses the validation alias as the variable name when it is a plain
-  string, and treats the name as unreadable when the validation alias is not a plain
-  string, whatever the plain alias is
+- **THEN** the check uses the name or names of the validation alias, as the
+  configuration library does, whatever the plain alias is
 
 #### Scenario: Configuration model not yet present
 - **WHEN** the backend's configuration model does not exist yet

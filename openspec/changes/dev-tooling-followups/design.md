@@ -50,7 +50,8 @@ merge (`bec3d43`) and its archive (`6186bc2`):
 
 - Changing how the hook behaves in Egor's files beyond the notebook exclusion; his
   inline markers are his.
-- A general settings parser: the check stays a static read of one module.
+- Settings built outside one module: the check reads `backend/app/core/config.py` only
+  and does not evaluate settings constructed elsewhere.
 
 ## Decisions
 
@@ -138,32 +139,66 @@ stay.
 - **Alternative:** keep everything in the baseline and rely on decision 1 only (still
   correct, but every test edit rewrites the baseline).
 
-### 4. The settings check resolves names like pydantic, and refuses otherwise
+### 4. The settings check asks `pydantic-settings` for the names
 
-`check_env_example.py`:
+`check_env_example.py` loads `backend/app/core/config.py` (by file path, under a
+temporary module name) and, for every `BaseSettings` subclass in the module's namespace,
+takes each field's variable names from `EnvSettingsSource(cls)._extract_field_info`, the
+code the library uses to read the environment. So aliases (validation alias first),
+`AliasChoices` (every choice), `env_prefix`, an alias generator, `case_sensitive`,
+`populate_by_name`, a `Field` built by a helper, a type alias and an inherited
+configuration give exactly the names the application reads; nothing is guessed.
+`ClassVar` and private attributes are not fields for pydantic and are not reported.
+Names are compared upper-cased, or as written when the class is case-sensitive.
 
-- does not treat the class-level configuration as a variable: an annotated or plain
-  `model_config`, and any attribute annotated `ClassVar[...]`; `model_config` is still
-  inspected for `env_prefix` (below);
-- for each other annotated attribute of a settings class, reads `Field(...)` called as
-  `Field` or as `<module>.Field`. If `validation_alias` is given, it is the name when it
-  is a string constant and the name is unreadable otherwise, whatever `alias` says. If
-  only `alias` is given, the same rule applies to it. With neither, the name is the
-  upper-cased field name;
-- treats as unreadable, and reports as `config.py: cannot read the variable name of
-  <Class>.<field>`: a non-constant alias as above (`AliasChoices`, `AliasPath`, a
-  name), a `model_config` with `env_prefix` in a settings class (reported for each
-  field of that class), and a class that derives from another settings class of the
-  module (its inherited fields and prefix would need the parent);
-- recognises a settings class by a base named `BaseSettings` or
-  `<module>.BaseSettings`;
-- exits 2 when any name is unreadable (the commit is blocked, the message names class
-  and field), 1 when a readable name is missing from `.env.example`, 0 otherwise.
+It reports as unreadable, with exit 2 and `config.py: cannot read the variable names of
+...`: a class that overrides `settings_customise_sources`, `_settings_init_sources`,
+`_settings_build_values` or `__init__` (`<Class>.*`: names are then set by code the
+check does not evaluate), a field the library cannot resolve (`<Class>.<field>`), and a
+module that does not load, `sys.exit` and other `BaseException` included
+(`<module> (<Error>)`, the error type only, never its text). Exit 1 names each variable missing from
+`.env.example`; exit 0 otherwise, and when the settings module does not exist yet.
 
-- **Why:** review item 3 of WP6. A wrong name silently passes the check today.
-- **Alternative:** import the module and read pydantic's own resolution. That needs the
-  backend's dependencies in the hook's environment and runs application code at commit
-  time, which WP6 decision 5 avoided on purpose.
+The hook runs in its own pre-commit environment with `pydantic` and
+`pydantic-settings` pinned in `additional_dependencies` to the versions installed in
+`backend/.venv` (2.13.5 and 2.15.0 today); a test fails when the pins and the installed
+versions differ, so a dependency upgrade updates both. `_extract_field_info` is a private
+method of the library; the pin and that test keep a library change from passing
+silently.
+
+Known limits, accepted (from the `tester`'s pass 5, 2026-10-04):
+
+- options given at the call site (`Settings(_env_prefix=...)`) are not visible in
+  `config.py`; changes made at module level after the class statement are, because the
+  module is executed;
+- a settings class created only inside a function (`def get_settings(): class S...`)
+  is not in the module namespace and is not read;
+- with `env_nested_delimiter`, only the parent name of a nested field is required, not
+  every `PARENT__CHILD` name;
+- the library's own resolution can require a name the application then rejects
+  (`validate_by_alias=False` with an alias: both the alias and the field name are
+  required); this only adds a template key;
+- a lower-case alias in a case-sensitive class is required as written, but template
+  keys are upper-case, so such a field fails the check (loud) until the alias is
+  upper-cased; a lower-case alias in a case-insensitive class is compared upper-cased,
+  as the application matches it;
+- `os._exit` or a hang in `config.py` cannot be caught in-process, and the module's own
+  `print` or warnings reach the hook output;
+- settings outside `backend/app/core/config.py` are not read (a change that moves them
+  updates the hook's `files:` filter and `CONFIG`).
+
+- **Why:** review item 3 of WP6. A static (AST) reading was tried first, with a
+  deny-list and then an allow-list; four review rounds (`tester` passes 1, 3 and 4,
+  `orchestrator` finding 1) kept finding forms where it read a different name than the
+  application, silently. Asking the library removes the class of errors. Decided by
+  Akim on 2026-10-04.
+- **Trade-off:** the hook now executes `config.py` at commit time and needs the two
+  libraries in its environment, which WP6 decision 5 had avoided. `config.py` holds only
+  settings classes and imports only `pydantic`, `pydantic_settings`, `pathlib` and
+  `typing`; a settings module that grows other imports needs them in
+  `additional_dependencies` too, or the check reports it as not loading (exit 2, loud).
+- **Alternative:** keep the static reading and narrow the spec to the forms it knows;
+  rejected, because the requirement is to read names the way the library does.
 
 ### 5. The layers contract becomes exhaustive over `app`
 
@@ -223,10 +258,17 @@ layers contract keeps `engine` where that decision puts it.
 ## Non-functional requirements
 
 - **Security:** no new secret, no new place that prints values; the notebook exclusion
-  is the one weakening and is bounded by decision 2's rule. The settings check prints
-  class and field names only.
-- **Performance:** no application code runs at commit time; the hooks add no new tool
-  run beyond the two that exist.
+  is the one weakening and is bounded by decision 2's rule. The settings check executes
+  `backend/app/core/config.py` at commit time: only the developer's own working-tree
+  file, which imports only `pathlib`, `typing`, `pydantic` and `pydantic_settings`; it
+  prints variable, class and field names and, for a module that does not load, the
+  error type only, never the error text or a value.
+- **Performance:** the settings check runs only when `config.py` or `.env.example` is
+  staged. Informational figures, not a gate: the hook through pre-commit took 0.22 s,
+  0.18 s and 0.18 s on 2026-10-04 (`/usr/bin/time -f "%e s" backend/.venv/bin/pre-commit
+  run env-example-matches-settings --all-files`, hook environment already built), the
+  script alone 0.09 s. The hook environment is built once per machine and installs two
+  pinned packages (`pydantic`, `pydantic-settings`).
 - **Coverage:** branch coverage of `app` and `backend/scripts/` together >= 95% in
   `check.sh`.
 - **Accessibility:** not applicable; no user interface.
@@ -239,9 +281,14 @@ layers contract keeps `engine` where that decision puts it.
 - [A marker hides a real secret pasted on a marked line] → Markers sit only on lines
   that hold the reviewed placeholders; a changed value on such a line is still a change
   the reviewer sees in the diff.
-- [The stricter settings check blocks a commit for a legitimate `env_prefix`] → The
-  message names the field; the fix is to extend the check in the same change that adds
-  the prefix, deliberately.
+- [The check relies on the private `EnvSettingsSource._extract_field_info`] → The hook
+  pins `pydantic-settings`; a library change that alters it shows in the check's own
+  tests against the backend's installed version.
+- [The hook's pins drift from `backend/.venv`] → A test fails when the pinned versions
+  differ from the installed ones, so an upgrade updates both in the same change.
+- [`config.py` gains an import that the hook environment lacks] → The check reports
+  the module as not loading (exit 2, loud); the change that adds the import adds it to
+  `additional_dependencies`.
 - [Egor's files keep their baseline entries until he marks them] → Decision 1 covers
   their line shifts meanwhile.
 - [Pinning `python3.12` breaks the hook environment on a machine without a

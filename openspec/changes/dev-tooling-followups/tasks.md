@@ -60,19 +60,21 @@ branch, so `tasks.md` may run ahead of the code on `develop`.
 
 ## 3. Settings check (backend)
 
-- [x] 3.1 Read variable names like pydantic (decision 4): `validation_alias` before
-  `alias`, `Field` and `<module>.Field`, `BaseSettings` and `<module>.BaseSettings`,
-  not treating `model_config` (annotated or plain) and `ClassVar` attributes as
-  variables, while still inspecting `model_config` for `env_prefix` (3.2); verify tests
-  show the validation alias chosen when both are given, in either keyword order, a
-  `pydantic_settings.BaseSettings` base recognised, and an annotated
-  `model_config: SettingsConfigDict = ...` and a `ClassVar` not reported as variables
-- [x] 3.2 Refuse unreadable names (decision 4): a non-constant `validation_alias` or
-  `alias`, a non-constant `validation_alias` next to a constant `alias`, `env_prefix` in
-  `model_config`, a class derived from another settings class of the module; exit 2
-  with `config.py: cannot read the variable name of <Class>.<field>`; verify one test
-  per case, the exit codes 0, 1 and 2, and that the repository's `config.py` still exits
-  0
+- [x] 3.1 Read variable names from `pydantic-settings` (decision 4): load the settings
+  module, find its `BaseSettings` subclasses and take each field's names from the
+  library's own resolution; verify tests show the names for aliases (validation alias
+  first), `AliasChoices`, `env_prefix`, an alias generator, `case_sensitive`,
+  `populate_by_name`, a `Field` from a helper function, a type alias, an inherited
+  prefix, and `ClassVar` and private attributes not reported (revised 2026-10-04 from a
+  static reading, see decision 4)
+- [x] 3.2 Refuse what cannot be read (decision 4): a class overriding
+  `settings_customise_sources`, `_settings_init_sources`, `_settings_build_values` or
+  `__init__`, a field the library cannot resolve, a module that does not load
+  (`sys.exit` included); exit 2 with `config.py: cannot read the variable names of
+  <Class>.* | <Class>.<field> | <module> (<Error>)`; pin `pydantic` and
+  `pydantic-settings` in the hook's `additional_dependencies` to the backend's installed
+  versions; verify one test per case, the exit codes 0, 1 and 2, a test that the pins
+  equal the installed versions, and that the repository's `config.py` still exits 0
 - [x] 3.3 Pin the hook interpreter: `language_version: python3.12` on
   `env-example-matches-settings`; verify `pre-commit run env-example-matches-settings
   --all-files` passes after `pre-commit clean`
@@ -118,7 +120,7 @@ branch, so `tasks.md` may run ahead of the code on `develop`.
 
 ## 6. Close
 
-- [ ] 6.1 Run `backend/check.sh`, `frontend/check.sh`, `pre-commit run --all-files` and
+- [x] 6.1 Run `backend/check.sh`, `frontend/check.sh`, `pre-commit run --all-files` and
   `openspec validate --all --strict` on the branch after `git merge develop`; verify all
   pass and coverage of `app` and `scripts` is at least 95%
 - [ ] 6.2 `tester` GO for `feature/dev-tooling/backend` (UI/UX: N/A, no user interface)
@@ -136,10 +138,18 @@ branch, so `tasks.md` may run ahead of the code on `develop`.
   6.1 needs sections 2-4; 6.2 needs 6.1; 5.1 after 6.2 and in the same session as 6.3;
   5.2 and 5.3 after 5.1 (the rule is in place only then).
 - `normative-catalog-backend` (WP9) adds tests with placeholder passwords
-  (`test_db_catalog.py`, `test_services_catalog_unavailable.py`, `test_api_normatives.py`)
-  that this change's baseline does not list. Whichever of the two features merges
-  second marks those lines with `# pragma: allowlist secret` and re-runs the scan of 2.3
-  on its branch after `git merge develop`. The same feature checks that the WP9 branch
+  (`test_db_catalog.py`, `test_services_catalog_unavailable.py`, `test_api_normatives.py`,
+  and new lines in `test_config.py`) that this change's baseline does not list, and its
+  `test_config.py` conflicts with this change's markers (the orchestrator's merge
+  simulation, 2026-10-04). Whichever of the two features merges second resolves the
+  conflict by keeping WP9's tests and adding markers, marks every occurrence of each
+  placeholder (detect-secrets reports a repeated secret once per file) with
+  `# pragma: allowlist secret`, and re-runs the two-step scan of 2.3 on its branch after
+  `git merge develop`, so the baseline still lists only the findings of 2.3. It also
+  runs `backend/scripts/check_env_example.py` on the merged `config.py` and confirms
+  exit 0 (a new import in `config.py` would need adding to the hook's
+  `additional_dependencies`). The same dependency is recorded in
+  `normative-catalog-backend` `tasks.md`, "Dependencies". The same feature checks that the WP9 branch
   adds no top-level `app.*` package or module outside the layers of the exhaustive
   contract (4.1); if it does, the contract names it in that merge.
 - Egor marks `ml/tests/conftest.py` and `infra/docker-compose.yml` on his own branch;
