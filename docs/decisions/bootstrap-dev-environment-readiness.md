@@ -1,7 +1,7 @@
 # Readiness review: `bootstrap-dev-environment` (WP6)
 
 - Date: 2026-09-27
-- Change: `openspec/changes/bootstrap-dev-environment/`
+- Change: `openspec/changes/archive/2026-10-04-bootstrap-dev-environment/` (archived 2026-10-04; was `openspec/changes/bootstrap-dev-environment/`)
 - Owner: Akim. No shared-file edits outside `openspec/` and `docs/` at the spec phase;
   implementation touches only `backend/`, `frontend/`, and root files not in Egor's zone
   (`.pre-commit-config.yaml`, `.env.example`, `.secrets.baseline`).
@@ -13,8 +13,12 @@ Russian version: `bootstrap-dev-environment-readiness-rus.md`.
 
 ## Final status
 
+**Archived — 2026-10-04.** Merged into `develop` in `bec3d43` after the review (task 7.2,
+section 7); synced into `openspec/specs/development-process/spec.md` and archived by
+`spec-keeper` (task 7.3, section 8).
+
 **GO (implementation, task 7.1) — 2026-10-04**, for `feature/dev-environment/backend`;
-see section 6. Merge waits for the review (task 7.2), archive for 7.2 and 7.3.
+see section 6.
 
 **GO (spec phase, task 1.4) — 2026-09-27**
 
@@ -199,3 +203,27 @@ findings of section 6 (the sixth was already closed by `7fd2f06`).
 
 Deferred items 3-6 and the coverage of `backend/scripts/` (section 6, finding 2) go to
 a later tooling change or the WP6 backlog; they would need a new `tester` run.
+
+## 8. Sync and archive (task 7.3, 2026-10-04)
+
+`spec-keeper` checked the preconditions (tasks 1.1-7.2 ticked, sections 6 and 7,
+`openspec validate --all --strict` 20/20), then:
+
+- reworded the scenario "Config variable missing from the template" in the delta to
+  "this check runs as a pre-commit hook, and the backend tooling command may also run
+  it" (section 6, finding 1);
+- kept the three "not yet present" scenarios: the guards they describe are still in
+  `backend/check.sh` and `backend/scripts/check_env_example.py`, so they state correct
+  behavior; they are trimmed only if a later change removes the guards;
+- ticked 7.3 and ran `openspec archive bootstrap-dev-environment --yes`: four requirements
+  added to `development-process` ("Backend tooling command", "Frontend tooling
+  command", "Import contract check", "Pre-commit secret scan and documented
+  configuration"), nothing else in the base spec changed.
+
+After the archive: `openspec validate --all --strict` 19/19 (`calculation-verification`
+and `record-installed-skills-akim` still valid); `pre-commit run --all-files` passes,
+including `detect-secrets` on the moved files.
+
+Not tracked by any active change yet: section 6 finding 2 (coverage of
+`backend/scripts/`), section 7 items 3-6, and the answers to
+`secrets-baseline-refresh-questions-akim.md`; they go to a later tooling change.

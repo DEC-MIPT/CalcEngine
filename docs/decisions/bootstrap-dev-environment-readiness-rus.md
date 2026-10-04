@@ -1,7 +1,7 @@
 # Проверка готовности: `bootstrap-dev-environment` (WP6)
 
 - Дата: 2026-09-27
-- Change: `openspec/changes/bootstrap-dev-environment/`
+- Change: `openspec/changes/archive/2026-10-04-bootstrap-dev-environment/` (в архиве с 2026-10-04; было `openspec/changes/bootstrap-dev-environment/`)
 - Владелец: Аким. На спековой фазе правок общих файлов нет, кроме `openspec/` и
   `docs/`; реализация затрагивает только `backend/`, `frontend/` и корневые файлы вне
   зоны Егора (`.pre-commit-config.yaml`, `.env.example`, `.secrets.baseline`).
@@ -13,8 +13,12 @@
 
 ## Итоговый статус
 
+**В архиве — 2026-10-04.** Слито в `develop` в `bec3d43` после ревью (задача 7.2,
+раздел 7); `spec-keeper` перенёс дельту в `openspec/specs/development-process/spec.md`
+и заархивировал изменение (задача 7.3, раздел 8).
+
 **GO (реализация, задача 7.1) — 2026-10-04** для `feature/dev-environment/backend`;
-см. раздел 6. Слияние ждёт ревью (задача 7.2), архив — 7.2 и 7.3.
+см. раздел 6.
 
 **GO (спековая фаза, задача 1.4) — 2026-09-27**
 
@@ -200,3 +204,27 @@ Conditions:
 Отложенные пункты 3-6 и покрытие `backend/scripts/` (раздел 6, замечание 2) уходят в
 следующее изменение по инструментам или в бэклог WP6; им понадобится новый прогон
 `tester`.
+
+## 8. Синхронизация и архив (задача 7.3, 2026-10-04)
+
+`spec-keeper` проверил предусловия (задачи 1.1-7.2 отмечены, разделы 6 и 7,
+`openspec validate --all --strict` 20/20), затем:
+
+- переписал в дельте сценарий «Config variable missing from the template»: «this check
+  runs as a pre-commit hook, and the backend tooling command may also run it» (раздел 6,
+  замечание 1);
+- оставил три сценария «not yet present»: описанные ими защитные условия остались в
+  `backend/check.sh` и `backend/scripts/check_env_example.py`, так что поведение они
+  описывают верно; убрать их стоит, только если следующее изменение уберёт эти условия;
+- отметил 7.3 и выполнил `openspec archive bootstrap-dev-environment --yes`: в
+  `development-process` добавлены четыре требования («Backend tooling command»,
+  «Frontend tooling command», «Import contract check», «Pre-commit secret scan and
+  documented configuration»), остальное в базовой спецификации не изменилось.
+
+После архива: `openspec validate --all --strict` 19/19 (`calculation-verification` и
+`record-installed-skills-akim` по-прежнему валидны); `pre-commit run --all-files`
+проходит, включая `detect-secrets` на перенесённых файлах.
+
+Пока ни в одном активном изменении: раздел 6, замечание 2 (покрытие `backend/scripts/`),
+раздел 7, пункты 3-6, и ответы на `secrets-baseline-refresh-questions-akim.md`; они
+уходят в следующее изменение по инструментам.

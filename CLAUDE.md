@@ -29,10 +29,7 @@ what it does not say. Do not restate `AGENTS.md` here.
 - Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
   (WP2; engine and report merged; open: the frontend feature 3.4, 3.5, 5.4, task 7.2,
   archive after WP1), `calculation-api` (WP8; merged, only 6.5 sync and archive left,
-  after WP2), `calculation-verification` (WP4), `bootstrap-dev-environment` (WP6;
-  `feature/dev-environment/backend` merged into `develop` in `bec3d43` on 2026-10-04
-  after the `tester` GO and the `orchestrator` review, only 7.3 sync and archive left),
-  `backend-layered-architecture` (WP5, all tasks done, not archived),
+  after WP2), `calculation-verification` (WP4), `backend-layered-architecture` (WP5, all tasks done, not archived),
   `record-installed-skills-akim`, `normative-catalog-backend` (WP9, Akim and Egor; on
   `develop` since 2026-10-03, DOR met 2026-10-04 when Egor confirmed its read contract,
   task 1.4; Akim's sections 3-6 are done on `feature/normative-catalog/backend`
@@ -110,6 +107,13 @@ what it does not say. Do not restate `AGENTS.md` here.
   `backend-layered-architecture` still names it. The MVP domains are shallow
   foundations, then internal water supply. Build on the active changes, not on the
   placeholder.
+- `bootstrap-dev-environment` (WP6) is archived (2026-10-04,
+  `openspec/changes/archive/2026-10-04-bootstrap-dev-environment/`): merged in `bec3d43`
+  after the `tester` GO and the `orchestrator` review; its four tooling requirements are
+  in `openspec/specs/development-process/spec.md`. Its deferred follow-ups (review items
+  3-6, coverage of `backend/scripts/`, the baseline-refresh question to Egor) are listed
+  in `docs/decisions/bootstrap-dev-environment-readiness.md`, sections 7-8, for a later
+  tooling change.
 - `team-roles-update` (WP7) is archived (2026-09-27,
   `openspec/changes/archive/2026-09-27-team-roles-update/`): the PM role and the
   code-free GO path are in `openspec/specs/development-process/spec.md` and `AGENTS.md`

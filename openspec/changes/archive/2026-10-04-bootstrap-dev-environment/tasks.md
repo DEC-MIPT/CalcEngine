@@ -200,7 +200,7 @@ and 5.1 no longer carry the marker.
   `docs/decisions/`, or a follow-up spec change) before this task is checked off
 - [x] 7.2 Reviewed by Egor or the orchestrator before merge to `develop`
   (`development-process` "Review before merge"; this change is not code-free)
-- [ ] 7.3 `spec-keeper` syncs the delta into
+- [x] 7.3 `spec-keeper` syncs the delta into
   `openspec/specs/development-process/spec.md` and archives the change
 
 ## Dependencies
