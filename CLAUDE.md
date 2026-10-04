@@ -72,8 +72,11 @@ what it does not say. Do not restate `AGENTS.md` here.
   `DEC_NORMATIVES_READER_PASSWORD`. `dec_app` is not in the compose file:
   backend verify clauses run on a database created by hand on `dec-postgres`.
 - Known issue: `.secrets.baseline` lists paths from before the move and misses newer
-  backend files, so `pre-commit run --all-files` fails on `develop`; the fix is WP6 task
-  4.5 on `feature/dev-environment/backend`.
+  backend files, so `pre-commit run --all-files` fails on `develop`. Fixed by WP6 task
+  4.5 on `feature/dev-environment/backend` (`9dca91e`, note for Egor in
+  `docs/decisions/secrets-baseline-egor-files.md`); it reaches `develop` with that
+  feature's merge. Merging WP9 adds test files with placeholder passwords that the
+  baseline does not list, so the scan of task 4.5 is re-run after that merge.
 - Review follow-ups (the 18 minor items of
   `docs/decisions/calculation-core-contract-readiness.md` sections 12-14): done on
   `fix/calculation-engine/backend` (WP2 tasks 9.1-9.10, WP8 tasks 7.1-7.2), `tester` GO,
@@ -167,9 +170,15 @@ Edit these only when the user explicitly says so; otherwise show a diff.
 
 - `openspec validate --all --strict` — validate all specs and changes (read-only).
 - `openspec list`, `openspec status --change <name>`, `openspec show <item>`.
+- One-time setup per machine, before the commands below: `python -m venv backend/.venv`,
+  `backend/.venv/bin/pip install -r backend/requirements-dev.txt`, `npm ci` in
+  `frontend/`, and `backend/.venv/bin/pre-commit install` at the repository root, so the
+  pre-commit hooks run on every `git commit` (WP6 task 6.2).
 - Backend: `backend/check.sh` (`ruff`, `mypy`, `pytest` with branch coverage >= 95% on
-  `app`), using `backend/.venv`. Tests marked `postgres` (migrations, JSON round-trip,
-  latency) run only with `DEC_TEST_APP_DATABASE_URL` set to a hand-made database on
+  `app`; on `feature/dev-environment/backend` also `lint-imports` with the layer
+  contracts of `backend-layered-architecture` decision 2), using `backend/.venv`. Tests
+  marked `postgres` (migrations, JSON round-trip, latency) run only with
+  `DEC_TEST_APP_DATABASE_URL` set to a hand-made database on
   `dec-postgres` (`dec_app_wp8_test` exists), and are skipped otherwise:
   `docker start dec-postgres`, then from `backend/`
   `DEC_TEST_APP_DATABASE_URL=postgresql://dec:<password>@localhost:5433/dec_app_wp8_test pytest -m postgres`.
@@ -184,7 +193,9 @@ Edit these only when the user explicitly says so; otherwise show a diff.
   branch `DEC_NORMATIVES_DATABASE_URL` (the reader role) serves the catalog; without it
   the app still starts, and the catalog paths answer `503`.
 - Frontend: `frontend/check.sh` (`eslint`, `tsc -b`, `vitest run --coverage`).
-- Pre-commit: `pre-commit run --all-files` (`detect-secrets`; see the known issue above).
+- Pre-commit: `pre-commit run --all-files` (`detect-secrets`; on
+  `feature/dev-environment/backend` also a hook that `.env.example` lists every
+  backend settings variable; see the known issue above).
 - Egor's pipeline (his zone): `python -m normatives_pipeline.search --json "<query>"`
   after `pip install -e "./ml[ml]"`, with `DEC_DATABASE_URL` set, as in `README.md`
   and `docs/decisions/normatives-pilot-usage-akim.md`. Its PostgreSQL is
