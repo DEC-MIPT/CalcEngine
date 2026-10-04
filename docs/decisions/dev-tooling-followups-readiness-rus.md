@@ -1,7 +1,7 @@
 # Проверка готовности: `dev-tooling-followups`
 
 - Дата: 2026-10-04
-- Изменение: `openspec/changes/dev-tooling-followups/`
+- Изменение: `openspec/changes/archive/2026-10-04-dev-tooling-followups/` (в архиве с 2026-10-04; было `openspec/changes/dev-tooling-followups/`)
 - Владелец: Аким. Ветка фичи `feature/dev-tooling/backend` (создана 2026-10-04 от
   `8a5fd74`); документы — на `develop`. Файлы зоны Егора не меняются.
 - Критерии: `AGENTS.md`, раздел 3 (DOR); `openspec/specs/development-process/spec.md`,

@@ -190,8 +190,9 @@ being a variable.
 - **THEN** the secret scan does not scan it and does not block the commit because of it
 
 #### Scenario: Placeholder marked in its file
-- **WHEN** a staged line holds a placeholder credential and carries the scanner's inline
-  allowlist marker
+- **WHEN** a staged line holds a placeholder credential and the scanner's allowlist
+  marker sits either on that line itself or, as `pragma: allowlist nextline secret`, on
+  the line just before it
 - **THEN** the commit is not blocked by that line, and the baseline does not list it
 
 #### Scenario: Config variable missing from the template

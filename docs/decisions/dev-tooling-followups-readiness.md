@@ -1,7 +1,7 @@
 # Readiness review: `dev-tooling-followups`
 
 - Date: 2026-10-04
-- Change: `openspec/changes/dev-tooling-followups/`
+- Change: `openspec/changes/archive/2026-10-04-dev-tooling-followups/` (archived 2026-10-04; was `openspec/changes/dev-tooling-followups/`)
 - Owner: Akim. Feature branch `feature/dev-tooling/backend` (created 2026-10-04 from
   `8a5fd74`); documents on `develop`. No file of Egor's zone changes.
 - Criteria: `AGENTS.md` section 3 (DOR); `openspec/specs/development-process/spec.md`,

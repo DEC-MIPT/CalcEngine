@@ -102,17 +102,17 @@ branch, so `tasks.md` may run ahead of the code on `develop`.
 
 ## 5. Documents (spec, directly on `develop`)
 
-- [ ] 5.1 Add the two sentences of decision 1 to `AGENTS.md` sections 2 and 4, only after
+- [x] 5.1 Add the two sentences of decision 1 to `AGENTS.md` sections 2 and 4, only after
   Akim's explicit agreement to that edit (`CLAUDE.md`, "Do not change without
   agreement"), only after 6.2 and in the same session as 6.3, so `AGENTS.md` and the base
   spec change on `develop` together; verify Akim's agreement is on record, the sentences
   match decision 1 and the spec delta, and the commit message cites Egor's answer of
   2026-10-04 (part 3) for the section 2 sentence
-- [ ] 5.2 Fix `CLAUDE.md`: replace "Egor installs it after he answers the baseline
+- [x] 5.2 Fix `CLAUDE.md`: replace "Egor installs it after he answers the baseline
   question" with what Egor's answer says (he marks his two files and adds the `ml/` ->
   `app` check; installing the hook is his own step, not yet stated), and describe the
   refresh rule once 5.1 is in; verify the lines read as stated
-- [ ] 5.3 Tell Egor in a new file in `docs/decisions/` that the notebook exclusion and
+- [x] 5.3 Tell Egor in a new file in `docs/decisions/` that the notebook exclusion and
   the refresh rule are in place, quote the section 4 sentence added without a separate
   acknowledgement and invite his objection, and say that the hook needs `python3.12` on
   `PATH`; verify the file names the merge commit, the two files he marks himself, and
@@ -126,7 +126,7 @@ branch, so `tasks.md` may run ahead of the code on `develop`.
 - [x] 6.2 `tester` GO for `feature/dev-tooling/backend` (UI/UX: N/A, no user interface)
   and the review by Egor or the orchestrator, then the merge into `develop`; verify the
   GO and the review are recorded in `docs/decisions/dev-tooling-followups-readiness.md`
-- [ ] 6.3 `spec-keeper` syncs the delta into `openspec/specs/development-process/spec.md`
+- [x] 6.3 `spec-keeper` syncs the delta into `openspec/specs/development-process/spec.md`
   and archives the change, in the same session as 5.1; verify `openspec validate --all
   --strict` passes after the archive, the base spec and `AGENTS.md` state the same rule,
   and `pre-commit run --all-files` passes on the moved files
