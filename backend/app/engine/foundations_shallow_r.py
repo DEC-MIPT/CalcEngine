@@ -6,7 +6,13 @@ from app.core.exceptions import CalculationError
 from app.engine.base import Calculator
 from app.engine.pipeline import CalculatorOutput
 from app.engine.registry import CalculatorRegistry
-from app.engine.steps import check_step, compare, formula_step, table_step
+from app.engine.steps import (
+    check_step,
+    compare,
+    confirm_selectors,
+    formula_step,
+    table_step,
+)
 from app.schemas.calculation import (
     CalculationTypeContract,
     NormRefs,
@@ -68,15 +74,18 @@ class FoundationsShallowR(Calculator[Mapping[str, QuantityValue], Parameters, Ca
 
     def calculate(self, inputs: Mapping[str, QuantityValue], parameters: Parameters) -> CalculatorOutput:
         values = dict(inputs)
-        conditions = tuple(
-            table_step(entry.symbol, entry)
-            for entry in (parameters.gamma_c1, parameters.gamma_c2, parameters.k)
+        entries = (
+            parameters.gamma_c1,
+            parameters.gamma_c2,
+            parameters.k,
+            parameters.m_gamma,
+            parameters.m_q,
+            parameters.m_c,
         )
-        bearing = tuple(
-            table_step(entry.symbol, entry)
-            for entry in (parameters.m_gamma, parameters.m_q, parameters.m_c)
-        )
-        for step in (*conditions, *bearing):
+        for entry in entries:
+            confirm_selectors(entry, inputs)
+        tables = tuple(table_step(entry.symbol, entry) for entry in entries)
+        for step in tables:
             _bind(values, step.step_id, step.result)
         below = compare("k_z", inputs["b"], "lt", parameters.k_z_threshold.value)
         k_z_formula = parameters.k_z_below if below else parameters.k_z_from
@@ -84,7 +93,7 @@ class FoundationsShallowR(Calculator[Mapping[str, QuantityValue], Parameters, Ca
         _bind(values, k_z_formula.result_symbol, k_z.result)
         r = formula_step("R", parameters.r, values)
         check = check_step(CHECK, ("p", inputs["p"]), "le", ("R", r.result), parameters.check_norm_refs)
-        return CalculatorOutput(trace=(*conditions, *bearing, k_z, r, check), outputs={"R": r.result})
+        return CalculatorOutput(trace=(*tables, k_z, r, check), outputs={"R": r.result})
 
 
 def contract(rounding_rule: RoundingRule, rounding_source: Source) -> CalculationTypeContract:

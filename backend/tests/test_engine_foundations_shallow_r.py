@@ -10,6 +10,7 @@ from app.core.exceptions import CalculationError, ExpressionError, UnitError
 from app.engine import foundations_shallow_r as pilot
 from app.engine.pipeline import calculate
 from app.engine.registry import CalculatorRegistry
+from app.models.calculation_result import CalculationResultRow
 from app.parameters.loader import load_parameters
 from app.repositories.calculation_result import CalculationResultRepository
 from app.schemas.calculation import (
@@ -243,6 +244,52 @@ def test_the_service_runs_the_registered_pilot(sqlite_session: Session) -> None:
 
     assert envelope.verdict == "pass"
     assert envelope.outputs[0].value == 172.5
+
+
+def test_a_heading_that_differs_from_phi_ii_stops_the_pilot() -> None:
+    with pytest.raises(CalculationError, match="'M_q': selector 'phi_II' differs from the input"):
+        run(resolved=parameters(m_q=entry("M_q", 5.0, 30.0)))
+
+
+def test_a_heading_on_a_symbol_that_is_not_an_input_stops_the_pilot() -> None:
+    soil = Selector(symbol="soil", value=QuantityValue(value=1.0, unit="1"))
+    gamma_c1 = parameters().gamma_c1.model_copy(update={"selectors": (soil,)})
+
+    with pytest.raises(CalculationError, match="'gamma_c1': selector 'soil' is not an input"):
+        run(resolved=parameters(gamma_c1=gamma_c1))
+
+
+def test_headings_in_radians_are_confirmed_for_phi_ii_given_in_radians() -> None:
+    in_radians = Selector(symbol="phi_II", value=QuantityValue(value=0.3, unit="rad"))
+    selected = {
+        name: getattr(parameters(), name).model_copy(update={"selectors": (in_radians,)})
+        for name in ("m_gamma", "m_q", "m_c")
+    }
+    given = inputs() | {"phi_II": QuantityValue(value=0.3, unit="rad")}
+
+    result = run(given, parameters(**selected))
+
+    assert [(s.symbol, s.value, s.unit) for s in result.trace[4].substitutions] == [("phi_II", 0.3, "rad")]
+
+
+class MismatchedSource:
+    def resolve(self, calculation_type: str, given: Mapping[str, QuantityValue]) -> ResolvedParameters:
+        return ResolvedParameters(parameters=parameters(m_c=entry("M_c", 10.0, 10.0)), method_range=())
+
+
+def test_a_mismatched_heading_stores_nothing(sqlite_session: Session) -> None:
+    registry = CalculatorRegistry()
+    pilot.register(registry, ROUNDING, RULE)
+    service = CalculationService(
+        registry,
+        sources={pilot.NAME: MismatchedSource()},
+        results=CalculationResultRepository(sqlite_session),
+    )
+
+    with pytest.raises(CalculationError, match="'M_c'"):
+        service.submit(CalculationRequest(calculation_type=pilot.NAME, inputs=inputs()))
+
+    assert sqlite_session.query(CalculationResultRow).count() == 0
 
 
 def numeric_literals(source: str) -> list[object]:
