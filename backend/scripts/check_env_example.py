@@ -69,11 +69,31 @@ def _has_prefix(config: ast.expr | None) -> bool:
     return True
 
 
-def _variable(name: str, value: ast.expr | None) -> str | None:
-    """Имя переменной поля или ``None``, если его не прочитать статически."""
-    if not (isinstance(value, ast.Call) and _named(value.func, "Field")):
+def _is_field(node: ast.expr | None) -> bool:
+    return isinstance(node, ast.Call) and _named(node.func, "Field")
+
+
+def _fields(annotation: ast.expr, value: ast.expr | None) -> list[ast.Call]:
+    """Вызовы ``Field(...)`` поля: в значении и в метаданных ``Annotated[...]``."""
+    found = [value] if isinstance(value, ast.Call) and _is_field(value) else []
+    if isinstance(annotation, ast.Subscript) and _named(annotation.value, "Annotated"):
+        metadata = annotation.slice.elts[1:] if isinstance(annotation.slice, ast.Tuple) else []
+        found += [item for item in metadata if isinstance(item, ast.Call) and _is_field(item)]
+    return found
+
+
+def _variable(name: str, annotation: ast.expr, value: ast.expr | None) -> str | None:
+    """Имя переменной поля или ``None``, если его не прочитать статически.
+
+    Два ``Field(...)`` у одного поля (в значении и в ``Annotated``) и ``Field(**...)``
+    нечитаемы: какой алиас победит, решает ``pydantic`` при запуске.
+    """
+    fields = _fields(annotation, value)
+    if not fields:
         return name.upper()
-    keywords = {keyword.arg: keyword.value for keyword in value.keywords}
+    if len(fields) > 1 or any(keyword.arg is None for keyword in fields[0].keywords):
+        return None
+    keywords = {keyword.arg: keyword.value for keyword in fields[0].keywords}
     for key in ("validation_alias", "alias"):
         if key in keywords:
             alias = keywords[key]
@@ -81,14 +101,30 @@ def _variable(name: str, value: ast.expr | None) -> str | None:
     return name.upper()
 
 
+def _settings_classes(classes: list[ast.ClassDef]) -> set[str]:
+    """Имена классов настроек модуля: наследники ``BaseSettings`` на любой глубине."""
+    found = {node.name for node in classes if any(_named(base, "BaseSettings") for base in node.bases)}
+    while True:
+        more = {
+            node.name
+            for node in classes
+            if node.name not in found and any(isinstance(base, ast.Name) and base.id in found for base in node.bases)
+        }
+        if not more:
+            return found
+        found |= more
+
+
 def settings_variables(source: str) -> SettingsVariables:
     """Переменные окружения, которые читают классы ``BaseSettings`` модуля.
 
     Имя переменной — ``validation_alias`` поля, иначе ``alias``, иначе имя поля в верхнем
     регистре, как его ищет ``pydantic-settings`` без префикса. ``model_config`` и атрибуты
-    ``ClassVar`` переменными не считаются. Неконстантный алиас, ``env_prefix`` в
-    ``model_config`` и класс, унаследованный от другого класса настроек модуля, делают
-    имена полей нечитаемыми.
+    ``ClassVar`` переменными не считаются, поля с подчёркиванием в начале — тоже (для
+    ``pydantic`` они приватные). ``Field(...)`` читается и из значения, и из
+    ``Annotated[...]``. Неконстантный алиас, ``Field(**...)``, два ``Field`` у поля,
+    ``env_prefix`` в ``model_config`` и класс, унаследованный (на любой глубине) от
+    другого класса настроек модуля, делают имена полей нечитаемыми.
 
     Args:
         source: текст модуля настроек.
@@ -98,12 +134,12 @@ def settings_variables(source: str) -> SettingsVariables:
     """
     found = SettingsVariables()
     classes = [node for node in ast.walk(ast.parse(source)) if isinstance(node, ast.ClassDef)]
-    settings = {node.name for node in classes if any(_named(base, "BaseSettings") for base in node.bases)}
+    settings = _settings_classes(classes)
     for node in classes:
-        derived = any(isinstance(base, ast.Name) and base.id in settings for base in node.bases)
-        if node.name not in settings and not derived:
+        if node.name not in settings:
             continue
-        fields: list[tuple[str, ast.expr | None]] = []
+        derived = any(isinstance(base, ast.Name) and base.id in settings for base in node.bases)
+        fields: list[tuple[str, ast.expr, ast.expr | None]] = []
         prefixed = derived
         for statement in node.body:
             target = _target(statement)
@@ -112,12 +148,16 @@ def settings_variables(source: str) -> SettingsVariables:
             name, value = target
             if name == "model_config":
                 prefixed = prefixed or _has_prefix(value)
-            elif isinstance(statement, ast.AnnAssign) and not _is_class_var(statement.annotation):
-                fields.append((name, value))
+            elif (
+                isinstance(statement, ast.AnnAssign)
+                and not _is_class_var(statement.annotation)
+                and not name.startswith("_")
+            ):
+                fields.append((name, statement.annotation, value))
         if derived and not fields:
             found.unreadable.append(f"{node.name}.*")
-        for name, value in fields:
-            variable = None if prefixed else _variable(name, value)
+        for name, annotation, value in fields:
+            variable = None if prefixed else _variable(name, annotation, value)
             if variable is None:
                 found.unreadable.append(f"{node.name}.{name}")
             elif variable not in found.names:

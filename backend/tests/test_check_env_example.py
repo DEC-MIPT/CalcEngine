@@ -89,6 +89,9 @@ def test_the_variables_are_read_like_pydantic_reads_them() -> None:
         ("    model_config = SettingsConfigDict(**OPTIONS)\n    a: str\n", ["S.a"]),
         ("    model_config = {KEY: 1}\n    a: str\n", ["S.a"]),
         ("    model_config = OPTIONS\n    a: str\n", ["S.a"]),
+        ("    a: str = Field(**OPTIONS)\n", ["S.a"]),
+        ('    a: Annotated[str, Field(**OPTIONS)]\n', ["S.a"]),
+        ('    a: Annotated[str, Field(alias="DEC_A")] = Field(validation_alias="DEC_B")\n', ["S.a"]),
     ],
     ids=[
         "alias-choices",
@@ -101,6 +104,9 @@ def test_the_variables_are_read_like_pydantic_reads_them() -> None:
         "config-kwargs",
         "config-dict-key-not-constant",
         "config-name",
+        "field-kwargs",
+        "annotated-field-kwargs",
+        "two-fields",
     ],
 )
 def test_a_name_that_cannot_be_read_is_reported_not_guessed(body: str, unreadable: list[str]) -> None:
@@ -109,15 +115,31 @@ def test_a_name_that_cannot_be_read_is_reported_not_guessed(body: str, unreadabl
     assert found == SettingsVariables(names=[], unreadable=unreadable)
 
 
-def test_a_class_derived_from_another_settings_class_is_unreadable() -> None:
+def test_a_class_derived_from_another_settings_class_is_unreadable_at_any_depth() -> None:
     source = (
+        "class Grand(Child):\n    g: str\n\n"
         "class Base(BaseSettings):\n    a: str\n\n"
         "class Child(Base):\n    b: str\n\n"
         "class Empty(Base):\n    pass\n\n"
         "class Plain(Helper):\n    c: str\n"
     )
 
-    assert settings_variables(source) == SettingsVariables(names=["A"], unreadable=["Child.b", "Empty.*"])
+    assert settings_variables(source) == SettingsVariables(
+        names=["A"], unreadable=["Grand.g", "Child.b", "Empty.*"]
+    )
+
+
+def test_a_field_in_annotated_metadata_is_read_and_private_fields_are_skipped() -> None:
+    source = (
+        "class S(BaseSettings):\n"
+        '    a: Annotated[str, Field(validation_alias="DEC_A")]\n'
+        '    b: Annotated[list[str], NoDecode] = Field(validation_alias="DEC_B")\n'
+        "    c: Annotated[str, NoDecode]\n"
+        "    d: Optional[str] = None\n"
+        "    _private: str = 'x'\n"
+    )
+
+    assert settings_variables(source) == SettingsVariables(names=["DEC_A", "DEC_B", "C", "D"], unreadable=[])
 
 
 def test_active_and_commented_keys_are_listed() -> None:
