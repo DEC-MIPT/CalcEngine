@@ -131,6 +131,12 @@ Egor may split these tasks further on his branch; each one stays in his zone.
 - [x] 4.3 Add the contract test: `information_schema.columns` of `catalog_read` equals
   the column list of decision 2 (backend); verify: it passes on the synthetic postgres
   database and fails when a column is renamed in the fixture
+- [ ] 4.4 Order ties inside the synthetic `catalog_read.search` before its `LIMIT`, as
+  decision 2 now says (added 2026-10-04 from Egor's answer in
+  `docs/decisions/normative-catalog-search-order-questions-akim.md`) (backend); verify:
+  in the postgres module, a search whose hits tie in rank at the `max_rows` cut keeps
+  the first hits in the order `rank DESC`, `designation`, `number`, and the endpoint
+  test with `limit` keeps the same hits
 
 ## 5. Catalog parameter source and the engine change (backend, Akim)
 
