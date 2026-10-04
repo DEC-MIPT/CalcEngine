@@ -303,3 +303,45 @@ def load_postgres(engine: Engine) -> None:
         connection.exec_driver_sql(SQL_FILE.read_text(encoding="utf-8"))
         for view in CATALOG_COLUMNS:
             _insert(connection, view, cast_json=True)
+
+
+COLUMNS_QUERY = text(
+    "SELECT table_name, column_name, data_type FROM information_schema.columns"
+    " WHERE table_schema = :schema ORDER BY table_name, ordinal_position"
+)
+SEARCH_QUERY = text(
+    "SELECT p.parameter_name, p.data_type, p.parameter_mode FROM information_schema.routines AS r"
+    " JOIN information_schema.parameters AS p ON p.specific_schema = r.specific_schema"
+    " AND p.specific_name = r.specific_name"
+    " WHERE r.routine_schema = :schema AND r.routine_name = 'search' ORDER BY p.ordinal_position"
+)
+SEARCH_ARGUMENTS = (("query", "text"), ("max_rows", "integer"))
+
+
+def contract_differences(connection: Connection) -> list[str]:
+    """Сверяет ``catalog_read`` базы с колонками решения 2 через ``information_schema``.
+
+    Порядок колонок не сверяется: бэкенд читает их по имени. Видно только то, на что
+    у текущей роли есть права, поэтому сверка под ролью-читателем заодно проверяет,
+    что ей видно всё нужное.
+
+    Args:
+        connection: соединение с базой каталога.
+
+    Returns:
+        По строке на каждое расхождение; пустой список — контракт совпадает.
+    """
+    found: dict[str, set[tuple[str, str]]] = {}
+    for table, column, kind in connection.execute(COLUMNS_QUERY, {"schema": SCHEMA}):
+        found.setdefault(table, set()).add((column, kind))
+    differences = [f"unexpected view {view}" for view in sorted(set(found) - set(CATALOG_COLUMNS))]
+    for view, columns in CATALOG_COLUMNS.items():
+        have = found.get(view, set())
+        differences += [f"{view}: missing {column} {kind}" for column, kind in sorted(set(columns) - have)]
+        differences += [f"{view}: unexpected {column} {kind}" for column, kind in sorted(have - set(columns))]
+    parameters = connection.execute(SEARCH_QUERY, {"schema": SCHEMA}).all()
+    arguments = tuple((name, kind) for name, kind, mode in parameters if mode == "IN")
+    results = tuple((name, kind) for name, kind, mode in parameters if mode == "OUT")
+    if (arguments, results) != (SEARCH_ARGUMENTS, SEARCH_COLUMNS):
+        differences.append(f"search: arguments {arguments}, results {results}")
+    return differences

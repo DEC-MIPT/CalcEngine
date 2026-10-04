@@ -3,7 +3,12 @@ from collections.abc import Iterator
 from typing import Any, Literal
 
 import pytest
-from catalog_fixture import PLACEHOLDER_CLAUSES, PLACEHOLDER_DOCUMENTS, TEST_ROLE
+from catalog_fixture import (
+    PLACEHOLDER_CLAUSES,
+    PLACEHOLDER_DOCUMENTS,
+    TEST_ROLE,
+    contract_differences,
+)
 from sqlalchemy import Engine, event, text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
@@ -147,3 +152,47 @@ def test_the_reader_is_refused_outside_its_privileges(as_reader: Any, statement:
         as_reader.execute(text(statement))
 
     assert sqlstate(exc_info.value) == INSUFFICIENT_PRIVILEGE
+
+
+def test_the_contract_columns_match_the_design(as_reader: Any) -> None:
+    assert contract_differences(as_reader) == []
+
+
+@pytest.mark.parametrize(
+    ("change", "difference"),
+    [
+        (
+            "ALTER TABLE catalog_read.type_table_values RENAME COLUMN heading_unit TO heading_units",
+            ["type_table_values: missing heading_unit text", "type_table_values: unexpected heading_units text"],
+        ),
+        (
+            "ALTER TABLE catalog_read.type_thresholds ALTER COLUMN value TYPE double precision",
+            ["type_thresholds: missing value numeric", "type_thresholds: unexpected value double precision"],
+        ),
+        (
+            "ALTER TABLE catalog_read.type_checks RENAME TO type_check",
+            [
+                "unexpected view type_check",
+                "type_checks: missing calculation_type text",
+                "type_checks: missing norm_refs jsonb",
+                "type_checks: missing parameter text",
+            ],
+        ),
+    ],
+)
+def test_a_changed_contract_is_reported(catalog_postgres: Engine, change: str, difference: list[str]) -> None:
+    with catalog_postgres.connect() as connection:
+        connection.execute(text(change))
+        found = contract_differences(connection)
+        connection.rollback()
+
+    assert found == difference
+
+
+def test_a_changed_search_function_is_reported(catalog_postgres: Engine) -> None:
+    with catalog_postgres.connect() as connection:
+        connection.execute(text("ALTER FUNCTION catalog_read.search(text, integer) RENAME TO search_all"))
+        found = contract_differences(connection)
+        connection.rollback()
+
+    assert found == ["search: arguments (), results ()"]
