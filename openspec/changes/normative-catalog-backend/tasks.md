@@ -4,9 +4,9 @@ Owners: Akim (backend zone) and Egor (data zone). WP9.
 
 Branches: two features, one per zone (`AGENTS.md`, Branching rules).
 
-- `feature/normative-catalog/data` (Egor): section 2. It branches from `develop` (or from
-  `feature/normative-parser/ml` while that branch is not merged) and is merged into
-  `develop` when section 2 is done, after its `tester` GO and Akim's review.
+- `feature/normative-catalog/data` (Egor): section 2. It branches from `develop`, where
+  Egor's pipeline is (his answer of 2026-10-04), and is merged into `develop` when
+  section 2 is done, after its `tester` GO and Akim's review.
 - `feature/normative-catalog/backend` (Akim): sections 3-7. It branches from `develop`.
   Sections 3-6 do not wait for Egor: they run against the synthetic contract of
   `design.md` decision 9. Section 7 waits for `feature/normative-catalog/data` to be on
@@ -21,12 +21,12 @@ tasks only).
 
 ## 1. Spec readiness
 
-- [ ] 1.1 (spec) Run `openspec validate normative-catalog-backend --strict` and
+- [x] 1.1 (spec) Run `openspec validate normative-catalog-backend --strict` and
   `openspec validate --all --strict`; verify: both pass
-- [ ] 1.2 (spec) Run `spec-reviewer` on this change and resolve its findings until a
+- [x] 1.2 (spec) Run `spec-reviewer` on this change and resolve its findings until a
   report on the current version lists no blocker and no major finding; record the passes
   in `docs/decisions/normative-catalog-backend-readiness.md` (with a Russian copy)
-- [ ] 1.3 (spec) Run `norm-traceability-checker`; verify: its report finds no
+- [x] 1.3 (spec) Run `norm-traceability-checker`; verify: its report finds no
   requirement that fixes a norm-derived formula, coefficient, limit, heading or rounding
   rule; the engine, API and performance limits are labelled as non-norm; the example
   reference in `design.md` decision 2 is the synthetic placeholder; and the only real
@@ -35,14 +35,15 @@ tasks only).
   `docs/decisions/first-calculation-type-egor-pm.md` (table 5.5) and
   `docs/decisions/calculation-core-contract-formula-execution-akim.md` (the
   coefficients)
-- [ ] 1.4 (spec) Ask Egor to confirm `design.md` decisions 1-3 (schema `catalog_read`,
+- [x] 1.4 (spec) Ask Egor to confirm `design.md` decisions 1-3 (schema `catalog_read`,
   the privileges and the `REVOKE` on `public`, the interim database `dec`, the owner that
   runs the ingestion, the reader's password variable, the columns of each view, the tree
   form) and his tasks in section 2, in
   `docs/decisions/normative-catalog-backend-contract-akim.md` (with a Russian copy;
   answers under `## Answers` in the same file); verify: his answer is committed on
   `develop`, and any column he changes is applied to decision 2 and to this list before
-  task 3.1 starts
+  task 3.1 starts (2026-10-04, `348955c`: Egor agrees to decisions 1-3 and section 2
+  without changes, no column changed; section 2 on `develop` by the end of 2026-10-04)
 
 ## 2. Read contract in `dec_normatives` (data, Egor)
 
@@ -240,12 +241,12 @@ Egor may split these tasks further on his branch; each one stays in his zone.
 
 ## DOR checklist
 
-- [ ] `proposal.md`, `specs/normatives-catalog/spec.md`,
+- [x] `proposal.md`, `specs/normatives-catalog/spec.md`,
   `specs/calculation-engine/spec.md`, `design.md` and `tasks.md` exist and pass
   `openspec validate --strict` (task 1.1)
-- [ ] A `spec-reviewer` report on the current version lists no blocker and no major
+- [x] A `spec-reviewer` report on the current version lists no blocker and no major
   finding (task 1.2), and `norm-traceability-checker` passes (task 1.3)
-- [ ] Egor has confirmed the read contract and his section 2 (task 1.4)
+- [x] Egor has confirmed the read contract and his section 2 (task 1.4)
 - [ ] Functional requirements are recorded as requirements with scenarios; the
   non-functional ones (performance, security, coverage) are in "Non-functional — catalog
   read path"

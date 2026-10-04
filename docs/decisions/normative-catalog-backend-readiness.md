@@ -10,12 +10,32 @@ Russian version: `normative-catalog-backend-readiness-rus.md`.
 
 ## Verdict
 
-**Content READY; DOR waits for task 1.4.** `openspec validate normative-catalog-backend
+**READY; DOR met 2026-10-04.** `openspec validate normative-catalog-backend
 --strict` and `openspec validate --all --strict` pass (20/20). The last `spec-reviewer`
 pass (4) lists no blocker and no major finding; its two minors are fixed.
-`norm-traceability-checker` passes. The change becomes ready for implementation when
-Egor confirms the read contract and his section 2 (task 1.4,
-`normative-catalog-backend-contract-akim.md`).
+`norm-traceability-checker` passes. Egor confirmed the read contract and his section 2
+on 2026-10-04 (task 1.4, see below).
+
+## Task 1.4: Egor's confirmation (2026-10-04)
+
+Egor's answers in `normative-catalog-backend-contract-akim.md` ("Answers", commit
+`348955c`) agree to every item without changes:
+
+1. Decision 1: schema `catalog_read`, the role `dec_normatives_reader` and its
+   privileges, the `REVOKE` on `public`, the interim database `dec`. The ingestion runs
+   as the owner through `DEC_DATABASE_URL`, which he keeps (his 2026-09-29 plan to
+   rename it to `DEC_NORMATIVES_DATABASE_URL` is dropped, so the two variables stay
+   distinct); the reader's password comes from `DEC_NORMATIVES_READER_PASSWORD`.
+2. Decision 2: no column changes; he placed each parameter of the pilot in exactly one
+   view. Nothing is applied to decision 2 before task 3.1.
+3. Decision 3: `latex2sympy2` output is converted into the node set at ingestion; no
+   extra node kinds or functions; a formula he cannot convert is not stored as bound.
+4. Section 2: agreed with the split and the verify clauses.
+   `feature/normative-catalog/data` branches from `develop`, where his pipeline is.
+   Section 2 is due on `develop` by the end of 2026-10-04.
+
+`design.md` (context, decisions 1-3) and `tasks.md` (branch point, task 1.4, DOR) record
+the confirmation.
 
 ## `spec-reviewer`
 
@@ -41,7 +61,7 @@ Majors and how they were closed:
 4. Pass 1: database, owner and reader credentials were unspecified. Closed: the
    interim database `dec`, the owner that runs the ingestion, the reader's password
    variable and `REVOKE CREATE ON SCHEMA public` (PostgreSQL 14) in design decision 1;
-   Egor confirms in task 1.4.
+   Egor confirmed on 2026-10-04 (task 1.4).
 5. Pass 1: Egor's task 2.3 was too large and its re-verification unprovable. Closed:
    split into 2.3-2.5; the coefficient check ends in a dated record in
    `docs/decisions/`, and statuses stay `unverified` (WP3 owns raising them).

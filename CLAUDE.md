@@ -7,7 +7,7 @@ what it does not say. Do not restate `AGENTS.md` here.
 @AGENTS.md
 @agent-docs/domain-constraints.md
 
-## Status (2026-10-03)
+## Status (2026-10-04)
 
 - Code on `develop`: Akim's `backend/` — WP5 backend core (`53a4892`), WP6 backend
   tooling, the WP2 calculation engine (`8c001b9`) and report generator (`9642d8d`), and
@@ -22,15 +22,18 @@ what it does not say. Do not restate `AGENTS.md` here.
   (PostgreSQL `dec-postgres`, port 5433, single database `dec`). The root has no
   `pyproject.toml`, `tests/` or `normatives_pipeline/` any more. No catalog parameter
   source exists yet, so `POST /calculations` for the pilot answers
-  `503 parameter_source_unavailable` until `normative-catalog-backend`. The three merged
-  feature branches still exist on `origin` (delete only on Akim's word).
+  `503 parameter_source_unavailable` until `normative-catalog-backend`. The review
+  follow-ups are merged too (`1027627`). The three merged feature branches and
+  `fix/calculation-engine/backend` still exist on `origin` (delete only on Akim's word).
 - Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
   (WP2; engine and report merged; open: the frontend feature 3.4, 3.5, 5.4, task 7.2,
   archive after WP1), `calculation-api` (WP8; merged, only 6.5 sync and archive left,
   after WP2), `calculation-verification` (WP4), `bootstrap-dev-environment` (WP6),
   `backend-layered-architecture` (WP5, all tasks done, not archived),
-  `record-installed-skills-akim`. Planned by Akim: `normative-catalog-backend` (Akim and
-  Egor; Egor answered its questions 2026-10-03, so the proposal can be written),
+  `record-installed-skills-akim`, `normative-catalog-backend` (WP9, Akim and Egor; on
+  `develop` since 2026-10-03, DOR met 2026-10-04 when Egor confirmed its read contract,
+  task 1.4; Akim's sections 3-6 run on the synthetic contract, section 7 waits for
+  Egor's section 2 on `feature/normative-catalog/data`). Planned by Akim:
   `user-accounts-auth` (test accounts made by an admin command, login, JWT, Argon2id;
   tiers, trial and billing deferred). Led by Egor, with Akim's parts: `retarget-mvp-domain` (WP1;
   Akim's review tasks are done, Egor applies the follow-ups in WP1 tasks 3.3 and 5.6).
@@ -45,7 +48,12 @@ what it does not say. Do not restate `AGENTS.md` here.
   through its own repository, with `DEC_NORMATIVES_DATABASE_URL`, and never imports
   `ml/`. Old WP5 item 9.3 is settled this way. The exact JSON of the expression tree is
   fixed together in `normative-catalog-backend`. Egor named the end of 2026-10-04 for
-  `normatives-formula-contract` 1.4-1.7, the views and WP1 task 3.1.
+  `normatives-formula-contract` 1.4-1.7, the views and WP1 task 3.1. On 2026-10-04
+  (`docs/decisions/normative-catalog-backend-contract-akim.md`, "Answers") he confirmed
+  WP9 decisions 1-3 without changes: schema `catalog_read`, the reader role's
+  privileges and the `REVOKE` on `public`, the interim database `dec`, every column of
+  the views, the expression tree built at ingestion with no extra nodes; and his
+  section 2, due on `develop` by the end of 2026-10-04.
 - Formula status: the pipeline writes `status = unverified` and
   `provenance = machine-extracted` (stored per formula and coefficient,
   `normatives-formula-contract` task 1.6, not done yet); the backend builds
@@ -54,18 +62,22 @@ what it does not say. Do not restate `AGENTS.md` here.
   user-side verification action. Egor's `formulas.toml` is to be deleted (still at
   `ml/configs/formulas.toml`).
 - Variables: Akim's `Settings` reads `DEC_APP_DATABASE_URL` (`dec_app`) and
-  `DEC_NORMATIVES_DATABASE_URL`. Egor's code still reads `DEC_DATABASE_URL`; he agreed to
-  rename it to `DEC_NORMATIVES_DATABASE_URL`. `dec_app` is not in the compose file:
+  `DEC_NORMATIVES_DATABASE_URL` (the reader role `dec_normatives_reader`). Egor's
+  ingestion keeps `DEC_DATABASE_URL` as the database owner's URL (2026-10-04, replacing
+  his 2026-09-29 plan to rename it) and sets the reader's password from
+  `DEC_NORMATIVES_READER_PASSWORD`. `dec_app` is not in the compose file:
   backend verify clauses run on a database created by hand on `dec-postgres`.
 - Known issue: `.secrets.baseline` lists paths from before the move and misses newer
   backend files, so `pre-commit run --all-files` fails on `develop`; the fix is WP6 task
   4.5 on `feature/dev-environment/backend`.
-- Review follow-ups: 18 minor items from the `tester` and `orchestrator` reviews of the
-  three merged branches wait for a planned `fix/calculation-engine/backend`, listed in
-  `docs/decisions/calculation-core-contract-readiness.md` sections 12-14. First: the
-  report request accepts U+FFFE/U+FFFF, so `POST /calculations/{result_id}/report`
-  answers `500` instead of `422` (item 8). Item 6 (table entries carry no selector
-  values) goes to `normative-catalog-backend`.
+- Review follow-ups (the 18 minor items of
+  `docs/decisions/calculation-core-contract-readiness.md` sections 12-14): done on
+  `fix/calculation-engine/backend` (WP2 tasks 9.1-9.10, WP8 tasks 7.1-7.2), `tester` GO,
+  `orchestrator` review, merged into `develop` in `1027627` on 2026-10-03 (section 16;
+  `check.sh` 672 passed, coverage 100%). Item 3 was fixed earlier (`cc70f7d`). Still
+  open: item 6 (table entries carry no selector values), fixed by
+  `normative-catalog-backend` tasks 5.1a-5.1b; item 9 (per-column length limits of the
+  title block), a follow-up in `calculation-core-contract` `tasks.md` "Dependencies".
 - Input form: the `web-platform` "Calculation input form" requirement (WP1 delta: fields
   from the type's contract, nothing hard-coded) has no task in any change yet.
   `GET /calculation-types` already lists each input's allowed `units` for it (WP8 task
