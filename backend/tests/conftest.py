@@ -40,8 +40,11 @@ def engine_calls(monkeypatch: pytest.MonkeyPatch) -> list[str]:
 
 @pytest.fixture
 def catalog_sqlite() -> Iterator[Engine]:
-    """Движок SQLite с синтетическим контрактом каталога в подключённой базе ``catalog_read``."""
-    engine = create_engine("sqlite://", poolclass=StaticPool)
+    """Движок SQLite с синтетическим контрактом каталога в подключённой базе ``catalog_read``.
+
+    ``check_same_thread=False``: ``TestClient`` выполняет маршруты в другом потоке.
+    """
+    engine = create_engine("sqlite://", poolclass=StaticPool, connect_args={"check_same_thread": False})
     load_sqlite(engine)
     yield engine
     engine.dispose()

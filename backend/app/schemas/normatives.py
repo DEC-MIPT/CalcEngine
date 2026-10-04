@@ -4,6 +4,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, TypeAdapter
 
 from app.schemas.calculation import NormRef, NormRefs
+from app.schemas.resolved import Formula, Selector, TableValue, Threshold
 
 
 @dataclass(frozen=True)
@@ -103,6 +104,34 @@ class DocumentView(BaseModel):
     year: int | None
     source_url: str | None
     clauses: tuple[ClauseView, ...]
+
+
+class CatalogTableRow(BaseModel):
+    """Строка таблицы каталога без выбора: значение и заголовок, если он есть."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    parameter: str
+    entry: TableValue
+    heading: Selector | None
+
+
+class CatalogSnapshot(BaseModel):
+    """Данные каталога типа расчёта, с которыми получен отказ по диапазону метода.
+
+    Когда вход не совпал ни с одной строкой таблицы и лежит вне диапазона метода,
+    источник отдаёт движку этот снимок вместо параметров: движок отказывает до
+    калькулятора, а ``input_hash`` отказа покрывает снимок и так называет данные
+    каталога (``normative-catalog-backend`` design.md, решение 6). Все строки таблиц —
+    без выбора; поля — только числа и строки, чтобы снимок хешировался.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    formulas: dict[str, Formula]
+    table_rows: tuple[CatalogTableRow, ...]
+    thresholds: dict[str, Threshold]
+    checks: dict[str, NormRefs]
 
 
 _NORM_REFS: TypeAdapter[tuple[NormRef, ...]] = TypeAdapter(NormRefs)
