@@ -9,11 +9,14 @@ from catalog_fixture import (
     TEST_ROLE,
     contract_differences,
 )
+from fastapi.testclient import TestClient
 from sqlalchemy import Engine, event, text
 from sqlalchemy.exc import DBAPIError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.db.catalog import CatalogSessions
+from app.engine.registry import CalculatorRegistry
+from app.main import create_app
 from app.repositories.normatives import NormativesRepository
 from app.schemas.normatives import SearchHit
 
@@ -196,3 +199,25 @@ def test_a_changed_search_function_is_reported(catalog_postgres: Engine) -> None
         connection.rollback()
 
     assert found == ["search: arguments (), results ()"]
+
+
+def test_the_search_endpoint_ranks_caps_and_finds_russian_words(
+    catalog_postgres: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("DEC_APP_DATABASE_URL", raising=False)
+    app = create_app(registry=CalculatorRegistry(), catalog_session_factory=sessionmaker(bind=catalog_postgres))
+
+    with TestClient(app) as client:
+        capped = client.get("/normatives/search", params={"q": "Синтетический", "limit": 3})
+        russian = client.get("/normatives/search", params={"q": "  грунтах "})
+        hostile = client.get("/normatives/search", params={"q": "x'); DROP TABLE catalog_read.documents; --"})
+        document = client.get("/normatives/documents/1")
+
+    assert [(hit["kind"], hit["document_id"], hit["number"]) for hit in capped.json()["hits"]] == [
+        ("document", 2, None),
+        ("document", 1, None),
+        ("clause", 1, PLACEHOLDER_CLAUSES[1]),
+    ]
+    assert russian.json()["hits"] == [hit("clause", 2, PLACEHOLDER_CLAUSES[1], "Синтетический пункт о грунтах").model_dump()]
+    assert (hostile.status_code, hostile.json()) == (200, {"hits": []})
+    assert [clause["page"] for clause in document.json()["clauses"]] == [1, 2, None]

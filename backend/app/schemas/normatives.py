@@ -82,6 +82,14 @@ class SearchHit(BaseModel):
     title: str | None
 
 
+class SearchResults(BaseModel):
+    """Ответ ``GET /normatives/search``: совпадения в порядке ранга, не больше ``limit``."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    hits: tuple[SearchHit, ...]
+
+
 class ClauseView(BaseModel):
     """Пункт документа в ответе ``GET /normatives/documents/{document_id}``."""
 

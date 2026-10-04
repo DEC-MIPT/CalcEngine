@@ -4,16 +4,14 @@ from contextlib import contextmanager
 from itertools import groupby
 
 from pydantic import BaseModel
-from sqlalchemy.exc import InterfaceError, OperationalError, ProgrammingError
 
 from app.core.exceptions import (
-    CatalogUnavailableError,
     ExpressionError,
     InputValidationError,
     ParameterSourceUnavailableError,
     UnitError,
 )
-from app.db.catalog import CatalogSessions
+from app.db.catalog import UNREACHABLE, CatalogSessions
 from app.engine.applicability import check_applicability
 from app.engine.boundary import convert, inputs_to_base_units
 from app.engine.registry import CalculatorRegistry
@@ -33,7 +31,7 @@ from app.schemas.normatives import (
 )
 from app.schemas.resolved import Formula, Selector, TableValue, Threshold
 from app.services.catalog import PARAMETER_MODELS
-from app.services.parameter_source import ResolvedParameters
+from app.services.parameter_source import ParameterSource, ResolvedParameters
 
 logger = logging.getLogger("app.services.catalog_source")
 
@@ -46,15 +44,6 @@ VIEWS: Mapping[type[BaseModel], str] = {
     Threshold: "type_thresholds",
 }
 """Представление для поля модели по его виду; поле со ссылками проверки — ``type_checks``."""
-
-UNREACHABLE = (CatalogUnavailableError, OperationalError, InterfaceError, ProgrammingError)
-"""Каталог не настроен, не отвечает или в нём нет схемы ``catalog_read`` и прав на неё.
-
-``ProgrammingError`` — потому что после ``DROP SCHEMA catalog_read`` бэкенд должен отвечать
-``503`` (design.md, "Migration Plan"), а PostgreSQL сообщает об отсутствующей схеме и
-нехватке прав именно им.
-"""
-
 
 def _view(annotation: object) -> str:
     return next((view for kind, view in VIEWS.items() if annotation is kind), "type_checks")
@@ -363,3 +352,26 @@ class CatalogParameterSource:
         with _guard(None):
             parameters = model.model_validate(fields)
         return ResolvedParameters(parameters=parameters, method_range=method_range)
+
+
+def catalog_sources(
+    registry: CalculatorRegistry,
+    sessions: CatalogSessions,
+    models: Mapping[str, type[BaseModel]] = PARAMETER_MODELS,
+) -> dict[str, ParameterSource]:
+    """Источник каталога для каждого зарегистрированного типа расчёта (design.md, решение 5).
+
+    Все типы делят один ``CatalogParameterSource``. Тип без модели параметров источника
+    не получает и отвечает ``503 parameter_source_unavailable``; у каждого типа из
+    ``REGISTRATIONS`` модель есть.
+
+    Args:
+        registry: реестр типов расчёта.
+        sessions: фабрика сессий каталога приложения.
+        models: модель разрешённых параметров каждого типа.
+
+    Returns:
+        Источник для каждого типа реестра, у которого есть модель параметров.
+    """
+    source = CatalogParameterSource(sessions, registry, models)
+    return {contract.name: source for contract in registry.contracts() if contract.name in models}

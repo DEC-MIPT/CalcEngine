@@ -2,7 +2,12 @@ import threading
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
-from sqlalchemy.exc import ArgumentError
+from sqlalchemy.exc import (
+    ArgumentError,
+    InterfaceError,
+    OperationalError,
+    ProgrammingError,
+)
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import NormativesSettings
@@ -11,6 +16,14 @@ from app.db.session import as_psycopg_url
 
 READ_ONLY_OPTIONS = "-c default_transaction_read_only=on"
 """Опция подключения: каждая транзакция каталога только читает, даже при неверной роли."""
+
+UNREACHABLE = (CatalogUnavailableError, OperationalError, InterfaceError, ProgrammingError)
+"""Каталог не настроен, не отвечает или в нём нет схемы ``catalog_read`` и прав на неё.
+
+``ProgrammingError`` — потому что после ``DROP SCHEMA catalog_read`` бэкенд должен отвечать
+``503`` (``normative-catalog-backend`` design.md, "Migration Plan"), а PostgreSQL сообщает
+об отсутствующей схеме и нехватке прав именно им.
+"""
 
 
 def get_catalog_engine(url: str) -> Engine:
