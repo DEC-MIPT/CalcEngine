@@ -127,13 +127,13 @@ and 5.1 no longer carry the marker.
   `changeme` tripped `detect-secrets`' Basic Auth detector on the `dec_normatives` line,
   same as the team's existing `dec:dec` convention; folded into the 4.2 baseline after
   hand-review)
-- [ ] 4.4 Add a local pre-commit hook comparing
+- [x] 4.4 Add a local pre-commit hook comparing
   `backend/app/core/config.py`'s Pydantic settings fields against `.env.example` keys;
   verify a field missing from `.env.example` fails `pre-commit run` (2026-10-04:
   unblocked; the settings now span several classes, `Settings`, `ApiSettings` from
   `calculation-api` and `NormativesSettings` from `normative-catalog-backend` task 3.1,
   so which classes and keys the hook compares is settled when the task starts)
-- [ ] 4.5 Regenerate `.secrets.baseline` (added 2026-10-03, `spec-reviewer` finding):
+- [x] 4.5 Regenerate `.secrets.baseline` (added 2026-10-03, `spec-reviewer` finding):
   after Egor's move of 2026-10-03 (`ml/`, `infra/`) the baseline names five files that
   no longer exist, and it does not cover the backend files merged after 4.2, so
   `pre-commit run --all-files` fails on `develop`. Re-run the scan of 4.2 on
@@ -144,7 +144,7 @@ and 5.1 no longer carry the marker.
   (backend); verify: `pre-commit run --all-files` exits 0 on that branch after
   `git merge develop`, a staged fake key still fails it, every path in the baseline
   exists, and the note exists on `develop`
-- [ ] 4.6 Align `DEC_NORMATIVES_DATABASE_URL` in `.env.example` with the read contract
+- [x] 4.6 Align `DEC_NORMATIVES_DATABASE_URL` in `.env.example` with the read contract
   of `normative-catalog-backend` (added 2026-10-04 from Egor's answers in
   `docs/decisions/normative-catalog-backend-contract-akim.md`): the placeholder names
   the reader role `dec_normatives_reader` and Egor's interim database `dec`
@@ -159,7 +159,7 @@ and 5.1 no longer carry the marker.
 
 ## 5. Import contract (backend)
 
-- [ ] 5.1 Add `[tool.importlinter]` contracts to `backend/pyproject.toml`,
+- [x] 5.1 Add `[tool.importlinter]` contracts to `backend/pyproject.toml`,
   naming `backend-layered-architecture`'s layer packages and encoding its total layer
   order (`design.md` decision 2), and wire them into `backend/check.sh`: a "layers"
   contract (`api | worker`, `services`, `engine | parameters | reporting`,
@@ -176,18 +176,18 @@ and 5.1 no longer carry the marker.
 
 ## 6. Documentation (backend)
 
-- [ ] 6.1 Add a line to `CLAUDE.md`'s "Commands that exist today" naming
+- [x] 6.1 Add a line to `CLAUDE.md`'s "Commands that exist today" naming
   `backend/check.sh` and `frontend/check.sh`, once both exit 0 on a clean checkout;
   remove them from the "TBD" list; show the edit as a diff before committing, per
   `CLAUDE.md`'s own "Do not change without agreement" note on shared files (this one is
   Akim's own file, no agreement needed, but still shown)
-- [ ] 6.2 Record `pre-commit install` as a one-time per-machine setup step in
+- [x] 6.2 Record `pre-commit install` as a one-time per-machine setup step in
   `CLAUDE.md` (same section as task 6.1, next to the commands it applies to); verify
   the line is present after the edit
 
 ## 7. Close
 
-- [ ] 7.1 `tester` issues the full verdict: both `check.sh` scripts pass, `pre-commit
+- [x] 7.1 `tester` issues the full verdict: both `check.sh` scripts pass, `pre-commit
   run --all-files` passes, frontend coverage >= 95% (trivial on the smoke test alone);
   the delta spec matches the implementation. Backend coverage is not gated while
   `backend/app/` does not exist (`design.md` decision 3), so `backend/check.sh` produces
