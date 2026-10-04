@@ -5,6 +5,7 @@ cd "$(dirname "$0")"
 ruff check .
 mypy .
 if [ -d app ]; then
+  lint-imports
   pytest --cov=app --cov-branch --cov-fail-under=95
 else
   pytest
