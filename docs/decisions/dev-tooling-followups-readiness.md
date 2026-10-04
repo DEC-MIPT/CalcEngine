@@ -84,4 +84,38 @@ scenario of the delta changed, so the DOR stands.
 
 ## 5. Implementation evidence
 
-Task 2.4 records its probe output here when it runs.
+On `feature/dev-tooling/backend`, commit `3605eaa` (2026-10-04). Probes ran in a scratch
+clone of `develop` with the branch's staged files copied over; the working tree and
+Egor's zone were not touched.
+
+Task 2.1 (notebook exclusion):
+
+| Probe | Result |
+|---|---|
+| `pre-commit run detect-secrets --files ml/research/research.ipynb` | `(no files to check) Skipped` |
+| fake AWS key staged in `ml/research/probe.ipynb` | `Skipped`, exit 0 |
+| the same key staged in `probe/key.txt` | `Failed`, exit 1 |
+
+Task 2.4 (line-only refresh), on `README.md` line 46 (`dec:dec`):
+
+| Probe | Exit | Hook output | `git diff .secrets.baseline` |
+|---|---|---|---|
+| insert a line above 46 | 3 | "The baseline file was updated", no "Potential secrets" | `line_number` 46 -> 47, `generated_at` |
+| delete line 46 | 3 | same | the `README.md` entry removed, `generated_at` |
+| no change | 0 | `Passed` | none |
+
+The first run of the shift probe also added the filter `is_baseline_file` to
+`filters_used`, because a baseline made by `scan` alone does not record it. The baseline
+is therefore generated in two steps (`scan`, then `scan --baseline`, `design.md`
+decision 2, task 2.3); the table shows the runs after that fix.
+
+Task 2.3: 12 files, 12 findings, all reviewed: the local `dec:dec` (`README.md`, eight
+files in `docs/decisions/`, `ml/tests/conftest.py`), `POSTGRES_PASSWORD: dec`
+(`infra/docker-compose.yml`) and a `computedHash` (`skills-lock.json`). Two of the
+`docs/decisions/` files (`secrets-baseline-refresh-questions-akim.md` and `-rus.md`) came
+with Egor's answer `dc09e57` after the WP6 baseline, so `pre-commit run --all-files`
+fails on `develop` until this feature merges.
+
+Checks on the branch: `backend/check.sh` exit 0 (4 contracts kept, 700 passed, 1 skipped,
+branch coverage of `app` and `scripts` 100%); `frontend/check.sh` exit 0;
+`pre-commit run --all-files` exit 0; `openspec validate --all --strict` 20/20.

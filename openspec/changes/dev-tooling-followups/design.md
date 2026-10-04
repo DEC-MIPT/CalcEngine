@@ -106,6 +106,12 @@ notebook lines and records the filter in its `filters_used`. Both places are set
 because the hook's `exclude` keeps it from opening the files, while the baseline's
 filter keeps a manual `detect-secrets scan` consistent with the hook.
 
+The baseline is generated in two steps: the scan above, then
+`detect-secrets scan --baseline .secrets.baseline`. The second step records the filter
+`detect_secrets.filters.common.is_baseline_file` in `filters_used`; without it the hook
+adds that filter on its first rewrite, and the first line-only refresh would then carry
+more than line numbers (found by task 2.4 on 2026-10-04).
+
 - **Why:** Egor's answer, part 2: the notebooks stay executed, with images in their
   outputs; eight more notebooks arrive from `feature/normative-formula-contract/data`.
   The pattern covers them without listing names.

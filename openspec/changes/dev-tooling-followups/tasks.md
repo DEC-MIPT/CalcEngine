@@ -21,14 +21,14 @@ branch, so `tasks.md` may run ahead of the code on `develop`.
 
 ## 2. Secrets baseline (backend)
 
-- [ ] 2.1 Exclude the research notebooks from the secret scan (`design.md` decision 2):
+- [x] 2.1 Exclude the research notebooks from the secret scan (`design.md` decision 2):
   `exclude: ^ml/research/.*\.ipynb$` on the `detect-secrets` hook in
   `.pre-commit-config.yaml`; verify `pre-commit run detect-secrets --files
   ml/research/research.ipynb` reports no file checked, and, in a scratch clone of the
   repository (never in the working tree, so no file of Egor's zone is created there), a
   staged fake key in `ml/research/probe.ipynb` does not block while the same key in
   another path does
-- [ ] 2.2 Mark Akim's placeholders inline (decision 3): `# pragma: allowlist secret` on
+- [x] 2.2 Mark Akim's placeholders inline (decision 3): `# pragma: allowlist secret` on
   each flagged line of `backend/tests/` (`test_api_dependencies.py`,
   `test_api_error_boundary.py`, `test_api_errors.py`, `test_config.py`,
   `test_db_session.py`, `test_calculation_result_postgres.py`), on the template comment
@@ -36,17 +36,20 @@ branch, so `tasks.md` may run ahead of the code on `develop`.
   migrations; `# pragma: allowlist nextline secret` on its own line before each URL of
   `.env.example`; verify `detect-secrets scan` of these files reports nothing, `ruff`
   and the settings hook still pass, and `alembic heads` still prints `ae350ead9bfd`
-- [ ] 2.3 Regenerate `.secrets.baseline` with `detect-secrets scan --exclude-files
-  'package-lock\.json' --exclude-files '^ml/research/.*\.ipynb$'` and review every
+- [x] 2.3 Regenerate `.secrets.baseline` with `detect-secrets scan --exclude-files
+  'package-lock\.json' --exclude-files '^ml/research/.*\.ipynb$'`, then
+  `detect-secrets scan --baseline .secrets.baseline` (decision 2), and review every
   finding by hand (file, line, why it is not a secret); verify the baseline lists exactly
   `README.md`, the six files of `docs/decisions/` it lists today
   (`normatives-formula-contract-review-egor.md`, `normatives-postgres-storage.md`,
   `repo-reorganization-src-layout.md`, each with its `-rus.md`),
+  `docs/decisions/secrets-baseline-refresh-questions-akim.md` and its `-rus.md` (Egor's
+  answer of 2026-10-04 quotes the same local `dec:dec`; added when the task ran),
   `infra/docker-compose.yml`, `ml/tests/conftest.py` and `skills-lock.json`, and nothing
   else (so the diff against today removes the entries of Akim's files and the notebook
   lines); every listed path exists; `pre-commit run --all-files` exits 0; a staged fake
   key elsewhere still fails the hook
-- [ ] 2.4 Check the line-only refresh of decision 1 on the branch: add a line above a
+- [x] 2.4 Check the line-only refresh of decision 1 on the branch: add a line above a
   flagged line of a file that stays in the baseline, and in a second run remove a flagged
   line, both in a scratch clone of the repository (not in the working tree); verify each
   run exits 3 with "The baseline file was updated" and no "Potential secrets" report, and
@@ -57,39 +60,39 @@ branch, so `tasks.md` may run ahead of the code on `develop`.
 
 ## 3. Settings check (backend)
 
-- [ ] 3.1 Read variable names like pydantic (decision 4): `validation_alias` before
+- [x] 3.1 Read variable names like pydantic (decision 4): `validation_alias` before
   `alias`, `Field` and `<module>.Field`, `BaseSettings` and `<module>.BaseSettings`,
   not treating `model_config` (annotated or plain) and `ClassVar` attributes as
   variables, while still inspecting `model_config` for `env_prefix` (3.2); verify tests
   show the validation alias chosen when both are given, in either keyword order, a
   `pydantic_settings.BaseSettings` base recognised, and an annotated
   `model_config: SettingsConfigDict = ...` and a `ClassVar` not reported as variables
-- [ ] 3.2 Refuse unreadable names (decision 4): a non-constant `validation_alias` or
+- [x] 3.2 Refuse unreadable names (decision 4): a non-constant `validation_alias` or
   `alias`, a non-constant `validation_alias` next to a constant `alias`, `env_prefix` in
   `model_config`, a class derived from another settings class of the module; exit 2
   with `config.py: cannot read the variable name of <Class>.<field>`; verify one test
   per case, the exit codes 0, 1 and 2, and that the repository's `config.py` still exits
   0
-- [ ] 3.3 Pin the hook interpreter: `language_version: python3.12` on
+- [x] 3.3 Pin the hook interpreter: `language_version: python3.12` on
   `env-example-matches-settings`; verify `pre-commit run env-example-matches-settings
   --all-files` passes after `pre-commit clean`
 
 ## 4. Import contracts and coverage (backend)
 
-- [ ] 4.1 Make the layers contract exhaustive (decision 5): `containers = ["app"]`,
+- [x] 4.1 Make the layers contract exhaustive (decision 5): `containers = ["app"]`,
   `exhaustive = true`, `exhaustive_ignores = ["main"]`, layer names relative to `app`;
   extend the helper of `test_import_contracts.py` so it can add a package
   (`app/<name>/__init__.py`) as well as a module; verify `lint-imports` keeps every
   contract on the repository, and new test cases with a top-level package `app/newpkg/`
   and a top-level module `app/loose.py` placed in no layer each fail, naming
   `app.newpkg` and `app.loose`
-- [ ] 4.2 Find `lint-imports` through a helper (directory of `sys.executable`, then
+- [x] 4.2 Find `lint-imports` through a helper (directory of `sys.executable`, then
   `shutil.which` on `PATH`) in `test_import_contracts.py` and call `pytest.fail` with
   "lint-imports not found; install backend/requirements-dev.txt" when neither has it
   (decision 6); verify the existing cases pass and a test that monkeypatches
   `sys.executable` to a temporary directory and `PATH` to an empty one gets that failure
   message, not `FileNotFoundError`
-- [ ] 4.3 Put `backend/scripts/` under the coverage gate (decision 6): `--cov=app
+- [x] 4.3 Put `backend/scripts/` under the coverage gate (decision 6): `--cov=app
   --cov=scripts` in `backend/check.sh`, `source = ["app", "scripts"]`, the `__main__`
   guard in `exclude_also`, superseding the WP6 decision "Gate scope: `app` only"
   (`docs/decisions/bootstrap-dev-environment-readiness.md`, section 6); verify
