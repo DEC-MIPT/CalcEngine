@@ -206,10 +206,11 @@ and 5.1 no longer carry the marker.
   `backend-layered-architecture` (WP5) tasks 1.1 and 2.1 respectively; both are merged
   (`53a4892`), so the `[blocked: WP5]` marker is lifted (2026-10-04). They still do not
   gate this change's own GO.
-- Task 4.6 comes before 4.5.
+- Tasks 4.6, 4.4 and 5.1 come before 4.5, in that order, so that the one scan of 4.5
+  covers every file the feature adds.
 - Task 7.3 (archive) needs 7.1 and 7.2.
-- Task 7.1 needs 4.5, since `pre-commit run --all-files` is part of the verdict. Task 4.5
-  needs nothing else. A later move of files in either zone makes the hook fail again on
+- Task 7.1 needs 4.5, since `pre-commit run --all-files` is part of the verdict. Apart from
+  that order, task 4.5 needs nothing else. A later move of files in either zone makes the hook fail again on
   the moved files; that failure is the trigger, and the developer who sees it re-runs the
   scan of 4.5 (a manual step, no automation).
 
