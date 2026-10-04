@@ -15,6 +15,15 @@ CYR: dict[str, str] = _CFG.get("cyr_map", {})
 _MAX_SYMBOL_LEN = 8
 _PRIME_CHARS = ("´", "'", "\u02b9", "\u2032", "\u2033", "\u2034")
 
+# Кириллица в омографии с латиницей (а≈a, с≈s, е≈e, р≈r, у≈u, к≈k) даёт тот же id,
+# если её транслитерировать в латиницу. Чтобы id оставался однозначным, любому
+# обозначению с кириллицей добавляем суффикс: \text{с} -> `s_cyr`, а латинское `s` -> `s`.
+CYR_SUFFIX = "_cyr"
+
+
+def _is_cyrillic(ch: str) -> bool:
+    return "\u0400" <= ch <= "\u04ff"
+
 
 def split_symbols(raw: str) -> list[str]:
     parts = re.split(r"\s*,\s*|\s+и\s+|\s*;\s*", raw)
@@ -44,9 +53,12 @@ def _char_id(ch: str) -> str:
         return lt.removeprefix("\\")
     low = ch.lower()
     if low in CYR:
-        return CYR[low]
+        translit = CYR[low]
+        return translit[:1].upper() + translit[1:] if ch.isupper() else translit
     if ch.isascii() and ch.isalnum():
         return ch
+    if _is_cyrillic(ch):
+        return f"u{ord(ch):04x}"
     return "_"
 
 
@@ -71,5 +83,8 @@ def normalize_symbol(raw: str) -> tuple[str, str] | None:
     id_base = _char_id(chars[0])
     id_sub = "".join(_char_id(ch) for ch in chars[1:])
     ident = id_base + (("_" + id_sub) if id_sub else "") + ("_pr" if prime else "")
+
+    if any(_is_cyrillic(ch) for ch in chars):
+        ident += CYR_SUFFIX
 
     return ident, latex
