@@ -29,7 +29,9 @@ what it does not say. Do not restate `AGENTS.md` here.
 - Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
   (WP2; engine and report merged; open: the frontend feature 3.4, 3.5, 5.4, task 7.2,
   archive after WP1), `calculation-api` (WP8; merged, only 6.5 sync and archive left,
-  after WP2), `calculation-verification` (WP4), `bootstrap-dev-environment` (WP6),
+  after WP2), `calculation-verification` (WP4), `bootstrap-dev-environment` (WP6;
+  `feature/dev-environment/backend` merged into `develop` in `bec3d43` on 2026-10-04
+  after the `tester` GO and the `orchestrator` review, only 7.3 sync and archive left),
   `backend-layered-architecture` (WP5, all tasks done, not archived),
   `record-installed-skills-akim`, `normative-catalog-backend` (WP9, Akim and Egor; on
   `develop` since 2026-10-03, DOR met 2026-10-04 when Egor confirmed its read contract,
@@ -71,12 +73,16 @@ what it does not say. Do not restate `AGENTS.md` here.
   his 2026-09-29 plan to rename it) and sets the reader's password from
   `DEC_NORMATIVES_READER_PASSWORD`. `dec_app` is not in the compose file:
   backend verify clauses run on a database created by hand on `dec-postgres`.
-- Known issue: `.secrets.baseline` lists paths from before the move and misses newer
-  backend files, so `pre-commit run --all-files` fails on `develop`. Fixed by WP6 task
-  4.5 on `feature/dev-environment/backend` (`9dca91e`, note for Egor in
-  `docs/decisions/secrets-baseline-egor-files.md`); it reaches `develop` with that
-  feature's merge. Merging WP9 adds test files with placeholder passwords that the
-  baseline does not list, so the scan of task 4.5 is re-run after that merge.
+- Secrets baseline: `pre-commit run --all-files` passes on `develop` since the WP6 merge
+  (`bec3d43`; files of Egor's zone in `docs/decisions/secrets-baseline-egor-files.md`).
+  `detect-secrets` matches findings by file and line, so moving a listed file or shifting
+  a flagged line fails the hook (a line shift rewrites the baseline and exits 3). Who
+  refreshes it after a line shift, and on which branch, is asked of Egor in
+  `docs/decisions/secrets-baseline-refresh-questions-akim.md`; until he answers, the
+  baseline changes only on a feature or fix branch. Merging WP9 adds test files with
+  placeholder passwords that the baseline does not list, so the scan of WP6 task 4.5 is
+  re-run on the WP9 branch after `git merge develop`. `pre-commit install` is not done on
+  Akim's machine yet (decided 2026-10-04 to install it later).
 - Review follow-ups (the 18 minor items of
   `docs/decisions/calculation-core-contract-readiness.md` sections 12-14): done on
   `fix/calculation-engine/backend` (WP2 tasks 9.1-9.10, WP8 tasks 7.1-7.2), `tester` GO,
@@ -175,8 +181,8 @@ Edit these only when the user explicitly says so; otherwise show a diff.
   `frontend/`, and `backend/.venv/bin/pre-commit install` at the repository root, so the
   pre-commit hooks run on every `git commit` (WP6 task 6.2).
 - Backend: `backend/check.sh` (`ruff`, `mypy`, `pytest` with branch coverage >= 95% on
-  `app`; on `feature/dev-environment/backend` also `lint-imports` with the layer
-  contracts of `backend-layered-architecture` decision 2), using `backend/.venv`. Tests
+  `app`, and `lint-imports` with the layer contracts of `backend-layered-architecture`
+  decision 2 in `backend/pyproject.toml`), using `backend/.venv`. Tests
   marked `postgres` (migrations, JSON round-trip, latency) run only with
   `DEC_TEST_APP_DATABASE_URL` set to a hand-made database on
   `dec-postgres` (`dec_app_wp8_test` exists), and are skipped otherwise:
@@ -193,9 +199,8 @@ Edit these only when the user explicitly says so; otherwise show a diff.
   branch `DEC_NORMATIVES_DATABASE_URL` (the reader role) serves the catalog; without it
   the app still starts, and the catalog paths answer `503`.
 - Frontend: `frontend/check.sh` (`eslint`, `tsc -b`, `vitest run --coverage`).
-- Pre-commit: `pre-commit run --all-files` (`detect-secrets`; on
-  `feature/dev-environment/backend` also a hook that `.env.example` lists every
-  backend settings variable; see the known issue above).
+- Pre-commit: `pre-commit run --all-files` (`detect-secrets`, and a hook that
+  `.env.example` lists every backend settings variable; see "Secrets baseline" above).
 - Egor's pipeline (his zone): `python -m normatives_pipeline.search --json "<query>"`
   after `pip install -e "./ml[ml]"`, with `DEC_DATABASE_URL` set, as in `README.md`
   and `docs/decisions/normatives-pilot-usage-akim.md`. Its PostgreSQL is
