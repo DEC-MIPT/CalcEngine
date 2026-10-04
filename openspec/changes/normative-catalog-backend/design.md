@@ -114,7 +114,7 @@ from the backend's `schemas/units.py` list (for example `kPa`, `m`, `deg`, `1`).
 |---|---|---|
 | `catalog_read.documents` | `document_id int`, `designation text`, `title text`, `edition text`, `year int null`, `source_url text null` | One row per document. |
 | `catalog_read.clauses` | `document_id int`, `position int`, `number text`, `title text null`, `page int null` | `position` gives document order. |
-| `catalog_read.search(query text, max_rows int)` | returns `kind text` (`document`, `clause`, `formula`), `document_id int`, `designation text`, `edition text`, `number text null`, `title text null`, `rank real` | Egor's ranking (`pg_trgm`); at most `max_rows` rows. |
+| `catalog_read.search(query text, max_rows int)` | returns `kind text` (`document`, `clause`, `formula`), `document_id int`, `designation text`, `edition text`, `number text null`, `title text null`, `rank real` | Egor's ranking (`pg_trgm` `similarity`, 0..1); rows ordered by `rank DESC`, then `designation COLLATE "C"`, then `number COLLATE "C" NULLS FIRST`, and `LIMIT max_rows` applied after that order. |
 | `catalog_read.type_formulas` | `calculation_type text`, `parameter text`, `result_symbol text`, `latex text`, `tree jsonb`, `units jsonb` (symbol id → unit, including the result symbol), `norm_refs jsonb` | One row per formula parameter. |
 | `catalog_read.type_table_values` | `calculation_type text`, `parameter text`, `symbol text`, `latex text`, `value numeric`, `unit text`, `heading_symbol text null`, `heading_value numeric null`, `heading_unit text null`, `norm_refs jsonb` | One row per table row for a selected parameter, one row with null headings for a parameter that no input selects. |
 | `catalog_read.type_thresholds` | `calculation_type text`, `parameter text`, `latex text`, `value numeric`, `unit text`, `norm_refs jsonb` | |
@@ -136,6 +136,12 @@ reference status":
 - One parameter appears in exactly one of the four `type_*` parameter views, the one
   that matches the kind its field has in the parameters model (`Formula`, `TableValue`,
   `Threshold`, `NormRefs`).
+- `search` orders ties inside the function, before its `LIMIT`: the backend sorts only
+  the rows it gets back, so a tie at the cut would otherwise drop the hit that the spec
+  "Normative search endpoint" puts first. The backend keeps the same `ORDER BY` on its
+  side. Agreed with Egor on 2026-10-04
+  (`docs/decisions/normative-catalog-search-order-questions-akim.md`, "Answers"); he
+  implements it in task 2.6, Akim's synthetic function follows it (task 4.4).
 - A selected table has one heading per parameter: every row of a parameter carries the
   same `heading_symbol`, or no row does. A selection by two inputs needs new columns and
   a change to this decision.

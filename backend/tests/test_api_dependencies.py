@@ -12,7 +12,7 @@ from sqlalchemy.pool import StaticPool
 from app.api.dependencies import get_session
 from app.main import create_app
 
-CLOSED = "postgresql://user:hunter2@127.0.0.1:1/dec_app"
+CLOSED = "postgresql://user:hunter2@127.0.0.1:1/dec_app"  # pragma: allowlist secret
 
 
 def make_app(session_factory: sessionmaker[Session] | None = None) -> FastAPI:

@@ -28,7 +28,7 @@ from app.models import Base
 
 SENTINEL = "client-value-5d1e"
 ORIGIN = "http://localhost:5173"
-CLOSED = "postgresql://user:hunter2@127.0.0.1:1/dec_app"
+CLOSED = "postgresql://user:hunter2@127.0.0.1:1/dec_app"  # pragma: allowlist secret
 
 
 @pytest.fixture(autouse=True)

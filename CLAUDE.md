@@ -70,16 +70,23 @@ what it does not say. Do not restate `AGENTS.md` here.
   his 2026-09-29 plan to rename it) and sets the reader's password from
   `DEC_NORMATIVES_READER_PASSWORD`. `dec_app` is not in the compose file:
   backend verify clauses run on a database created by hand on `dec-postgres`.
-- Secrets baseline: `pre-commit run --all-files` passes on `develop` since the WP6 merge
-  (`bec3d43`; files of Egor's zone in `docs/decisions/secrets-baseline-egor-files.md`).
-  `detect-secrets` matches findings by file and line, so moving a listed file or shifting
-  a flagged line fails the hook (a line shift rewrites the baseline and exits 3). Who
-  refreshes it after a line shift, and on which branch, is asked of Egor in
-  `docs/decisions/secrets-baseline-refresh-questions-akim.md`; until he answers, the
-  baseline changes only on a feature or fix branch. Merging WP9 adds test files with
-  placeholder passwords that the baseline does not list, so the scan of WP6 task 4.5 is
-  re-run on the WP9 branch after `git merge develop`. `pre-commit install` is not done on
-  Akim's machine yet (decided 2026-10-04 to install it later).
+- Secrets baseline: `pre-commit run --all-files` passes on `develop` since the
+  `dev-tooling-followups` merge (`a505352`; 12 findings, all the local `dec:dec` or a
+  content hash; research notebooks `ml/research/**.ipynb` are not scanned; Akim's
+  placeholders carry `# pragma: allowlist secret`). `detect-secrets` matches findings by
+  file and line: when the hook only rewrites line numbers or drops entries of removed
+  lines (exit 3, "The baseline file was updated", no "Potential secrets"), stage the
+  rewritten baseline and commit it with the change that caused it, on its branch,
+  `develop` included (`AGENTS.md` section 2, agreed by Egor on 2026-10-04); a new finding
+  is removed from the file or marked there as a placeholder, or the baseline is
+  regenerated with a hand review on a feature or fix branch with the two-step command of
+  `dev-tooling-followups` design decision 2. Merging WP9 brings test placeholders the
+  baseline does not list: see `normative-catalog-backend` `tasks.md`, "Dependencies".
+  `pre-commit install` is done on Akim's machine (2026-10-04, hook from
+  `backend/.venv`). Egor's answer of 2026-10-04 says he marks `ml/tests/conftest.py`
+  and `infra/docker-compose.yml` and adds an `ml/` -> `app` import check on his side; it
+  does not say when he installs the hook. The settings hook needs `python3.12` and
+  installs pinned `pydantic` and `pydantic-settings` in its own environment.
 - Review follow-ups (the 18 minor items of
   `docs/decisions/calculation-core-contract-readiness.md` sections 12-14): done on
   `fix/calculation-engine/backend` (WP2 tasks 9.1-9.10, WP8 tasks 7.1-7.2), `tester` GO,
@@ -107,6 +114,12 @@ what it does not say. Do not restate `AGENTS.md` here.
   `backend-layered-architecture` still names it. The MVP domains are shallow
   foundations, then internal water supply. Build on the active changes, not on the
   placeholder.
+- `dev-tooling-followups` (WP6 follow-ups) is archived (2026-10-04,
+  `openspec/changes/archive/2026-10-04-dev-tooling-followups/`): merged in `a505352`
+  after the `tester` GO and the `orchestrator` review; the baseline-refresh rule, the
+  notebook exclusion, the settings check that asks `pydantic-settings`, the exhaustive
+  layers contract and the coverage of `backend/scripts/` are in
+  `openspec/specs/development-process/spec.md` and `AGENTS.md` sections 2 and 4.
 - `bootstrap-dev-environment` (WP6) is archived (2026-10-04,
   `openspec/changes/archive/2026-10-04-bootstrap-dev-environment/`): merged in `bec3d43`
   after the `tester` GO and the `orchestrator` review; its four tooling requirements are

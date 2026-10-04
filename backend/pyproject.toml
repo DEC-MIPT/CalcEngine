@@ -20,11 +20,12 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["app"]
+source = ["app", "scripts"]
 branch = true
 
 [tool.coverage.report]
 show_missing = true
+exclude_also = ['if __name__ == "__main__":']
 
 [tool.importlinter]
 root_package = "app"
@@ -33,14 +34,17 @@ include_external_packages = true
 [[tool.importlinter.contracts]]
 name = "Layers follow backend-layered-architecture design.md decision 2"
 type = "layers"
+containers = ["app"]
+exhaustive = true
+exhaustive_ignores = ["main"]
 layers = [
-    "app.api | app.worker",
-    "app.services",
-    "app.engine | app.parameters | app.reporting",
-    "app.repositories",
-    "app.db",
-    "app.models | app.schemas",
-    "app.core",
+    "api | worker",
+    "services",
+    "engine | parameters | reporting",
+    "repositories",
+    "db",
+    "models | schemas",
+    "core",
 ]
 
 [[tool.importlinter.contracts]]

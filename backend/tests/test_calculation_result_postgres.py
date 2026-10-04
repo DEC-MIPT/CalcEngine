@@ -30,7 +30,7 @@ pytestmark = pytest.mark.postgres
 
 URL = os.environ.get("DEC_TEST_APP_DATABASE_URL")
 BACKEND = Path(__file__).resolve().parents[1]
-INITIAL = "869e03eddcc5"
+INITIAL = "869e03eddcc5"  # pragma: allowlist secret
 
 if URL is None:
     pytest.skip("DEC_TEST_APP_DATABASE_URL is not set", allow_module_level=True)
