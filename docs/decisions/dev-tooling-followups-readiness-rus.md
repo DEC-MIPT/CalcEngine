@@ -84,4 +84,38 @@ DOR в силе.
 
 ## 5. Подтверждения реализации
 
-Задача 2.4 запишет сюда результат своих проб, когда будет выполнена.
+На `feature/dev-tooling/backend`, коммит `3605eaa` (2026-10-04). Пробы шли в отдельном
+клоне `develop` с перенесёнными застейдженными файлами ветки; рабочее дерево и зона Егора
+не тронуты.
+
+Задача 2.1 (исключение ноутбуков):
+
+| Проба | Итог |
+|---|---|
+| `pre-commit run detect-secrets --files ml/research/research.ipynb` | `(no files to check) Skipped` |
+| фейковый ключ AWS в застейдженном `ml/research/probe.ipynb` | `Skipped`, exit 0 |
+| тот же ключ в застейдженном `probe/key.txt` | `Failed`, exit 1 |
+
+Задача 2.4 (обновление только номеров строк), `README.md`, строка 46 (`dec:dec`):
+
+| Проба | Код | Вывод хука | `git diff .secrets.baseline` |
+|---|---|---|---|
+| вставка строки над 46 | 3 | «The baseline file was updated», без «Potential secrets» | `line_number` 46 -> 47, `generated_at` |
+| удаление строки 46 | 3 | то же | удалена запись `README.md`, `generated_at` |
+| без изменений | 0 | `Passed` | нет |
+
+Первый прогон пробы со сдвигом также добавил в `filters_used` фильтр `is_baseline_file`:
+baseline, созданный одним `scan`, его не записывает. Поэтому baseline собирается в два
+шага (`scan`, затем `scan --baseline`, решение 2 `design.md`, задача 2.3); таблица — по
+прогонам после этого исправления.
+
+Задача 2.3: 12 файлов, 12 находок, все проверены: локальный `dec:dec` (`README.md`, восемь
+файлов `docs/decisions/`, `ml/tests/conftest.py`), `POSTGRES_PASSWORD: dec`
+(`infra/docker-compose.yml`) и `computedHash` (`skills-lock.json`). Два файла
+`docs/decisions/` (`secrets-baseline-refresh-questions-akim.md` и `-rus.md`) пришли с
+ответом Егора `dc09e57` после baseline WP6, поэтому `pre-commit run --all-files` на
+`develop` падает до слияния этой фичи.
+
+Проверки на ветке: `backend/check.sh` exit 0 (4 контракта соблюдены, 700 passed,
+1 skipped, покрытие ветвей `app` и `scripts` 100%); `frontend/check.sh` exit 0;
+`pre-commit run --all-files` exit 0; `openspec validate --all --strict` 20/20.
