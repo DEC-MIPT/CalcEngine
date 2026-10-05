@@ -246,7 +246,18 @@ table has no value column; `ml/` does not import `app`.
   AGENTS.md section 2 a new finding is removed from the file or marked there as a
   placeholder, never added to the baseline in passing. Fix: mark the seven lines (or
   write the URLs without the password), then `pre-commit install` on Egor's machine. I
-  did not touch these files or `.secrets.baseline`.
+  did not touch these files or `.secrets.baseline`, except the finding in
+  `normatives-formula-contract-implementation-egor.md`: answering its section 6a, I wrote
+  that URL without the password (2026-10-05), so six findings remain.
+- **m7. The edition of СП 22.13330.2016 may be recorded wrong.** Egor's record of task
+  2.5 gives "2016 (актуализированная редакция СНиП 2.02.01-83*, изменения 1-4)". The copy
+  I read (`docs/NTD/СП 22.13330.2016.pdf` on my machine, untracked) is the text "с
+  Изменениями N 1, 2, 3, 4, 5", and the notes to formula (5.7) are marked "Измененная
+  редакция, Изм. № 5". Either Egor's PDF is an older consolidated text without change 5,
+  or the record is wrong. The catalog's `edition` and every `NormRef` of the pilot depend
+  on it. Fix: name the exact consolidated text the pipeline ingests (changes included and
+  its date) in the record and in `document.edition`; if it lacks change 5, ingest the
+  current text. The edition stays `unverified` either way until WP3.
 
 ### Notes for the backend side (no action for Egor)
 
@@ -255,6 +266,16 @@ table has no value column; `ml/` does not import `app`.
   (`normative-catalog-pilot-coefficients-egor.md`). The pilot has no input for these
   conditions, so its result is right only in that case. The form or the report has to
   state the conditions, or the contract needs inputs for them (Akim and PM).
+- The pilot cannot reproduce two of its three WP4 reference examples
+  (`reference-examples-foundations.md`, section 3): they use `γc1` = 1.1 (`ex1`, page 8),
+  1.4 (`ex1-rz`, page 16) and 1.25 (`ex2`, page 23), while the catalog gives one row,
+  `γc1 = 1.1`, because the pilot has no input that selects the soil row of table 5.4.
+  `γc2 = 1.0` and `k = 1` are the same in all three. The cards also give `Mγ`, `Mq`,
+  `Mc` directly and no `φII`, which the pilot needs to select the row of table 5.5. Akim's
+  side: an input that selects the row of table 5.4 (a soil kind as its heading, so the
+  catalog stores every row of the table) or `γc1` as an input, decided with the PM
+  together with the layered base; and `φII` added to each card from the guide, checked
+  to be a whole degree.
 - Table 5.5 has a row per whole degree, and there is no interpolation rule, so a
   non-integer `phi_II` inside [0, 45] gets `422`. The input form needs to say so.
 
