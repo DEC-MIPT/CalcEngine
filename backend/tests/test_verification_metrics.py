@@ -1,18 +1,29 @@
 import pytest
 from test_verification_properties import DriftingCalculator
-from test_verification_runner import CONTRACT, example, output, registry, resolve
+from test_verification_runner import (
+    CONTRACT,
+    METHOD,
+    PARAMETERS,
+    example,
+    output,
+    registry,
+    resolve,
+)
 
 from app.engine.registry import CalculatorRegistry
+from app.schemas.calculation import NormRef
 from app.verification.metrics import (
     Deviation,
     GoReport,
     Reproducibility,
+    Traceability,
     deviations,
     go_report,
     reproducibility,
+    traceability,
 )
 from app.verification.models import ReferenceExample
-from app.verification.runner import run_suite
+from app.verification.runner import ExampleParameters, run_suite
 
 DRIFTING = "synthetic_drifting_type"
 
@@ -102,6 +113,7 @@ def test_the_go_report_of_a_passing_reproduced_suite_is_go_with_both_metrics() -
     assert (report.verdict, report.effective_verdict, report.missing_metrics) == ("GO", "GO", ())
     assert report.deviations is not None and len(report.deviations) == 2
     assert report.reproducibility is not None and report.reproducibility.rate == 1.0
+    assert report.traceability == Traceability(verified_steps=0, steps=4, engineer_rules=2)
 
 
 def test_a_failing_suite_gives_a_no_go_report_with_its_metrics() -> None:
@@ -124,23 +136,28 @@ def test_a_passing_suite_that_does_not_reproduce_gives_no_go() -> None:
 
 
 @pytest.mark.parametrize(
-    ("attach_deviations", "attach_reproducibility", "missing"),
+    ("attach", "missing"),
     [
-        (False, True, ("deviation from the references",)),
-        (True, False, ("reproducibility rate",)),
-        (False, False, ("deviation from the references", "reproducibility rate")),
+        ((False, True, True), ("deviation from the references",)),
+        ((True, False, True), ("reproducibility rate",)),
+        ((True, True, False), ("traceability completeness",)),
+        (
+            (False, False, False),
+            ("deviation from the references", "reproducibility rate", "traceability completeness"),
+        ),
     ],
-    ids=["no deviations", "no reproducibility", "no metrics"],
+    ids=["no deviations", "no reproducibility", "no traceability", "no metrics"],
 )
 def test_a_go_without_a_metric_is_invalid_and_counts_as_no_go(
-    attach_deviations: bool, attach_reproducibility: bool, missing: tuple[str, ...]
+    attach: tuple[bool, bool, bool], missing: tuple[str, ...]
 ) -> None:
     full = go_report(run_suite([example("a")], registry(), resolve))
 
     claimed = GoReport(
         verdict="GO",
-        deviations=full.deviations if attach_deviations else None,
-        reproducibility=full.reproducibility if attach_reproducibility else None,
+        deviations=full.deviations if attach[0] else None,
+        reproducibility=full.reproducibility if attach[1] else None,
+        traceability=full.traceability if attach[2] else None,
     )
 
     assert claimed.missing_metrics == missing
@@ -149,13 +166,70 @@ def test_a_go_without_a_metric_is_invalid_and_counts_as_no_go(
 
 def test_a_go_claimed_with_a_rate_below_one_hundred_percent_counts_as_no_go() -> None:
     claimed = GoReport(
-        verdict="GO", deviations=(), reproducibility=Reproducibility(reproduced=1, examples=2, not_reproduced=("d",))
+        verdict="GO",
+        deviations=(),
+        reproducibility=Reproducibility(reproduced=1, examples=2, not_reproduced=("d",)),
+        traceability=Traceability(verified_steps=0, steps=0, engineer_rules=0),
     )
 
     assert (claimed.missing_metrics, claimed.effective_verdict) == ((), "NO-GO")
 
 
 def test_a_no_go_stays_no_go() -> None:
-    claimed = GoReport(verdict="NO-GO", deviations=(), reproducibility=Reproducibility(1, 1, ()))
+    claimed = GoReport(
+        verdict="NO-GO",
+        deviations=(),
+        reproducibility=Reproducibility(1, 1, ()),
+        traceability=Traceability(verified_steps=0, steps=0, engineer_rules=0),
+    )
 
     assert claimed.effective_verdict == "NO-GO"
+
+
+VERIFIED = NormRef(
+    document="<NORM-DOC-PLACEHOLDER>",
+    edition="<EDITION-PLACEHOLDER>",
+    clause="<CLAUSE-PLACEHOLDER>",
+    status="verified",
+    provenance="human-verified",
+)
+
+
+def verified_formula(example: ReferenceExample) -> ExampleParameters:
+    """Параметры, у формулы которых проверенная ссылка; ссылка проверки в калькуляторе — нет."""
+    formula = PARAMETERS.formula.model_copy(update={"norm_refs": (VERIFIED,)})
+    return ExampleParameters(parameters=PARAMETERS.model_copy(update={"formula": formula}), method_range=METHOD)
+
+
+def test_traceability_counts_the_verified_steps_of_every_envelope() -> None:
+    measured = traceability(run_suite([example("a"), example("b")], registry(), verified_formula))
+
+    assert measured == Traceability(verified_steps=2, steps=4, engineer_rules=2)
+    assert measured.completeness == 0.5
+
+
+def test_unverified_references_give_a_completeness_of_zero() -> None:
+    measured = traceability(run_suite([example("a")], registry(), resolve))
+
+    assert (measured.verified_steps, measured.steps, measured.completeness) == (0, 2, 0.0)
+
+
+def test_refused_and_failed_runs_are_not_counted() -> None:
+    unknown = example("unknown").model_copy(update={"calculation_type": "not_registered"})
+
+    measured = traceability(run_suite([example("a"), example("far", b=60.0), unknown], registry(), verified_formula))
+
+    assert measured == Traceability(verified_steps=1, steps=2, engineer_rules=1)
+
+
+def test_a_run_without_steps_has_no_completeness() -> None:
+    measured = traceability(run_suite([example("far", b=60.0)], registry(), resolve))
+
+    assert (measured.steps, measured.completeness) == (0, None)
+
+
+def test_traceability_does_not_decide_the_verdict() -> None:
+    report = go_report(run_suite([example("a"), example("b")], registry(), resolve))
+
+    assert report.traceability is not None and report.traceability.completeness == 0.0
+    assert (report.verdict, report.effective_verdict) == ("GO", "GO")

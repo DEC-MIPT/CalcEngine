@@ -56,6 +56,31 @@ class Reproducibility:
         return "NO-GO" if self.not_reproduced else "GO"
 
 
+@dataclass(frozen=True)
+class Traceability:
+    """Полнота прослеживаемости по конвертам прогона (задача 3.5).
+
+    Проверенный шаг — тот, у которого проверена каждая ``NormRef`` его ``norm_refs``;
+    непроверенных шагов столько, сколько ``unverified_step_count`` конверта. Отказные
+    конверты не входят. Правила инженера в долю не входят и считаются отдельно. Порога
+    у метрики нет, вердикт она не решает (`calculation-verification` "Metrics per run").
+
+    Attributes:
+        verified_steps: число проверенных шагов.
+        steps: число шагов трассы.
+        engineer_rules: число записей ``engineer_rules`` в конвертах.
+    """
+
+    verified_steps: int
+    steps: int
+    engineer_rules: int
+
+    @property
+    def completeness(self) -> float | None:
+        """Доля проверенных шагов; ``None``, если шагов нет."""
+        return None if self.steps == 0 else self.verified_steps / self.steps
+
+
 def deviations(report: SuiteReport) -> tuple[Deviation, ...]:
     """Отклонения от эталонов по каждой ожидаемой величине каждого примера (задача 2.13).
 
@@ -99,26 +124,49 @@ def reproducibility(report: SuiteReport) -> Reproducibility:
     )
 
 
+def traceability(report: SuiteReport) -> Traceability:
+    """Считает полноту прослеживаемости по неотказным конвертам прогона (задача 3.5).
+
+    Args:
+        report: отчёт прогона набора.
+
+    Returns:
+        Прослеживаемость набора.
+    """
+    envelopes = [run.result for run in report.runs if run.result is not None and run.result.verdict != "refused"]
+    steps = sum(len(result.trace) for result in envelopes)
+    unverified = sum(result.unverified_step_count for result in envelopes)
+    return Traceability(
+        verified_steps=steps - unverified,
+        steps=steps,
+        engineer_rules=sum(len(result.engineer_rules) for result in envelopes),
+    )
+
+
 @dataclass(frozen=True)
 class GoReport:
-    """Вердикт тестировщика с приложенными метриками (задача 2.15).
-
-    Метрика прослеживаемости — задача 3.5, она добавится сюда же.
+    """Вердикт тестировщика с приложенными тремя метриками (задачи 2.15 и 3.5).
 
     Attributes:
         verdict: заявленный вердикт.
         deviations: отклонения от эталонов или ``None``, если не приложены.
         reproducibility: воспроизводимость или ``None``, если не приложена.
+        traceability: полнота прослеживаемости или ``None``, если не приложена.
     """
 
     verdict: Verdict
     deviations: tuple[Deviation, ...] | None
     reproducibility: Reproducibility | None
+    traceability: Traceability | None
 
     @property
     def missing_metrics(self) -> tuple[str, ...]:
         """Имена метрик, которые не приложены."""
-        attached = {"deviation from the references": self.deviations, "reproducibility rate": self.reproducibility}
+        attached = {
+            "deviation from the references": self.deviations,
+            "reproducibility rate": self.reproducibility,
+            "traceability completeness": self.traceability,
+        }
         return tuple(name for name, value in attached.items() if value is None)
 
     @property
@@ -128,20 +176,26 @@ class GoReport:
         Сценарий "Metrics missing" требования "Metrics per run"; воспроизводимость ниже
         100% тоже даёт NO-GO (сценарий "Non-reproducible result").
         """
-        if self.verdict == "NO-GO" or self.deviations is None or self.reproducibility is None:
+        if self.verdict == "NO-GO" or self.missing_metrics or self.reproducibility is None:
             return "NO-GO"
         return self.reproducibility.verdict
 
 
 def go_report(report: SuiteReport) -> GoReport:
-    """Строит вердикт набора эталонов с обеими метриками.
+    """Строит вердикт набора эталонов с тремя метриками.
 
     Args:
         report: отчёт прогона набора.
 
     Returns:
-        Вердикт ``GO``, только если набор прошёл и воспроизводимость 100%, с метриками.
+        Вердикт ``GO``, только если набор прошёл и воспроизводимость 100%, с метриками;
+        прослеживаемость вердикт не решает.
     """
     measured = reproducibility(report)
     verdict: Verdict = "GO" if report.verdict == "GO" and measured.verdict == "GO" else "NO-GO"
-    return GoReport(verdict=verdict, deviations=deviations(report), reproducibility=measured)
+    return GoReport(
+        verdict=verdict,
+        deviations=deviations(report),
+        reproducibility=measured,
+        traceability=traceability(report),
+    )

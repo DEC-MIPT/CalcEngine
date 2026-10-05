@@ -82,6 +82,7 @@ class ExampleRun:
         error: имя класса ошибки, если расчёт или получение параметров её бросили.
         reproduced: оба расчёта примера дали равные результаты; ``False`` при ошибке
             (`calculation-verification` "Metrics per run", воспроизводимость).
+        result: конверт первого расчёта; ``None`` при ошибке.
     """
 
     example_id: str
@@ -90,6 +91,7 @@ class ExampleRun:
     checks: tuple[QuantityCheck, ...] = ()
     error: str | None = None
     reproduced: bool = False
+    result: CalculationResult | None = None
 
 
 @dataclass(frozen=True)
@@ -205,9 +207,11 @@ def run_example(example: ReferenceExample, registry: CalculatorRegistry, resolve
     checks = tuple(_check(quantity, expected, result) for quantity, expected in example.expected_outputs.items())
     reproduced = result == repeat
     if result.verdict == "refused":
-        return ExampleRun(example.example_id, example.calculation_type, "refused", checks, reproduced=reproduced)
+        return ExampleRun(
+            example.example_id, example.calculation_type, "refused", checks, reproduced=reproduced, result=result
+        )
     outcome: ExampleOutcome = "passed" if all(check.outcome == "within" for check in checks) else "failed"
-    return ExampleRun(example.example_id, example.calculation_type, outcome, checks, reproduced=reproduced)
+    return ExampleRun(example.example_id, example.calculation_type, outcome, checks, reproduced=reproduced, result=result)
 
 
 def run_suite(
