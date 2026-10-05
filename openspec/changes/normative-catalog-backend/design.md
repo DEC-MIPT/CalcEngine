@@ -310,6 +310,13 @@ Any breach of the contract in a type's rows makes `CatalogParameterSource` raise
 - a parameter in two `type_*` views, or in a view whose kind does not match its field;
 - a tree that `parse_expression` refuses;
 - a unit outside the list;
+- a formula whose `units` give a symbol or its result symbol that names an input or an
+  output of the type a unit other than that quantity's base unit in the type's contract.
+  `formula_step` compares units exactly and converts nothing inside a formula, so
+  without this check the breach would surface only at evaluation, as `UnitError` and
+  `422 invalid_input`, blaming the client for the catalog's data (Akim's review of the
+  data feature, M2, 2026-10-05). A symbol that names neither (a table symbol, the result
+  of another formula) is not checked here;
 - a value that is not a finite number;
 - an empty or invalid `norm_refs`, or a `NormRef` invariant broken;
 - duplicate headings (equal after conversion to the input's base unit), rows with and

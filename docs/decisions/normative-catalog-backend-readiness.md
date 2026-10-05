@@ -176,11 +176,15 @@ table has no value column; `ml/` does not import `app`.
   implicit default in code, refused by the same check once M2 is fixed.
   The backend has the mirror gap (Akim's follow-up, not Egor's): `CatalogParameterSource`
   checks that every symbol has a unit from the list, but not that the unit of a symbol
-  naming an input has that input's dimension, and decision 7 does not list this breach.
+  naming an input or an output is that quantity's base unit (`formula_step` compares
+  units exactly, so the same dimension is not enough), and decision 7 does not list this
+  breach.
   Such a catalog error therefore surfaces only in `formula_step` as `UnitError`, which
   `api/errors.py` maps to `422 invalid_input`, blaming the client instead of answering
-  `503 parameter_source_unavailable`. I add the breach to decision 7 and the check to the
-  source on `feature/normative-catalog/backend`.
+  `503 parameter_source_unavailable`. I add the breach to decision 7 and the spec
+  "Expression tree form in the catalog", and the check to the source on
+  `feature/normative-catalog/backend` (task 5.6). The pilot's data already meet the rule:
+  every input and output symbol of formulas `5.7` and `k_z_from` is in its base unit.
 - **M3. Process.** The feature was merged before this review (AGENTS.md section 2,
   lifecycle step 7: GO, then review, then merge). The merge also brought the whole
   `feature/normative-formula-contract/data` into `develop` as its base (`320b61f` is on

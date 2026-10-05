@@ -187,6 +187,14 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   port and a test without the variable both give `503 parameter_source_unavailable` on
   `POST /calculations`, nothing is stored, and neither the response nor the log holds the
   URL or its password
+- [ ] 5.6 Add the decision 7 check that a formula gives every symbol and result symbol
+  naming an input or an output of the type that quantity's base unit (spec "Expression
+  tree form in the catalog"; Akim's review of the data feature, M2) (backend); verify:
+  the breach tests of task 5.4 gain a formula symbol of an input in another unit of the
+  same dimension, one in a unit of another dimension, and a result symbol of an output in
+  another unit, each raising `ParameterSourceUnavailableError` with one
+  `code=catalog_data_invalid` line naming the parameter; the pilot's synthetic rows still
+  resolve; `check.sh` passes with branch coverage of 100%
 
 ## 6. Endpoints and wiring (backend, Akim)
 
