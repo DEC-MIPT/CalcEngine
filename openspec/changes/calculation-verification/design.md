@@ -72,6 +72,39 @@ See `proposal.md` (Non-goals).
     >= 95% branch coverage", because the file is shared with Egor and another active
     change (`team-roles-update`) modifies a neighbouring requirement.
 
+13. **Code location** (added 2026-10-05, Akim, before tasks 2.1-2.4). The reference
+    suite runner and its models live in a new package `backend/app/verification/`, not
+    in `backend/tests/`: the runner is a tool of the GO gate with its own logic, so it
+    is covered by the 95% branch-coverage gate and tested itself. In the `import-linter`
+    layers contract of `backend-layered-architecture` decision 2 it is a top layer beside
+    `api | worker` (`"api | worker | verification"`), and a forbidden contract lets it
+    import from the application only `engine`, `schemas` and `core`; nothing imports
+    it.
+    - Alternative: the runner in `backend/tests/`. Rejected: it would be outside the
+      coverage gate, and untested code would decide GO.
+14. **Reference example model and the parameter source** (added 2026-10-05, Akim). A
+    reference example is a pydantic model with the fields of the requirement "Reference
+    examples"; a missing or empty field makes the example invalid (task 2.2). The runner
+    does not decide where the resolved parameters of an example come from: it receives a
+    function `resolve(example) -> (parameters, method_range)`. The framework is tested
+    with a synthetic calculation type and synthetic parameters. For the pilot
+    `foundations_shallow_r` the choice between the catalog, the example's own values, or
+    a mix (formulas from the catalog, coefficients from the example) stays open and is
+    decided before the first real example runs, together with the file format and the
+    place of the real examples.
+    - Why: the choice depends on the fixes of the catalog data (WP9 review, B1 and M1)
+      and on the pilot's scope (the soil row of `γc1`, `φII` in the cards), neither of
+      which the framework needs.
+15. **Comparison and the suite report** (added 2026-10-05, Akim). Each computed output
+    is converted to the unit of its expected value with `engine.boundary.convert`
+    before the tolerance applies, so an `absolute` tolerance stays in the unit the
+    engineer wrote it in. A refused result, or an expected output the result does not
+    hold, fails that example. The suite report holds the verdict (GO, NO-GO, or
+    "invalid suite" with its reasons) and, for every example and quantity, the computed
+    value, the expected value, the `tolerance` and its kind (scenario "A quantity
+    outside its tolerance"). The rule of at least 3 examples (decision 1) is checked
+    against the list of calculation types the suite is given (task 2.4).
+
 ## Swap boundary
 
 The reference suite, the regression corpus, and the invariant tests call the calculation
