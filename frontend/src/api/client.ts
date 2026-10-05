@@ -15,6 +15,7 @@ const DEFAULT_BASE_URL = 'http://127.0.0.1:8000'
 export function createApi(options: ClientOptions = {}) {
   return createClient<paths>({
     baseUrl: import.meta.env.VITE_API_BASE_URL ?? DEFAULT_BASE_URL,
+    fetch: (request) => globalThis.fetch(request),
     ...options,
   })
 }
