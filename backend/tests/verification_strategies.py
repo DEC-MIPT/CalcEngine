@@ -1,3 +1,4 @@
+import math
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
@@ -33,12 +34,18 @@ class Subject:
 def _input(item: InputRange) -> st.SearchStrategy[QuantityValue]:
     """Значение внутри диапазона, выраженное в любой единице той же размерности.
 
+    Целые значения (``whole``) остаются в единице диапазона: в другой единице они
+    перестали бы совпадать со строкой таблицы.
+
     Args:
         item: допустимый диапазон входа.
 
     Returns:
         Стратегия значений входа.
     """
+    if item.whole:
+        whole = st.integers(min_value=math.ceil(item.lower), max_value=math.floor(item.upper))
+        return whole.map(lambda value: QuantityValue(value=float(value), unit=item.unit))
     values = st.floats(min_value=item.lower, max_value=item.upper, allow_nan=False, allow_infinity=False)
     units = st.sampled_from(units_of(UNITS[item.unit].dimension))
     return st.builds(lambda value, unit: convert(QuantityValue(value=value, unit=item.unit), unit), values, units)

@@ -1,3 +1,4 @@
+import math
 from collections.abc import Collection, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Literal
@@ -38,13 +39,16 @@ class InputRange(BaseModel):
     """Допустимый диапазон одного входа, из которого генератор берёт значения.
 
     Это данные типа, как его эталонные примеры, а не значение нормы и не диапазон
-    применимости метода (design.md, решение 17). Границы входят.
+    применимости метода (design.md, решение 17). Границы входят. Вход, который выбирает
+    строку таблицы по целым значениям (например ``phi_II`` для таблицы с шагом в градус),
+    объявляется с ``whole``: тогда генератор берёт только целые значения в ``unit``.
 
     Attributes:
         quantity: имя входа типа.
         lower: нижняя граница.
         upper: верхняя граница, не меньше нижней.
         unit: единица обеих границ.
+        whole: генерировать только целые значения.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False)
@@ -53,11 +57,14 @@ class InputRange(BaseModel):
     lower: float
     upper: float
     unit: UnitSymbol
+    whole: bool = False
 
     @model_validator(mode="after")
     def _ordered(self) -> "InputRange":
         if self.lower > self.upper:
             raise ValueError("lower must not exceed upper")
+        if self.whole and math.ceil(self.lower) > math.floor(self.upper):
+            raise ValueError("a whole range must hold a whole value")
         return self
 
 

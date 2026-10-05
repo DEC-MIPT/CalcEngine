@@ -211,3 +211,16 @@ def test_a_tested_pair_that_no_plan_lists_changes_nothing() -> None:
     tested = {(TYPE, DETERMINISM), (TYPE, UNIT_CHANGE), (TYPE, "y-grows-with-b"), (TYPE, "not-listed")}
 
     assert invariant_coverage([plan()], tested).verdict == "GO"
+
+
+def test_a_range_is_continuous_unless_declared_whole() -> None:
+    assert InputRange(quantity="b", lower=1.0, upper=2.0, unit="m").whole is False
+
+
+def test_a_whole_range_without_a_whole_value_is_rejected() -> None:
+    with pytest.raises(ValidationError):
+        InputRange(quantity="phi_II", lower=0.2, upper=0.8, unit="deg", whole=True)
+
+
+def test_a_whole_range_with_a_single_whole_value_is_accepted() -> None:
+    assert InputRange(quantity="phi_II", lower=0.5, upper=1.5, unit="deg", whole=True).whole
