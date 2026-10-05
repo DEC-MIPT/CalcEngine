@@ -1,11 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 
 @theme inline {
-  --font-sans: system-ui, 'Segoe UI', 'Noto Sans', sans-serif;
+  --font-sans: 'Geist Variable', system-ui, sans-serif;
   --font-heading: var(--font-sans);
-  --font-mono: ui-monospace, 'Cascadia Mono', 'DejaVu Sans Mono', monospace;
+  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -25,6 +27,8 @@
   --color-warning: var(--warning);
   --color-warning-surface: var(--warning-surface);
   --color-warning-foreground: var(--warning-foreground);
+  --color-success: var(--success);
+  --color-success-surface: var(--success-surface);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -53,6 +57,8 @@
   --warning: #b7791f;
   --warning-surface: #fff4d6;
   --warning-foreground: #5c3b00;
+  --success: #2b5e31;
+  --success-surface: #edf3ec;
   --border: #c5ced9;
   --input: #7a8ca3;
   --ring: #1b4f9c;
@@ -61,10 +67,21 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
   body {
     @apply bg-background font-sans text-foreground antialiased;
+    line-height: 1.6;
+  }
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.015em;
+    line-height: 1.2;
   }
   code,
   pre,
@@ -72,5 +89,16 @@
   samp {
     @apply font-mono;
     font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
