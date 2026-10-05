@@ -7,6 +7,7 @@ from typing import Any
 
 import psycopg2  # type: ignore[import-untyped]
 from psycopg2.extras import (  # type: ignore[import-untyped]
+    Json,
     RealDictCursor,
     execute_values,
 )
@@ -42,9 +43,13 @@ CREATE TABLE IF NOT EXISTS formula (
     expression TEXT NOT NULL DEFAULT '',
     raw_text TEXT NOT NULL DEFAULT '',
     page INT,
-    search_text TEXT NOT NULL DEFAULT ''
+    search_text TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted'
 );
 ALTER TABLE formula ADD COLUMN IF NOT EXISTS expression TEXT NOT NULL DEFAULT '';
+ALTER TABLE formula ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'unverified';
+ALTER TABLE formula ADD COLUMN IF NOT EXISTS provenance TEXT NOT NULL DEFAULT 'machine-extracted';
 
 CREATE TABLE IF NOT EXISTS notation_entry (
     id SERIAL PRIMARY KEY,
@@ -68,6 +73,19 @@ CREATE TABLE IF NOT EXISTS cross_ref (
     url TEXT NOT NULL DEFAULT ''
 );
 
+CREATE TABLE IF NOT EXISTS condition (
+    id SERIAL PRIMARY KEY,
+    document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
+    clause_number TEXT NOT NULL DEFAULT '',
+    text TEXT NOT NULL,
+    page INT,
+    line INT,
+    kind TEXT NOT NULL DEFAULT 'condition',
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted'
+);
+ALTER TABLE condition ADD COLUMN IF NOT EXISTS line INT;
+
 CREATE TABLE IF NOT EXISTS coefficient (
     id SERIAL PRIMARY KEY,
     document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
@@ -75,8 +93,16 @@ CREATE TABLE IF NOT EXISTS coefficient (
     page INT,
     row_index INT NOT NULL,
     col_index INT NOT NULL,
-    value TEXT NOT NULL
+    value TEXT NOT NULL,
+    edition TEXT NOT NULL DEFAULT 'unverified',
+    clause TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted'
 );
+ALTER TABLE coefficient ADD COLUMN IF NOT EXISTS edition TEXT NOT NULL DEFAULT 'unverified';
+ALTER TABLE coefficient ADD COLUMN IF NOT EXISTS clause TEXT NOT NULL DEFAULT '';
+ALTER TABLE coefficient ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'unverified';
+ALTER TABLE coefficient ADD COLUMN IF NOT EXISTS provenance TEXT NOT NULL DEFAULT 'machine-extracted';
 
 CREATE INDEX IF NOT EXISTS idx_clause_doc ON clause(document_id);
 CREATE INDEX IF NOT EXISTS idx_formula_doc ON formula(document_id);
@@ -92,6 +118,84 @@ CREATE INDEX IF NOT EXISTS idx_clause_search ON clause
     USING gin (search_text gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_formula_search ON formula
     USING gin (search_text gin_trgm_ops);
+
+ALTER TABLE formula ADD COLUMN IF NOT EXISTS result_symbol TEXT NOT NULL DEFAULT '';
+ALTER TABLE formula ADD COLUMN IF NOT EXISTS tree JSONB;
+ALTER TABLE formula ADD COLUMN IF NOT EXISTS units JSONB;
+
+CREATE TABLE IF NOT EXISTS catalog_binding (
+    id SERIAL PRIMARY KEY,
+    calculation_type TEXT NOT NULL,
+    parameter TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
+    formula_number TEXT NOT NULL DEFAULT '',
+    table_number TEXT NOT NULL DEFAULT '',
+    heading_symbol TEXT NOT NULL DEFAULT '',
+    source_key TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted',
+    UNIQUE (calculation_type, parameter)
+);
+CREATE INDEX IF NOT EXISTS idx_binding_type ON catalog_binding(calculation_type);
+
+CREATE TABLE IF NOT EXISTS table_value (
+    id SERIAL PRIMARY KEY,
+    document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
+    calculation_type TEXT NOT NULL DEFAULT '',
+    parameter TEXT NOT NULL,
+    clause TEXT NOT NULL DEFAULT '',
+    symbol TEXT NOT NULL DEFAULT '',
+    latex TEXT NOT NULL DEFAULT '',
+    value NUMERIC NOT NULL,
+    unit TEXT NOT NULL DEFAULT '1',
+    heading_symbol TEXT NOT NULL DEFAULT '',
+    heading_value NUMERIC,
+    heading_unit TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted'
+);
+CREATE INDEX IF NOT EXISTS idx_table_value_param ON table_value(calculation_type, parameter);
+
+CREATE TABLE IF NOT EXISTS threshold_value (
+    id SERIAL PRIMARY KEY,
+    document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
+    calculation_type TEXT NOT NULL,
+    parameter TEXT NOT NULL,
+    clause TEXT NOT NULL DEFAULT '',
+    latex TEXT NOT NULL DEFAULT '',
+    value NUMERIC NOT NULL,
+    unit TEXT NOT NULL DEFAULT '1',
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted',
+    UNIQUE (calculation_type, parameter)
+);
+
+CREATE TABLE IF NOT EXISTS check_ref (
+    id SERIAL PRIMARY KEY,
+    document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
+    calculation_type TEXT NOT NULL,
+    parameter TEXT NOT NULL,
+    clause TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted',
+    UNIQUE (calculation_type, parameter)
+);
+
+CREATE TABLE IF NOT EXISTS method_bound (
+    id SERIAL PRIMARY KEY,
+    document_id INT NOT NULL REFERENCES document(id) ON DELETE CASCADE,
+    calculation_type TEXT NOT NULL,
+    quantity TEXT NOT NULL,
+    clause TEXT NOT NULL DEFAULT '',
+    kind TEXT NOT NULL,
+    value NUMERIC NOT NULL,
+    unit TEXT NOT NULL DEFAULT '1',
+    inclusive BOOLEAN NOT NULL DEFAULT TRUE,
+    status TEXT NOT NULL DEFAULT 'unverified',
+    provenance TEXT NOT NULL DEFAULT 'machine-extracted'
+);
+CREATE INDEX IF NOT EXISTS idx_method_bound_type ON method_bound(calculation_type);
 """
 
 
@@ -112,6 +216,13 @@ def document_exists(conn: Any, designation: str) -> bool:
     with conn.cursor() as cur:
         cur.execute("SELECT 1 FROM document WHERE designation = %s", (designation,))
         return cur.fetchone() is not None
+
+
+def fetch_document_id(conn: Any, designation: str) -> int | None:
+    with conn.cursor() as cur:
+        cur.execute("SELECT id FROM document WHERE designation = %s", (designation,))
+        row = cur.fetchone()
+        return int(row["id"]) if row else None
 
 
 def delete_document(conn: Any, designation: str) -> None:
@@ -159,7 +270,8 @@ def insert_formulas(conn: Any, doc_id: int, rows: list[tuple]) -> None:
             cur,
             """
             INSERT INTO formula
-                (document_id, number, clause_number, latex, expression, raw_text, page, search_text)
+                (document_id, number, clause_number, latex, expression, raw_text, page,
+                 search_text, status, provenance)
             VALUES %s
             """,
             [(doc_id, *row) for row in rows],
@@ -194,13 +306,28 @@ def insert_cross_refs(conn: Any, doc_id: int, rows: list[tuple]) -> None:
     conn.commit()
 
 
+def insert_conditions(conn: Any, doc_id: int, rows: list[tuple]) -> None:
+    with conn.cursor() as cur:
+        execute_values(
+            cur,
+            """
+            INSERT INTO condition
+                (document_id, clause_number, text, page, line, kind, status, provenance)
+            VALUES %s
+            """,
+            [(doc_id, *row) for row in rows],
+        )
+    conn.commit()
+
+
 def insert_coefficients(conn: Any, doc_id: int, rows: list[tuple]) -> None:
     with conn.cursor() as cur:
         execute_values(
             cur,
             """
             INSERT INTO coefficient
-                (document_id, table_number, page, row_index, col_index, value)
+                (document_id, table_number, page, row_index, col_index, value,
+                 edition, clause, status, provenance)
             VALUES %s
             """,
             [(doc_id, *row) for row in rows],
@@ -212,10 +339,12 @@ def fetch_coefficients(conn: Any, doc_id: int, table_number: str) -> list[dict]:
     with conn.cursor() as cur:
         cur.execute(
             """
-            SELECT table_number, page, row_index, col_index, value
-            FROM coefficient
-            WHERE document_id = %s AND table_number = %s
-            ORDER BY row_index, col_index
+            SELECT d.designation, c.table_number, c.page, c.row_index, c.col_index,
+                   c.value, c.edition, c.clause, c.status, c.provenance
+            FROM coefficient c
+            JOIN document d ON d.id = c.document_id
+            WHERE c.document_id = %s AND c.table_number = %s
+            ORDER BY c.row_index, c.col_index
             """,
             (doc_id, table_number),
         )
@@ -226,7 +355,7 @@ def fetch_formulas(conn: Any, doc_id: int) -> list[dict]:
     with conn.cursor() as cur:
         cur.execute(
             """
-            SELECT id, number, clause_number, page
+            SELECT id, number, clause_number, page, status, provenance
             FROM formula
             WHERE document_id = %s
             ORDER BY id
@@ -264,7 +393,10 @@ def _trgm_search(
 
 
 def search_formulas(conn: Any, lemmas: str, k: int = 5) -> list[dict]:
-    cols = "f.number, f.clause_number, f.latex, f.expression, f.raw_text, f.page, d.edition"
+    cols = (
+        "f.number, f.clause_number, f.latex, f.expression, f.raw_text, f.page, "
+        "d.edition, f.status, f.provenance"
+    )
     return _trgm_search(conn, "formula", "f", cols, lemmas, k)
 
 
@@ -313,14 +445,20 @@ def _formula_locator(formula: dict) -> str:
 def build_formula_payload(conn: Any, formula: dict) -> dict:
     cfg = output_config()
 
+    document = formula.get("designation") or ""
+    if not document:
+        raise RuntimeError("формула без документа: payload не строится")
+
     norm_ref = {
-        "document": formula.get("designation", ""),
+        "document": document,
         "edition": formula.get("edition") or "unverified",
         "clause": _formula_locator(formula),
-        "status": "unverified",
-        "provenance": "machine-extracted",
+        "status": formula.get("status") or "unverified",
+        "provenance": formula.get("provenance") or "machine-extracted",
     }
-    norm_ref = {k: norm_ref[k] for k in cfg["norm_ref_keys"]}
+    for key in cfg["norm_ref_keys"]:
+        if key not in norm_ref and key in formula:
+            norm_ref[key] = formula[key]
 
     symbols = []
     for n in fetch_notation(conn, formula["document_id"], formula["number"]):
@@ -346,3 +484,189 @@ def build_formula_payload(conn: Any, formula: dict) -> dict:
         "cross_refs": cross_refs,
     }
     return {k: payload[k] for k in cfg["formula_keys"]}
+
+
+def build_coefficient_norm_ref(coefficient: dict) -> dict:
+    document = coefficient.get("designation") or ""
+    if not document:
+        raise RuntimeError("коэффициент без документа: NormRef не строится")
+    return {
+        "document": document,
+        "edition": coefficient.get("edition") or "unverified",
+        "clause": coefficient.get("clause") or "unverified",
+        "status": coefficient.get("status") or "unverified",
+        "provenance": coefficient.get("provenance") or "machine-extracted",
+    }
+
+
+def build_coefficient_payload(coefficient: dict) -> dict:
+    return {
+        "table_number": coefficient.get("table_number", ""),
+        "page": coefficient.get("page"),
+        "row_index": coefficient["row_index"],
+        "col_index": coefficient["col_index"],
+        "value": coefficient["value"],
+        "norm_ref": build_coefficient_norm_ref(coefficient),
+    }
+
+
+def fetch_formula_by_number(conn: Any, doc_id: int, number: str) -> dict | None:
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT id, number, clause_number, latex, expression, result_symbol, page,
+                   status, provenance
+            FROM formula
+            WHERE document_id = %s AND number = %s
+            ORDER BY id
+            LIMIT 1
+            """,
+            (doc_id, number),
+        )
+        row = cur.fetchone()
+        return dict(row) if row else None
+
+
+def set_formula_catalog(
+    conn: Any,
+    formula_id: int,
+    result_symbol: str,
+    tree: Any,
+    units: Any,
+) -> None:
+    with conn.cursor() as cur:
+        cur.execute(
+            "UPDATE formula SET result_symbol = %s, tree = %s, units = %s WHERE id = %s",
+            (result_symbol, Json(tree), Json(units), formula_id),
+        )
+    conn.commit()
+
+
+def replace_catalog_formula(
+    conn: Any,
+    doc_id: int,
+    number: str,
+    clause_number: str,
+    latex: str,
+    expression: str,
+    result_symbol: str,
+    tree: Any,
+    units: Any,
+) -> None:
+    with conn.cursor() as cur:
+        cur.execute(
+            "DELETE FROM formula WHERE document_id = %s AND number = %s",
+            (doc_id, number),
+        )
+        cur.execute(
+            """
+            INSERT INTO formula
+                (document_id, number, clause_number, latex, expression, result_symbol,
+                 tree, units, status, provenance)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'unverified', 'machine-extracted')
+            """,
+            (
+                doc_id, number, clause_number, latex, expression, result_symbol,
+                Json(tree), Json(units),
+            ),
+        )
+    conn.commit()
+
+
+def delete_catalog_rows(conn: Any, calculation_type: str) -> None:
+    with conn.cursor() as cur:
+        for table in (
+            "catalog_binding",
+            "table_value",
+            "threshold_value",
+            "check_ref",
+            "method_bound",
+        ):
+            cur.execute(
+                f"DELETE FROM {table} WHERE calculation_type = %s", (calculation_type,)
+            )
+    conn.commit()
+
+
+def insert_catalog_bindings(conn: Any, doc_id: int, rows: list[tuple]) -> None:
+    with conn.cursor() as cur:
+        execute_values(
+            cur,
+            """
+            INSERT INTO catalog_binding
+                (calculation_type, parameter, kind, document_id, formula_number,
+                 table_number, heading_symbol, source_key, status, provenance)
+            VALUES %s
+            """,
+            [
+                (
+                    calculation_type, parameter, kind, doc_id, formula_number,
+                    table_number, heading_symbol, source_key,
+                    "unverified", "machine-extracted",
+                )
+                for (
+                    calculation_type, parameter, kind, formula_number,
+                    table_number, heading_symbol, source_key,
+                ) in rows
+            ],
+        )
+    conn.commit()
+
+
+def insert_table_values(conn: Any, doc_id: int, rows: list[tuple]) -> None:
+    with conn.cursor() as cur:
+        execute_values(
+            cur,
+            """
+            INSERT INTO table_value
+                (document_id, calculation_type, parameter, clause, symbol, latex, value,
+                 unit, heading_symbol, heading_value, heading_unit, status, provenance)
+            VALUES %s
+            """,
+            [(doc_id, *row, "unverified", "machine-extracted") for row in rows],
+        )
+    conn.commit()
+
+
+def insert_threshold_values(conn: Any, doc_id: int, rows: list[tuple]) -> None:
+    with conn.cursor() as cur:
+        execute_values(
+            cur,
+            """
+            INSERT INTO threshold_value
+                (document_id, calculation_type, parameter, clause, latex, value, unit,
+                 status, provenance)
+            VALUES %s
+            """,
+            [(doc_id, *row, "unverified", "machine-extracted") for row in rows],
+        )
+    conn.commit()
+
+
+def insert_check_refs(conn: Any, doc_id: int, rows: list[tuple]) -> None:
+    with conn.cursor() as cur:
+        execute_values(
+            cur,
+            """
+            INSERT INTO check_ref
+                (document_id, calculation_type, parameter, clause, status, provenance)
+            VALUES %s
+            """,
+            [(doc_id, *row, "unverified", "machine-extracted") for row in rows],
+        )
+    conn.commit()
+
+
+def insert_method_bounds(conn: Any, doc_id: int, rows: list[tuple]) -> None:
+    with conn.cursor() as cur:
+        execute_values(
+            cur,
+            """
+            INSERT INTO method_bound
+                (document_id, calculation_type, quantity, clause, kind, value, unit,
+                 inclusive, status, provenance)
+            VALUES %s
+            """,
+            [(doc_id, *row, "unverified", "machine-extracted") for row in rows],
+        )
+    conn.commit()

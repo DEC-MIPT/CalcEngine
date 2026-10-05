@@ -14,6 +14,24 @@ formula_lookback = 6
 notation_scan_lines = 10
 synthetic_id_template = '{clause}#{index}'
 formula_label = 'формула'
+condition_cues = [
+  "при условии что",
+  "при условии",
+  "при соблюдении",
+  "если соблюдается условие",
+  "если выполняется условие",
+  "следует выполнять если",
+  "следует проводить если",
+  "в случае когда",
+  "только если",
+  "при выполнении условия",
+  "соблюдены следующие условия",
+  "исходя из условия",
+  "допускается если",
+  "применяют при условии",
+  "применяется при условии",
+  "при соблюдении условия",
+]
 
 [parser.greek_map]
 "α" = "\\alpha"
@@ -84,6 +102,7 @@ symbol_keys = ["id", "latex", "meaning", "unit", "kind"]
 default_symbol_kind = "input"
 clause_prefix = "п."
 formula_prefix = "форм."
+table_prefix = "табл."
 
 [search]
 similarity_threshold = 0.1

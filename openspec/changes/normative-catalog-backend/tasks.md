@@ -49,35 +49,35 @@ tasks only).
 
 Egor may split these tasks further on his branch; each one stays in his zone.
 
-- [ ] 2.1 [Egor] Store the binding of `foundations_shallow_r` from a registry in his
+- [x] 2.1 [Egor] Store the binding of `foundations_shallow_r` from a registry in his
   zone: for each parameter of the pilot (`design.md` decision 2, column `parameter`), the
   formula number, table, table cell or heading, threshold, check, or method bound it
   comes from, never a value (data); verify: his test shows one binding row per parameter
   of the pilot and no value column in the binding table
-- [ ] 2.2 [Egor] Store each bound formula's expression tree in the JSON form of the spec
+- [x] 2.2 [Egor] Store each bound formula's expression tree in the JSON form of the spec
   "Expression tree form in the catalog", with the unit of every symbol and of the
   result symbol, built at ingestion (data); verify: his test validates every stored tree
   of the pilot against the node set, the function list and the limits, and a formula he
   cannot convert is not stored as bound
-- [ ] 2.3 [Egor] Store `status` and `provenance` per formula, table value, threshold,
+- [x] 2.3 [Egor] Store `status` and `provenance` per formula, table value, threshold,
   check and method bound, as the pipeline sets them (`machine-extracted`, `unverified`)
   (data); verify: his test shows both columns on every row the views give for the pilot,
   and no `machine-extracted` row with status `verified`
-- [ ] 2.4 [Egor] Store the row headings of the pilot's selected table (table 5.5 of
+- [x] 2.4 [Egor] Store the row headings of the pilot's selected table (table 5.5 of
   СП 22.13330.2016; edition and clause unverified until checked against the primary
   text) with their symbol and unit (the selecting input's base unit where the table
   allows it, `design.md` decision 6), and the method's range bounds of the pilot with
   their quantity and unit (data); verify: his test shows one heading symbol, value and
   unit on every row of each selected parameter, no duplicate heading value, and every
   bound naming an input of the pilot
-- [ ] 2.5 [Egor] Check the coefficients `γc1`, `γc2`, `k`, `kz` of the pilot against the
+- [x] 2.5 [Egor] Check the coefficients `γc1`, `γc2`, `k`, `kz` of the pilot against the
   primary text of СП 22.13330.2016 (edition and clauses unverified until this check) and
   store them like the table of task 2.4, each with its `NormRef` (data); verify: a dated
   record in `docs/decisions/` names, for each coefficient, the document, the edition and
   the clause or table it was found in, and who checked it; the stored rows keep
   `provenance = machine-extracted` and `status = unverified`, because raising a status is
   the gate of `norm-source-traceability` (WP3), not of this change
-- [ ] 2.6 [Egor] Create the schema `catalog_read` with the views and the `search`
+- [x] 2.6 [Egor] Create the schema `catalog_read` with the views and the `search`
   function of `design.md` decision 2, and the role `dec_normatives_reader` with the
   privileges, the `REVOKE` on `public` and the password variable of decision 1,
   idempotently, as part of ingestion (data); verify: running the ingestion twice
@@ -86,7 +86,9 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   appears in no log, and an import scan of `ml/` finds no import of the backend's package
 - [ ] 2.7 [Egor] `tester` GO for `feature/normative-catalog/data`, Akim's review, and
   the merge into `develop` (data); verify: the GO and the review are recorded in
-  `docs/decisions/normative-catalog-backend-readiness.md`
+  `docs/decisions/normative-catalog-backend-readiness.md` (2026-10-05: `tester` GO
+  recorded and the feature merged into `develop`; Akim's review acknowledgement is
+  pending — it is recorded in the readiness doc when he gives it)
 
 ## 3. Groundwork (backend, Akim)
 
@@ -185,6 +187,14 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   port and a test without the variable both give `503 parameter_source_unavailable` on
   `POST /calculations`, nothing is stored, and neither the response nor the log holds the
   URL or its password
+- [ ] 5.6 Add the decision 7 check that a formula gives every symbol and result symbol
+  naming an input or an output of the type that quantity's base unit (spec "Expression
+  tree form in the catalog"; Akim's review of the data feature, M2) (backend); verify:
+  the breach tests of task 5.4 gain a formula symbol of an input in another unit of the
+  same dimension, one in a unit of another dimension, and a result symbol of an output in
+  another unit, each raising `ParameterSourceUnavailableError` with one
+  `code=catalog_data_invalid` line naming the parameter; the pilot's synthetic rows still
+  resolve; `check.sh` passes with branch coverage of 100%
 
 ## 6. Endpoints and wiring (backend, Akim)
 

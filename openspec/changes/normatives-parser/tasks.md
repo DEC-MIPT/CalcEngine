@@ -4,15 +4,21 @@ Branch: `feature/normative-parser/ml` (Egor, ml zone).
 
 ## 1. Baseline extraction (deterministic)
 
-- [ ] 1.1 [Egor] Text-layer classifier (text-PDF vs scan)
-- [ ] 1.2 [Egor] Clause/numbered-item extraction (regex) → locatable `cl. 6.2`
-- [ ] 1.3 [Egor] Notation extraction (symbol → meaning + unit) from «Обозначения»
-- [ ] 1.4 [Egor] Coefficient-table extraction (`pdfplumber`) with units + applicability
+- [x] 1.1 [Egor] Text-layer classifier (text-PDF vs scan) — `parser/text_layer.classify`
+- [x] 1.2 [Egor] Clause/numbered-item extraction (regex) → locatable `cl. 6.2`
+- [x] 1.3 [Egor] Notation extraction (symbol → meaning + unit) from «Обозначения»
+- [x] 1.4 [Egor] Coefficient-table extraction (`pdfplumber`) with units + applicability
+- [x] 1.5 [Egor] Applicability-condition extraction (`extract_conditions`, config-driven
+  phrase cues, `condition` table) — deterministic, no models
 
 ## 2. Formula path (reliable + alternatives)
 
-- [ ] 2.1 [Egor] Formula extraction (regex on text layer; DocLayout-YOLO + pix2text for formulas)
-- [ ] 2.2 [Egor] Output format: structured JSON (LaTeX + SymPy + notation) — reliable
+- [x] 2.1 [Egor] Formula extraction. Text-PDF: regex number detection + deterministic LaTeX
+  reconstruction from the text layer (`latex_reconstruct`, A2: pdfplumber geometry + NFKC +
+  Adobe Symbol table; Cyrillic kept, transliterated for SymPy only). Scan: DocLayout-YOLO +
+  pix2text (deferred). MinerU evaluated and rejected as a pipeline (research `nb09`; see
+  design §4). Unified entry point: `formulas/source.py` (PDF-type-based selection).
+- [x] 2.2 [Egor] Output format: structured JSON (LaTeX + SymPy + notation) — reliable
 - [ ] 2.3 [Egor] Alternatives eval: LaTeX-only, raw model string, direct codegen
 - [ ] 2.4 [Egor] SymPy `parse_latex` → `lambdify` executor (validation, H6)
 - [ ] 2.5 [Egor] Manual manifest binding on 1–2 control examples
@@ -27,7 +33,7 @@ Branch: `feature/normative-parser/ml` (Egor, ml zone).
 
 - [ ] 4.1 [Agent: tester] pytest: clause/table/formula extraction, executor; fixtures =
   pilot СП pages + hand markup; branch coverage ≥ 95%
-- [ ] 4.2 [Egor] `ruff` + `mypy` clean
+- [x] 4.2 [Egor] `ruff` + `mypy` clean
 
 ## 5. Validate and close
 

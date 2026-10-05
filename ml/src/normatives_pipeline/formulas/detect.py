@@ -72,10 +72,21 @@ def correct_latex(latex: str) -> str:
         lines = [p.strip().strip("{}").strip() for p in latex.split("\\\\")]
         lines = [line for line in lines if line]
         latex = _pick_formula_line(lines) if lines else latex
-    latex = re.sub(r"\\mathrm\{\s*\}", "", latex)
-    latex = re.sub(r"\\qquad|\\quad", "", latex)
-    for spacing in ("~", "\\,", "\\;"):
+    latex = re.sub(r"\\not\s*", "", latex)
+    latex = latex.replace("\\[", "[").replace("\\]", "]")
+    latex = re.sub(r"\\\s+", " ", latex)
+    latex = re.sub(r"\{\s*\}", "", latex)
+    latex = re.sub(r"\\tt\b", "", latex)
+    for cmd in (
+        "\\boldsymbol", "\\mathit", "\\mathsf", "\\textsf", "\\mathtt",
+        "\\tiny", "\\scriptsize", "\\scriptstyle", "\\displaystyle", "\\textstyle",
+    ):
+        latex = re.sub(re.escape(cmd) + r"\s*\{([^{}]*)\}", r"\1", latex)
+        latex = latex.replace(cmd, "")
+    for spacing in ("\\enspace", "\\qquad", "\\quad", "~", "\\,", "\\;", "\\!"):
         latex = latex.replace(spacing, " ")
+    latex = re.sub(r"(\d)\s*,\s*(\d)", r"\1.\2", latex)
+    latex = re.sub(r"\\mathrm\{\s*\}", "", latex)
     latex = re.sub(r"\s+", " ", latex).strip()
     return latex.rstrip(" ,;.:")
 

@@ -67,7 +67,10 @@ A tree SHALL have a depth of at most 64 and at most 4096 nodes. The function lis
 these two limits are the engine's (`calculation-core-contract` design decision 11), not
 norm values. Each formula SHALL name its result symbol, and SHALL give a unit for the
 result symbol and for every symbol of its tree, taken from the backend's list of accepted
-unit symbols. The pipeline builds the tree at ingestion; the backend SHALL NOT parse a
+unit symbols. A symbol or result symbol that names an input or an output of the
+calculation type SHALL carry that quantity's base unit, as the type's contract declares
+it: the engine hands a formula its inputs in their base units and converts nothing inside
+a formula. The pipeline builds the tree at ingestion; the backend SHALL NOT parse a
 formula's text or LaTeX to obtain it.
 
 #### Scenario: A formula in the shared form
@@ -77,8 +80,9 @@ formula's text or LaTeX to obtain it.
 
 #### Scenario: A formula outside the form
 - **WHEN** a formula a calculation type needs has a node of another kind, a function
-  outside the list, a tree over the limits, a symbol without a unit, or a unit outside
-  the accepted list
+  outside the list, a tree over the limits, a symbol without a unit, a unit outside
+  the accepted list, or a symbol or result symbol that names an input or an output of the
+  type in a unit other than that quantity's base unit
 - **THEN** the calculation type is treated as having no usable parameter source
   ("Catalog parameter source", scenario "Catalog data that breaks the contract"), and the
   engine does not run

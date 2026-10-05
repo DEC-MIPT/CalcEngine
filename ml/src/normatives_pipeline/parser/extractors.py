@@ -8,7 +8,7 @@ from pathlib import Path
 import pdfplumber
 
 from ..config import parser_config
-from .models import Clause, CrossRef, Formula, NotationEntry, Table
+from .models import Clause, Condition, CrossRef, Formula, NotationEntry, Table
 
 _CFG = parser_config()
 
@@ -23,6 +23,8 @@ FORMULA_MAX_LEN = int(_CFG["formula_max_len"])
 FORMULA_LOOKBACK = int(_CFG["formula_lookback"])
 NOTATION_SCAN_LINES = int(_CFG["notation_scan_lines"])
 SYNTHETIC_ID_TEMPLATE = _CFG["synthetic_id_template"]
+COND_CUES = tuple(p.strip().lower() for p in _CFG["condition_cues"] if p.strip())
+COND_MAX_LEN = int(_CFG.get("condition_max_len", 400))
 
 
 def _clauses_by_page(clauses: list[Clause]) -> dict[int, list[Clause]]:
@@ -216,18 +218,42 @@ def extract_cross_refs(pages: list[str], clauses: list[Clause]) -> list[CrossRef
     return out
 
 
-def _table_caption(page, bbox: tuple) -> str:
+def _caption_search(text: str) -> str:
+    collapsed = re.sub(r"\s+", "", text)
+    m = re.search(r"[Тт]аблиц[а-я]*(\d+(?:\.\d{1,2})?)", collapsed)
+    return m.group(1) if m else ""
+
+
+def _caption_line(text: str) -> str:
+    for line in text.splitlines():
+        collapsed = re.sub(r"\s+", "", line)
+        m = re.match(r"^Таблица(\d+(?:\.\d{1,2})?)$", collapsed, re.IGNORECASE)
+        if m:
+            return m.group(1)
+    return ""
+
+
+def _table_caption(page, bbox: tuple, prev_page=None) -> str:
     top = bbox[1]
     crop = page.within_bbox((0, max(0, top - 60), page.width, top))
-    collapsed = re.sub(r"\s+", "", crop.extract_text() or "")
-    m = re.search(r"[Тт]аблиц[а-я]*(\d+(?:\.\d+)?)", collapsed)
-    return m.group(1) if m else ""
+    number = _caption_search(crop.extract_text() or "")
+    if number:
+        return number
+    if prev_page is not None:
+        tail = prev_page.within_bbox(
+            (0, max(0, prev_page.height - 200), prev_page.width, prev_page.height)
+        )
+        number = _caption_line(tail.extract_text() or "")
+        if number:
+            return number
+    return ""
 
 
 def extract_tables(path: Path, max_pages: int | None = None) -> list[Table]:
     out: list[Table] = []
     with pdfplumber.open(path) as pdf:
         pages = pdf.pages if max_pages is None else pdf.pages[:max_pages]
+        prev_page = None
         for page_no, page in enumerate(pages, start=1):
             for tbl in page.find_tables():
                 rows = tuple(
@@ -236,10 +262,51 @@ def extract_tables(path: Path, max_pages: int | None = None) -> list[Table]:
                 )
                 if not rows:
                     continue
-                number = _table_caption(page, tbl.bbox)
+                number = _table_caption(page, tbl.bbox, prev_page)
                 out.append(Table(number=number, rows=rows, page=page_no))
-    return out
+            prev_page = page
+
+    resolved: list[Table] = []
+    last_number = ""
+    last_page: int | None = None
+    for table in out:
+        number = table.number
+        if not number and last_number and (
+            last_page is None or table.page - last_page <= 1
+        ):
+            number = last_number
+        if number:
+            last_number = number
+            last_page = table.page
+        resolved.append(Table(number=number, rows=table.rows, page=table.page))
+    return resolved
 
 
 def extract_table_refs(text: str) -> list[str]:
     return TABLE_REF_RE.findall(text)
+
+
+def _cond_norm(text: str) -> str:
+    return re.sub(r"[,\s]+", " ", text.lower()).strip()
+
+
+def extract_conditions(pages: list[str], clauses: list[Clause]) -> list[Condition]:
+    """Условия применимости: строки с фразами-маркерами («при условии что», «при
+    соблюдении», «соблюдены следующие условия» и т. п.). Детерминированно, без моделей."""
+    by_page = _clauses_by_page(clauses)
+    out: list[Condition] = []
+    for page_no, text in enumerate(pages, start=1):
+        page_clauses = by_page.get(page_no, [])
+        for line_no, line in enumerate(text.splitlines()):
+            stripped = line.strip()
+            if not stripped or len(stripped) > COND_MAX_LEN:
+                continue
+            norm = _cond_norm(stripped)
+            if not any(cue in norm for cue in COND_CUES):
+                continue
+            preceding = [c for c in page_clauses if c.line <= line_no]
+            clause_num = preceding[-1].number if preceding else ""
+            out.append(
+                Condition(clause=clause_num, text=stripped, page=page_no, line=line_no)
+            )
+    return out

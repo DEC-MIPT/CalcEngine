@@ -10,10 +10,10 @@ MODIFIED block cannot drop its scenario.
 ### Requirement: MVP domains and their order
 The system SHALL target two MVP domains in a fixed order: shallow foundations first,
 internal water supply second. The scope of the first domain is owned by the
-`foundations-shallow` capability. The scope of the second domain is fixed by a later
-change that names its milestone. Calculation types are swappable and must not hard-code
-the selection of the normative method. DRAFT — needs Egor review (domain order and
-milestone name).
+`foundations-shallow` capability. The scope of the second domain (internal water supply)
+is fixed by a later change at the `water-supply-internal` milestone, not inside the MVP.
+Calculation types are swappable and must not hard-code the selection of the normative
+method.
 
 #### Scenario: MVP delivered
 - **WHEN** the MVP is delivered

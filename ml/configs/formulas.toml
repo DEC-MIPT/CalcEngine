@@ -138,3 +138,89 @@ latex = "c_{II}"
 meaning = "расчетное значение удельного сцепления грунта"
 unit = "кПа"
 kind = "input"
+
+[[formula]]
+designation = "СП 22.13330.2016"
+number = "9.7"
+clause = "9.22"
+latex = "K_a = \\frac{\\cos^2(\\varphi - \\theta)}{\\cos^2 \\theta \\left[ 1 + \\sqrt{\\frac{\\sin(\\delta + \\varphi)\\sin(\\varphi - \\beta)}{\\cos(\\delta + \\theta)\\cos(\\theta - \\beta)}} \\right]^2}"
+expression = "cos(phi - theta)**2 / (cos(theta)**2 * (1 + sqrt(sin(delta + phi)*sin(phi - beta) / (cos(delta + theta)*cos(theta - beta))))**2)"
+output = "K_a"
+
+[[formula.symbols]]
+id = "K_a"
+latex = "K_a"
+meaning = "коэффициент активного давления грунта"
+unit = ""
+kind = "output"
+
+[[formula.symbols]]
+id = "phi"
+latex = "\\varphi"
+meaning = "угол внутреннего трения грунта"
+unit = "°"
+kind = "input"
+
+[[formula.symbols]]
+id = "beta"
+latex = "\\beta"
+meaning = "угол наклона поверхности грунта к горизонту"
+unit = "°"
+kind = "input"
+
+[[formula.symbols]]
+id = "theta"
+latex = "\\theta"
+meaning = "угол отклонения грани конструкции от вертикали"
+unit = "°"
+kind = "input"
+
+[[formula.symbols]]
+id = "delta"
+latex = "\\delta"
+meaning = "угол трения грунта по материалу конструкции"
+unit = "°"
+kind = "input"
+
+[[formula]]
+designation = "СП 22.13330.2016"
+number = "9.11"
+clause = "9.23"
+latex = "K_p = \\frac{\\cos^2(\\varphi + \\theta)}{\\cos^2 \\theta \\left[ 1 - \\sqrt{\\frac{\\sin(\\varphi + \\delta)\\sin(\\varphi + \\beta)}{\\cos(\\delta - \\theta)\\cos(\\beta - \\theta)}} \\right]^2}"
+expression = "cos(phi + theta)**2 / (cos(theta)**2 * (1 - sqrt(sin(phi + delta)*sin(phi + beta) / (cos(delta - theta)*cos(beta - theta))))**2)"
+output = "K_p"
+
+[[formula.symbols]]
+id = "K_p"
+latex = "K_p"
+meaning = "коэффициент пассивного давления грунта"
+unit = ""
+kind = "output"
+
+[[formula.symbols]]
+id = "phi"
+latex = "\\varphi"
+meaning = "угол внутреннего трения грунта"
+unit = "°"
+kind = "input"
+
+[[formula.symbols]]
+id = "beta"
+latex = "\\beta"
+meaning = "угол наклона поверхности грунта к горизонту"
+unit = "°"
+kind = "input"
+
+[[formula.symbols]]
+id = "theta"
+latex = "\\theta"
+meaning = "угол отклонения грани конструкции от вертикали"
+unit = "°"
+kind = "input"
+
+[[formula.symbols]]
+id = "delta"
+latex = "\\delta"
+meaning = "угол трения грунта по материалу конструкции"
+unit = "°"
+kind = "input"

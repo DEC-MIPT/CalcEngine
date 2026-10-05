@@ -25,7 +25,7 @@ class Settings:
     sources: dict[str, SourceConfig]
 
     @classmethod
-    def load(cls, path: Path = DEFAULT_CONFIG) -> "Settings":
+    def load(cls, path: Path = DEFAULT_CONFIG) -> Settings:
         data = tomllib.loads(path.read_text(encoding="utf-8"))
         sources: dict[str, SourceConfig] = {}
         for name, raw in data.get("sources", {}).items():

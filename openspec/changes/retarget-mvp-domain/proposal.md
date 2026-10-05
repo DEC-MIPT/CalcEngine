@@ -1,8 +1,9 @@
 # Proposal
 
-> DRAFT — needs Egor review. Egor leads this change; Akim drafted it and wrote the
-> engine-facing scenarios. The PM approves scope and the non-goals list. Nothing here is
-> final until Egor has reviewed and rewritten his parts.
+> Reviewed by Egor (2026-10-05): the data-zone parts (`normatives-catalog` delta,
+> `foundations-shallow` lists, the domain-order and milestone decision) are his. Akim
+> drafted the change and wrote the engine-facing scenarios. The PM still approves the
+> scope and the non-goals list (task 1.4).
 
 ## Why
 
@@ -33,7 +34,7 @@ in both `web-platform` and `user-accounts`.
 - `calculation-engine`: the deterministic-calculation scenario no longer names the
   placeholder domain and runs a first-domain calculation type instead.
 - `normatives-catalog`: the binding scenario uses a first-domain calculation type; a new
-  requirement fixes how a norm reference is marked as verified or `source: unverified`.
+  requirement fixes how a norm reference is marked as verified or `status: unverified`.
 - `transparent-output`: the example reference becomes a synthetic placeholder.
 - `web-platform`: the input form is domain-neutral; single authorization becomes a
   reference to `user-accounts`.
@@ -60,10 +61,10 @@ Before the defense the project does not deliver:
 This change also does not:
 
 - Write an engineering method, a formula, a coefficient, a limit, or a clause number for
-  any domain. Every norm reference stays `source: unverified` until checked against the
+  any domain. Every norm reference stays `status: unverified` until checked against the
   primary source text.
 - Specify internal water supply as a capability. It is named as the second domain only;
-  its scope change follows at a named milestone.
+  its scope change follows at the `water-supply-internal` milestone.
 - Edit anything under `openspec/changes/archive/`.
 - Edit `openspec/specs/` directly; the deltas apply at archive.
 - Edit `backend-layered-architecture`; its cleanup is a task (see `tasks.md`).

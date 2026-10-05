@@ -54,6 +54,9 @@ python -m normatives_pipeline.search --json "условие успешного �
 python -m normatives_pipeline.formulas.enrich   # formula extraction (needs .[ml])
 ```
 
+Full terminal verification cycle (get PDF → ingest → read → independent comparison of every
+document): `ml/research/VERIFY.md`. Stack, rationale and open work: `ml/research/PIPELINE.md`.
+
 ### Checks
 
 ```bash
