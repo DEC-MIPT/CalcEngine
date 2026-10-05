@@ -1,8 +1,13 @@
+from collections.abc import Mapping, Sequence
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.core.exceptions import UnitError
-from app.engine.boundary import convert
-from app.schemas.calculation import CalculationTypeContract, QuantityValue
+from app.engine.base import Calculator
+from app.engine.boundary import convert, inputs_to_base_units
+from app.engine.pipeline import calculate
+from app.schemas.calculation import CalculationTypeContract, MethodBound, QuantityValue
 from app.schemas.units import UNITS, UnitSymbol
 
 DETERMINISM = "determinism"
@@ -152,3 +157,59 @@ def plan_problems(plan: InvariantPlan, contract: CalculationTypeContract) -> tup
             if name not in known
         )
     return tuple(problems)
+
+
+def determinism_holds(
+    contract: CalculationTypeContract,
+    calculator: Calculator[Mapping[str, QuantityValue], Any, Any],
+    inputs: Mapping[str, QuantityValue],
+    parameters: object,
+    method_range: Sequence[MethodBound] = (),
+) -> bool:
+    """Проверяет детерминизм: два одинаковых вызова чистой функции дают равные результаты.
+
+    Требование "Pure calculation function" `calculation-core-contract`, задача 2.10.
+
+    Args:
+        contract: контракт типа расчёта.
+        calculator: калькулятор типа.
+        inputs: входы со своими единицами.
+        parameters: разрешённые параметры.
+        method_range: границы диапазона метода.
+
+    Returns:
+        ``True``, если результаты равны поле в поле.
+    """
+    first = calculate(contract, calculator, inputs, parameters, method_range=method_range)
+    second = calculate(contract, calculator, inputs, parameters, method_range=method_range)
+    return first == second
+
+
+def unit_change_holds(
+    contract: CalculationTypeContract,
+    calculator: Calculator[Mapping[str, QuantityValue], Any, Any],
+    inputs: Mapping[str, QuantityValue],
+    parameters: object,
+    method_range: Sequence[MethodBound] = (),
+) -> bool:
+    """Проверяет согласованность при смене единицы (design.md, решение 17; задача 2.9).
+
+    Входы в своих единицах дают тот же результат, поле в поле и без допуска, что те же
+    входы, переведённые в базовые единицы собственным переводом движка и поданные в
+    базовых единицах (требование "Explicit units at the boundary"
+    `calculation-core-contract`).
+
+    Args:
+        contract: контракт типа расчёта.
+        calculator: калькулятор типа.
+        inputs: входы в любых единицах их размерностей.
+        parameters: разрешённые параметры.
+        method_range: границы диапазона метода.
+
+    Returns:
+        ``True``, если оба результата равны.
+    """
+    given = calculate(contract, calculator, inputs, parameters, method_range=method_range)
+    in_base = inputs_to_base_units(contract, inputs)
+    converted = calculate(contract, calculator, in_base, parameters, method_range=method_range)
+    return given == converted
