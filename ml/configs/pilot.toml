@@ -1,0 +1,56 @@
+# Ручной реестр данных пилота `foundations_shallow_r` (данные, не код).
+# Как `formulas.toml` — источник для ingestion; значения попадают в БД и читаются
+# каталогом на исполнении. Все значения из СП 22.13330.2016 п. 5.6.7 и таблиц 5.4/5.5;
+# проверка по первоисточнику — `docs/decisions/normative-catalog-pilot-coefficients-egor.md`.
+# status/provenance пишутся кодом как unverified/machine-extracted (WP3 поднимает статус).
+
+[document]
+designation = "СП 22.13330.2016"
+edition = "2016"
+
+[[coefficient]]
+parameter = "gamma_c1"
+symbol = "gamma_c1"
+latex = "\\gamma_{c1}"
+value = 1.1
+unit = "1"
+clause = "табл. 5.4"
+
+[[coefficient]]
+parameter = "gamma_c2"
+symbol = "gamma_c2"
+latex = "\\gamma_{c2}"
+value = 1.0
+unit = "1"
+clause = "табл. 5.4"
+
+[[coefficient]]
+parameter = "k"
+symbol = "k"
+latex = "k"
+value = 1.0
+unit = "1"
+clause = "5.6.7"
+
+[[threshold]]
+parameter = "k_z_threshold"
+latex = "b_0"
+value = 10.0
+unit = "m"
+clause = "5.6.7"
+
+[[formula]]
+parameter = "k_z_below"
+number = "5.6.7#k_z_below"
+latex = "k_z = 1"
+expression = "1"
+result_symbol = "k_z"
+units = { k_z = "1" }
+
+[[formula]]
+parameter = "k_z_from"
+number = "5.6.7#k_z_from"
+latex = "k_z = \\frac{z_0}{b} + 0.2"
+expression = "8/b + 0.2"
+result_symbol = "k_z"
+units = { b = "m", k_z = "1" }

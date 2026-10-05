@@ -9,6 +9,7 @@ from pathlib import Path
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "configs"
 PARSER_TOML = CONFIG_DIR / "parser.toml"
 FORMULAS_TOML = CONFIG_DIR / "formulas.toml"
+PILOT_TOML = CONFIG_DIR / "pilot.toml"
 
 
 @lru_cache(maxsize=1)
@@ -39,3 +40,9 @@ def detect_config() -> dict:
 def formula_manifest() -> list[dict]:
     with FORMULAS_TOML.open("rb") as fh:
         return tomllib.load(fh).get("formula", [])
+
+
+@lru_cache(maxsize=1)
+def pilot_manifest() -> dict:
+    with PILOT_TOML.open("rb") as fh:
+        return tomllib.load(fh)
