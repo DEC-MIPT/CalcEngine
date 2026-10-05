@@ -123,7 +123,9 @@ See `proposal.md` (Non-goals).
 17. **The two shared invariants and the valid range** (added 2026-10-05, Akim). For a
     calculation type, `backend/app/verification/` holds the list of its invariants
     (identifier, statement, quantities), the valid range of each input the generator may
-    use (a lower and an upper bound in a unit of the input), and a check function per
+    use (a lower and an upper bound in a unit of the input, and whether only whole
+    values may be drawn, as for an input that selects a table row by whole degrees;
+    added 2026-10-06), and a check function per
     shared invariant; the generating test draws inputs inside that range.
     - Determinism (requirement "Pure calculation function"): two calls of the pure
       function with the same inputs and resolved parameters give equal calculation

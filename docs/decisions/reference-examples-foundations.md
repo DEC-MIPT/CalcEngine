@@ -16,7 +16,7 @@ Russian version: `reference-examples-foundations-rus.md` (added 2026-10-05).
 | Pilot inputs the cards lack or the pilot cannot take (2026-10-05) | **Open**: the cards have no `φII` (the pilot selects `Mγ`, `Mq`, `Mc` from table 5.5 by it), and their `γc1` differs (1.1, 1.4, 1.25) while the pilot's catalog gives one row, `γc1 = 1.1`, with no input that selects the soil row of table 5.4 (section 3, "Pilot fit"; Akim's WP9 review, `normative-catalog-backend-readiness.md`, notes for the backend side) | Running `ex1-rz` and `ex2` through the pilot; WP4 tasks 2.1-2.4 on the pilot |
 | Bibliographic record of the guide | Filled (section 2) | Source citation of every example |
 | 3 worked examples per calculation type | Filled (section 3), 3 of 5 found; `tolerance`/`tolerance_kind`/`tolerance_source` still open | WP4 tasks 2.1-2.4; step 5 (first slice) |
-| Invariants specific to shallow foundations | Open | WP4 task 2.11 |
+| Invariants specific to shallow foundations | **Confirmed 2026-10-06** (section 4): 9 invariants and the valid input range; 3 have property tests, 6 wait for the formula from the catalog | WP4 task 2.11 (open until the 6 are tested) |
 | Definition of "typical calculation" | Open | WP4 task 3.7 (30-second latency test) |
 
 ## 1. First calculation type
@@ -212,11 +212,51 @@ audit's "<= 0.1%" is not used (decision 3).
 - **Invariants** (task 2.11): statements that hold for every valid input of the type,
   beyond determinism and unit-change consistency, which are shared and already covered.
   For each: identifier, statement, quantities involved, and the valid input range the
-  property test may use. None is invented in the specs.
+  property test may use. None is invented in the specs. For `foundations_shallow_r`
+  see the subsection below.
 - **Typical calculation** (task 3.7): which calculation, with which inputs, counts as
   typical, and where the 30 seconds are measured. The calculation is asynchronous, so
   say whether the clock covers the engine call only or the whole job from request to
   result.
+
+### Invariants of `foundations_shallow_r`, confirmed 2026-10-06 (task 2.11)
+
+Confirmed by the engineer (Akim) on 2026-10-06. The formula is (5.7) of СП 22.13330.2016
+as Egor's registry gives it (`formulas.toml`, `unverified`):
+`R = (γc1·γc2/k)·[Mγ·kz·b·γII + Mq·d1·γ'II + (Mq − 1)·db·γ'II + Mc·cII]`, check `p ≤ R`.
+Conditions the engineer checked in table 5.5 (page 38): every coefficient is
+non-negative, and `Mq ≥ 1` in every row.
+
+| Identifier | Statement | Quantities | Condition | Property test |
+|---|---|---|---|---|
+| `p-does-not-change-R` | The pressure p does not change R; it changes only the verdict | p, R | none | done (`eefc660`) |
+| `verdict-is-p-le-R` | The verdict is pass exactly when p ≤ R, with R unrounded | p, R | none | done (`eefc660`) |
+| `verdict-monotone-in-p` | If the check passes at p, it passes at every smaller p | p, R | none | done (`eefc660`) |
+| `R-affine-in-c_II` | With the other inputs fixed, equal steps of cII give equal steps of R | cII, R | formula (5.7) | waits for the formula from the catalog |
+| `R-affine-in-d_1` | The same for d1 | d1, R | formula (5.7) | waits for the formula from the catalog |
+| `R-grows-with-c_II` | A larger cII gives an R not smaller | cII, R | `Mc ≥ 0` | waits for the formula from the catalog |
+| `R-grows-with-gamma_II` | A larger γII gives an R not smaller | γII, R | `Mγ ≥ 0` | waits for the formula from the catalog |
+| `R-grows-with-d_b` | A larger db gives an R not smaller | db, R | `Mq ≥ 1` | waits for the formula from the catalog |
+| `R-grows-with-b` | A larger b gives an R not smaller, across the kz threshold too | b, R | `Mγ ≥ 0`; `kz·b` grows above the threshold (clause 5.6.7) | waits for the formula from the catalog |
+
+The six formula-dependent invariants cannot be tested on the synthetic formula of the
+tests, and the tree of (5.7) may not be written into tests (WP2 task 7.1b,
+`agent-docs/domain-constraints.md`). They are tested once the pilot runs on the catalog's
+formula: after the fixes of B1 and M1 of Akim's WP9 review and `calculation-verification`
+design decision 14.
+
+Valid input range of the pilot, accepted by the engineer on 2026-10-06 (test data, not
+norm values; design decision 17):
+
+| Input | Range | Note |
+|---|---|---|
+| `b` | 0.5 … 20 m | crosses the kz threshold of 10 m |
+| `d_1` | 0.5 … 5 m | |
+| `d_b` | 0 … 2 m | |
+| `gamma_II`, `gamma_II_prime` | 14 … 22 kN/m³ | |
+| `c_II` | 0 … 50 kPa | |
+| `phi_II` | 0 … 45 deg, whole values only | rows of table 5.5 |
+| `p` | 50 … 600 kPa | gives both verdicts |
 
 ## 5. Completeness check
 
