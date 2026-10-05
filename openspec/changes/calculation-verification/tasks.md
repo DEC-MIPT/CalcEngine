@@ -39,7 +39,7 @@ Depends on `retarget-mvp-domain` for the list of calculation types of `foundatio
 - [x] 2.8 Define the invariant list structure (identifier, statement, quantities), a way to declare the valid range per calculation type, and the seed record in the test report
 - [x] 2.9 Property test for unit-change consistency, shared by all types (uses the units requirement of `calculation-core-contract` by name)
 - [x] 2.10 Property test for determinism, shared by all types (uses "Pure calculation function" by name)
-- [ ] 2.11 (engineer, no code, no zone) Confirm the invariants specific to `foundations-shallow`; then add a property test for each
+- [ ] 2.11 (engineer, no code, no zone) Confirm the invariants specific to `foundations-shallow`; then add a property test for each (2026-10-06: 9 invariants and the valid input range confirmed by Akim, `docs/decisions/reference-examples-foundations.md`, section 4; property tests of the 3 formula-independent ones done on `feature/calculation-verification/backend`, `eefc660`; the 6 that depend on formula (5.7) wait for the pilot to run on the catalog's formula, design decision 14)
 - [x] 2.12 Test: a listed invariant without a property test makes the verification incomplete
 
 ### Requirement 5: metrics, ready part (backend)
