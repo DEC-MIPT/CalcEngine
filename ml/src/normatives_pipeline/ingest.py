@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from . import catalog_contract, db
+from . import catalog_contract, db, pilot_catalog
 from .config import formula_manifest, output_config, parser_config
 from .formulas import source
 from .formulas.validation import canonical_latex
@@ -148,6 +148,7 @@ def ingest(path: Path, force: bool = False) -> int:
             if value
         ]
         db.insert_coefficients(conn, doc_id, coeff_rows)
+        pilot_catalog.sync_pilot_catalog(conn, designation)
 
         print(
             f"[ingested] {designation}: пунктов {len(clauses)}, формул {len(formulas)} "

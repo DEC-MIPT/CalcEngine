@@ -68,6 +68,17 @@ def test_ingestion_twice_is_idempotent(conn) -> None:
     assert _columns(conn, "type_formulas") == EXPECTED["type_formulas"]
 
 
+def test_reader_password_is_not_logged(conn, caplog, capsys) -> None:
+    import logging
+
+    with caplog.at_level(logging.DEBUG):
+        assert catalog_contract.ensure_catalog_read(conn, password=PASSWORD) is True
+    captured = capsys.readouterr()
+    assert PASSWORD not in caplog.text
+    assert PASSWORD not in captured.out
+    assert PASSWORD not in captured.err
+
+
 def _reader_url() -> str:
     parts = urlsplit(os.environ["DEC_DATABASE_URL"])
     host = parts.hostname or "localhost"
