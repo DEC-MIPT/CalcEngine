@@ -8,6 +8,7 @@ from app.schemas.api import (
     InputView,
     OutputView,
 )
+from app.schemas.text import LocalizedText
 from app.schemas.units import Dimension
 
 
@@ -51,20 +52,43 @@ def test_a_field_error_needs_a_location_and_a_message() -> None:
 def test_a_calculation_type_view_lists_inputs_and_outputs() -> None:
     view = CalculationTypeView(
         name="t",
-        inputs=(InputView(name="b", base_unit="m", dimension=Dimension.LENGTH, units=("m", "mm")),),
-        outputs=(OutputView(name="R", base_unit="kPa"),),
+        inputs=(
+            InputView(
+                name="b",
+                base_unit="m",
+                dimension=Dimension.LENGTH,
+                units=("m", "mm"),
+                label=LocalizedText(ru="Ширина", en="Width"),
+                symbol="b",
+                whole_values_only=False,
+            ),
+        ),
+        outputs=(OutputView(name="R", base_unit="kPa", label=LocalizedText(ru="Сопротивление"), symbol="R"),),
     )
 
     assert view.model_dump(mode="json") == {
         "name": "t",
-        "inputs": [{"name": "b", "base_unit": "m", "dimension": "length", "units": ["m", "mm"]}],
-        "outputs": [{"name": "R", "base_unit": "kPa"}],
+        "inputs": [
+            {
+                "name": "b",
+                "base_unit": "m",
+                "dimension": "length",
+                "units": ["m", "mm"],
+                "label": {"ru": "Ширина", "en": "Width"},
+                "symbol": "b",
+                "hint": None,
+                "whole_values_only": False,
+            }
+        ],
+        "outputs": [
+            {"name": "R", "base_unit": "kPa", "label": {"ru": "Сопротивление", "en": None}, "symbol": "R"}
+        ],
     }
 
 
 def test_a_view_rejects_a_unit_outside_the_vocabulary() -> None:
     with pytest.raises(ValidationError):
-        OutputView(name="R", base_unit="furlong")
+        OutputView(name="R", base_unit="furlong", label=LocalizedText(ru="R"), symbol="R")
     with pytest.raises(ValidationError):
         InputView.model_validate({"name": "b", "base_unit": "m", "dimension": "mass", "units": ["m"]})
 
@@ -76,9 +100,25 @@ def test_a_view_rejects_a_unit_outside_the_vocabulary() -> None:
 )
 def test_an_input_view_rejects_units_that_do_not_fit(units: tuple[str, ...]) -> None:
     with pytest.raises(ValidationError):
-        InputView(name="b", base_unit="m", dimension=Dimension.LENGTH, units=units)
+        InputView(
+            name="b",
+            base_unit="m",
+            dimension=Dimension.LENGTH,
+            units=units,
+            label=LocalizedText(ru="b"),
+            symbol="b",
+            whole_values_only=False,
+        )
 
 
 def test_an_input_view_rejects_a_dimension_other_than_its_base_unit_s() -> None:
     with pytest.raises(ValidationError, match="dimension"):
-        InputView(name="b", base_unit="m", dimension=Dimension.PRESSURE, units=("m",))
+        InputView(
+            name="b",
+            base_unit="m",
+            dimension=Dimension.PRESSURE,
+            units=("m",),
+            label=LocalizedText(ru="b"),
+            symbol="b",
+            whole_values_only=False,
+        )

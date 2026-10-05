@@ -10,6 +10,10 @@ class AlreadyRegisteredError(DECError):
     """Имя регистрируется второй раз."""
 
 
+class ContractMetadataError(DECError):
+    """У величины типа расчёта нет подписи или обозначения для человека."""
+
+
 class ParameterValidationError(DECError):
     """Данные параметров не проходят проверку схемы."""
 

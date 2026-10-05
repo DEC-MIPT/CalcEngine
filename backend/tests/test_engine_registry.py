@@ -11,6 +11,7 @@ from app.schemas.calculation import (
     RoundingRule,
 )
 from app.schemas.parameters import EngineerRule
+from app.schemas.text import LocalizedText
 
 
 class DoublingCalculator(Calculator[float, float, float]):
@@ -22,10 +23,12 @@ def doubling_contract(name: str = "doubling") -> CalculationTypeContract:
     return CalculationTypeContract(
         checks=("c",),
         name=name,
-        inputs=(QuantityDeclaration(name="x", base_unit="m"),),
+        inputs=(QuantityDeclaration(name="x", label=LocalizedText(ru="x"), symbol="x", base_unit="m"),),
         outputs=(
             OutputDeclaration(
                 name="y",
+                label=LocalizedText(ru="y"),
+                symbol="y",
                 base_unit="m",
                 rounding_rule=RoundingRule(decimals=2, mode="half_up"),
                 rounding_source=EngineerRule(engineer="<ENGINEER>", rationale="<RATIONALE>"),

@@ -1,4 +1,5 @@
 import ast
+import json
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -297,3 +298,15 @@ def test_the_import_scan_finds_every_import() -> None:
     assert modules == ["os", "socket", "pathlib", "", "app.db"]
     assert not any(is_allowed(module) for module in modules)
     assert is_allowed("app.schemas.resolved") and not is_allowed("app.schemasx")
+
+
+GOLDEN = Path(__file__).parent / "fixtures" / "pilot_envelope_before_metadata.json"
+GOLDEN_CASES = json.loads(GOLDEN.read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize("case", sorted(GOLDEN_CASES))
+def test_the_metadata_changes_no_result_trace_norm_reference_or_hash(case: str) -> None:
+    recorded = GOLDEN_CASES[case]
+    given = {name: QuantityValue(**value) for name, value in recorded["inputs"].items()}
+
+    assert run(given).model_dump(mode="json") == recorded["result"]

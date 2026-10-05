@@ -24,6 +24,7 @@ from app.schemas.calculation import (
 )
 from app.schemas.parameters import EngineerRule
 from app.schemas.resolved import TableValue
+from app.schemas.text import LocalizedText
 
 HASH = "0" * 64
 
@@ -54,7 +55,7 @@ def declared_output(name: str, unit: str) -> OutputDeclaration:
 def contract(**changes: Any) -> CalculationTypeContract:
     fields: dict[str, Any] = {
         "name": "t",
-        "inputs": (QuantityDeclaration(name="x", base_unit="m"),),
+        "inputs": (QuantityDeclaration(name="x", label=LocalizedText(ru="x"), symbol="x", base_unit="m"),),
         "outputs": (
             declared_output("y1", "kPa"),
             declared_output("y2", "m"),

@@ -19,6 +19,7 @@ from app.schemas.calculation import (
 from app.schemas.expression import parse_expression
 from app.schemas.parameters import EngineerRule
 from app.schemas.resolved import Formula
+from app.schemas.text import LocalizedText
 
 REF = NormRef(
     document="<NORM-DOC-PLACEHOLDER>",
@@ -59,10 +60,12 @@ def test_a_value_that_is_not_a_tie_rounds_to_the_nearest(mode: str) -> None:
 def test_a_check_whose_outcome_would_change_on_the_rounded_value_uses_the_unrounded_value() -> None:
     contract = CalculationTypeContract(
         name="synthetic",
-        inputs=(QuantityDeclaration(name="a", base_unit="kPa"),),
+        inputs=(QuantityDeclaration(name="a", label=LocalizedText(ru="a"), symbol="a", base_unit="kPa"),),
         outputs=(
             OutputDeclaration(
-                name="y", base_unit="kPa", rounding_rule=rule(2, "half_up"), rounding_source=RULE
+                name="y",
+                label=LocalizedText(ru="y"),
+                symbol="y", base_unit="kPa", rounding_rule=rule(2, "half_up"), rounding_source=RULE
             ),
         ),
         checks=("check",),

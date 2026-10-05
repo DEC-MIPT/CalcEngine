@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from app.schemas.text import LocalizedText
 from app.schemas.units import UNITS, Dimension, UnitSymbol
 
 
@@ -34,6 +35,11 @@ class InputView(BaseModel):
         dimension: размерность базовой единицы.
         units: все единицы словаря этой размерности; форма предлагает их на выбор и
             не держит своей копии словаря (``calculation-api`` design.md, решение 10).
+        label: подпись входа.
+        symbol: обозначение входа в LaTeX.
+        hint: пояснение для входа, если оно есть.
+        whole_values_only: ``True``, если вход принимает только целые значения в
+            базовой единице (``frontend-app`` design.md, решение 6).
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -42,6 +48,10 @@ class InputView(BaseModel):
     base_unit: UnitSymbol
     dimension: Dimension
     units: tuple[UnitSymbol, ...] = Field(min_length=1)
+    label: LocalizedText
+    symbol: str = Field(min_length=1)
+    hint: LocalizedText | None = None
+    whole_values_only: bool
 
     @model_validator(mode="after")
     def _units_fit_the_dimension(self) -> "InputView":
@@ -53,12 +63,14 @@ class InputView(BaseModel):
 
 
 class OutputView(BaseModel):
-    """Объявленный выход типа расчёта."""
+    """Объявленный выход типа расчёта с подписью и обозначением."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     name: str = Field(min_length=1)
     base_unit: UnitSymbol
+    label: LocalizedText
+    symbol: str = Field(min_length=1)
 
 
 class CalculationTypeView(BaseModel):

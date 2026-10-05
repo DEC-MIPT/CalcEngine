@@ -4,21 +4,73 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.core.exceptions import InputValidationError
+from app.core.exceptions import ContractMetadataError, InputValidationError
 from app.schemas.api import FieldError
 from app.schemas.parameters import EngineerRule
+from app.schemas.text import LocalizedText
 from app.schemas.units import UNITS, UnitSymbol
 
 UNVERIFIED: Literal["unverified"] = "unverified"
 
 
 class QuantityDeclaration(BaseModel):
-    """Величина типа расчёта и базовая единица, в которой она хранится."""
+    """Величина типа расчёта и базовая единица, в которой она хранится.
+
+    Подпись, обозначение, подсказка и признак целых значений описывают величину для
+    человека и не влияют на расчёт, трассу, ``NormRef`` и ``input_hash``
+    (``frontend-app`` design.md, решение 6). Регистрация типа требует ``label.ru`` и
+    ``symbol`` у каждой величины.
+
+    Attributes:
+        name: имя величины.
+        base_unit: базовая единица величины.
+        label: подпись величины.
+        symbol: обозначение величины в LaTeX.
+        hint: пояснение для входа; у выхода его нет.
+        whole_values_only: ``True`` для входа, который принимает только целые значения.
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     name: str = Field(min_length=1)
     base_unit: UnitSymbol
+    label: LocalizedText | None = None
+    symbol: str | None = None
+    hint: LocalizedText | None = None
+    whole_values_only: bool = False
+
+    def described(self) -> tuple[LocalizedText, str]:
+        """Возвращает подпись и обозначение величины, которые есть у зарегистрированного типа.
+
+        Returns:
+            Подпись и обозначение в LaTeX.
+
+        Raises:
+            ContractMetadataError: если подписи или обозначения нет.
+        """
+        if self.label is None or self.symbol is None:
+            raise ContractMetadataError(f"quantity {self.name!r} has no label or symbol")
+        return self.label, self.symbol
+
+    def metadata_problems(self, role: str) -> tuple[str, ...]:
+        """Перечисляет, чего не хватает величине из описания для человека.
+
+        Args:
+            role: ``input`` или ``output``; попадает в текст проблемы.
+
+        Returns:
+            По одной строке на проблему, с именем величины; пустой кортеж, если
+            описание полное.
+        """
+        where = f"{role} {self.name!r}"
+        problems = []
+        if self.label is None or not self.label.ru.strip():
+            problems.append(f"{where} has no label.ru")
+        if self.symbol is None or not self.symbol.strip():
+            problems.append(f"{where} has no symbol")
+        if self.hint is not None and not self.hint.ru.strip():
+            problems.append(f"{where} has a hint without hint.ru")
+        return tuple(problems)
 
 
 class QuantityValue(BaseModel):
@@ -196,7 +248,23 @@ class CalculationTypeContract(BaseModel):
                 raise ValueError("quantity names must be unique within inputs and within outputs")
         if len(self.checks) != len(set(self.checks)):
             raise ValueError("check names must be unique")
+        if any(output.hint is not None or output.whole_values_only for output in self.outputs):
+            raise ValueError("an output has no hint and no whole_values_only")
         return self
+
+    def metadata_problems(self) -> tuple[str, ...]:
+        """Перечисляет проблемы описания величин типа для человека.
+
+        Returns:
+            Проблемы входов, затем выходов, в порядке контракта; пустой кортеж, если
+            у каждой величины есть ``label.ru`` и ``symbol``.
+        """
+        return tuple(
+            problem
+            for role, group in (("input", self.inputs), ("output", self.outputs))
+            for quantity in group
+            for problem in quantity.metadata_problems(role)
+        )
 
 
 class _Bound(BaseModel):
