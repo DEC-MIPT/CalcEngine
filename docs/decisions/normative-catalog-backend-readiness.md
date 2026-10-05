@@ -232,6 +232,21 @@ table has no value column; `ml/` does not import `app`.
   it, so there is no practical harm. Fix: `REVOKE TEMP ON DATABASE dec FROM PUBLIC`
   during ingestion (the owner, a superuser, keeps it), or record it as an accepted
   deviation.
+- **m6. `pre-commit run --all-files` fails on `develop` again.** `detect-secrets` reports
+  seven findings, all from Egor's commits that arrived on 2026-10-05 (WP9 data feature,
+  `normatives-formula-contract` and research). Six are the local URL with `dec:dec` and
+  no `# pragma: allowlist secret`: `ml/research/make_review_html.py:14`,
+  `ml/research/verify_end_to_end.py:23`,
+  `ml/src/normatives_pipeline/parser/cyrillic.py:11`, `ml/research/VERIFY.md:26`,
+  `docs/decisions/normatives-formula-contract-implementation-egor.md:74` and
+  `docs/decisions/normatives-pipeline-end-to-end-verification-egor.md:4`. The seventh is a
+  false positive, `ml/src/normatives_pipeline/catalog_contract.py:15`: a constant that
+  holds the name of the reader's password variable, not a password. The hook checks only the
+  files of a commit, so the commits that brought these were made without it. Under
+  AGENTS.md section 2 a new finding is removed from the file or marked there as a
+  placeholder, never added to the baseline in passing. Fix: mark the seven lines (or
+  write the URLs without the password), then `pre-commit install` on Egor's machine. I
+  did not touch these files or `.secrets.baseline`.
 
 ### Notes for the backend side (no action for Egor)
 
