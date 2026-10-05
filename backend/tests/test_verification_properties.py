@@ -15,11 +15,15 @@ from test_verification_runner import (
 from verification_strategies import Subject, inputs_in_range
 
 from app.engine.base import Calculator
-from app.engine.pipeline import CalculatorOutput
+from app.engine.boundary import inputs_to_base_units
+from app.engine.pipeline import CalculatorOutput, calculate
 from app.schemas.calculation import QuantityValue
 from app.verification.invariants import (
+    DETERMINISM,
+    UNIT_CHANGE,
     InvariantPlan,
     determinism_holds,
+    invariant_coverage,
     plan_problems,
     shared_invariants,
     unit_change_holds,
@@ -76,6 +80,40 @@ def test_generated_inputs_stay_inside_the_valid_range(data: st.DataObject) -> No
     in_metres = inputs["b"].value * {"m": 1.0, "cm": 1e-2, "mm": 1e-3}[inputs["b"].unit]
     assert 1.0 - 1e-9 <= in_metres <= 40.0 + 1e-9
     assert inputs["q"].unit == "1" and 0.5 <= inputs["q"].value <= 2.0
+
+
+@CASES
+@given(data=st.data())
+def test_y_grows_with_b_in_the_synthetic_type(data: st.DataObject) -> None:
+    subject = SUBJECTS[0]
+    inputs = inputs_to_base_units(subject.contract, data.draw(inputs_in_range(subject.plan)))
+    upper = RANGES[0].upper
+    larger = data.draw(st.floats(min_value=inputs["b"].value, max_value=upper, allow_nan=False))
+    grown = {**inputs, "b": QuantityValue(value=larger, unit="m")}
+
+    def y(given: dict[str, QuantityValue]) -> float:
+        result = calculate(subject.contract, subject.calculator, given, subject.parameters, method_range=subject.method_range)
+        return next(output.value for output in result.outputs if output.quantity == "y")
+
+    assert y(inputs) <= y(grown)
+
+
+PROPERTY_TESTS = {
+    **{(subject.contract.name, DETERMINISM): test_the_same_inputs_give_the_same_result for subject in SUBJECTS},
+    **{(subject.contract.name, UNIT_CHANGE): test_an_input_in_another_unit_gives_the_same_result for subject in SUBJECTS},
+    (TYPE, SPECIFIC.identifier): test_y_grows_with_b_in_the_synthetic_type,
+}
+"""Property-тест каждого инварианта каждого субъекта: пара (тип, инвариант) -> функция теста."""
+
+
+def test_every_listed_invariant_has_a_property_test() -> None:
+    coverage = invariant_coverage([subject.plan for subject in SUBJECTS], PROPERTY_TESTS)
+
+    assert (coverage.verdict, coverage.untested) == ("GO", ())
+
+
+def test_every_registered_test_is_a_property_based_test() -> None:
+    assert all(getattr(test, "is_hypothesis_test", False) for test in PROPERTY_TESTS.values())
 
 
 def test_an_input_in_millimetres_gives_the_same_result_as_in_metres() -> None:

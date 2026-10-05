@@ -1,5 +1,6 @@
-from collections.abc import Mapping, Sequence
-from typing import Any
+from collections.abc import Collection, Mapping, Sequence
+from dataclasses import dataclass
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -213,3 +214,53 @@ def unit_change_holds(
     in_base = inputs_to_base_units(contract, inputs)
     converted = calculate(contract, calculator, in_base, parameters, method_range=method_range)
     return given == converted
+
+
+@dataclass(frozen=True)
+class UntestedInvariant:
+    """Перечисленный инвариант, у которого нет property-теста.
+
+    Attributes:
+        calculation_type: тип расчёта плана.
+        identifier: идентификатор инварианта.
+    """
+
+    calculation_type: str
+    identifier: str
+
+
+@dataclass(frozen=True)
+class InvariantCoverage:
+    """Полнота проверки инвариантов (`calculation-verification` "Invariant tests").
+
+    Attributes:
+        verdict: ``GO``, только если у каждого перечисленного инварианта есть property-тест.
+        untested: инварианты без property-теста, в порядке планов.
+    """
+
+    verdict: Literal["GO", "NO-GO"]
+    untested: tuple[UntestedInvariant, ...]
+
+
+def invariant_coverage(plans: Sequence[InvariantPlan], tested: Collection[tuple[str, str]]) -> InvariantCoverage:
+    """Проверяет, что у каждого инварианта каждого плана есть property-тест (задача 2.12).
+
+    Перечисленный инвариант без property-теста делает проверку неполной, и вердикт —
+    ``NO-GO`` (сценарий "Invariant without a property test"). Пара из ``tested``, которой
+    нет ни в одном плане, ничего не меняет.
+
+    Args:
+        plans: планы инвариантов проверяемых типов.
+        tested: пары (тип расчёта, идентификатор инварианта), у которых есть property-тест.
+
+    Returns:
+        Вердикт полноты и непокрытые инварианты.
+    """
+    covered = set(tested)
+    untested = tuple(
+        UntestedInvariant(plan.calculation_type, invariant.identifier)
+        for plan in plans
+        for invariant in plan.invariants
+        if (plan.calculation_type, invariant.identifier) not in covered
+    )
+    return InvariantCoverage(verdict="NO-GO" if untested else "GO", untested=untested)

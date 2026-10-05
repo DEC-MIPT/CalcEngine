@@ -12,6 +12,8 @@ from app.verification.invariants import (
     InputRange,
     Invariant,
     InvariantPlan,
+    UntestedInvariant,
+    invariant_coverage,
     plan_problems,
     shared_invariants,
 )
@@ -174,3 +176,38 @@ def test_this_run_has_its_seed_in_the_report(pytestconfig: pytest.Config) -> Non
 
     assert seed is not None
     assert conftest.pytest_report_header(pytestconfig) == f"hypothesis seed: {seed}"
+
+
+def test_every_listed_invariant_with_a_property_test_gives_go() -> None:
+    tested = {(TYPE, DETERMINISM), (TYPE, UNIT_CHANGE), (TYPE, "y-grows-with-b")}
+
+    coverage = invariant_coverage([plan()], tested)
+
+    assert (coverage.verdict, coverage.untested) == ("GO", ())
+
+
+def test_a_listed_invariant_without_a_property_test_makes_the_verification_incomplete() -> None:
+    coverage = invariant_coverage([plan()], {(TYPE, DETERMINISM), (TYPE, UNIT_CHANGE)})
+
+    assert coverage.verdict == "NO-GO"
+    assert coverage.untested == (UntestedInvariant(calculation_type=TYPE, identifier="y-grows-with-b"),)
+
+
+def test_a_test_of_the_same_invariant_for_another_type_does_not_count() -> None:
+    other = plan(calculation_type="other_type")
+    tested = {(TYPE, DETERMINISM), (TYPE, UNIT_CHANGE), (TYPE, "y-grows-with-b")}
+
+    coverage = invariant_coverage([plan(), other], tested)
+
+    assert coverage.verdict == "NO-GO"
+    assert [(item.calculation_type, item.identifier) for item in coverage.untested] == [
+        ("other_type", DETERMINISM),
+        ("other_type", UNIT_CHANGE),
+        ("other_type", "y-grows-with-b"),
+    ]
+
+
+def test_a_tested_pair_that_no_plan_lists_changes_nothing() -> None:
+    tested = {(TYPE, DETERMINISM), (TYPE, UNIT_CHANGE), (TYPE, "y-grows-with-b"), (TYPE, "not-listed")}
+
+    assert invariant_coverage([plan()], tested).verdict == "GO"
