@@ -1,0 +1,178 @@
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass
+from typing import Literal
+
+from app.core.exceptions import DECError, UnitError
+from app.engine.boundary import convert
+from app.engine.pipeline import calculate
+from app.engine.registry import CalculatorRegistry
+from app.schemas.calculation import CalculationResult, MethodBound, QuantityValue
+from app.verification.models import ExpectedOutput, ReferenceExample
+
+CheckOutcome = Literal["within", "outside", "missing", "incompatible_unit"]
+"""Итог сравнения одной величины с ожидаемым значением."""
+
+ExampleOutcome = Literal["passed", "failed", "refused", "error"]
+"""Итог примера: все величины в допуске, хотя бы одна нет, отказ расчёта или ошибка."""
+
+Verdict = Literal["GO", "NO-GO"]
+
+
+@dataclass(frozen=True)
+class ExampleParameters:
+    """Разрешённые параметры, с которыми считается эталонный пример.
+
+    Откуда они берутся, раннер не решает (`calculation-verification` design.md,
+    решение 14).
+
+    Attributes:
+        parameters: разрешённые параметры калькулятора типа.
+        method_range: границы диапазона метода.
+    """
+
+    parameters: object
+    method_range: tuple[MethodBound, ...] = ()
+
+
+Resolver = Callable[[ReferenceExample], ExampleParameters]
+"""Функция, которая даёт параметры примера."""
+
+
+@dataclass(frozen=True)
+class QuantityCheck:
+    """Сравнение одной ожидаемой величины с вычисленной.
+
+    Attributes:
+        quantity: имя величины.
+        expected: ожидаемое значение с допуском.
+        computed: вычисленное значение в единице ожидаемого или ``None``, если его нет
+            или его нельзя перевести в эту единицу.
+        outcome: итог сравнения.
+    """
+
+    quantity: str
+    expected: ExpectedOutput
+    computed: QuantityValue | None
+    outcome: CheckOutcome
+
+
+@dataclass(frozen=True)
+class ExampleRun:
+    """Прогон одного эталонного примера.
+
+    Attributes:
+        example_id: идентификатор примера.
+        calculation_type: тип расчёта примера.
+        outcome: итог примера.
+        checks: сравнения по ожидаемым величинам, в порядке карточки; пусто при ошибке.
+        error: имя класса ошибки, если расчёт или получение параметров её бросили.
+    """
+
+    example_id: str
+    calculation_type: str
+    outcome: ExampleOutcome
+    checks: tuple[QuantityCheck, ...] = ()
+    error: str | None = None
+
+
+@dataclass(frozen=True)
+class SuiteReport:
+    """Отчёт прогона набора эталонов (design.md, решение 15).
+
+    Attributes:
+        verdict: ``GO``, только если каждый пример прошёл.
+        runs: прогоны примеров в порядке набора.
+    """
+
+    verdict: Verdict
+    runs: tuple[ExampleRun, ...]
+
+    @property
+    def failures(self) -> tuple[tuple[str, QuantityCheck], ...]:
+        """Величины вне допуска или без значения, с идентификатором примера."""
+        return tuple(
+            (run.example_id, check) for run in self.runs for check in run.checks if check.outcome != "within"
+        )
+
+
+def within_tolerance(computed: float, expected: ExpectedOutput) -> bool:
+    """Проверяет правило допуска требования «Reference examples».
+
+    ``absolute``: модуль разности не больше ``tolerance``; ``relative``: не больше
+    ``tolerance`` на модуль ожидаемого значения. Граница допуска входит.
+
+    Args:
+        computed: вычисленное значение в единице ожидаемого.
+        expected: ожидаемое значение с допуском.
+
+    Returns:
+        ``True``, если значение в допуске.
+    """
+    limit = expected.tolerance if expected.tolerance_kind == "absolute" else expected.tolerance * abs(expected.value)
+    return abs(computed - expected.value) <= limit
+
+
+def _check(quantity: str, expected: ExpectedOutput, result: CalculationResult) -> QuantityCheck:
+    output = next((output for output in result.outputs if output.quantity == quantity), None)
+    if output is None:
+        return QuantityCheck(quantity=quantity, expected=expected, computed=None, outcome="missing")
+    try:
+        computed = convert(QuantityValue(value=output.value, unit=output.unit), expected.unit)
+    except UnitError:
+        return QuantityCheck(quantity=quantity, expected=expected, computed=None, outcome="incompatible_unit")
+    outcome: CheckOutcome = "within" if within_tolerance(computed.value, expected) else "outside"
+    return QuantityCheck(quantity=quantity, expected=expected, computed=computed, outcome=outcome)
+
+
+def run_example(example: ReferenceExample, registry: CalculatorRegistry, resolve: Resolver) -> ExampleRun:
+    """Считает один пример через чистую функцию расчёта и сравнивает выходы.
+
+    Пример идёт только через ``engine.pipeline.calculate`` и читает только конверт
+    (design.md, "Swap boundary"). Отказ расчёта — провал примера, без сравнений.
+
+    Args:
+        example: эталонный пример.
+        registry: реестр типов расчёта.
+        resolve: функция, которая даёт параметры примера.
+
+    Returns:
+        Прогон примера.
+    """
+    try:
+        resolved = resolve(example)
+        result = calculate(
+            registry.contract(example.calculation_type),
+            registry.get(example.calculation_type),
+            example.inputs,
+            resolved.parameters,
+            method_range=resolved.method_range,
+        )
+    except DECError as error:
+        return ExampleRun(example.example_id, example.calculation_type, "error", error=type(error).__name__)
+    checks = tuple(_check(quantity, expected, result) for quantity, expected in example.expected_outputs.items())
+    if result.verdict == "refused":
+        return ExampleRun(example.example_id, example.calculation_type, "refused", checks)
+    outcome: ExampleOutcome = "passed" if all(check.outcome == "within" for check in checks) else "failed"
+    return ExampleRun(example.example_id, example.calculation_type, outcome, checks)
+
+
+def run_suite(
+    examples: Sequence[ReferenceExample], registry: CalculatorRegistry, resolve: Resolver
+) -> SuiteReport:
+    """Прогоняет набор эталонных примеров (задача 2.3).
+
+    Вердикт ``GO``, только если каждый пример прошёл; иначе ``NO-GO``, и отчёт
+    называет пример, величину, вычисленное и ожидаемое значения и допуск (сценарий
+    "A quantity outside its tolerance").
+
+    Args:
+        examples: эталонные примеры набора.
+        registry: реестр типов расчёта.
+        resolve: функция, которая даёт параметры примера.
+
+    Returns:
+        Отчёт набора.
+    """
+    runs = tuple(run_example(example, registry, resolve) for example in examples)
+    verdict: Verdict = "GO" if all(run.outcome == "passed" for run in runs) else "NO-GO"
+    return SuiteReport(verdict=verdict, runs=runs)
