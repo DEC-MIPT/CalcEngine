@@ -64,32 +64,32 @@ before task 2.1.
 
 ## 3. Technical foundations (feature `frontend-app/frontend`)
 
-- [ ] 3.1 Add `openapi-typescript`, the script `npm run gen:api`, the committed
+- [x] 3.1 Add `openapi-typescript`, the script `npm run gen:api`, the committed
   `frontend/src/api/schema.d.ts`, and a check in `check.sh` that the committed file is current
   (frontend); verify: regenerating from the backend of section 2 leaves no diff; a hand edit of the
-  file makes the check fail
-- [ ] 3.2 Add the API client over `openapi-fetch` with the base address from
+  file makes the check fail (done 2026-10-06 on `feature/frontend-app/frontend`, `b0ce766`)
+- [x] 3.2 Add the API client over `openapi-fetch` with the base address from
   `VITE_API_BASE_URL`, and a helper that turns an error body (`code`, `message`, `fields`) into a
   typed value (frontend); verify: Vitest tests for a `422` body with `fields`, a `404`, a `503`, and a
-  network failure
-- [ ] 3.3a Add MSW with one set of handlers shared by the browser and Vitest, and the script
+  network failure (done 2026-10-06 on `feature/frontend-app/frontend`, `8e1c690`)
+- [x] 3.3a Add MSW with one set of handlers shared by the browser and Vitest, and the script
   `npm run dev:mock` (frontend); verify: `npm run dev:mock` answers `GET /calculation-types`
-  from the handlers, and the Vitest setup uses the same handler module
+  from the handlers, and the Vitest setup uses the same handler module (done 2026-10-06 on `feature/frontend-app/frontend`, `69c7b8a`)
 - [ ] 3.3b Add the scenario handlers of `design.md` decision 4: pass, fail, refused, warning,
   `422`, `503`, typed by the generated schema (frontend); verify: one test per scenario reads
-  the response through the client of 3.2 and gets the expected typed value
-- [ ] 3.4 Add React Router with the four addresses of "User journey and screens" and empty screens
+  the response through the client of 3.2 and gets the expected typed value (in part on `feature/frontend-app/frontend`, `69c7b8a`: pass, fail, `422` and `503` are mocked; refused and warning are left for tasks 6.4b and 6.4c)
+- [x] 3.4 Add React Router with the four addresses of "User journey and screens" and empty screens
   (frontend); verify: a test per address renders its screen; an unknown address renders a "not
-  found" screen
+  found" screen (done 2026-10-06 on `feature/frontend-app/frontend`, `fa41aa0`)
 - [ ] 3.5 Add the typed `ru`/`en` dictionary with the fallback to `ru`, the language switch, and
   number formatting through `Intl.NumberFormat` (frontend); verify: tests that a missing `en` key
   shows the `ru` text, and that `172.5` shows as `172,5` in Russian and `172.5` in English
 - [ ] 3.6 Add `eslint-plugin-jsx-a11y` and an axe helper for component tests (frontend); verify:
   `check.sh` runs both; a test component with an unlabelled input fails the axe helper
-- [ ] 3.7 Add the `Formula` component on MathJax with the raw-text fallback and the restricted
+- [x] 3.7 Add the `Formula` component on MathJax with the raw-text fallback and the restricted
   extensions of `design.md` decision 1 (frontend); verify: tests that a valid LaTeX string is
   typeset, that an invalid one shows its raw text, that neither throws, and that
-  `\href{javascript:alert(1)}{x}` and a `\require` string create no link and run no script
+  `\href{javascript:alert(1)}{x}` and a `\require` string create no link and run no script (done 2026-10-06 on `feature/frontend-app/frontend`, `08a5c4f`)
 - [ ] 3.8 Add Playwright with Chromium, Firefox and WebKit, used by the cross-browser scenario here and by tasks 8.6, 8.7, 8.9
   (frontend); verify: one test opens a mocked result with a trace and finds every step's formula
   typeset in each of the three engines
