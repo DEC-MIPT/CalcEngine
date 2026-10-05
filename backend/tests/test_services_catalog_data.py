@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import Engine, create_engine, func, select, text
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
-from test_engine_foundations_shallow_r import inputs
+from test_engine_foundations_shallow_r import R_UNITS, inputs
 from test_services_catalog_source import make_source, registry, with_phi
 
 from app.core.exceptions import ParameterSourceUnavailableError
@@ -20,6 +20,7 @@ from app.models.calculation_result import CalculationResultRow
 TYPE = f"calculation_type = '{PILOT}'"
 REF_JSON = json.dumps(REFS)
 VERIFIED_JSON = json.dumps([{**REFS[0], "status": "verified"}])
+R_IN_MPA = json.dumps({**R_UNITS, "R": "MPa"})
 
 BREACHES: list[tuple[str, list[str], str | None]] = [
     ("missing parameter", [f"DELETE FROM catalog_read.type_thresholds WHERE {TYPE}"], "k_z_threshold"),
@@ -57,6 +58,25 @@ BREACHES: list[tuple[str, list[str], str | None]] = [
         "symbol without a unit",
         [f"UPDATE catalog_read.type_formulas SET units = '{{\"k_z\": \"1\"}}' WHERE {TYPE} AND parameter = 'k_z_from'"],
         "k_z_from",
+    ),
+    (
+        "input symbol in another unit of its dimension",
+        [
+            f"UPDATE catalog_read.type_formulas SET units = '{{\"b\": \"mm\", \"k_z\": \"1\"}}' WHERE {TYPE} AND parameter = 'k_z_from'"
+        ],
+        "k_z_from",
+    ),
+    (
+        "input symbol in a unit of another dimension",
+        [
+            f"UPDATE catalog_read.type_formulas SET units = '{{\"b\": \"kPa\", \"k_z\": \"1\"}}' WHERE {TYPE} AND parameter = 'k_z_from'"
+        ],
+        "k_z_from",
+    ),
+    (
+        "output result symbol in another unit",
+        [f"UPDATE catalog_read.type_formulas SET units = '{R_IN_MPA}' WHERE {TYPE} AND parameter = 'r'"],
+        "r",
     ),
     (
         "unit outside the list",
@@ -199,8 +219,8 @@ def test_a_breach_makes_the_type_unavailable_with_one_log_line(
     assert lines(caplog) == [expected_line(parameter)]
 
 
-def test_every_breach_listed_in_task_5_4_has_a_case() -> None:
-    assert len(BREACHES) == len({name for name, _, _ in BREACHES}) == 24
+def test_every_breach_listed_in_tasks_5_4_and_5_6_has_a_case() -> None:
+    assert len(BREACHES) == len({name for name, _, _ in BREACHES}) == 27
 
 
 @pytest.fixture

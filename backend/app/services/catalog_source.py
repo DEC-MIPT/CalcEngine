@@ -17,8 +17,13 @@ from app.engine.boundary import convert, inputs_to_base_units
 from app.engine.registry import CalculatorRegistry
 from app.repositories.normatives import NormativesRepository
 from app.schemas.api import FieldError
-from app.schemas.calculation import MethodBound, QuantityValue, check_bounds
-from app.schemas.expression import parse_expression
+from app.schemas.calculation import (
+    MethodBound,
+    QuantityDeclaration,
+    QuantityValue,
+    check_bounds,
+)
+from app.schemas.expression import parse_expression, symbols
 from app.schemas.normatives import (
     CatalogSnapshot,
     CatalogTableRow,
@@ -82,8 +87,26 @@ def _guard(parameter: str | None) -> Generator[None, None, None]:
         raise CatalogDataError(parameter) from None
 
 
-def _formula(row: FormulaRow) -> Formula:
-    return Formula.model_validate(
+def _formula(row: FormulaRow, quantities: Sequence[QuantityDeclaration]) -> Formula:
+    """Собирает формулу из строки каталога и сверяет единицы величин типа.
+
+    ``formula_step`` сравнивает единицы точно и внутри формулы ничего не переводит, а
+    входы получает в базовых единицах, поэтому символ или символ результата, названный
+    как вход или выход типа, обязан нести базовую единицу этой величины (design.md,
+    решение 7).
+
+    Args:
+        row: строка ``type_formulas``.
+        quantities: входы и выходы контракта типа.
+
+    Returns:
+        Формула, проверенная моделью ``Formula``.
+
+    Raises:
+        CatalogDataError: если символ входа или выхода типа в формуле не в базовой
+            единице этой величины.
+    """
+    formula = Formula.model_validate(
         {
             "latex": row.latex,
             "tree": parse_expression(row.tree),
@@ -92,6 +115,10 @@ def _formula(row: FormulaRow) -> Formula:
             "norm_refs": parse_norm_refs(row.norm_refs),
         }
     )
+    named = {*symbols(formula.tree), formula.result_symbol}
+    if any(quantity.base_unit != formula.units[quantity.name] for quantity in quantities if quantity.name in named):
+        raise CatalogDataError(row.parameter)
+    return formula
 
 
 def _threshold(row: ThresholdRow) -> Threshold:
@@ -284,6 +311,7 @@ class CatalogParameterSource:
                 self._models[calculation_type],
                 base_inputs,
                 base_units,
+                (*contract.inputs, *contract.outputs),
                 formulas,
                 table_values,
                 thresholds,
@@ -302,6 +330,7 @@ class CatalogParameterSource:
         model: type[BaseModel],
         inputs: Mapping[str, QuantityValue],
         base_units: Mapping[str, str],
+        quantities: Sequence[QuantityDeclaration],
         formulas: Sequence[FormulaRow],
         table_values: Sequence[TableValueRow],
         thresholds: Sequence[ThresholdRow],
@@ -312,7 +341,7 @@ class CatalogParameterSource:
         fields: dict[str, object] = {}
         for formula in formulas:
             with _guard(formula.parameter):
-                fields[formula.parameter] = _formula(formula)
+                fields[formula.parameter] = _formula(formula, quantities)
         for threshold in thresholds:
             with _guard(threshold.parameter):
                 fields[threshold.parameter] = _threshold(threshold)
