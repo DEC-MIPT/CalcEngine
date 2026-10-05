@@ -64,6 +64,11 @@ class QuantityCheck:
     computed: QuantityValue | None
     outcome: CheckOutcome
 
+    @property
+    def deviation(self) -> float | None:
+        """Вычисленное минус ожидаемое в единице ожидаемого; ``None``, если вычисленного нет."""
+        return None if self.computed is None else self.computed.value - self.expected.value
+
 
 @dataclass(frozen=True)
 class ExampleRun:
@@ -75,6 +80,8 @@ class ExampleRun:
         outcome: итог примера.
         checks: сравнения по ожидаемым величинам, в порядке карточки; пусто при ошибке.
         error: имя класса ошибки, если расчёт или получение параметров её бросили.
+        reproduced: оба расчёта примера дали равные результаты; ``False`` при ошибке
+            (`calculation-verification` "Metrics per run", воспроизводимость).
     """
 
     example_id: str
@@ -82,6 +89,7 @@ class ExampleRun:
     outcome: ExampleOutcome
     checks: tuple[QuantityCheck, ...] = ()
     error: str | None = None
+    reproduced: bool = False
 
 
 @dataclass(frozen=True)
@@ -169,10 +177,12 @@ def _check(quantity: str, expected: ExpectedOutput, result: CalculationResult) -
 
 
 def run_example(example: ReferenceExample, registry: CalculatorRegistry, resolve: Resolver) -> ExampleRun:
-    """Считает один пример через чистую функцию расчёта и сравнивает выходы.
+    """Считает один пример дважды через чистую функцию расчёта и сравнивает выходы.
 
     Пример идёт только через ``engine.pipeline.calculate`` и читает только конверт
-    (design.md, "Swap boundary"). Отказ расчёта — провал примера, без сравнений.
+    (design.md, "Swap boundary"). Отказ расчёта — провал примера. Второй расчёт с теми же
+    входами и параметрами нужен для метрики воспроизводимости (задача 2.14): чистая
+    функция не возвращает ``result_id``, поэтому результаты сравниваются целиком.
 
     Args:
         example: эталонный пример.
@@ -184,20 +194,20 @@ def run_example(example: ReferenceExample, registry: CalculatorRegistry, resolve
     """
     try:
         resolved = resolve(example)
-        result = calculate(
-            registry.contract(example.calculation_type),
-            registry.get(example.calculation_type),
-            example.inputs,
-            resolved.parameters,
-            method_range=resolved.method_range,
+        contract = registry.contract(example.calculation_type)
+        calculator = registry.get(example.calculation_type)
+        result, repeat = (
+            calculate(contract, calculator, example.inputs, resolved.parameters, method_range=resolved.method_range)
+            for _ in range(2)
         )
     except DECError as error:
         return ExampleRun(example.example_id, example.calculation_type, "error", error=type(error).__name__)
     checks = tuple(_check(quantity, expected, result) for quantity, expected in example.expected_outputs.items())
+    reproduced = result == repeat
     if result.verdict == "refused":
-        return ExampleRun(example.example_id, example.calculation_type, "refused", checks)
+        return ExampleRun(example.example_id, example.calculation_type, "refused", checks, reproduced=reproduced)
     outcome: ExampleOutcome = "passed" if all(check.outcome == "within" for check in checks) else "failed"
-    return ExampleRun(example.example_id, example.calculation_type, outcome, checks)
+    return ExampleRun(example.example_id, example.calculation_type, outcome, checks, reproduced=reproduced)
 
 
 def run_suite(
