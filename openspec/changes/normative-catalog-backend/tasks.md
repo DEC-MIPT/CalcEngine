@@ -133,7 +133,7 @@ Egor may split these tasks further on his branch; each one stays in his zone.
 - [x] 4.3 Add the contract test: `information_schema.columns` of `catalog_read` equals
   the column list of decision 2 (backend); verify: it passes on the synthetic postgres
   database and fails when a column is renamed in the fixture
-- [ ] 4.4 Order ties inside the synthetic `catalog_read.search` before its `LIMIT`, as
+- [x] 4.4 Order ties inside the synthetic `catalog_read.search` before its `LIMIT`, as
   decision 2 now says (added 2026-10-04 from Egor's answer in
   `docs/decisions/normative-catalog-search-order-questions-akim.md`) (backend); verify:
   in the postgres module, a search whose hits tie in rank at the `max_rows` cut keeps
@@ -187,7 +187,7 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   port and a test without the variable both give `503 parameter_source_unavailable` on
   `POST /calculations`, nothing is stored, and neither the response nor the log holds the
   URL or its password
-- [ ] 5.6 Add the decision 7 check that a formula gives every symbol and result symbol
+- [x] 5.6 Add the decision 7 check that a formula gives every symbol and result symbol
   naming an input or an output of the type that quantity's base unit (spec "Expression
   tree form in the catalog"; Akim's review of the data feature, M2) (backend); verify:
   the breach tests of task 5.4 gain a formula symbol of an input in another unit of the
@@ -252,7 +252,8 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   record in `calculation-api` that its error table gains the row `catalog_unavailable`
   from this change and that `invalid_input` also covers an input that the catalog's
   table does not cover (both owners agree to the edits); verify: the notes are on
-  `develop`
+  `develop` (2026-10-05: notes written by Akim in WP2 `tasks.md` section 9 and task 7.2,
+  WP5 `design.md` decision 2, WP8 `design.md` error table; Egor's agreement pending)
 - [ ] 8.2 (spec) After both features are merged, `spec-keeper` syncs `normatives-catalog`
   and archives this change; verify: `openspec validate --all --strict` passes after the
   archive

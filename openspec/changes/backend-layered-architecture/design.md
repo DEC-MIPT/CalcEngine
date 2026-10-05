@@ -82,6 +82,13 @@ not by this one.
    reads Egor's read-only views in `dec_normatives` through its own repository, which
    that change places. `ml/` sits outside `backend/app` and has no import relationship
    in either direction (decision 6).
+
+   Note (2026-10-05, `normative-catalog-backend` task 8.1): that change settles old item
+   9.3 and places the catalog parameter source in `services`
+   (`services/catalog_source.py`), not in `parameters`, because it also needs the
+   engine's unit conversion and applicability check, which `parameters` may not import
+   (its `design.md` decision 5). `parameters` may still import `repositories`; nothing
+   uses that today.
    - Rationale: keeps the calculation engine and data access swappable and testable, and
      gives `bootstrap-dev-environment` task 5.1 a complete contract to encode as an
      `import-linter` "layers" contract (siblings as independent layers) plus forbidden
