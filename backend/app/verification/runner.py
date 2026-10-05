@@ -1,3 +1,4 @@
+from collections import Counter
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Literal
@@ -7,7 +8,12 @@ from app.engine.boundary import convert
 from app.engine.pipeline import calculate
 from app.engine.registry import CalculatorRegistry
 from app.schemas.calculation import CalculationResult, MethodBound, QuantityValue
-from app.verification.models import ExpectedOutput, ReferenceExample
+from app.verification.models import (
+    ExampleProblem,
+    ExpectedOutput,
+    ParsedExamples,
+    ReferenceExample,
+)
 
 CheckOutcome = Literal["within", "outside", "missing", "incompatible_unit"]
 """Итог сравнения одной величины с ожидаемым значением."""
@@ -16,6 +22,9 @@ ExampleOutcome = Literal["passed", "failed", "refused", "error"]
 """Итог примера: все величины в допуске, хотя бы одна нет, отказ расчёта или ошибка."""
 
 Verdict = Literal["GO", "NO-GO"]
+
+MIN_EXAMPLES_PER_TYPE = 3
+"""Наименьшее число эталонных примеров на тип расчёта (design.md, решение 1); не значение нормы."""
 
 
 @dataclass(frozen=True)
@@ -76,16 +85,51 @@ class ExampleRun:
 
 
 @dataclass(frozen=True)
+class TooFewExamples:
+    """У типа расчёта меньше ``MIN_EXAMPLES_PER_TYPE`` принятых примеров.
+
+    Attributes:
+        calculation_type: тип расчёта из списка набора.
+        count: сколько принятых примеров у него есть.
+    """
+
+    calculation_type: str
+    count: int
+
+
+@dataclass(frozen=True)
+class RejectedExample:
+    """Карточка отклонена при разборе (задача 2.2).
+
+    Attributes:
+        problem: место карточки и пути её недопустимых полей.
+    """
+
+    problem: ExampleProblem
+
+
+@dataclass(frozen=True)
+class NoCalculationTypes:
+    """Набору не передан ни один тип расчёта, так что проверять нечего."""
+
+
+InvalidReason = TooFewExamples | RejectedExample | NoCalculationTypes
+"""Почему набор эталонов недействителен (сценарий "Too few or incomplete examples")."""
+
+
+@dataclass(frozen=True)
 class SuiteReport:
     """Отчёт прогона набора эталонов (design.md, решение 15).
 
     Attributes:
-        verdict: ``GO``, только если каждый пример прошёл.
-        runs: прогоны примеров в порядке набора.
+        verdict: ``GO``, только если набор действителен и каждый пример прошёл.
+        runs: прогоны принятых примеров в порядке набора.
+        invalid: причины, по которым набор недействителен; пусто для действительного.
     """
 
     verdict: Verdict
     runs: tuple[ExampleRun, ...]
+    invalid: tuple[InvalidReason, ...] = ()
 
     @property
     def failures(self) -> tuple[tuple[str, QuantityCheck], ...]:
@@ -176,3 +220,53 @@ def run_suite(
     runs = tuple(run_example(example, registry, resolve) for example in examples)
     verdict: Verdict = "GO" if all(run.outcome == "passed" for run in runs) else "NO-GO"
     return SuiteReport(verdict=verdict, runs=runs)
+
+
+def suite_invalidity(parsed: ParsedExamples, calculation_types: Sequence[str]) -> tuple[InvalidReason, ...]:
+    """Находит причины, по которым набор эталонов недействителен.
+
+    Набор недействителен, если какая-либо карточка отклонена при разборе, если список
+    типов пуст или если у типа из списка меньше ``MIN_EXAMPLES_PER_TYPE`` принятых
+    примеров (задача 2.4). Отклонённая карточка в счёт примеров не входит.
+
+    Args:
+        parsed: итог ``parse_examples``.
+        calculation_types: типы расчёта, которые набор обязан покрыть.
+
+    Returns:
+        Причины в порядке: отклонённые карточки, пустой список, типы с нехваткой примеров.
+    """
+    reasons: list[InvalidReason] = [RejectedExample(problem) for problem in parsed.problems]
+    if not calculation_types:
+        reasons.append(NoCalculationTypes())
+    counts = Counter(example.calculation_type for example in parsed.examples)
+    reasons.extend(
+        TooFewExamples(calculation_type, counts[calculation_type])
+        for calculation_type in dict.fromkeys(calculation_types)
+        if counts[calculation_type] < MIN_EXAMPLES_PER_TYPE
+    )
+    return tuple(reasons)
+
+
+def run_reference_suite(
+    parsed: ParsedExamples, calculation_types: Sequence[str], registry: CalculatorRegistry, resolve: Resolver
+) -> SuiteReport:
+    """Проверяет действительность набора эталонов и прогоняет его принятые примеры.
+
+    Недействительный набор даёт ``NO-GO`` с причинами, даже если каждый принятый
+    пример прошёл (сценарий "Too few or incomplete examples"); принятые примеры всё
+    равно прогоняются, чтобы отчёт показал и их.
+
+    Args:
+        parsed: итог ``parse_examples``.
+        calculation_types: типы расчёта, которые набор обязан покрыть.
+        registry: реестр типов расчёта.
+        resolve: функция, которая даёт параметры примера.
+
+    Returns:
+        Отчёт набора.
+    """
+    report = run_suite(parsed.examples, registry, resolve)
+    invalid = suite_invalidity(parsed, calculation_types)
+    verdict: Verdict = "NO-GO" if invalid else report.verdict
+    return SuiteReport(verdict=verdict, runs=report.runs, invalid=invalid)
