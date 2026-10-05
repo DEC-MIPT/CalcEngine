@@ -13,6 +13,7 @@
     "gen:api:check": "node scripts/gen-api.mjs --check"
   },
   "dependencies": {
+    "openapi-fetch": "^0.17.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
