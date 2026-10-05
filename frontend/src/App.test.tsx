@@ -3,8 +3,9 @@ import { describe, expect, it } from 'vitest'
 import App from './App'
 
 describe('App', () => {
-  it('renders the scaffold default component', () => {
+  it('opens the type selection at the root address', () => {
     render(<App />)
-    expect(screen.getByRole('heading', { name: 'Get started' })).toBeInTheDocument()
+
+    expect(screen.getByRole('heading', { name: 'Calculation types' })).toBeInTheDocument()
   })
 })
