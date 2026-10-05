@@ -140,6 +140,27 @@ See `proposal.md` (Non-goals).
       invariants specific to the type (task 2.11). It is not a norm value and not the
       method's range of application, though it should lie inside it.
 
+18. **Regression corpus: comparison and declared differences** (added 2026-10-05,
+    Akim, with tasks 3.2-3.3).
+    - A corpus entry is frozen from the result of the pure function: entry identifier,
+      calculation type, inputs with their units, the envelope's `outputs` (quantity,
+      value, unit) and `verdict`, its `input_hash` and its `engine_version`.
+    - Recomputing an entry compares only the `outputs` (quantity, value and unit,
+      exactly) and the `verdict`. A changed `input_hash` with the same outputs and
+      verdict is not a difference. An output that disappeared or appeared is a
+      difference to or from nothing.
+    - The section "Declared result differences" of a change's `proposal.md` (decision 7)
+      is a table with the columns `Entry | Quantity | Old | New | Reason`, under a
+      heading of level 2 or deeper, up to the next heading. A value is written as
+      `<number> <unit>` (a unit of the vocabulary), as a verdict (`pass`, `fail`,
+      `refused`) for the quantity `verdict`, or as `—` when there is no output. A
+      declaration covers a difference only when the entry, the quantity, the old and the
+      new value all match; an unreadable row is an error that names its line. A
+      declaration that matches no difference is reported, and does not fail the check.
+    - Open, decided together with the parameter source of the pilot (decision 14): where
+      the real corpus is stored, how its entries get their parameters, and which
+      `proposal.md` files a build reads the declarations from.
+
 ## Swap boundary
 
 The reference suite, the regression corpus, and the invariant tests call the calculation
