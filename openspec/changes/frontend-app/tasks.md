@@ -39,27 +39,28 @@ before task 2.1.
 
 ## 2. Backend: input and output metadata (feature `frontend-app/backend`)
 
-- [ ] 2.1 Add `label`, `symbol`, `hint` and `whole_values_only` to the quantity declaration
+- [x] 2.1 Add `label`, `symbol`, `hint` and `whole_values_only` to the quantity declaration
   (`QuantityDeclaration`, `backend/app/schemas/calculation.py`) with the shape of `design.md`
   decision 6, and reject at registration a type whose input or output has no `label.ru` or no
   `symbol` (backend); verify: tests that a declaration with a missing or empty `label.ru`, or with a
   missing or empty `symbol`, fails and names the quantity, and that `hint` and `label.en` are
-  optional
-- [ ] 2.2 Declare the metadata for the inputs and outputs of `foundations_shallow_r`
+  optional (done 2026-10-06 on `feature/frontend-app/backend`, `bab155f`)
+- [x] 2.2 Declare the metadata for the inputs and outputs of `foundations_shallow_r`
   (`backend/app/engine/foundations_shallow_r.py`), with `whole_values_only` true for `phi_II` and
   false for the others (backend); verify: a test reads every quantity of the pilot and finds
-  `label.ru` and `symbol`; no value, formula, `NormRef` or parameter of the pilot changes
-- [ ] 2.3 Carry the metadata to `GET /calculation-types` through `InputView` and `OutputView`
+  `label.ru` and `symbol`; no value, formula, `NormRef` or parameter of the pilot changes (done 2026-10-06 on `feature/frontend-app/backend`, `bab155f`)
+- [x] 2.3 Carry the metadata to `GET /calculation-types` through `InputView` and `OutputView`
   (`backend/app/schemas/api.py`) and the OpenAPI schema (backend); verify: a test of the endpoint
   finds the fields in the declared order, `phi_II` with `whole_values_only` true; `/openapi.json`
-  documents them
-- [ ] 2.4 Prove that the metadata changes no calculation (backend); verify: a test that the result
+  documents them (done 2026-10-06 on `feature/frontend-app/backend`, `bab155f`)
+- [x] 2.4 Prove that the metadata changes no calculation (backend); verify: a test that the result
   envelope, the trace, the `NormRef` list and `input_hash` of a fixed request equal the values
   in a fixture `backend/tests/fixtures/pilot_envelope_before_metadata.json`, generated on `develop`
   and committed as the first commit of the branch, before task 2.1; no file under `ml/` or `infra/` and no query to `dec_normatives`
-  is added
-- [ ] 2.5 Run `backend/check.sh` and the `postgres` module (backend); verify: `ruff`, `mypy`,
-  `lint-imports` pass, branch coverage of `app` stays 100%, and the `pre-commit` hooks pass
+  is added (done 2026-10-06 on `feature/frontend-app/backend`: the fixture in `b8f14c4`, the test in
+  `bab155f`; the baseline got three entries for the fixture's hashes by hand, not a full regeneration)
+- [x] 2.5 Run `backend/check.sh` and the `postgres` module (backend); verify: `ruff`, `mypy`,
+  `lint-imports` pass, branch coverage of `app` stays 100%, and the `pre-commit` hooks pass (done 2026-10-06 on `feature/frontend-app/backend`, `bab155f`)
 
 ## 3. Technical foundations (feature `frontend-app/frontend`)
 

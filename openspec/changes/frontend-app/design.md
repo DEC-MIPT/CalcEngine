@@ -59,6 +59,11 @@ function, its boundary (WP5 decision 7) and the engine are unchanged.
      (edition unverified; the report's own source is in `calculation-core-contract`), as the report
      uses it; (2) an engineer's calculation pad on grid paper; (3) the restraint of
      product documentation pages (one column of text, one accent).
+   - Tooling for the base tokens (decided with Akim on 2026-10-06): `shadcn/ui` is initialised
+     (`shadcn init`) on Tailwind CSS 4 only to hold a small set of CSS variables (paper background,
+     rules, blueprint-blue accent, amber warning, red refusal, radius, a system sans and a
+     monospace stack); no component is added until a screen needs it, and there is no token set
+     beyond that.
 6. **Metadata shape** (kickoff 9, with the whole-values flag chosen on 2026-10-06). Each input and
    output of a type has `label` (`{ru, en?}`, `ru` required) and `symbol` (LaTeX, required); an
    input also has `hint` (`{ru, en?}`, optional) and `whole_values_only` (bool). A type that lacks
