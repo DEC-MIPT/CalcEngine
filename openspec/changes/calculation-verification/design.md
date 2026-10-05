@@ -67,7 +67,8 @@ See `proposal.md` (Non-goals).
 10. **Deviation is reported per quantity.** No aggregate percentage is computed, because
     quantities have different units and tolerances.
 11. **Property-test tool and runner** are decided in `bootstrap-dev-environment`. No
-    command is invented here.
+    command is invented here. (Superseded on 2026-10-05 by decision 16:
+    `bootstrap-dev-environment` was archived on 2026-10-04 without deciding them.)
 12. **Development-process delta** adds a requirement instead of rewriting "Test gate with
     >= 95% branch coverage", because the file is shared with Egor and another active
     change (`team-roles-update`) modifies a neighbouring requirement.
@@ -104,6 +105,40 @@ See `proposal.md` (Non-goals).
     value, the expected value, the `tolerance` and its kind (scenario "A quantity
     outside its tolerance"). The rule of at least 3 examples (decision 1) is checked
     against the list of calculation types the suite is given (task 2.4).
+
+16. **Property-test tool and number of cases** (added 2026-10-05, Akim, before tasks
+    2.8-2.10; replaces decision 11). The tool is Hypothesis, a development dependency in
+    `backend/requirements-dev.txt`, so the generating tests live in `backend/tests/` and
+    `backend/app/verification/` never imports it. Each invariant runs on 100 generated
+    cases per calculation type (`max_examples=100`, the tool's default), without the
+    tool's per-case deadline, since the latency requirement is a separate test (task
+    3.7). The seed is recorded in the test report: Hypothesis itself prints only the
+    falsifying input, not the seed (checked 2026-10-05 with Hypothesis 6.168), so
+    `backend/tests/conftest.py` picks a seed when `--hypothesis-seed` is not given, hands
+    it to Hypothesis, and prints it in the pytest report header (`hypothesis seed: <n>`);
+    a run started with `--hypothesis-seed=<n>` repeats it. The example database is off
+    (`database=None`), so a run does not depend on earlier local runs.
+    - Alternative: a generator of our own on `random.Random(seed)`. Rejected: it would
+      add code of our own for generation and lose the shrinking of a failing input.
+17. **The two shared invariants and the valid range** (added 2026-10-05, Akim). For a
+    calculation type, `backend/app/verification/` holds the list of its invariants
+    (identifier, statement, quantities), the valid range of each input the generator may
+    use (a lower and an upper bound in a unit of the input), and a check function per
+    shared invariant; the generating test draws inputs inside that range.
+    - Determinism (requirement "Pure calculation function"): two calls of the pure
+      function with the same inputs and resolved parameters give equal calculation
+      results.
+    - Unit-change consistency (requirement "Explicit units at the boundary"): an input
+      given in a unit other than its base unit gives the same calculation result, field
+      for field and without a tolerance, as that input converted to the base unit with
+      the engine's own `engine.boundary.convert` and given in the base unit. Both sides
+      then reach the formulas with the same floating-point values, so the comparison is
+      exact, and a difference can only mean that the unit acts somewhere other than the
+      boundary.
+    - The valid range is data of the type, like its reference examples: for a synthetic
+      type the tests declare it; for the pilot it is filled by the engineer with the
+      invariants specific to the type (task 2.11). It is not a norm value and not the
+      method's range of application, though it should lie inside it.
 
 ## Swap boundary
 
