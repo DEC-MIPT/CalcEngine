@@ -25,7 +25,7 @@ Executor tags: **[Akim]** engine/backend zone, **[Egor]** catalog/data zone, **[
 
 ## 3. Catalog and data (Egor)
 
-- [ ] 3.1 [Egor] Fill the in-scope and out-of-scope lists in `foundations-shallow`, replacing "TBD"
+- [x] 3.1 [Egor] Fill the in-scope and out-of-scope lists in `foundations-shallow`, replacing "TBD" (2026-10-05: in-scope `foundations_shallow_r`, the type Egor and the PM confirmed in `docs/decisions/first-calculation-type-egor-pm.md`; out-of-scope is its complement, for the PM to confirm with the in-scope list)
 - [ ] 3.2 [Egor] Fill the milestone name for the second domain in `product-vision`
 - [ ] 3.3 [Egor] Confirm the `normatives-catalog` norm-reference marking is compatible with `NormRef` of `norm-source-traceability`
 

@@ -94,5 +94,19 @@ exact heading match did not say that a rule between rows comes only from the nor
 All fixed. Pass 2 minors (task 1.3 wording, the source files of the real designations,
 exact matching labelled as an API rule) were fixed. The only real designations are in
 tasks 2.4 and 2.5 (СП 22.13330.2016, its table 5.5, the coefficients of the pilot),
-taken from `first-calculation-type-egor-pm.md` and
-`calculation-core-contract-formula-execution-akim.md`, all marked unverified.
+  taken from `first-calculation-type-egor-pm.md` and
+  `calculation-core-contract-formula-execution-akim.md`, all marked unverified.
+
+## Section 2: `tester` GO and review (2026-10-05)
+
+- **`tester` GO for `feature/normative-catalog/data`** (2026-10-05): every verify clause
+  of tasks 2.1-2.6 holds; `ruff` and `mypy` clean; 78 tests pass; branch coverage of
+  `normatives_pipeline.pilot_catalog` is 100%. The `tester` agent's first pass (NO-GO)
+  found norm values in code and test data; this was fixed by moving the pilot's
+  coefficient/threshold/formula values into the data registry `ml/configs/pilot.toml`
+  (ingested into `dec_normatives`, mirroring `ml/configs/formulas.toml`), deriving the
+  method bounds from the extracted table 5.5 headings, and replacing real values in test
+  data with synthetic placeholders. The coefficient record of task 2.5 is
+  `docs/decisions/normative-catalog-pilot-coefficients-egor.md`.
+- **Review (Akim): pending.** Egor merged the feature into `develop` after the GO; Akim's
+  review acknowledgement is the remaining step of task 2.7 (recorded here when he gives it).

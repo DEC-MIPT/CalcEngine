@@ -49,35 +49,35 @@ tasks only).
 
 Egor may split these tasks further on his branch; each one stays in his zone.
 
-- [ ] 2.1 [Egor] Store the binding of `foundations_shallow_r` from a registry in his
+- [x] 2.1 [Egor] Store the binding of `foundations_shallow_r` from a registry in his
   zone: for each parameter of the pilot (`design.md` decision 2, column `parameter`), the
   formula number, table, table cell or heading, threshold, check, or method bound it
   comes from, never a value (data); verify: his test shows one binding row per parameter
   of the pilot and no value column in the binding table
-- [ ] 2.2 [Egor] Store each bound formula's expression tree in the JSON form of the spec
+- [x] 2.2 [Egor] Store each bound formula's expression tree in the JSON form of the spec
   "Expression tree form in the catalog", with the unit of every symbol and of the
   result symbol, built at ingestion (data); verify: his test validates every stored tree
   of the pilot against the node set, the function list and the limits, and a formula he
   cannot convert is not stored as bound
-- [ ] 2.3 [Egor] Store `status` and `provenance` per formula, table value, threshold,
+- [x] 2.3 [Egor] Store `status` and `provenance` per formula, table value, threshold,
   check and method bound, as the pipeline sets them (`machine-extracted`, `unverified`)
   (data); verify: his test shows both columns on every row the views give for the pilot,
   and no `machine-extracted` row with status `verified`
-- [ ] 2.4 [Egor] Store the row headings of the pilot's selected table (table 5.5 of
+- [x] 2.4 [Egor] Store the row headings of the pilot's selected table (table 5.5 of
   СП 22.13330.2016; edition and clause unverified until checked against the primary
   text) with their symbol and unit (the selecting input's base unit where the table
   allows it, `design.md` decision 6), and the method's range bounds of the pilot with
   their quantity and unit (data); verify: his test shows one heading symbol, value and
   unit on every row of each selected parameter, no duplicate heading value, and every
   bound naming an input of the pilot
-- [ ] 2.5 [Egor] Check the coefficients `γc1`, `γc2`, `k`, `kz` of the pilot against the
+- [x] 2.5 [Egor] Check the coefficients `γc1`, `γc2`, `k`, `kz` of the pilot against the
   primary text of СП 22.13330.2016 (edition and clauses unverified until this check) and
   store them like the table of task 2.4, each with its `NormRef` (data); verify: a dated
   record in `docs/decisions/` names, for each coefficient, the document, the edition and
   the clause or table it was found in, and who checked it; the stored rows keep
   `provenance = machine-extracted` and `status = unverified`, because raising a status is
   the gate of `norm-source-traceability` (WP3), not of this change
-- [ ] 2.6 [Egor] Create the schema `catalog_read` with the views and the `search`
+- [x] 2.6 [Egor] Create the schema `catalog_read` with the views and the `search`
   function of `design.md` decision 2, and the role `dec_normatives_reader` with the
   privileges, the `REVOKE` on `public` and the password variable of decision 1,
   idempotently, as part of ingestion (data); verify: running the ingestion twice

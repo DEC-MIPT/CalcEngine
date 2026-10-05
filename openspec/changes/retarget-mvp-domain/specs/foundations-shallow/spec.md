@@ -10,8 +10,9 @@ clause number.
 
 ### Requirement: In-scope calculation types
 The system SHALL support only the calculation types listed as in scope for shallow
-foundations. The list is: TBD. DRAFT — needs Egor review: Egor and the PM fill in the
-calculation type names; this draft invents none.
+foundations. The list is: design soil resistance of the base (R) of a shallow foundation
+on a natural base, registered as `foundations_shallow_r`. Egor and the PM confirmed this
+type on 2026-09-27 (`docs/decisions/first-calculation-type-egor-pm.md`, questions 1-2).
 
 #### Scenario: In-scope type runs
 - **WHEN** a user selects a calculation type from the in-scope list
@@ -25,8 +26,9 @@ calculation type names; this draft invents none.
 
 ### Requirement: Out-of-scope cases
 The system SHALL treat the cases on the out-of-scope list as unsupported for shallow
-foundations. The list is: TBD. DRAFT — needs Egor review: Egor and the PM fill in the
-list from the confirmed scope; this draft invents no engineering cases.
+foundations. The list is: every calculation of shallow foundations other than the
+in-scope type, and every foundation type other than a shallow foundation on a natural
+base. This is the complement of the in-scope list; the PM confirms it with that list.
 
 #### Scenario: Out-of-scope case requested
 - **WHEN** a user asks for a case on the out-of-scope list
