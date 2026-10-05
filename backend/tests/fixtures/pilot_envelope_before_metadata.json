@@ -1,0 +1,1061 @@
+{
+  "above_threshold": {
+    "inputs": {
+      "b": {
+        "unit": "m",
+        "value": 8.0
+      },
+      "c_II": {
+        "unit": "kPa",
+        "value": 3.0
+      },
+      "d_1": {
+        "unit": "m",
+        "value": 1.0
+      },
+      "d_b": {
+        "unit": "m",
+        "value": 0.5
+      },
+      "gamma_II": {
+        "unit": "kN/m3",
+        "value": 10.0
+      },
+      "gamma_II_prime": {
+        "unit": "kN/m3",
+        "value": 20.0
+      },
+      "p": {
+        "unit": "kPa",
+        "value": 100.0
+      },
+      "phi_II": {
+        "unit": "deg",
+        "value": 20.0
+      }
+    },
+    "result": {
+      "engine_version": "0.1.0",
+      "engineer_rules": [
+        {
+          "engineer": "<ENGINEER>",
+          "rationale": "<RATIONALE>"
+        }
+      ],
+      "input_hash": "8784ccd73a7d80867c2aecb9ed731e1a9ae6cb6d972e87d6c932d396f7703768",
+      "norm_refs": [
+        {
+          "clause": "<CLAUSE-PLACEHOLDER>",
+          "document": "<NORM-DOC-PLACEHOLDER>",
+          "edition": "unverified",
+          "provenance": "machine-extracted",
+          "status": "unverified"
+        }
+      ],
+      "outputs": [
+        {
+          "quantity": "R",
+          "rounding_rule": {
+            "decimals": 1,
+            "mode": "half_up"
+          },
+          "rounding_source": {
+            "engineer": "<ENGINEER>",
+            "rationale": "<RATIONALE>"
+          },
+          "unit": "kPa",
+          "value": 220.0
+        }
+      ],
+      "trace": [
+        {
+          "expression": "gamma_c1",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 2.0
+          },
+          "step_id": "gamma_c1",
+          "substitutions": []
+        },
+        {
+          "expression": "gamma_c2",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 3.0
+          },
+          "step_id": "gamma_c2",
+          "substitutions": []
+        },
+        {
+          "expression": "k",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 4.0
+          },
+          "step_id": "k",
+          "substitutions": []
+        },
+        {
+          "expression": "M_gamma = M_gamma\\left(phi_II\\right)",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 0.5
+          },
+          "step_id": "M_gamma",
+          "substitutions": [
+            {
+              "symbol": "phi_II",
+              "unit": "deg",
+              "value": 20.0
+            }
+          ]
+        },
+        {
+          "expression": "M_q = M_q\\left(phi_II\\right)",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 5.0
+          },
+          "step_id": "M_q",
+          "substitutions": [
+            {
+              "symbol": "phi_II",
+              "unit": "deg",
+              "value": 20.0
+            }
+          ]
+        },
+        {
+          "expression": "M_c = M_c\\left(phi_II\\right)",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 10.0
+          },
+          "step_id": "M_c",
+          "substitutions": [
+            {
+              "symbol": "phi_II",
+              "unit": "deg",
+              "value": 20.0
+            }
+          ]
+        },
+        {
+          "expression": "k_z = b / 4",
+          "kind": "formula",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 2.0
+          },
+          "step_id": "k_z",
+          "substitutions": [
+            {
+              "symbol": "b",
+              "unit": "m",
+              "value": 8.0
+            }
+          ]
+        },
+        {
+          "expression": "R = \\mathrm{synthetic}",
+          "kind": "formula",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "kPa",
+            "value": 220.0
+          },
+          "step_id": "R",
+          "substitutions": [
+            {
+              "symbol": "gamma_c1",
+              "unit": "1",
+              "value": 2.0
+            },
+            {
+              "symbol": "c_II",
+              "unit": "kPa",
+              "value": 3.0
+            },
+            {
+              "symbol": "M_c",
+              "unit": "1",
+              "value": 10.0
+            },
+            {
+              "symbol": "gamma_c2",
+              "unit": "1",
+              "value": 3.0
+            },
+            {
+              "symbol": "M_q",
+              "unit": "1",
+              "value": 5.0
+            },
+            {
+              "symbol": "d_1",
+              "unit": "m",
+              "value": 1.0
+            },
+            {
+              "symbol": "gamma_II_prime",
+              "unit": "kN/m3",
+              "value": 20.0
+            },
+            {
+              "symbol": "k",
+              "unit": "1",
+              "value": 4.0
+            },
+            {
+              "symbol": "M_gamma",
+              "unit": "1",
+              "value": 0.5
+            },
+            {
+              "symbol": "k_z",
+              "unit": "1",
+              "value": 2.0
+            },
+            {
+              "symbol": "b",
+              "unit": "m",
+              "value": 8.0
+            },
+            {
+              "symbol": "d_b",
+              "unit": "m",
+              "value": 0.5
+            },
+            {
+              "symbol": "gamma_II",
+              "unit": "kN/m3",
+              "value": 10.0
+            }
+          ]
+        },
+        {
+          "expression": "p \\le R",
+          "kind": "check",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "operator": "le",
+          "passed": true,
+          "result": {
+            "unit": "kPa",
+            "value": 100.0
+          },
+          "right": {
+            "unit": "kPa",
+            "value": 220.0
+          },
+          "step_id": "p_le_R",
+          "substitutions": [
+            {
+              "symbol": "p",
+              "unit": "kPa",
+              "value": 100.0
+            },
+            {
+              "symbol": "R",
+              "unit": "kPa",
+              "value": 220.0
+            }
+          ]
+        }
+      ],
+      "unverified_step_count": 9,
+      "verdict": "pass",
+      "verdict_reason": {
+        "kind": "check",
+        "step_id": "p_le_R"
+      },
+      "warnings": []
+    }
+  },
+  "fail": {
+    "inputs": {
+      "b": {
+        "unit": "m",
+        "value": 2.0
+      },
+      "c_II": {
+        "unit": "kPa",
+        "value": 3.0
+      },
+      "d_1": {
+        "unit": "m",
+        "value": 1.0
+      },
+      "d_b": {
+        "unit": "m",
+        "value": 0.5
+      },
+      "gamma_II": {
+        "unit": "kN/m3",
+        "value": 10.0
+      },
+      "gamma_II_prime": {
+        "unit": "kN/m3",
+        "value": 20.0
+      },
+      "p": {
+        "unit": "kPa",
+        "value": 200.0
+      },
+      "phi_II": {
+        "unit": "deg",
+        "value": 20.0
+      }
+    },
+    "result": {
+      "engine_version": "0.1.0",
+      "engineer_rules": [
+        {
+          "engineer": "<ENGINEER>",
+          "rationale": "<RATIONALE>"
+        }
+      ],
+      "input_hash": "325b2bd7e2a18566150a9b015926b0e6340ff7cd57259a5f157e9bb269d85e35",
+      "norm_refs": [
+        {
+          "clause": "<CLAUSE-PLACEHOLDER>",
+          "document": "<NORM-DOC-PLACEHOLDER>",
+          "edition": "unverified",
+          "provenance": "machine-extracted",
+          "status": "unverified"
+        }
+      ],
+      "outputs": [
+        {
+          "quantity": "R",
+          "rounding_rule": {
+            "decimals": 1,
+            "mode": "half_up"
+          },
+          "rounding_source": {
+            "engineer": "<ENGINEER>",
+            "rationale": "<RATIONALE>"
+          },
+          "unit": "kPa",
+          "value": 172.5
+        }
+      ],
+      "trace": [
+        {
+          "expression": "gamma_c1",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 2.0
+          },
+          "step_id": "gamma_c1",
+          "substitutions": []
+        },
+        {
+          "expression": "gamma_c2",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 3.0
+          },
+          "step_id": "gamma_c2",
+          "substitutions": []
+        },
+        {
+          "expression": "k",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 4.0
+          },
+          "step_id": "k",
+          "substitutions": []
+        },
+        {
+          "expression": "M_gamma = M_gamma\\left(phi_II\\right)",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 0.5
+          },
+          "step_id": "M_gamma",
+          "substitutions": [
+            {
+              "symbol": "phi_II",
+              "unit": "deg",
+              "value": 20.0
+            }
+          ]
+        },
+        {
+          "expression": "M_q = M_q\\left(phi_II\\right)",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 5.0
+          },
+          "step_id": "M_q",
+          "substitutions": [
+            {
+              "symbol": "phi_II",
+              "unit": "deg",
+              "value": 20.0
+            }
+          ]
+        },
+        {
+          "expression": "M_c = M_c\\left(phi_II\\right)",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 10.0
+          },
+          "step_id": "M_c",
+          "substitutions": [
+            {
+              "symbol": "phi_II",
+              "unit": "deg",
+              "value": 20.0
+            }
+          ]
+        },
+        {
+          "expression": "k_z = \\kappa",
+          "kind": "formula",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 3.0
+          },
+          "step_id": "k_z",
+          "substitutions": []
+        },
+        {
+          "expression": "R = \\mathrm{synthetic}",
+          "kind": "formula",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "kPa",
+            "value": 172.5
+          },
+          "step_id": "R",
+          "substitutions": [
+            {
+              "symbol": "gamma_c1",
+              "unit": "1",
+              "value": 2.0
+            },
+            {
+              "symbol": "c_II",
+              "unit": "kPa",
+              "value": 3.0
+            },
+            {
+              "symbol": "M_c",
+              "unit": "1",
+              "value": 10.0
+            },
+            {
+              "symbol": "gamma_c2",
+              "unit": "1",
+              "value": 3.0
+            },
+            {
+              "symbol": "M_q",
+              "unit": "1",
+              "value": 5.0
+            },
+            {
+              "symbol": "d_1",
+              "unit": "m",
+              "value": 1.0
+            },
+            {
+              "symbol": "gamma_II_prime",
+              "unit": "kN/m3",
+              "value": 20.0
+            },
+            {
+              "symbol": "k",
+              "unit": "1",
+              "value": 4.0
+            },
+            {
+              "symbol": "M_gamma",
+              "unit": "1",
+              "value": 0.5
+            },
+            {
+              "symbol": "k_z",
+              "unit": "1",
+              "value": 3.0
+            },
+            {
+              "symbol": "b",
+              "unit": "m",
+              "value": 2.0
+            },
+            {
+              "symbol": "d_b",
+              "unit": "m",
+              "value": 0.5
+            },
+            {
+              "symbol": "gamma_II",
+              "unit": "kN/m3",
+              "value": 10.0
+            }
+          ]
+        },
+        {
+          "expression": "p \\le R",
+          "kind": "check",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "operator": "le",
+          "passed": false,
+          "result": {
+            "unit": "kPa",
+            "value": 200.0
+          },
+          "right": {
+            "unit": "kPa",
+            "value": 172.5
+          },
+          "step_id": "p_le_R",
+          "substitutions": [
+            {
+              "symbol": "p",
+              "unit": "kPa",
+              "value": 200.0
+            },
+            {
+              "symbol": "R",
+              "unit": "kPa",
+              "value": 172.5
+            }
+          ]
+        }
+      ],
+      "unverified_step_count": 9,
+      "verdict": "fail",
+      "verdict_reason": {
+        "kind": "check",
+        "step_id": "p_le_R"
+      },
+      "warnings": []
+    }
+  },
+  "pass": {
+    "inputs": {
+      "b": {
+        "unit": "m",
+        "value": 2.0
+      },
+      "c_II": {
+        "unit": "kPa",
+        "value": 3.0
+      },
+      "d_1": {
+        "unit": "m",
+        "value": 1.0
+      },
+      "d_b": {
+        "unit": "m",
+        "value": 0.5
+      },
+      "gamma_II": {
+        "unit": "kN/m3",
+        "value": 10.0
+      },
+      "gamma_II_prime": {
+        "unit": "kN/m3",
+        "value": 20.0
+      },
+      "p": {
+        "unit": "kPa",
+        "value": 100.0
+      },
+      "phi_II": {
+        "unit": "deg",
+        "value": 20.0
+      }
+    },
+    "result": {
+      "engine_version": "0.1.0",
+      "engineer_rules": [
+        {
+          "engineer": "<ENGINEER>",
+          "rationale": "<RATIONALE>"
+        }
+      ],
+      "input_hash": "193f19fc07f1b2175bb4f0afa61a9f6c3224c678c0bb4e37a7c769b5abe0771e",
+      "norm_refs": [
+        {
+          "clause": "<CLAUSE-PLACEHOLDER>",
+          "document": "<NORM-DOC-PLACEHOLDER>",
+          "edition": "unverified",
+          "provenance": "machine-extracted",
+          "status": "unverified"
+        }
+      ],
+      "outputs": [
+        {
+          "quantity": "R",
+          "rounding_rule": {
+            "decimals": 1,
+            "mode": "half_up"
+          },
+          "rounding_source": {
+            "engineer": "<ENGINEER>",
+            "rationale": "<RATIONALE>"
+          },
+          "unit": "kPa",
+          "value": 172.5
+        }
+      ],
+      "trace": [
+        {
+          "expression": "gamma_c1",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 2.0
+          },
+          "step_id": "gamma_c1",
+          "substitutions": []
+        },
+        {
+          "expression": "gamma_c2",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 3.0
+          },
+          "step_id": "gamma_c2",
+          "substitutions": []
+        },
+        {
+          "expression": "k",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 4.0
+          },
+          "step_id": "k",
+          "substitutions": []
+        },
+        {
+          "expression": "M_gamma = M_gamma\\left(phi_II\\right)",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 0.5
+          },
+          "step_id": "M_gamma",
+          "substitutions": [
+            {
+              "symbol": "phi_II",
+              "unit": "deg",
+              "value": 20.0
+            }
+          ]
+        },
+        {
+          "expression": "M_q = M_q\\left(phi_II\\right)",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 5.0
+          },
+          "step_id": "M_q",
+          "substitutions": [
+            {
+              "symbol": "phi_II",
+              "unit": "deg",
+              "value": 20.0
+            }
+          ]
+        },
+        {
+          "expression": "M_c = M_c\\left(phi_II\\right)",
+          "kind": "table",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 10.0
+          },
+          "step_id": "M_c",
+          "substitutions": [
+            {
+              "symbol": "phi_II",
+              "unit": "deg",
+              "value": 20.0
+            }
+          ]
+        },
+        {
+          "expression": "k_z = \\kappa",
+          "kind": "formula",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "1",
+            "value": 3.0
+          },
+          "step_id": "k_z",
+          "substitutions": []
+        },
+        {
+          "expression": "R = \\mathrm{synthetic}",
+          "kind": "formula",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "result": {
+            "unit": "kPa",
+            "value": 172.5
+          },
+          "step_id": "R",
+          "substitutions": [
+            {
+              "symbol": "gamma_c1",
+              "unit": "1",
+              "value": 2.0
+            },
+            {
+              "symbol": "c_II",
+              "unit": "kPa",
+              "value": 3.0
+            },
+            {
+              "symbol": "M_c",
+              "unit": "1",
+              "value": 10.0
+            },
+            {
+              "symbol": "gamma_c2",
+              "unit": "1",
+              "value": 3.0
+            },
+            {
+              "symbol": "M_q",
+              "unit": "1",
+              "value": 5.0
+            },
+            {
+              "symbol": "d_1",
+              "unit": "m",
+              "value": 1.0
+            },
+            {
+              "symbol": "gamma_II_prime",
+              "unit": "kN/m3",
+              "value": 20.0
+            },
+            {
+              "symbol": "k",
+              "unit": "1",
+              "value": 4.0
+            },
+            {
+              "symbol": "M_gamma",
+              "unit": "1",
+              "value": 0.5
+            },
+            {
+              "symbol": "k_z",
+              "unit": "1",
+              "value": 3.0
+            },
+            {
+              "symbol": "b",
+              "unit": "m",
+              "value": 2.0
+            },
+            {
+              "symbol": "d_b",
+              "unit": "m",
+              "value": 0.5
+            },
+            {
+              "symbol": "gamma_II",
+              "unit": "kN/m3",
+              "value": 10.0
+            }
+          ]
+        },
+        {
+          "expression": "p \\le R",
+          "kind": "check",
+          "norm_refs": [
+            {
+              "clause": "<CLAUSE-PLACEHOLDER>",
+              "document": "<NORM-DOC-PLACEHOLDER>",
+              "edition": "unverified",
+              "provenance": "machine-extracted",
+              "status": "unverified"
+            }
+          ],
+          "operator": "le",
+          "passed": true,
+          "result": {
+            "unit": "kPa",
+            "value": 100.0
+          },
+          "right": {
+            "unit": "kPa",
+            "value": 172.5
+          },
+          "step_id": "p_le_R",
+          "substitutions": [
+            {
+              "symbol": "p",
+              "unit": "kPa",
+              "value": 100.0
+            },
+            {
+              "symbol": "R",
+              "unit": "kPa",
+              "value": 172.5
+            }
+          ]
+        }
+      ],
+      "unverified_step_count": 9,
+      "verdict": "pass",
+      "verdict_reason": {
+        "kind": "check",
+        "step_id": "p_le_R"
+      },
+      "warnings": []
+    }
+  }
+}
