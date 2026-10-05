@@ -1,6 +1,6 @@
 # Design
 
-> DRAFT — needs Egor review.
+> Reviewed by Egor (2026-10-05); the data-zone parts below are his.
 
 ## Context
 
@@ -25,7 +25,8 @@ See `proposal.md` (Non-goals).
    from Akim's confirmation and `CLAUDE.md`. The kickoff file with the Decision section
    named in the task is not in the repository (assumption A1 below).
 2. **Only the first domain gets a capability now.** Roadmap section 3.1 allows one new
-   capability. The second domain is named in `product-vision` with a milestone.
+   capability. The second domain (internal water supply) is named in `product-vision`
+   with the `water-supply-internal` milestone.
 3. **Owner spec per rule.**
 
    | Rule | Owner | Others |
@@ -36,12 +37,13 @@ See `proposal.md` (Non-goals).
    | Norm-reference marking | `normatives-catalog` | `transparent-output` follows it |
 
 4. **Synthetic norm references.** Examples in specs use `<NORM-DOC-PLACEHOLDER>`,
-   edition `unverified`, clause `<CLAUSE-PLACEHOLDER>`, and `source: unverified`, never a
+   edition `unverified`, clause `<CLAUSE-PLACEHOLDER>`, and `status: unverified`, never a
    real clause number. The exact reference fields are defined by the planned change
    `norm-source-traceability` (`NormRef`), so this change does not fix a field format.
-5. **Placeholders in the scope capability.** The in-scope calculation type names and the
-   out-of-scope list are marked for Egor and the PM to fill. The draft does not invent
-   them.
+5. **Placeholders in the scope capability.** The in-scope list is filled (the
+   `foundations_shallow_r` type, confirmed by Egor and the PM in
+   `docs/decisions/first-calculation-type-egor-pm.md`); the out-of-scope list is its
+   complement, for the PM to confirm with the in-scope list (task 1.4).
 6. **ML-in-MVP (PM-approved).** The normative pipeline (collector, regex baseline parser,
    embeddings retrieval on CPU) is part of the MVP; no ML runs in the calculation path;
    generative-LLM structured extraction is deferred. The fold touches `product-vision`,

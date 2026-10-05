@@ -1,6 +1,7 @@
 # Tasks
 
-> DRAFT — needs Egor review. Egor leads this change and owns the data zone.
+> Reviewed by Egor (2026-10-05). Egor leads this change and owns the data zone;
+> Akim drafted it and wrote the engine-facing scenarios.
 
 Branch: planning phase, so the work stays on the `Specs` line (`Specs-onboarding` now,
 merged into `Specs` after review). There is no application code, so no
@@ -15,7 +16,7 @@ Executor tags: **[Akim]** engine/backend zone, **[Egor]** catalog/data zone, **[
 
 - [x] 1.1 [Akim] Draft proposal, design, and the seven spec deltas (2026-09-26)
 - [x] 1.2 [Akim] Retarget the domain sentence in `openspec/config.yaml` (only domain-specific lines)
-- [ ] 1.3 [Egor] Review the whole draft and rewrite his parts: `normatives-catalog` delta, `foundations-shallow` lists, `design.md` decisions
+- [x] 1.3 [Egor] Review the whole draft and rewrite his parts: `normatives-catalog` delta, `foundations-shallow` lists, `design.md` decisions (2026-10-05: reviewed; `source: unverified` → `status: unverified` to match the shared `NormRef`; `foundations-shallow` lists filled in 3.1; DRAFT markers removed)
 - [ ] 1.4 [PM] Approve the non-goals list, the domain order, and the B2C limit (unverified in `user-accounts`)
 
 ## 2. Engine-facing scenarios (Akim)
@@ -26,15 +27,15 @@ Executor tags: **[Akim]** engine/backend zone, **[Egor]** catalog/data zone, **[
 ## 3. Catalog and data (Egor)
 
 - [x] 3.1 [Egor] Fill the in-scope and out-of-scope lists in `foundations-shallow`, replacing "TBD" (2026-10-05: in-scope `foundations_shallow_r`, the type Egor and the PM confirmed in `docs/decisions/first-calculation-type-egor-pm.md`; out-of-scope is its complement, for the PM to confirm with the in-scope list)
-- [ ] 3.2 [Egor] Fill the milestone name for the second domain in `product-vision`
-- [ ] 3.3 [Egor] Confirm the `normatives-catalog` norm-reference marking is compatible with `NormRef` of `norm-source-traceability`
+- [x] 3.2 [Egor] Fill the milestone name for the second domain in `product-vision` (2026-10-05: `water-supply-internal`)
+- [x] 3.3 [Egor] Confirm the `normatives-catalog` norm-reference marking is compatible with `NormRef` of `norm-source-traceability` (2026-10-05: aligned the marking to the shared interface `NormRef {document, edition, clause, status, provenance}`; the delta no longer uses a `source` field)
 
 ## 4. Cleanup of the placeholder domain outside this change
 
 Found by the grep sweep on 2026-09-26. Not edited by this draft; the owner decides.
 
-- [ ] 4.1 [Egor] `openspec/changes/backend-layered-architecture/tasks.md` lines 21, 27, 32 (pilot source, pilot parameter file, reference implementation of the placeholder domain): retarget or replace by domain-neutral wording. Shared area, owned by the backend-layered-architecture change
-- [ ] 4.2 [Egor] `openspec/changes/backend-layered-architecture/design.md` lines 62-63: reference-implementation wording. Same owner as 4.1
+- [x] 4.1 [Egor] `openspec/changes/backend-layered-architecture/tasks.md` lines 21, 27, 32 (pilot source, pilot parameter file, reference implementation of the placeholder domain): retarget or replace by domain-neutral wording. Shared area, owned by the backend-layered-architecture change (2026-10-05: closed — the placeholder-domain wording is already gone from that file; the pilot tasks moved to `calculation-core-contract` task 7.1, and its "Follow-ups outside this change" note says to close or update these citations)
+- [x] 4.2 [Egor] `openspec/changes/backend-layered-architecture/design.md` lines 62-63: reference-implementation wording. Same owner as 4.1 (2026-10-05: closed together with 4.1 — the referenced lines no longer hold placeholder wording)
 - [ ] 4.3 [Agent: spec-keeper] At archive, confirm the sync removed the placeholder-domain text from `openspec/specs/product-vision`, `calculation-engine`, `normatives-catalog`, and `transparent-output`, and that `openspec/config.yaml` is clean
 
 ## 5. Validate and close

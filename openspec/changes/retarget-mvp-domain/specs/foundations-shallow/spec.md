@@ -17,7 +17,7 @@ type on 2026-09-27 (`docs/decisions/first-calculation-type-egor-pm.md`, question
 #### Scenario: In-scope type runs
 - **WHEN** a user selects a calculation type from the in-scope list
 - **THEN** the type is available end-to-end in the MVP, and its norm references are
-  either verified or marked `source: unverified`
+  either verified or marked `status: unverified`
 
 #### Scenario: List is complete before apply
 - **WHEN** the change is proposed for apply
