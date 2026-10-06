@@ -21,7 +21,7 @@ export function I18nProvider({
       language,
       setLanguage,
       t: (key) => translate(dictionaries, language, key),
-      formatNumber: (number) => formatNumber(number, language),
+      formatNumber: (number, minimumFractionDigits) => formatNumber(number, language, minimumFractionDigits),
     }),
     [language],
   )

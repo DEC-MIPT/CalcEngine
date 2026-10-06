@@ -10,8 +10,9 @@ export function translate(
 
 const locales: Readonly<Record<Language, string>> = { ru: 'ru-RU', en: 'en-US' }
 
-export function formatNumber(value: number, language: Language): string {
+export function formatNumber(value: number, language: Language, minimumFractionDigits = 0): string {
   return new Intl.NumberFormat(locales[language], {
+    minimumFractionDigits,
     maximumFractionDigits: 20,
     useGrouping: false,
   }).format(value)

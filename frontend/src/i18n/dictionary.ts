@@ -49,6 +49,15 @@ export const ru = {
   'trace.op.lt': 'меньше',
   'trace.op.ge': 'больше или равно',
   'trace.op.gt': 'больше',
+  'outputs.title': 'Выходные величины',
+  'outputs.rounding': 'Округление',
+  'outputs.decimals': 'знаков после запятой',
+  'outputs.mode.half_up': 'до ближайшего, половина вверх',
+  'outputs.mode.half_even': 'до ближайшего, половина к чётному',
+  'outputs.source': 'Источник правила',
+  'source.engineerSet': 'Задано инженером',
+  'source.engineer': 'Инженер',
+  'source.rationale': 'Обоснование',
 } as const
 
 export type TextKey = keyof typeof ru
@@ -101,6 +110,15 @@ export const en: PartialDictionary = {
   'trace.op.lt': 'less than',
   'trace.op.ge': 'greater than or equal to',
   'trace.op.gt': 'greater than',
+  'outputs.title': 'Outputs',
+  'outputs.rounding': 'Rounding',
+  'outputs.decimals': 'decimal places',
+  'outputs.mode.half_up': 'to nearest, ties up',
+  'outputs.mode.half_even': 'to nearest, ties to even',
+  'outputs.source': 'Rule source',
+  'source.engineerSet': 'Set by the engineer',
+  'source.engineer': 'Engineer',
+  'source.rationale': 'Rationale',
 }
 
 export interface Dictionaries {

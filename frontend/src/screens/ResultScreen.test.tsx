@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -67,7 +67,18 @@ describe('opening a result by its address (4.3)', () => {
     open(`/calculations/${PASS_ID}`)
 
     expect(await screen.findByRole('heading', { name: 'Ход расчёта', level: 2 })).toBeInTheDocument()
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(passEnvelope.trace.length)
+    expect(within(screen.getByRole('region', { name: 'Ход расчёта' })).getAllByRole('heading', { level: 3 })).toHaveLength(
+      passEnvelope.trace.length,
+    )
+  })
+
+  it('shows the outputs above the trace', async () => {
+    open(`/calculations/${PASS_ID}`)
+
+    const outputs = await screen.findByRole('heading', { name: 'Выходные величины', level: 2 })
+    const trace = screen.getByRole('heading', { name: 'Ход расчёта', level: 2 })
+    expect(outputs.compareDocumentPosition(trace) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(within(document.querySelector<HTMLElement>('[data-output="R"]')!).getByText('172,5 кПа')).toBeInTheDocument()
   })
 
   it('shows the loading state first and has no accessibility violations', async () => {

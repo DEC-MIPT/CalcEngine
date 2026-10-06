@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { Link, useParams } from 'react-router'
 import { api, unwrap } from '@/api/client'
 import { useRequest } from '@/api/useRequest'
+import { Outputs } from '@/components/Outputs'
 import { ErrorState, LoadingState, NotFoundState } from '@/components/RequestStates'
 import { Trace } from '@/components/Trace'
 import { useI18n } from '@/i18n/context'
@@ -31,6 +32,7 @@ export function ResultScreen() {
           <p>
             <Link to={`/calculations/${state.data.result_id}/report`}>{t('result.toReport')}</Link>
           </p>
+          <Outputs outputs={state.data.outputs} />
           <Trace steps={state.data.trace} unverifiedStepCount={state.data.unverified_step_count} />
         </>
       )}

@@ -26,6 +26,11 @@ describe('formatNumber', () => {
     expect(formatNumber(172.5, 'en')).toBe('172.5')
   })
 
+  it('keeps trailing zeros up to the minimum and never cuts further digits', () => {
+    expect(formatNumber(172, 'ru', 1)).toBe('172,0')
+    expect(formatNumber(172.456, 'en', 1)).toBe('172.456')
+  })
+
   it('does not round or group the value', () => {
     expect(formatNumber(1234567.123456, 'en')).toBe('1234567.123456')
   })
