@@ -7,6 +7,6 @@ describe('App', () => {
     render(<App />)
 
     expect(screen.getByRole('heading', { name: 'Выберите тип расчёта' })).toBeInTheDocument()
-    await screen.findByRole('link', { name: 'foundations_shallow_r' })
+    await screen.findByRole('link', { name: 'Расчётное сопротивление грунта' })
   })
 })

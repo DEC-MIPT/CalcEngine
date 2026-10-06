@@ -2,6 +2,7 @@ import { WarningCircle } from '@phosphor-icons/react'
 import { Link } from 'react-router'
 import type { ApiError } from '@/api/client'
 import { useI18n } from '@/i18n/context'
+import type { TextKey } from '@/i18n/dictionary'
 import { Button } from './ui/button'
 
 export function LoadingState() {
@@ -13,7 +14,13 @@ export function LoadingState() {
   )
 }
 
-export function ErrorState({ error, onRetry }: { error: ApiError; onRetry: () => void }) {
+type ErrorStateProps = {
+  error: ApiError
+  onRetry: () => void
+  title?: TextKey
+}
+
+export function ErrorState({ error, onRetry, title }: ErrorStateProps) {
   const { t } = useI18n()
   const unavailable = error.kind === 'network' || error.status === 503
   return (
@@ -23,13 +30,15 @@ export function ErrorState({ error, onRetry }: { error: ApiError; onRetry: () =>
     >
       <WarningCircle aria-hidden="true" weight="fill" size={24} className="mt-0.5 shrink-0 text-destructive" />
       <div className="grid gap-2">
-        <p className="font-medium">{t(unavailable ? 'state.unavailable' : 'state.failed')}</p>
+        <p className="font-medium">{t(title ?? (unavailable ? 'state.unavailable' : 'state.failed'))}</p>
         {error.kind === 'api' && (
           <>
             <p className="text-sm">
               {t('state.code')}: <code>{error.code}</code>
             </p>
-            <p className="text-sm">{error.message}</p>
+            <p className="text-sm">
+              {t('state.serverMessage')}: {error.message}
+            </p>
           </>
         )}
         <div>

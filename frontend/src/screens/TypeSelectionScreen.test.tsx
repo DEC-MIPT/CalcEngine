@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
@@ -12,7 +12,12 @@ function open() {
 }
 
 const [pilot] = calculationTypes
-const second = { ...pilot, name: 'second_type' }
+const second = {
+  ...pilot,
+  name: 'second_type',
+  outputs: [{ ...pilot.outputs[0], label: { ru: 'Вторая величина', en: 'Second quantity' } }],
+}
+const PILOT_NAME = 'Расчётное сопротивление грунта'
 
 describe('TypeSelectionScreen', () => {
   it('lists every type of the listing, shows loading first, and has no a11y violations', async () => {
@@ -20,9 +25,13 @@ describe('TypeSelectionScreen', () => {
     const { container } = open()
 
     expect(screen.getByRole('status')).toBeInTheDocument()
-    const links = await screen.findAllByRole('link', { name: /_/ })
+    const table = await screen.findByRole('table')
+    const links = await within(table).findAllByRole('link')
 
-    expect(links.map((link) => link.textContent)).toEqual(['foundations_shallow_r', 'second_type'])
+    expect(links.map((link) => link.textContent)).toEqual([PILOT_NAME, 'Вторая величина'])
+    expect(within(table).getByText('foundations_shallow_r')).toBeInTheDocument()
+    expect(within(table).getByText('second_type')).toBeInTheDocument()
+    expect(within(table).getAllByText(String(pilot.inputs.length))).toHaveLength(2)
     await expectNoA11yViolations(container)
   })
 
@@ -31,7 +40,7 @@ describe('TypeSelectionScreen', () => {
     const router = createMemoryRouter(routes, { initialEntries: ['/'] })
     render(<RouterProvider router={router} />)
 
-    fireEvent.click(await screen.findByRole('link', { name: 'second_type' }))
+    fireEvent.click(await screen.findByRole('link', { name: 'Вторая величина' }))
 
     expect(screen.getByRole('heading', { name: 'Исходные данные' })).toBeInTheDocument()
     expect(await screen.findByText('second_type')).toBeInTheDocument()
@@ -42,18 +51,24 @@ describe('TypeSelectionScreen', () => {
     server.use(http.get('*/calculation-types', () => HttpResponse.json([{ ...pilot, name: 'a b&c' }])))
     open()
 
-    expect(await screen.findByRole('link', { name: 'a b&c' })).toHaveAttribute(
+    expect(await screen.findByRole('link', { name: PILOT_NAME })).toHaveAttribute(
       'href',
       '/calculations/new?type=a%20b%26c',
     )
   })
 
-  it('says so when the listing is empty', async () => {
-    server.use(http.get('*/calculation-types', () => HttpResponse.json([])))
+  it('calls an empty listing a configuration fault and retries it', async () => {
+    let types: unknown[] = []
+    server.use(http.get('*/calculation-types', () => HttpResponse.json(types)))
     open()
 
-    expect(await screen.findByText('Нет доступных типов расчёта.')).toBeInTheDocument()
-    expect(screen.queryByRole('list')).not.toBeInTheDocument()
+    expect(await screen.findByText(/Реестр типов расчёта пуст/)).toBeInTheDocument()
+    expect(within(screen.getByRole('table')).queryByRole('link')).not.toBeInTheDocument()
+
+    types = [pilot]
+    fireEvent.click(screen.getByRole('button', { name: 'Повторить' }))
+
+    expect(await screen.findByRole('link', { name: PILOT_NAME })).toBeInTheDocument()
   })
 
   it('shows a 503 with its code and retries the same request', async () => {
@@ -68,12 +83,14 @@ describe('TypeSelectionScreen', () => {
     open()
 
     const alert = await screen.findByRole('alert')
-    expect(alert).toHaveTextContent('Расчёт сейчас недоступен.')
+    expect(alert).toHaveTextContent('Не удалось загрузить список типов расчёта.')
+    expect(alert).not.toHaveTextContent('Расчёт сейчас недоступен.')
     expect(alert).toHaveTextContent('parameter_source_unavailable')
+    expect(alert).toHaveTextContent('Сообщение сервера: x')
 
     healthy = true
     fireEvent.click(screen.getByRole('button', { name: 'Повторить' }))
 
-    expect(await screen.findByRole('link', { name: 'foundations_shallow_r' })).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: PILOT_NAME })).toBeInTheDocument()
   })
 })

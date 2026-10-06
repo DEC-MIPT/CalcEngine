@@ -23,7 +23,7 @@ describe('routes', () => {
     open('/')
 
     expect(screen.getByRole('heading', { name: 'Выберите тип расчёта' })).toBeInTheDocument()
-    expect(await screen.findByRole('link', { name: 'foundations_shallow_r' })).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'Расчётное сопротивление грунта' })).toBeInTheDocument()
   })
 
   it('passes the type to the form and the id to the result and the report', async () => {

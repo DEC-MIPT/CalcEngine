@@ -26,6 +26,15 @@ describe('AppShell', () => {
     }
   })
 
+  it('marks the type selection link as the current page only on type selection', () => {
+    const { unmount } = open('/')
+    expect(screen.getByRole('link', { name: 'Типы расчётов' })).toHaveAttribute('aria-current', 'page')
+    unmount()
+
+    open('/nowhere')
+    expect(screen.getByRole('link', { name: 'Типы расчётов' })).not.toHaveAttribute('aria-current')
+  })
+
   it('has no detectable accessibility violations', async () => {
     const { container } = open('/nowhere')
 

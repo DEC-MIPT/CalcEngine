@@ -55,7 +55,7 @@ describe('request states', () => {
 
     expect(alert).toHaveTextContent('Расчёт сейчас недоступен.')
     expect(alert).toHaveTextContent('Код ошибки: parameter_source_unavailable')
-    expect(alert).toHaveTextContent('Parameter source is not configured')
+    expect(alert).toHaveTextContent('Сообщение сервера: Parameter source is not configured')
     expect(screen.getByRole('button', { name: 'Повторить' })).toBeInTheDocument()
     await expectNoA11yViolations(alert)
   })
