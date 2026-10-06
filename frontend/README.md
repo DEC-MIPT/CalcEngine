@@ -8,6 +8,7 @@ React 19, TypeScript, Vite, React Router, Tailwind CSS 4 with shadcn base tokens
 |---|---|
 | `npm run dev` | Dev server against the real backend at `VITE_API_BASE_URL` (default `http://127.0.0.1:8000`). |
 | `npm run dev:mock` | Dev server with MSW answering the API in the browser; no backend needed. |
+| `npm run test:e2e` | Playwright in Chromium, Firefox and WebKit against `dev:mock`. Not part of `check.sh`. One-time: `npx playwright install chromium firefox webkit`, and on Linux the system packages that `npx playwright install-deps` names. |
 | `npm run gen:api` | Regenerates `src/api/schema.d.ts` from the backend's OpenAPI description. |
 | `npm run gen:api:check` | Fails when the committed `schema.d.ts` is out of date (used by `check.sh`). |
 | `./check.sh` | `gen:api:check`, `eslint`, `tsc -b`, `vitest run --coverage` (branch coverage >= 95%). |
