@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+import { expectNoA11yViolations } from '@/test/axe'
 import { Formula } from './Formula'
 
 describe('Formula', () => {
@@ -15,6 +16,16 @@ describe('Formula', () => {
     const formula = screen.getByRole('img', { name: latex })
     expect(formula.querySelector('svg')).not.toBeNull()
     expect(document.querySelector('[data-fallback]')).toBeNull()
+  })
+
+  it('hides the inner SVG from assistive technology and has no accessibility violations', async () => {
+    const { container } = render(<Formula latex={String.raw`p \le R`} />)
+
+    expect(screen.getByRole('img', { name: String.raw`p \le R` }).firstElementChild).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    )
+    await expectNoA11yViolations(container)
   })
 
   it('typesets a displayed formula', () => {

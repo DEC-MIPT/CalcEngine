@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { PASS_ID } from '@/mocks/fixtures'
+import { PASS_ID, passEnvelope } from '@/mocks/fixtures'
 import { server } from '@/mocks/server'
 import { routes } from '@/routes'
 import { expectNoA11yViolations } from '@/test/axe'
@@ -61,6 +61,13 @@ describe('opening a result by its address (4.3)', () => {
     requests.stop()
 
     expect(requests.seen).toEqual([`GET /calculations/${PASS_ID}`, `GET /calculations/${PASS_ID}`])
+  })
+
+  it('shows the trace of the stored result under the id', async () => {
+    open(`/calculations/${PASS_ID}`)
+
+    expect(await screen.findByRole('heading', { name: 'Ход расчёта', level: 2 })).toBeInTheDocument()
+    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(passEnvelope.trace.length)
   })
 
   it('shows the loading state first and has no accessibility violations', async () => {

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router'
 import { api, unwrap } from '@/api/client'
 import { useRequest } from '@/api/useRequest'
 import { ErrorState, LoadingState, NotFoundState } from '@/components/RequestStates'
+import { Trace } from '@/components/Trace'
 import { useI18n } from '@/i18n/context'
 
 export function ResultScreen() {
@@ -30,6 +31,7 @@ export function ResultScreen() {
           <p>
             <Link to={`/calculations/${state.data.result_id}/report`}>{t('result.toReport')}</Link>
           </p>
+          <Trace steps={state.data.trace} unverifiedStepCount={state.data.unverified_step_count} />
         </>
       )}
     </>

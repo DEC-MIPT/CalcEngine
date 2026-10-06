@@ -27,7 +27,9 @@ let document: Document | undefined
 export function typeset(latex: string, display: boolean): Node | null {
   document ??= createDocument()
   try {
-    return document.convert(latex, { display }) as Node
+    const node = document.convert(latex, { display }) as Element
+    node.setAttribute('aria-hidden', 'true')
+    return node
   } catch {
     return null
   }
