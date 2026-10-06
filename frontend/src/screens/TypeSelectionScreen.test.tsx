@@ -43,7 +43,7 @@ describe('TypeSelectionScreen', () => {
     fireEvent.click(await screen.findByRole('link', { name: 'Вторая величина' }))
 
     expect(screen.getByRole('heading', { name: 'Исходные данные' })).toBeInTheDocument()
-    expect(await screen.findByText('second_type')).toBeInTheDocument()
+    expect(await screen.findByText('Вторая величина')).toBeInTheDocument()
     expect(router.state.location.search).toBe('?type=second_type')
   })
 

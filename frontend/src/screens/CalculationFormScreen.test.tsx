@@ -15,7 +15,8 @@ describe('CalculationFormScreen', () => {
 
     expect(screen.getByRole('heading', { name: 'Исходные данные' })).toBeInTheDocument()
     expect(screen.getByRole('status')).toBeInTheDocument()
-    expect(await screen.findByText('foundations_shallow_r')).toBeInTheDocument()
+    expect(await screen.findByText('Расчётное сопротивление грунта')).toBeInTheDocument()
+    expect(screen.queryByText('foundations_shallow_r')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Рассчитать' })).toBeInTheDocument()
   })
 

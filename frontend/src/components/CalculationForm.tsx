@@ -1,4 +1,4 @@
-import { WarningCircle } from '@phosphor-icons/react'
+import { CaretDown, WarningCircle } from '@phosphor-icons/react'
 import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { api, unwrap, type ApiError } from '@/api/client'
@@ -26,10 +26,12 @@ const parseErrorKey = {
 
 const fieldId = (name: string) => `field-${name}`
 
+const row = 'grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 sm:grid-cols-[3.5rem_minmax(0,1fr)_15.5rem] sm:items-center'
+
 function FieldMessage({ id, children }: { id: string; children: string }) {
   return (
-    <p id={id} className="flex items-start gap-2 text-sm text-destructive">
-      <WarningCircle aria-hidden="true" weight="fill" size={18} className="mt-0.5 shrink-0" />
+    <p id={id} className="flex items-start gap-1.5 text-sm text-destructive">
+      <WarningCircle aria-hidden="true" weight="fill" size={16} className="mt-0.5 shrink-0" />
       {children}
     </p>
   )
@@ -53,20 +55,23 @@ function Field({ input, value, unit, error, onValue, onUnit }: FieldProps) {
   const describedBy = [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(' ')
   const fixedUnit = input.whole_values_only || input.units.length === 1
   return (
-    <div className="grid gap-1.5">
-      <div className="flex items-baseline gap-2">
+    <div className={`${row} border-b border-border py-2.5`}>
+      <span
+        aria-hidden="true"
+        className={`row-span-2 pt-0.5 text-lg sm:row-span-1 sm:pt-0 ${error ? 'text-destructive' : ''}`}
+      >
+        <Formula latex={input.symbol} />
+      </span>
+      <div className="grid gap-0.5">
         <label htmlFor={fieldId(input.name)} className="font-medium">
           {label}
         </label>
-        <span aria-hidden="true">
-          <Formula latex={input.symbol} />
-        </span>
+        {hint && (
+          <p id={hintId} className="text-xs text-muted-foreground">
+            {hint}
+          </p>
+        )}
       </div>
-      {hint && (
-        <p id={hintId} className="text-sm text-muted-foreground">
-          {hint}
-        </p>
-      )}
       <div className="flex gap-2">
         <input
           id={fieldId(input.name)}
@@ -78,26 +83,37 @@ function Field({ input, value, unit, error, onValue, onUnit }: FieldProps) {
           onChange={onValue}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
-          className="min-h-9 w-full min-w-0 border border-input bg-card px-3 py-1.5 aria-invalid:border-destructive aria-invalid:border-2"
+          className="min-h-9 w-36 min-w-0 border border-input bg-card px-2.5 py-1.5 text-right font-mono focus-visible:outline-offset-[-1px] aria-invalid:border-destructive aria-invalid:focus-visible:outline-destructive"
         />
         {fixedUnit ? (
-          <span className="flex min-h-9 min-w-16 items-center">{unitLabel(input.base_unit, language)}</span>
+          <span className="flex min-h-9 w-24 items-center px-2.5">{unitLabel(input.base_unit, language)}</span>
         ) : (
-          <select
-            value={unit}
-            onChange={onUnit}
-            aria-label={`${t('form.unit')}: ${label}`}
-            className="min-h-9 min-w-28 border border-input bg-card px-2"
-          >
-            {input.units.map((code) => (
-              <option key={code} value={code}>
-                {unitLabel(code, language)}
-              </option>
-            ))}
-          </select>
+          <span className="relative w-24">
+            <select
+              value={unit}
+              onChange={onUnit}
+              aria-label={`${t('form.unit')}: ${label}`}
+              className="min-h-9 w-full cursor-pointer appearance-none border border-input bg-card py-1.5 pr-7 pl-2.5 focus-visible:outline-offset-[-1px]"
+            >
+              {input.units.map((code) => (
+                <option key={code} value={code}>
+                  {unitLabel(code, language)}
+                </option>
+              ))}
+            </select>
+            <CaretDown
+              aria-hidden="true"
+              size={14}
+              className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2"
+            />
+          </span>
         )}
       </div>
-      {error && <FieldMessage id={errorId}>{error}</FieldMessage>}
+      {error && (
+        <div className="col-start-2 sm:col-start-3">
+          <FieldMessage id={errorId}>{error}</FieldMessage>
+        </div>
+      )}
     </div>
   )
 }
@@ -165,10 +181,11 @@ export function CalculationForm({ type }: { type: CalculationType }) {
     setErrors((current) => Object.fromEntries(Object.entries(current).filter(([key]) => key !== name)))
   }
 
+  const invalidCount = Object.keys(errors).length
   return (
-    <form noValidate onSubmit={submit} className="grid max-w-2xl gap-6">
+    <form noValidate onSubmit={submit} className="grid gap-4">
       {general.length > 0 && (
-        <div role="alert" className="border border-destructive border-l-4 bg-destructive-surface p-4">
+        <div role="alert" className="max-w-2xl border border-destructive border-l-4 bg-destructive-surface p-4">
           <p className="font-medium">{t('form.rejected')}</p>
           <ul className="list-disc pl-5 text-sm">
             {general.map((message, index) => (
@@ -178,21 +195,42 @@ export function CalculationForm({ type }: { type: CalculationType }) {
         </div>
       )}
       {failure && <ErrorState error={failure} onRetry={() => void send()} />}
-      {type.inputs.map((input) => (
-        <Field
-          key={input.name}
-          input={input}
-          value={values[input.name] ?? ''}
-          unit={units[input.name] ?? input.base_unit}
-          error={errors[input.name]}
-          onValue={(event) => change(input.name, event.target.value)}
-          onUnit={(event) => setUnits((current) => ({ ...current, [input.name]: event.target.value }))}
-        />
-      ))}
+      {invalidCount > 0 && (
+        <p className="flex items-center gap-1.5 font-medium text-destructive">
+          <WarningCircle aria-hidden="true" weight="fill" size={18} className="shrink-0" />
+          {t('form.summary')}: {invalidCount}
+        </p>
+      )}
       <div>
-        <Button type="submit" disabled={submitting}>
-          {t(submitting ? 'form.submitting' : 'form.submit')}
-        </Button>
+        <div
+          aria-hidden="true"
+          className={`${row} hidden border-b border-foreground pb-2 font-heading text-sm font-semibold text-muted-foreground sm:grid`}
+        >
+          <span />
+          <span>{t('form.column.quantity')}</span>
+          <span className="flex gap-2">
+            <span className="w-36 text-right">{t('form.column.value')}</span>
+            <span className="w-24 px-2.5">{t('form.unit')}</span>
+          </span>
+        </div>
+        {type.inputs.map((input) => (
+          <Field
+            key={input.name}
+            input={input}
+            value={values[input.name] ?? ''}
+            unit={units[input.name] ?? input.base_unit}
+            error={errors[input.name]}
+            onValue={(event) => change(input.name, event.target.value)}
+            onUnit={(event) => setUnits((current) => ({ ...current, [input.name]: event.target.value }))}
+          />
+        ))}
+      </div>
+      <div className={row}>
+        <div className="col-start-2 sm:col-start-3">
+          <Button type="submit" disabled={submitting} className="w-full">
+            {t(submitting ? 'form.submitting' : 'form.submit')}
+          </Button>
+        </div>
       </div>
     </form>
   )

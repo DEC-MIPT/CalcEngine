@@ -204,6 +204,7 @@ describe('CalculationForm: client checks (5.2)', () => {
     expect(field).toHaveAccessibleDescription('Введите значение.')
     expect(field).toHaveFocus()
     expect(screen.getAllByText('Введите значение.')).toHaveLength(pilot.inputs.length)
+    expect(screen.getByText(`Полей с ошибкой: ${pilot.inputs.length}`)).toBeInTheDocument()
     expect(bodies).toHaveLength(0)
   })
 

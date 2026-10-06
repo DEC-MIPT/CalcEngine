@@ -4,11 +4,12 @@ import { useRequest } from '@/api/useRequest'
 import { CalculationForm } from '@/components/CalculationForm'
 import { ErrorState, LoadingState, NotFoundState } from '@/components/RequestStates'
 import { useI18n } from '@/i18n/context'
+import { typeName } from '@/lib/typeName'
 
 const loadTypes = () => unwrap(api.GET('/calculation-types'))
 
 export function CalculationFormScreen() {
-  const { t } = useI18n()
+  const { t, language } = useI18n()
   const [params] = useSearchParams()
   const name = params.get('type')
   const { state, retry } = useRequest(loadTypes)
@@ -22,9 +23,7 @@ export function CalculationFormScreen() {
       {state.status === 'error' && <ErrorState error={state.error} onRetry={retry} />}
       {type && (
         <>
-          <p className="mb-6">
-            <code>{type.name}</code>
-          </p>
+          <p className="mb-5 font-heading text-xl font-semibold">{typeName(type, language)}</p>
           <CalculationForm key={type.name} type={type} />
         </>
       )}

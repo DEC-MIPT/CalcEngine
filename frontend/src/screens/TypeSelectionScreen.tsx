@@ -8,8 +8,8 @@ import { Formula } from '@/components/Formula'
 import { ErrorState, LoadingState } from '@/components/RequestStates'
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n/context'
-import { pickText } from '@/i18n/translate'
 import { unitLabel } from '@/i18n/units'
+import { typeName } from '@/lib/typeName'
 
 type CalculationType = components['schemas']['CalculationTypeView']
 
@@ -54,7 +54,6 @@ function Notice({ children }: { children: ReactNode }) {
 
 function TypeRow({ type }: { type: CalculationType }) {
   const { language } = useI18n()
-  const name = type.outputs.map((output) => pickText(output.label, language)).join(' · ')
   return (
     <tr className="relative not-last:border-b not-last:border-border hover:bg-secondary has-[a:focus-visible]:bg-secondary">
       <td className="px-3 py-3">
@@ -62,7 +61,7 @@ function TypeRow({ type }: { type: CalculationType }) {
           to={`/calculations/new?type=${encodeURIComponent(type.name)}`}
           className="font-medium text-foreground no-underline after:absolute after:inset-0 focus-visible:outline-offset-[-2px]"
         >
-          {name}
+          {typeName(type, language)}
         </Link>
         <span aria-hidden="true" className="mt-0.5 flex flex-wrap gap-x-3 text-sm text-muted-foreground">
           {type.outputs.map((output) => (

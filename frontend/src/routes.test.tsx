@@ -28,7 +28,7 @@ describe('routes', () => {
 
   it('passes the type to the form and the id to the result and the report', async () => {
     open('/calculations/new?type=foundations_shallow_r')
-    expect(await screen.findByText('foundations_shallow_r')).toBeInTheDocument()
+    expect(await screen.findByText('Расчётное сопротивление грунта')).toBeInTheDocument()
   })
 
   it('shows the id on the result and on the report screen', async () => {
