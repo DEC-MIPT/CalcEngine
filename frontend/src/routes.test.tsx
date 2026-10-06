@@ -9,7 +9,7 @@ function open(address: string) {
 
 describe('routes', () => {
   it.each([
-    ['/calculations/new?type=foundations_shallow_r', 'Calculation inputs'],
+    ['/calculations/new?type=foundations_shallow_r', 'Исходные данные'],
     ['/calculations/abc', 'Calculation result'],
     ['/calculations/abc/report', 'Report request'],
   ])('renders the screen of %s', (address, heading) => {
@@ -25,9 +25,9 @@ describe('routes', () => {
     expect(await screen.findByRole('link', { name: 'foundations_shallow_r' })).toBeInTheDocument()
   })
 
-  it('passes the type to the form and the id to the result and the report', () => {
+  it('passes the type to the form and the id to the result and the report', async () => {
     open('/calculations/new?type=foundations_shallow_r')
-    expect(screen.getByText('foundations_shallow_r')).toBeInTheDocument()
+    expect(await screen.findByText('foundations_shallow_r')).toBeInTheDocument()
   })
 
   it.each(['/calculations/abc', '/calculations/abc/report'])('shows the id on %s', (address) => {

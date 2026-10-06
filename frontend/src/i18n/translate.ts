@@ -16,3 +16,7 @@ export function formatNumber(value: number, language: Language): string {
     useGrouping: false,
   }).format(value)
 }
+
+export function pickText(text: { ru: string; en?: string | null }, language: Language): string {
+  return language === 'en' && text.en ? text.en : text.ru
+}

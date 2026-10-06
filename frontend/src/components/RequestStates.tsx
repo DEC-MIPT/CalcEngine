@@ -40,11 +40,17 @@ export function ErrorState({ error, onRetry }: { error: ApiError; onRetry: () =>
   )
 }
 
-export function NotFoundState({ subject = 'page' }: { subject?: 'page' | 'result' }) {
+const notFoundKey = {
+  page: 'notFound.page',
+  result: 'notFound.result',
+  type: 'notFound.type',
+} as const
+
+export function NotFoundState({ subject = 'page' }: { subject?: 'page' | 'result' | 'type' }) {
   const { t } = useI18n()
   return (
     <>
-      <h1>{t(subject === 'result' ? 'notFound.result' : 'notFound.page')}</h1>
+      <h1>{t(notFoundKey[subject])}</h1>
       <p>
         <Link to="/">{t('notFound.toTypes')}</Link>
       </p>

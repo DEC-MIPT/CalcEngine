@@ -4,7 +4,7 @@ import { LanguageSwitch } from '@/components/LanguageSwitch'
 import { useI18n } from './context'
 import { en, ru } from './dictionary'
 import { I18nProvider } from './I18nProvider'
-import { formatNumber, translate } from './translate'
+import { formatNumber, pickText, translate } from './translate'
 
 describe('translate', () => {
   it('uses the English text when it exists', () => {
@@ -82,5 +82,20 @@ describe('I18nProvider and LanguageSwitch', () => {
 
   it('refuses to be used outside the provider', () => {
     expect(() => render(<Probe />)).toThrow('useI18n must be used inside I18nProvider')
+  })
+})
+
+describe('pickText', () => {
+  const text = { ru: 'Ширина', en: 'Width' }
+
+  it('picks the text of the language', () => {
+    expect(pickText(text, 'ru')).toBe('Ширина')
+    expect(pickText(text, 'en')).toBe('Width')
+  })
+
+  it('falls back to Russian when the English text is missing or empty', () => {
+    expect(pickText({ ru: 'Ширина' }, 'en')).toBe('Ширина')
+    expect(pickText({ ru: 'Ширина', en: null }, 'en')).toBe('Ширина')
+    expect(pickText({ ru: 'Ширина', en: '' }, 'en')).toBe('Ширина')
   })
 })
