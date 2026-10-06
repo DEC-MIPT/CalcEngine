@@ -3,11 +3,15 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
+@import "@fontsource/fira-sans-condensed/600.css";
+@import "@fontsource/fira-sans-condensed/700.css";
 
 @theme inline {
   --font-sans: 'Geist Variable', system-ui, sans-serif;
-  --font-heading: var(--font-sans);
+  --font-heading: 'Fira Sans Condensed', 'Geist Variable', system-ui, sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+  --default-transition-duration: 120ms;
+  --default-transition-timing-function: linear;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -38,31 +42,32 @@
 }
 
 :root {
-  --background: #f6f8fa;
-  --foreground: #0f1b2d;
-  --card: #ffffff;
-  --card-foreground: #0f1b2d;
-  --popover: #ffffff;
-  --popover-foreground: #0f1b2d;
-  --primary: #1b4f9c;
+  --background: #f4f4f1;
+  --foreground: #111111;
+  --card: #fbfbf9;
+  --card-foreground: #111111;
+  --popover: #fbfbf9;
+  --popover-foreground: #111111;
+  --primary: #1d3fd6;
   --primary-foreground: #ffffff;
-  --secondary: #e8edf3;
-  --secondary-foreground: #0f1b2d;
-  --muted: #e8edf3;
-  --muted-foreground: #4a5a6e;
-  --accent: #e8edf3;
-  --accent-foreground: #0f1b2d;
+  --secondary: #e6e6e1;
+  --secondary-foreground: #111111;
+  --muted: #e6e6e1;
+  --muted-foreground: #4d4d4a;
+  --accent: #e6e6e1;
+  --accent-foreground: #111111;
   --destructive: #b42318;
   --destructive-surface: #fdecea;
   --warning: #b7791f;
   --warning-surface: #fff4d6;
   --warning-foreground: #5c3b00;
-  --success: #2b5e31;
-  --success-surface: #edf3ec;
-  --border: #c5ced9;
-  --input: #7a8ca3;
-  --ring: #1b4f9c;
-  --radius: 0.125rem;
+  /* A passed check carries the accent (frontend-app design decision 5). */
+  --success: var(--primary);
+  --success-surface: #e9edfc;
+  --border: #b9b9b2;
+  --input: #6f6f69;
+  --ring: var(--primary);
+  --radius: 0;
 }
 
 @layer base {
@@ -75,16 +80,29 @@
   }
   body {
     @apply bg-background font-sans text-foreground antialiased;
-    line-height: 1.6;
+    line-height: 1.45;
+    font-variant-numeric: tabular-nums;
   }
   h1,
   h2,
   h3 {
-    letter-spacing: -0.015em;
-    line-height: 1.2;
+    @apply font-heading;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
   }
   h1 {
-    @apply mb-6 border-b border-border pb-3 text-2xl font-semibold;
+    @apply relative mb-5 border-b border-foreground pb-2 text-3xl font-bold;
+  }
+  h1::before,
+  h1::after {
+    @apply absolute -bottom-1 h-2 w-px bg-foreground;
+    content: '';
+  }
+  h1::before {
+    left: 0;
+  }
+  h1::after {
+    right: 0;
   }
   h2 {
     @apply text-xl font-semibold;
