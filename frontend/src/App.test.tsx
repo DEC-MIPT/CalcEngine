@@ -3,9 +3,10 @@ import { describe, expect, it } from 'vitest'
 import App from './App'
 
 describe('App', () => {
-  it('opens the type selection at the root address', () => {
+  it('opens the type selection at the root address', async () => {
     render(<App />)
 
-    expect(screen.getByRole('heading', { name: 'Calculation types' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Выберите тип расчёта' })).toBeInTheDocument()
+    await screen.findByRole('link', { name: 'foundations_shallow_r' })
   })
 })

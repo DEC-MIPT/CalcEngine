@@ -9,7 +9,6 @@ function open(address: string) {
 
 describe('routes', () => {
   it.each([
-    ['/', 'Calculation types'],
     ['/calculations/new?type=foundations_shallow_r', 'Calculation inputs'],
     ['/calculations/abc', 'Calculation result'],
     ['/calculations/abc/report', 'Report request'],
@@ -17,6 +16,13 @@ describe('routes', () => {
     open(address)
 
     expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument()
+  })
+
+  it('renders the type selection at the root address', async () => {
+    open('/')
+
+    expect(screen.getByRole('heading', { name: 'Выберите тип расчёта' })).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'foundations_shallow_r' })).toBeInTheDocument()
   })
 
   it('passes the type to the form and the id to the result and the report', () => {
@@ -33,7 +39,7 @@ describe('routes', () => {
   it('renders a not found screen with a link to the type selection for an unknown address', () => {
     open('/nowhere')
 
-    expect(screen.getByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Calculation types' })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('heading', { name: 'Страница не найдена' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'К выбору типа расчёта' })).toHaveAttribute('href', '/')
   })
 })

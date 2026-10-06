@@ -83,6 +83,12 @@
     letter-spacing: -0.015em;
     line-height: 1.2;
   }
+  h1 {
+    @apply mb-6 border-b border-border pb-3 text-2xl font-semibold;
+  }
+  a {
+    @apply text-primary underline decoration-1 underline-offset-4 hover:decoration-2;
+  }
   code,
   pre,
   kbd,

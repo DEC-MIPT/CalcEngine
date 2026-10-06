@@ -1,10 +1,5 @@
-import { Link } from 'react-router'
+import { NotFoundState } from '@/components/RequestStates'
 
 export function NotFoundScreen() {
-  return (
-    <>
-      <h1>Page not found</h1>
-      <Link to="/">Calculation types</Link>
-    </>
-  )
+  return <NotFoundState />
 }
