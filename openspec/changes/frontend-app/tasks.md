@@ -39,56 +39,57 @@ before task 2.1.
 
 ## 2. Backend: input and output metadata (feature `frontend-app/backend`)
 
-- [ ] 2.1 Add `label`, `symbol`, `hint` and `whole_values_only` to the quantity declaration
+- [x] 2.1 Add `label`, `symbol`, `hint` and `whole_values_only` to the quantity declaration
   (`QuantityDeclaration`, `backend/app/schemas/calculation.py`) with the shape of `design.md`
   decision 6, and reject at registration a type whose input or output has no `label.ru` or no
   `symbol` (backend); verify: tests that a declaration with a missing or empty `label.ru`, or with a
   missing or empty `symbol`, fails and names the quantity, and that `hint` and `label.en` are
-  optional
-- [ ] 2.2 Declare the metadata for the inputs and outputs of `foundations_shallow_r`
+  optional (done 2026-10-06 on `feature/frontend-app/backend`, `bab155f`)
+- [x] 2.2 Declare the metadata for the inputs and outputs of `foundations_shallow_r`
   (`backend/app/engine/foundations_shallow_r.py`), with `whole_values_only` true for `phi_II` and
   false for the others (backend); verify: a test reads every quantity of the pilot and finds
-  `label.ru` and `symbol`; no value, formula, `NormRef` or parameter of the pilot changes
-- [ ] 2.3 Carry the metadata to `GET /calculation-types` through `InputView` and `OutputView`
+  `label.ru` and `symbol`; no value, formula, `NormRef` or parameter of the pilot changes (done 2026-10-06 on `feature/frontend-app/backend`, `bab155f`)
+- [x] 2.3 Carry the metadata to `GET /calculation-types` through `InputView` and `OutputView`
   (`backend/app/schemas/api.py`) and the OpenAPI schema (backend); verify: a test of the endpoint
   finds the fields in the declared order, `phi_II` with `whole_values_only` true; `/openapi.json`
-  documents them
-- [ ] 2.4 Prove that the metadata changes no calculation (backend); verify: a test that the result
+  documents them (done 2026-10-06 on `feature/frontend-app/backend`, `bab155f`)
+- [x] 2.4 Prove that the metadata changes no calculation (backend); verify: a test that the result
   envelope, the trace, the `NormRef` list and `input_hash` of a fixed request equal the values
   in a fixture `backend/tests/fixtures/pilot_envelope_before_metadata.json`, generated on `develop`
   and committed as the first commit of the branch, before task 2.1; no file under `ml/` or `infra/` and no query to `dec_normatives`
-  is added
-- [ ] 2.5 Run `backend/check.sh` and the `postgres` module (backend); verify: `ruff`, `mypy`,
-  `lint-imports` pass, branch coverage of `app` stays 100%, and the `pre-commit` hooks pass
+  is added (done 2026-10-06 on `feature/frontend-app/backend`: the fixture in `b8f14c4`, the test in
+  `bab155f`; the baseline got three entries for the fixture's hashes by hand, not a full regeneration)
+- [x] 2.5 Run `backend/check.sh` and the `postgres` module (backend); verify: `ruff`, `mypy`,
+  `lint-imports` pass, branch coverage of `app` stays 100%, and the `pre-commit` hooks pass (done 2026-10-06 on `feature/frontend-app/backend`, `bab155f`)
 
 ## 3. Technical foundations (feature `frontend-app/frontend`)
 
-- [ ] 3.1 Add `openapi-typescript`, the script `npm run gen:api`, the committed
+- [x] 3.1 Add `openapi-typescript`, the script `npm run gen:api`, the committed
   `frontend/src/api/schema.d.ts`, and a check in `check.sh` that the committed file is current
   (frontend); verify: regenerating from the backend of section 2 leaves no diff; a hand edit of the
-  file makes the check fail
-- [ ] 3.2 Add the API client over `openapi-fetch` with the base address from
+  file makes the check fail (done 2026-10-06 on `feature/frontend-app/frontend`, `b0ce766`)
+- [x] 3.2 Add the API client over `openapi-fetch` with the base address from
   `VITE_API_BASE_URL`, and a helper that turns an error body (`code`, `message`, `fields`) into a
   typed value (frontend); verify: Vitest tests for a `422` body with `fields`, a `404`, a `503`, and a
-  network failure
-- [ ] 3.3a Add MSW with one set of handlers shared by the browser and Vitest, and the script
+  network failure (done 2026-10-06 on `feature/frontend-app/frontend`, `8e1c690`)
+- [x] 3.3a Add MSW with one set of handlers shared by the browser and Vitest, and the script
   `npm run dev:mock` (frontend); verify: `npm run dev:mock` answers `GET /calculation-types`
-  from the handlers, and the Vitest setup uses the same handler module
+  from the handlers, and the Vitest setup uses the same handler module (done 2026-10-06 on `feature/frontend-app/frontend`, `69c7b8a`)
 - [ ] 3.3b Add the scenario handlers of `design.md` decision 4: pass, fail, refused, warning,
   `422`, `503`, typed by the generated schema (frontend); verify: one test per scenario reads
-  the response through the client of 3.2 and gets the expected typed value
-- [ ] 3.4 Add React Router with the four addresses of "User journey and screens" and empty screens
+  the response through the client of 3.2 and gets the expected typed value (in part on `feature/frontend-app/frontend`, `69c7b8a`: pass, fail, `422` and `503` are mocked; refused and warning are left for tasks 6.4b and 6.4c)
+- [x] 3.4 Add React Router with the four addresses of "User journey and screens" and empty screens
   (frontend); verify: a test per address renders its screen; an unknown address renders a "not
-  found" screen
+  found" screen (done 2026-10-06 on `feature/frontend-app/frontend`, `fa41aa0`)
 - [ ] 3.5 Add the typed `ru`/`en` dictionary with the fallback to `ru`, the language switch, and
   number formatting through `Intl.NumberFormat` (frontend); verify: tests that a missing `en` key
   shows the `ru` text, and that `172.5` shows as `172,5` in Russian and `172.5` in English
 - [ ] 3.6 Add `eslint-plugin-jsx-a11y` and an axe helper for component tests (frontend); verify:
   `check.sh` runs both; a test component with an unlabelled input fails the axe helper
-- [ ] 3.7 Add the `Formula` component on MathJax with the raw-text fallback and the restricted
+- [x] 3.7 Add the `Formula` component on MathJax with the raw-text fallback and the restricted
   extensions of `design.md` decision 1 (frontend); verify: tests that a valid LaTeX string is
   typeset, that an invalid one shows its raw text, that neither throws, and that
-  `\href{javascript:alert(1)}{x}` and a `\require` string create no link and run no script
+  `\href{javascript:alert(1)}{x}` and a `\require` string create no link and run no script (done 2026-10-06 on `feature/frontend-app/frontend`, `08a5c4f`)
 - [ ] 3.8 Add Playwright with Chromium, Firefox and WebKit, used by the cross-browser scenario here and by tasks 8.6, 8.7, 8.9
   (frontend); verify: one test opens a mocked result with a trace and finds every step's formula
   typeset in each of the three engines

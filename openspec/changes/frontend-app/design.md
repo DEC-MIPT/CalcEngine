@@ -42,23 +42,53 @@ function, its boundary (WP5 decision 7) and the engine are unchanged.
    of `tasks.md` is developed without the catalog source. The handler bodies are built from the
    generated types, so a contract change breaks `tsc`, not a test at run time. They contain no
    norm value that is not already in an example envelope of the backend tests.
-5. **Visual brief** (kickoff 7, option A with the warning colour of C). Direction only; tokens and
-   details are worked out during implementation with the frontend design skills.
-   - Idea: an engineering instrument that looks like a drafting sheet, not a dashboard. The
-     result sits in a frame with a title block, like the frame the `.docx` report already uses
+5. **Visual brief: "technical terminal"** (Akim, 2026-10-06). Direction only; tokens and details
+   are worked out during implementation, when the `shadcn/ui` variables are set, with the frontend
+   design skills. Examples of colours and faces below are recommendations, not a token list.
+   - Replaces the earlier brief (kickoff 7, option A with the warning colour of C: a minimal
+     drafting sheet with restrained references to construction). On 2026-10-06 Akim judged it too
+     restrained and sparse for an expert tool, where generous white space reads as a demo rather
+     than an instrument; the new direction is bolder but stays a serious engineering tool, neither
+     aggressive nor styled like a consumer product.
+   - Idea: Swiss typographic precision with a hint of a diagnostic instrument or a terminal (an
+     inspection tool, a measurement readout). Numbers are the main content of a result. The result
+     still sits in a frame with a title block, like the frame the `.docx` report already uses
      (`calculation-core-contract` design, report), so the screen and the document look alike.
-   - Palette (intent): paper-like neutrals and grey rules; one blueprint-blue accent for actions
-     and links; amber for a warning and red for a refusal, always together with an icon and a
-     text label, with dark text on a light amber or red fill so that contrast meets AA.
-   - Typography (intent): a neutral, humanist sans-serif for the interface; a monospace face with
-     tabular figures for numbers, units and steps; formulas typeset by MathJax.
-   - Form (intent): 1 px rules, square corners, generous white space, no shadows or gradients;
-     construction appears only in structure (title-block frame, a faint dimension-line motif in
-     section headers), never as helmets or cranes.
+   - Palette (intent): calm neutrals and grey rules for the whole interface; one cobalt-blue
+     accent, more saturated and colder than a link blue (for example around `#1d3fd6`), used
+     sparingly: the primary action, links, the focus ring and the status "method applicable,
+     check passed", which carries the accent instead of a separate green. Amber for a warning and
+     red for a refusal stay, always together with an icon and a text label, with dark text on a
+     light amber or red fill so that contrast meets AA. The accent marks a number (a tick, a bar,
+     a status mark) and never colours its digits.
+   - Typography (intent): a heading face with character, for example IBM Plex Sans Condensed or
+     Geist at a heavy weight; a neutral grotesque for the interface text (Geist); numbers, units,
+     step values and input fields in a monospace face or with tabular figures (Geist Mono, or
+     JetBrains Mono), so that digits align in columns. Every face has full Cyrillic, checked before
+     it is chosen. Formulas are typeset by MathJax.
+   - Structure (intent): an open grid with visible 1 px rules, square corners, no shadows or
+     gradients. Drawing construction is the language of the layout, not decoration: dimension
+     lines with ticks mark sections, spans and the extent of a group of values, and corner marks
+     close a frame; never literal icons such as helmets, cranes or rulers.
+   - Density (intent): dense rather than sparse. Label, value and unit sit in compact rows, and
+     the result screen shows the inputs, the outputs and the checks with little scrolling on a
+     desktop screen. Density never goes below the WCAG 2.2 AA target size (2.5.8) or the contrast
+     requirement.
+   - Motion (intent): precise and mechanical: short linear or stepped transitions (for example
+     100-150 ms) or an instant change of state; no springs, bounces or overshoot. All motion
+     follows `prefers-reduced-motion`.
    - Reference directions: (1) the title block and frame of a drawing sheet under GOST R 21.101
      (edition unverified; the report's own source is in `calculation-core-contract`), as the report
-     uses it; (2) an engineer's calculation pad on grid paper; (3) the restraint of
-     product documentation pages (one column of text, one accent).
+     uses it; (2) the readout of an inspection or measuring instrument (a value, its unit and its
+     tolerance state in one line); (3) Swiss grid layouts and terminal interfaces (flush-left
+     text, one accent).
+   - Tooling for the base tokens (decided with Akim on 2026-10-06, accent and statuses revised the
+     same day for this brief): `shadcn/ui` is initialised (`shadcn init`) on Tailwind CSS 4 only to
+     hold a small set of CSS variables (neutral background, rules, cobalt accent that also marks a
+     passed check, amber warning, red refusal, a square or near-square radius, Geist and Geist Mono
+     self-hosted for their Cyrillic support, a visible focus ring, reduced motion); Phosphor is the
+     icon library; no component is added until a screen needs it, and there is no token set beyond
+     that. Where a design skill differs from this brief, the brief wins.
 6. **Metadata shape** (kickoff 9, with the whole-values flag chosen on 2026-10-06). Each input and
    output of a type has `label` (`{ru, en?}`, `ru` required) and `symbol` (LaTeX, required); an
    input also has `hint` (`{ru, en?}`, optional) and `whole_values_only` (bool). A type that lacks
