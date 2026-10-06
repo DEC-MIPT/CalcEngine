@@ -29,6 +29,8 @@ export const ru = {
   'form.error.notFinite': 'Число слишком велико.',
   'form.error.notWhole': 'Значение должно быть целым числом.',
   'notFound.type': 'Тип расчёта не найден',
+  'result.title': 'Результат расчёта',
+  'result.toReport': 'Запросить отчёт',
 } as const
 
 export type TextKey = keyof typeof ru
@@ -61,6 +63,8 @@ export const en: PartialDictionary = {
   'form.error.notFinite': 'The number is too large.',
   'form.error.notWhole': 'The value must be a whole number.',
   'notFound.type': 'Calculation type not found',
+  'result.title': 'Calculation result',
+  'result.toReport': 'Request a report',
 }
 
 export interface Dictionaries {

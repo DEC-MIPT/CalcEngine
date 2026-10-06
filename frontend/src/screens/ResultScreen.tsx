@@ -1,11 +1,37 @@
-import { useParams } from 'react-router'
+import { useCallback } from 'react'
+import { Link, useParams } from 'react-router'
+import { api, unwrap } from '@/api/client'
+import { useRequest } from '@/api/useRequest'
+import { ErrorState, LoadingState, NotFoundState } from '@/components/RequestStates'
+import { useI18n } from '@/i18n/context'
 
 export function ResultScreen() {
-  const { id } = useParams()
+  const { t } = useI18n()
+  const { id } = useParams() as { id: string }
+  const load = useCallback(
+    () => unwrap(api.GET('/calculations/{result_id}', { params: { path: { result_id: id } } })),
+    [id],
+  )
+  const { state, retry } = useRequest(load)
+
+  if (state.status === 'error' && state.error.kind === 'api' && state.error.status === 404) {
+    return <NotFoundState subject="result" />
+  }
   return (
     <>
-      <h1>Calculation result</h1>
-      <p>{id}</p>
+      <h1>{t('result.title')}</h1>
+      {state.status === 'loading' && <LoadingState />}
+      {state.status === 'error' && <ErrorState error={state.error} onRetry={retry} />}
+      {state.status === 'ok' && (
+        <>
+          <p>
+            <code>{state.data.result_id}</code>
+          </p>
+          <p>
+            <Link to={`/calculations/${state.data.result_id}/report`}>{t('result.toReport')}</Link>
+          </p>
+        </>
+      )}
     </>
   )
 }

@@ -1,6 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import { cleanup, render, screen } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
+import { PASS_ID } from './mocks/fixtures'
 import { routes } from './routes'
 
 function open(address: string) {
@@ -10,7 +11,7 @@ function open(address: string) {
 describe('routes', () => {
   it.each([
     ['/calculations/new?type=foundations_shallow_r', 'Исходные данные'],
-    ['/calculations/abc', 'Calculation result'],
+    [`/calculations/${PASS_ID}`, 'Результат расчёта'],
     ['/calculations/abc/report', 'Report request'],
   ])('renders the screen of %s', (address, heading) => {
     open(address)
@@ -30,9 +31,12 @@ describe('routes', () => {
     expect(await screen.findByText('foundations_shallow_r')).toBeInTheDocument()
   })
 
-  it.each(['/calculations/abc', '/calculations/abc/report'])('shows the id on %s', (address) => {
-    open(address)
+  it('shows the id on the result and on the report screen', async () => {
+    open(`/calculations/${PASS_ID}`)
+    expect(await screen.findByText(PASS_ID)).toBeInTheDocument()
+    cleanup()
 
+    open('/calculations/abc/report')
     expect(screen.getByText('abc')).toBeInTheDocument()
   })
 
