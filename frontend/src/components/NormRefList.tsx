@@ -24,11 +24,10 @@ export function NormStatus({ status }: { status: NormRef['status'] }) {
   )
 }
 
-function Part({ label, value }: { label: string; value: string }) {
-  const { t } = useI18n()
+function Part({ label, value, unconfirmed }: { label: string; value: string; unconfirmed: string }) {
   return (
     <span>
-      {label}: {value === UNVERIFIED ? t('norm.unverified') : value}
+      {label}: {value === UNVERIFIED ? unconfirmed : value}
     </span>
   )
 }
@@ -39,8 +38,10 @@ export function NormRefList({ refs }: { refs: readonly NormRef[] }) {
     <ul className="grid gap-1">
       {refs.map((ref, index) => (
         <li key={index} className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="font-medium">{ref.document}</span> <Part label={t('norm.edition')} value={ref.edition} />{' '}
-          <Part label={t('norm.clause')} value={ref.clause} /> <NormStatus status={ref.status} />
+          <span className="font-medium">{ref.document}</span>{' '}
+          <Part label={t('norm.edition')} value={ref.edition} unconfirmed={t('norm.editionUnconfirmed')} />{' '}
+          <Part label={t('norm.clause')} value={ref.clause} unconfirmed={t('norm.clauseUnconfirmed')} />{' '}
+          <NormStatus status={ref.status} />
         </li>
       ))}
     </ul>

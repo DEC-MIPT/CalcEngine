@@ -118,7 +118,14 @@ describe('Trace: norm reference status (6.1a)', () => {
 
     const items = within(stepOf(formula.step_id)).getAllByRole('listitem').filter((item) => item.textContent?.includes('SP '))
     expect(items[0]).toHaveTextContent('SP Test редакция: 2020 пункт: 5.6 проверено')
-    expect(items[1]).toHaveTextContent('SP Other редакция: не проверено пункт: 7.1 не проверено')
+    expect(items[1]).toHaveTextContent('SP Other редакция: не подтверждена пункт: 7.1 не проверено')
+  })
+
+  it('says that an unrecorded clause is not confirmed, apart from the verification status', () => {
+    show(withRefs({ ...ref, clause: 'unverified', status: 'unverified' }))
+
+    const item = within(stepOf(formula.step_id)).getAllByRole('listitem').find((entry) => entry.textContent?.includes('SP Test'))!
+    expect(item).toHaveTextContent('SP Test редакция: 2020 пункт: не подтверждён не проверено')
   })
 
   it('shows no block of references for a step without any', () => {

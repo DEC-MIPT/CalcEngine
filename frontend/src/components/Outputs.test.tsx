@@ -27,7 +27,10 @@ function show(list: Output[], language: Language = 'ru') {
   )
 }
 
-const itemOf = (quantity: string) => within(document.querySelector<HTMLElement>(`[data-output="${quantity}"]`)!)
+const rowOf = (quantity: string) => document.querySelector<HTMLElement>(`[data-output="${quantity}"]`)!
+const itemOf = (quantity: string) => within(rowOf(quantity))
+const reading = (quantity: string) =>
+  `${rowOf(quantity).querySelector('[data-value]')!.textContent} ${rowOf(quantity).querySelector('[data-value]')!.nextElementSibling!.textContent}`
 
 describe('Outputs (6.2)', () => {
   it('shows the value, the unit, the rounding rule and the source of an engineer-set rule', () => {
@@ -35,7 +38,7 @@ describe('Outputs (6.2)', () => {
     const item = itemOf('R')
 
     expect(screen.getByRole('heading', { name: 'Выходные величины', level: 2 })).toBeInTheDocument()
-    expect(item.getByText('172,5 кПа')).toBeInTheDocument()
+    expect(reading('R')).toBe('172,5 кПа')
     expect(item.getByText('R')).toBeInTheDocument()
     expect(item.getByText(/Округление:/).parentElement).toHaveTextContent(
       'Округление: до ближайшего, половина вверх; знаков после запятой: 1',
@@ -72,14 +75,14 @@ describe('Outputs (6.2)', () => {
       { ...engineerSet, quantity: 'B', value: 172.456, rounding_rule: { decimals: 1, mode: 'half_up' } } as Output,
     ])
 
-    expect(itemOf('A').getByText('172,0 кПа')).toBeInTheDocument()
-    expect(itemOf('B').getByText('172,456 кПа')).toBeInTheDocument()
+    expect(reading('A')).toBe('172,0 кПа')
+    expect(reading('B')).toBe('172,456 кПа')
   })
 
   it('shows every output of the envelope', () => {
     show([engineerSet, { ...engineerSet, quantity: 'S' } as Output])
 
-    expect(screen.getAllByRole('listitem').length).toBeGreaterThanOrEqual(2)
+    expect(screen.getAllByRole('row')).toHaveLength(3)
     expect(itemOf('S').getByText('S')).toBeInTheDocument()
   })
 
@@ -88,7 +91,7 @@ describe('Outputs (6.2)', () => {
     const item = itemOf('R')
 
     expect(screen.getByRole('heading', { name: 'Outputs' })).toBeInTheDocument()
-    expect(item.getByText('172.5 kPa')).toBeInTheDocument()
+    expect(reading('R')).toBe('172.5 kPa')
     expect(item.getByText('Set by the engineer')).toBeInTheDocument()
     expect(item.getByText('Rounding:').parentElement).toHaveTextContent('to nearest, ties up; decimal places: 1')
   })

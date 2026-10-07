@@ -50,8 +50,10 @@ function Comparison({ step }: { step: CheckStep }) {
 function StepSummary({ step }: { step: Step }) {
   const { t } = useI18n()
   return (
-    <span className="ml-auto font-normal" data-summary>
-      <Value quantity={step.result} />
+    <span className="ml-auto" data-summary>
+      <span className="font-mono">
+        <Value quantity={step.result} />
+      </span>
       {step.kind === 'check' && <> · {t(step.passed ? 'trace.check.passed' : 'trace.check.failed')}</>}
     </span>
   )
@@ -61,14 +63,14 @@ function TraceStep({ step, expanded, onToggle }: { step: Step; expanded: boolean
   const { t } = useI18n()
   const detailsId = useId()
   return (
-    <li className="border border-border bg-card" data-step={step.step_id}>
+    <li className="not-last:border-b not-last:border-border" data-step={step.step_id}>
       <h3 className="text-base">
         <button
           type="button"
           aria-expanded={expanded}
           aria-controls={detailsId}
           onClick={onToggle}
-          className="flex w-full cursor-pointer flex-wrap items-baseline gap-x-3 p-4 text-left hover:bg-secondary focus-visible:outline-offset-[-2px]"
+          className="flex w-full cursor-pointer flex-wrap items-baseline gap-x-3 px-3 py-2.5 text-left font-sans hover:bg-secondary focus-visible:outline-offset-[-2px]"
         >
           <CaretRight
             aria-hidden="true"
@@ -76,11 +78,11 @@ function TraceStep({ step, expanded, onToggle }: { step: Step; expanded: boolean
             className={`shrink-0 self-center transition-transform motion-reduce:transition-none ${expanded ? 'rotate-90' : ''}`}
           />
           <code className="font-semibold">{step.step_id}</code>
-          <span className="text-sm font-normal text-muted-foreground">{t(`trace.kind.${step.kind}`)}</span>
+          <span className="text-sm text-muted-foreground">{t(`trace.kind.${step.kind}`)}</span>
           <StepSummary step={step} />
         </button>
       </h3>
-      <div id={detailsId} hidden={!expanded} className="grid gap-3 border-t border-border p-4">
+      <div id={detailsId} hidden={!expanded} className="grid gap-3 border-t border-dashed border-border bg-background/40 px-3 py-3 pl-10">
         <div className="overflow-x-auto">
           <Formula latex={step.expression} display />
         </div>
@@ -152,7 +154,7 @@ export function Trace({
           {t('trace.collapseAll')}
         </Button>
       </div>
-      <ol className="grid gap-3">
+      <ol className="border border-border bg-card">
         {steps.map((step, index) => (
           <TraceStep
             key={`${step.step_id}-${index}`}

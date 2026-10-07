@@ -45,7 +45,7 @@ describe('submit opens the stored result (4.3)', () => {
 
     expect(await screen.findByRole('heading', { name: 'Результат расчёта' })).toBeInTheDocument()
     await waitFor(() => expect(router.state.location.pathname).toBe(`/calculations/${PASS_ID}`))
-    expect(await screen.findByText(PASS_ID)).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: 'Проверка выполнена' })).toBeInTheDocument()
   })
 })
 
@@ -53,11 +53,11 @@ describe('opening a result by its address (4.3)', () => {
   it('reads GET /calculations/{id} and runs no calculation, also after a reload', async () => {
     const requests = recordRequests()
     const first = open(`/calculations/${PASS_ID}`)
-    expect(await screen.findByText(PASS_ID)).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: 'Проверка выполнена' })).toBeInTheDocument()
     first.unmount()
 
     open(`/calculations/${PASS_ID}`)
-    expect(await screen.findByText(PASS_ID)).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: 'Проверка выполнена' })).toBeInTheDocument()
     requests.stop()
 
     expect(requests.seen).toEqual([`GET /calculations/${PASS_ID}`, `GET /calculations/${PASS_ID}`])
@@ -78,14 +78,14 @@ describe('opening a result by its address (4.3)', () => {
     const outputs = await screen.findByRole('heading', { name: 'Выходные величины', level: 2 })
     const trace = screen.getByRole('heading', { name: 'Ход расчёта', level: 2 })
     expect(outputs.compareDocumentPosition(trace) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(within(document.querySelector<HTMLElement>('[data-output="R"]')!).getByText('172,5 кПа')).toBeInTheDocument()
+    expect(document.querySelector('[data-output="R"] [data-value]')).toHaveTextContent('172,5')
   })
 
   it('shows the loading state first and has no accessibility violations', async () => {
     const { container } = open(`/calculations/${PASS_ID}`)
 
     expect(screen.getByRole('status')).toBeInTheDocument()
-    await screen.findByText(PASS_ID)
+    await screen.findByRole('region', { name: 'Проверка выполнена' })
     await expectNoA11yViolations(container)
   })
 
@@ -108,7 +108,7 @@ describe('opening a result by its address (4.3)', () => {
     server.resetHandlers()
     fireEvent.click(screen.getByRole('button', { name: 'Повторить' }))
 
-    expect(await screen.findByText(PASS_ID)).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: 'Проверка выполнена' })).toBeInTheDocument()
   })
 })
 
@@ -119,7 +119,6 @@ describe('link from the result to the report (4.4)', () => {
     fireEvent.click(await screen.findByRole('link', { name: 'Запросить отчёт' }))
 
     expect(router.state.location.pathname).toBe(`/calculations/${PASS_ID}/report`)
-    expect(screen.getByText(PASS_ID)).toBeInTheDocument()
   })
 })
 
@@ -149,7 +148,7 @@ describe('applicability warning (6.4c)', () => {
     const warning = await region(/^Предупреждение: входное значение вне проверенного диапазона$/)
     const outputs = screen.getByRole('heading', { name: 'Выходные величины' }).closest('section')!
 
-    expect(outputs).toHaveTextContent('183,8 кПа')
+    expect(outputs.querySelector('[data-output="R"] [data-value]')).toHaveTextContent('183,8')
     expect(outputs.nextElementSibling).toContainElement(warning)
     expect(warning.querySelector('[data-fact="input"]')).toHaveTextContent('b = 6 м')
     expect(warning.querySelector('[data-fact="bound"]')).toHaveTextContent('b ≤меньше или равно 5 м')
@@ -205,5 +204,28 @@ describe('a value outside the range is sent and decided by the backend (5.4)', (
       expect.objectContaining({ inputs: expect.objectContaining({ b: { value: Number(value), unit } }) }),
     ])
     server.events.removeAllListeners('request:start')
+  })
+})
+
+
+describe('verdict first (critique of the result screen)', () => {
+  it('puts the verdict stamp right under the title and no result id on the screen', async () => {
+    const { container } = open(`/calculations/${PASS_ID}`)
+    const stamp = await screen.findByRole('region', { name: 'Проверка выполнена' })
+
+    expect(screen.getByRole('heading', { level: 1 }).nextElementSibling).toBe(stamp)
+    expect(container).not.toHaveTextContent(PASS_ID)
+    expect(screen.getAllByRole('link', { name: 'Запросить отчёт' })).toHaveLength(1)
+  })
+
+  it('keeps the report action under a refusal', async () => {
+    open(`/calculations/${REFUSED_ID}`)
+
+    await region(/^Расчёт не выполнен/)
+    expect(screen.getByRole('link', { name: 'Запросить отчёт' })).toHaveAttribute(
+      'href',
+      `/calculations/${REFUSED_ID}/report`,
+    )
+    expect(screen.queryByRole('region', { name: /^Проверка/ })).toBeNull()
   })
 })

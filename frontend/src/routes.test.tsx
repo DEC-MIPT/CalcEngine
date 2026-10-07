@@ -31,9 +31,12 @@ describe('routes', () => {
     expect(await screen.findByText('Расчётное сопротивление грунта')).toBeInTheDocument()
   })
 
-  it('shows the id on the result and on the report screen', async () => {
+  it('passes the id to the result, its report link, and to the report screen', async () => {
     open(`/calculations/${PASS_ID}`)
-    expect(await screen.findByText(PASS_ID)).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'Запросить отчёт' })).toHaveAttribute(
+      'href',
+      `/calculations/${PASS_ID}/report`,
+    )
     cleanup()
 
     open('/calculations/abc/report')

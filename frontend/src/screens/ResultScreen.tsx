@@ -1,3 +1,4 @@
+import { ArrowRight } from '@phosphor-icons/react'
 import { useCallback } from 'react'
 import { Link, useParams } from 'react-router'
 import { api, unwrap } from '@/api/client'
@@ -6,6 +7,8 @@ import { Outputs } from '@/components/Outputs'
 import { Refusal } from '@/components/Refusal'
 import { ErrorState, LoadingState, NotFoundState } from '@/components/RequestStates'
 import { Trace } from '@/components/Trace'
+import { buttonClass } from '@/components/ui/button'
+import { VerdictStamp } from '@/components/VerdictStamp'
 import { Warnings } from '@/components/Warnings'
 import { useI18n } from '@/i18n/context'
 
@@ -28,16 +31,19 @@ export function ResultScreen() {
       {state.status === 'error' && <ErrorState error={state.error} onRetry={retry} />}
       {state.status === 'ok' && (
         <>
-          <p>
-            <code>{state.data.result_id}</code>
-          </p>
-          <p>
-            <Link to={`/calculations/${state.data.result_id}/report`}>{t('result.toReport')}</Link>
-          </p>
           {state.data.verdict_reason.kind === 'bound' ? (
-            <Refusal reason={state.data.verdict_reason} />
+            <>
+              <Refusal reason={state.data.verdict_reason} />
+              <p className="mt-4">
+                <Link to={`/calculations/${state.data.result_id}/report`} className={buttonClass}>
+                  {t('result.toReport')}
+                  <ArrowRight aria-hidden="true" size={18} />
+                </Link>
+              </p>
+            </>
           ) : (
             <>
+              <VerdictStamp envelope={state.data} reason={state.data.verdict_reason} />
               <Outputs outputs={state.data.outputs} />
               <Warnings warnings={state.data.warnings} />
               <Trace steps={state.data.trace} unverifiedStepCount={state.data.unverified_step_count} />
