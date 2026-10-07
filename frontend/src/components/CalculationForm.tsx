@@ -185,7 +185,7 @@ export function CalculationForm({ type }: { type: CalculationType }) {
   return (
     <form noValidate onSubmit={submit} className="grid gap-4">
       {general.length > 0 && (
-        <div role="alert" className="max-w-2xl border border-destructive border-l-4 bg-destructive-surface p-4">
+        <div role="alert" className="max-w-2xl border border-destructive bg-destructive-surface p-4">
           <p className="font-medium">{t('form.rejected')}</p>
           <ul className="list-disc pl-5 text-sm">
             {general.map((message, index) => (

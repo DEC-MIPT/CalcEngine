@@ -1,5 +1,5 @@
-import { WarningCircle } from '@phosphor-icons/react'
-import { Link } from 'react-router'
+import { CircleNotch, WarningCircle } from '@phosphor-icons/react'
+import { Link, useLocation } from 'react-router'
 import type { ApiError } from '@/api/client'
 import { useI18n } from '@/i18n/context'
 import type { TextKey } from '@/i18n/dictionary'
@@ -8,7 +8,8 @@ import { Button } from './ui/button'
 export function LoadingState() {
   const { t } = useI18n()
   return (
-    <p role="status" className="text-muted-foreground">
+    <p role="status" className="inline-flex items-center gap-2 text-muted-foreground">
+      <CircleNotch aria-hidden="true" size={18} className="animate-spin" />
       {t('state.loading')}
     </p>
   )
@@ -26,7 +27,7 @@ export function ErrorState({ error, onRetry, title }: ErrorStateProps) {
   return (
     <div
       role="alert"
-      className="flex max-w-2xl gap-3 border border-destructive border-l-4 bg-destructive-surface p-4"
+      className="flex max-w-2xl gap-3 border border-destructive bg-destructive-surface p-4"
     >
       <WarningCircle aria-hidden="true" weight="fill" size={24} className="mt-0.5 shrink-0 text-destructive" />
       <div className="grid gap-2">
@@ -57,9 +58,21 @@ const notFoundKey = {
 
 export function NotFoundState({ subject = 'page' }: { subject?: 'page' | 'result' | 'type' }) {
   const { t } = useI18n()
+  const { pathname, search } = useLocation()
   return (
     <>
       <h1>{t(notFoundKey[subject])}</h1>
+      <dl className="mb-5 grid max-w-2xl border border-border bg-card text-sm sm:grid-cols-[max-content_1fr]">
+        <dt className="border-border px-3 py-2 text-muted-foreground max-sm:pb-0 sm:border-r">{t('notFound.code')}</dt>
+        <dd className="px-3 py-2 font-mono">404</dd>
+        <dt className="border-t border-border px-3 py-2 text-muted-foreground max-sm:pb-0 sm:border-r">
+          {t('notFound.address')}
+        </dt>
+        <dd className="border-border px-3 py-2 font-mono break-all sm:border-t">
+          {pathname}
+          {search}
+        </dd>
+      </dl>
       <p>
         <Link to="/">{t('notFound.toTypes')}</Link>
       </p>

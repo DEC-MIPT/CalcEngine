@@ -129,4 +129,28 @@ describe('request states', () => {
     expect(screen.getByRole('heading', { name: 'Результат не найден' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'К выбору типа расчёта' })).toHaveAttribute('href', '/')
   })
+
+  it('reads out the code and the requested address of a page that is not found', () => {
+    renderWithShell(<NotFoundState />)
+    const facts = [...document.querySelectorAll('dl > dt')].map((term) => [term.textContent, term.nextElementSibling?.textContent])
+
+    expect(facts).toEqual([
+      ['Код', '404'],
+      ['Адрес', '/'],
+    ])
+  })
+
+  it('frames an error with a thin rule on every side, not a coloured left edge', () => {
+    renderWithShell(<ErrorState error={{ kind: 'network' }} onRetry={() => undefined} />)
+
+    expect(screen.getByRole('alert').className).not.toMatch(/border-l-\d/)
+    expect(screen.getByRole('alert').className).toContain('border-destructive')
+  })
+
+  it('shows the loading state with a mark hidden from assistive technology', () => {
+    renderWithShell(<LoadingState />)
+
+    expect(screen.getByRole('status')).toHaveTextContent('Загрузка…')
+    expect(screen.getByRole('status').querySelector('svg')).toHaveAttribute('aria-hidden', 'true')
+  })
 })

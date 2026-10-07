@@ -1,23 +1,88 @@
-import { NavLink, Outlet } from 'react-router'
+import { CaretRight, Flask } from '@phosphor-icons/react'
+import { Link, NavLink, Outlet, useMatches } from 'react-router'
 import { I18nProvider } from '@/i18n/I18nProvider'
 import { useI18n } from '@/i18n/context'
+
+export type Crumb = 'form' | 'result' | 'report' | 'notFound'
+
+const SHORT_ID = 8
+
+function useTrail(): { crumbs: readonly Crumb[]; id?: string } {
+  const match = useMatches().at(-1)
+  const handle = match?.handle as { trail?: readonly Crumb[] } | undefined
+  return { crumbs: handle?.trail ?? [], id: match?.params.id }
+}
+
+function CrumbLabel({ crumb, id }: { crumb: Crumb; id?: string }) {
+  const { t } = useI18n()
+  if (crumb === 'result' && id) {
+    return (
+      <>
+        {t('crumb.result')} <span className="font-mono">№ {id.slice(0, SHORT_ID)}</span>
+      </>
+    )
+  }
+  return <>{t(`crumb.${crumb}`)}</>
+}
+
+function Trail() {
+  const { t } = useI18n()
+  const { crumbs, id } = useTrail()
+  return (
+    <nav aria-label={t('nav.main')}>
+      <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+        <li>
+          <NavLink
+            to="/"
+            end
+            className="aria-[current=page]:cursor-default aria-[current=page]:text-foreground aria-[current=page]:no-underline"
+          >
+            {t('nav.types')}
+          </NavLink>
+        </li>
+        {crumbs.map((crumb, index) => {
+          const last = index === crumbs.length - 1
+          return (
+            <li key={crumb} className="flex items-center gap-x-2">
+              <CaretRight aria-hidden="true" size={12} className="text-muted-foreground" />
+              {last ? (
+                <span aria-current="page">
+                  <CrumbLabel crumb={crumb} id={id} />
+                </span>
+              ) : (
+                <Link to={`/calculations/${id}`}>
+                  <CrumbLabel crumb={crumb} id={id} />
+                </Link>
+              )}
+            </li>
+          )
+        })}
+      </ol>
+    </nav>
+  )
+}
+
+function DemoBadge() {
+  const { t } = useI18n()
+  if (import.meta.env.MODE !== 'mock') return null
+  return (
+    <p className="inline-flex items-center gap-1.5 border border-warning bg-warning-surface px-2 py-0.5 text-sm text-warning-foreground sm:ml-auto">
+      <Flask aria-hidden="true" weight="fill" size={16} />
+      {t('app.demo')}
+    </p>
+  )
+}
 
 function Shell() {
   const { t } = useI18n()
   return (
     <>
       <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-3">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
           <p className="font-heading text-lg font-semibold">{t('app.title')}</p>
-          <nav aria-label={t('nav.main')} className="flex flex-wrap items-center gap-x-6 gap-y-3">
-            <NavLink
-              to="/"
-              end
-              className="aria-[current=page]:cursor-default aria-[current=page]:text-foreground aria-[current=page]:no-underline"
-            >
-              {t('nav.types')}
-            </NavLink>
-          </nav>
+          <span aria-hidden="true" className="h-5 w-px bg-border max-sm:hidden" />
+          <Trail />
+          <DemoBadge />
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-4 py-8">
