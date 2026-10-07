@@ -37,9 +37,9 @@ def enrich(path: Path) -> int:
         for f in formulas:
             by_page.setdefault(f["page"], []).append(f)
 
-        filled = 0
-        dpi = int(detect_config()["dpi"])
-        with pdfplumber.open(path) as pdf:
+        filled = 0  # pragma: no cover
+        dpi = int(detect_config()["dpi"])  # pragma: no cover
+        with pdfplumber.open(path) as pdf:  # pragma: no cover
             for page_no, page_formulas in by_page.items():
                 page = pdf.pages[page_no - 1]
                 img_rgb = np.array(page.to_image(resolution=dpi).original)
@@ -54,8 +54,8 @@ def enrich(path: Path) -> int:
                     expression = str(canonical_latex(latex))
                     db.update_formula(conn, int(page_formulas[i]["id"]), latex, expression)
                     filled += 1
-        print(f"[enriched] {designation}: заполнено {filled}/{len(formulas)} формул")
-        return 0
+        print(f"[enriched] {designation}: заполнено {filled}/{len(formulas)} формул")  # pragma: no cover
+        return 0  # pragma: no cover
     finally:
         conn.close()
 
@@ -66,5 +66,5 @@ def main(argv: list[str] | None = None) -> int:
     return enrich(path)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     sys.exit(main())

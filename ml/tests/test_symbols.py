@@ -103,6 +103,8 @@ def test_split_symbols(raw: str, parts: list[str]) -> None:
 
 
 def test_split_symbols_keeps_compound_subscript_whole() -> None:
-    ident, latex = symbols.normalize_symbol("ssl,g")
+    result = symbols.normalize_symbol("ssl,g")
+    assert result is not None
+    ident, latex = result
     assert latex == "s_{sl,g}"
     assert ident == "s_sl_g"

@@ -12,7 +12,7 @@ import os
 from typing import Any
 
 READER_ROLE = "dec_normatives_reader"
-READER_PASSWORD_VAR = "DEC_NORMATIVES_READER_PASSWORD"
+READER_PASSWORD_VAR = "DEC_NORMATIVES_READER_PASSWORD"  # pragma: allowlist secret
 
 _NORM_REF = """jsonb_build_array(jsonb_build_object(
         'document', d.designation,
@@ -147,5 +147,6 @@ def ensure_catalog_read(conn: Any, password: str | None = None) -> bool:
         cur.execute(f'REVOKE ALL ON ALL TABLES IN SCHEMA public FROM "{READER_ROLE}"')
         cur.execute(f'REVOKE ALL ON SCHEMA public FROM "{READER_ROLE}"')
         cur.execute("REVOKE CREATE ON SCHEMA public FROM PUBLIC")
+        cur.execute("REVOKE TEMP ON DATABASE dec FROM PUBLIC")
     conn.commit()
     return True
