@@ -138,9 +138,13 @@ what it does not say. Do not restate `AGENTS.md` here.
 
 ## Who is working
 
-- Claude Code sessions here are Akim's (frontend/backend, engine, report generator).
-  Egor uses Kilo Code. Skip the "which developer" question; ask only when a task
-  touches Egor's zones (data, ml, infra).
+- Both Akim and Egor use Claude Code (Egor switched from Kilo Code in October 2026).
+  Akim: frontend/backend, engine, report generator.
+  Egor: normative pipeline, NLP/RAG, ML, DevOps (`ml/`, `infra/`).
+  Always ask which developer is working at the start of each session.
+  Akim's session: ask only when a task touches Egor's zones (data, ml, infra).
+  Egor's session: stay strictly within `ml/` and `infra/`; ask when a task touches
+  Akim's zones (backend, frontend, engine, report generator).
 
 ## SDD gate
 

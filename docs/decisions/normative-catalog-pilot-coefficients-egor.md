@@ -11,12 +11,19 @@
 ## Source
 
 - Document: СП 22.13330.2016 "Основания зданий и сооружений".
-- Edition: 2016 (актуализированная редакция СНиП 2.02.01-83*, изменения 1-4); the edition
-  the ingestion stored in `document.edition`. `unverified` under
-  `agent-docs/domain-constraints.md` until WP3 checks it against the paper primary text.
+- Edition: the ingested PDF is the **base 2016 edition without amendments** (title page:
+  приказ Минстрой России от 16 декабря 2016 г. № 970/пр; no "с Изменениями N …" line
+  on pages 1-5). The pipeline confirms this: `extract_amendments()` returns `[]` for this
+  file, so `document.edition = '2016'`. Akim's copy includes amendments 1-5; formula (5.7)
+  is marked "Измененная редакция, Изм. № 5" there, meaning the formula may differ from
+  what the base text and the current catalog contain. The current catalog therefore reflects
+  the base 2016 text only. Re-ingestion with the consolidated text (amendments 1-5 or
+  current) will update `document.edition` automatically once that file is available.
+  `unverified` under `agent-docs/domain-constraints.md` until WP3 checks it against the
+  paper primary text.
 - File checked: `docs/normative-base/СП 22.13330.2016.pdf`, clause 5.6.7 (printed page 35),
   table 5.4 (page 35) and table 5.5 (printed page 36).
-- Checked by: Egor (data engineer), 2026-10-05.
+- Checked by: Egor (data engineer), 2026-10-05; edition clarified 2026-10-07.
 
 ## What the primary text says, and what the catalog stores
 

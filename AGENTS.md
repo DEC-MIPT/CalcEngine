@@ -244,14 +244,16 @@ Zone-to-agent mapping:
 
 ## 8. Where agents live
 
-- Kilo Code: `.kilo/agent/*.md` (canonical), `.kilo/skills/*/SKILL.md`,
-  `.kilocode/skills/*/SKILL.md`, `.kilocode/workflows/*.md`. Kilo reads `AGENTS.md` natively.
-- Claude Code: mirror under `.claude/agents/*.md`, `.claude/commands/`, `.claude/skills/`.
+- Claude Code: `.claude/agents/*.md` (canonical), `.claude/commands/`, `.claude/skills/`.
   Claude Code does not read `AGENTS.md`; `CLAUDE.md` imports it and adds nothing that
-  contradicts it. Claude-only settings live in `.claude/settings.json`.
-- Keep both mirrors in sync when adding or changing agents. Exception: agents that need
-  Claude-specific frontmatter (`model`, `tools`) may exist in `.claude/agents/` only,
-  and are listed in `CLAUDE.md`.
+  contradicts it. Claude-only settings live in `.claude/settings.json` (machine-specific,
+  not committed to the repository).
+- Kilo Code: `.kilo/agent/*.md`, `.kilo/skills/*/SKILL.md`,
+  `.kilocode/skills/*/SKILL.md`, `.kilocode/workflows/*.md`. Kilo reads `AGENTS.md`
+  natively. Kept as a secondary mirror for fallback use.
+- Keep both in sync when adding or changing agents. Exception: agents with
+  Claude-specific frontmatter (`model`, `tools`) live in `.claude/agents/` only,
+  listed in `CLAUDE.md`.
 
 ## 9. Required skills
 

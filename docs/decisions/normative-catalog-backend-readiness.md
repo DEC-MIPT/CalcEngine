@@ -313,3 +313,45 @@ limits of the contract are likely to come up with the next types and would need 
 of their own: formulas with Σ/∏ (`formula-autoparse-limits-egor.md`; Egor counts 10 such
 formulas in СП 24.13330.2021, 5 of them parsed), and a table selected by two inputs,
 which decision 2 does not allow.
+
+## Section 2: Egor's response to the review (2026-10-06)
+
+I agree with the verdict and with every finding. Fix plan, all on
+`fix/normative-catalog/data`, then a second review:
+
+- **B1 — agree.** `sync_pilot_catalog` must not be passed the ingested document's
+  designation. I will call it without `designation` (its default is already
+  СП 22.13330.2016) and add a test that ingesting a second document leaves the pilot's
+  rows bound to СП 22.
+- **M1 — agree.** The pilot's formula 5.7 must be `unverified` / `machine-extracted`,
+  not the `formulas.toml` auto-mark. I will store the bound formula as unverified and
+  assert in the test that no pilot row is `verified` / `human-verified`. (Whether
+  `ingest.py`'s blanket `verified` mark stays is part of M3's `formulas.toml` decision.)
+- **M2 — agree.** A tree symbol or result symbol without a notation entry must refuse the
+  formula. I will refuse in `_bind_registry_formula` and drop the `"R"` fallback in
+  `notation_result_symbol`; `"" -> 1` remains only for a symbol that has an entry.
+- **M3 — acknowledged.** The merge-before-review and the un-GO'd
+  `normatives-formula-contract` are recorded here. I will get the `tester` GO for
+  `normatives-formula-contract` on `develop`, tick its tasks, or say which of its code is
+  not done.
+- **m1 — agree.** Rebuild each type in one transaction, rolled back on error; I will do it
+  together with the two-step split when a second type is added (B1's fix covers the pilot).
+- **m2 — agree.** A separate `_test` database (`dec_test`) and test role
+  (`dec_catalog_test_reader`), and the tests refuse a database whose name does not end in
+  `_test`.
+- **m3 — agree.** `k_z_from` LaTeX shows `8`: `k_z = \frac{8}{b} + 0.2`.
+- **m4 — agree.** The method bounds' `NormRef.clause` becomes `табл. 5.5`.
+- **m5 — agree.** `REVOKE TEMP ON DATABASE dec FROM PUBLIC` during ingestion.
+- **m6 — agree.** I mark the six secret lines (or write the URLs without the password) and
+  run `pre-commit install`.
+- **m7 — I check.** I will verify whether the ingested СП 22 text includes Изм. № 5, name
+  the exact consolidated text and its date in the record and in `document.edition`, and
+  ingest the current text if change 5 is missing.
+
+The two-step ingestion from your recommendation (document layer, then type-catalog build
+from a per-type registry, one transaction per type) is accepted as the direction; I will
+implement it when the second type is introduced, not in this fix. One clarification,
+agreed with Egor: the document layer structures **all** tables (heading rows and value
+columns), not only table 5.5 — the type binding only names a table and its columns, and
+the backend reads what its type needs. The current table-5.5 parsing in `pilot_catalog.py`
+moves to that generic document layer.

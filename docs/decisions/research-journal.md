@@ -162,3 +162,51 @@ unacceptable. A singleton loads once per process; `hf_hub_download` caches the w
 
 For what: a long-lived service calls `warm_up()` at startup, so the first request is already warm;
 the batch CLI (`enrich.py`) amortizes the same one-time load across the whole document.
+
+## Entry 13 — Full cycle run: download → ingest → sync → read (2026-10-06)
+
+Branch `feature/normative-pipeline/data`. Goal: verify the end-to-end cycle works and catch
+known bugs before the fix branch.
+
+**Environment:** `dec-postgres` running (port 5433, DB `dec`), package installed as
+`pip install -e "./ml[ml]"`, `DEC_DATABASE_URL=postgresql://dec:<password>@localhost:5433/dec`.
+
+**Э1 — PDFs in `docs/normative-base/`:** 5 SP documents extract designation correctly
+(СП 22/24/30/31/45); 7 files (приказы `_пр.pdf`, СНиП) give empty designation and are
+correctly rejected by `ingest`.
+
+**Э2 — ingest:**
+
++ `СП 22.13330.2016 --force`: 647 clauses, 130 formulas (127 numbered + 6 synthetic), 203
+  notation entries, 56 cross-refs, 19 conditions, 121 tables, 2959 cells. Clean.
++ `СП 24.13330.2021 --force`: 292 clauses, 91 formulas, 134 notation entries. Clean.
++ **B1 confirmed:** after ingesting СП 24, `catalog_binding.document_id` for all 11 pilot
+  parameters pointed at `СП 24.13330.2021` instead of `СП 22.13330.2016`. Root cause:
+  `ingest.py:151` calls `pilot_catalog.sync_pilot_catalog(conn, designation)` with the
+  ingested document's designation.
+
+**Э3 — sync:** `pilot_catalog.sync_pilot_catalog(conn)` called without `designation`
+argument (defaults to `СП 22.13330.2016`). Returns `True`. All 11 bindings correctly
+reference `СП 22.13330.2016`.
+
+**Э4 — read (as `dec_normatives_reader`):**
+
+| View | Result |
+| --- | --- |
+| `catalog_read.documents` | 5 rows (СП 22/24/30/31/45); СП 30 and СП 45 show `edition=''`, `year=None` — old data from pre-edition-check code |
+| `catalog_read.type_formulas` | 3 rows for `foundations_shallow_r`: `k_z_below`, `k_z_from` (`unverified`), `r` (`verified`) |
+| `catalog_read.type_table_values` | 141 rows: 1 each for `gamma_c1/c2/k`, 46 each for `m_c/m_gamma/m_q` |
+| `catalog_read.type_thresholds` | `k_z_threshold = 10.0 m` |
+| `catalog_read.type_method_bounds` | `phi_II min=0.0 deg`, `phi_II max=45.0 deg` |
+| `catalog_read.search(…)` | Correct ranked results for Russian query |
+
+Access controls: INSERT refused (`FeatureNotSupported`), SELECT on `public.document` refused
+(`InsufficientPrivilege`), CREATE TABLE refused by readonly session (m5 TEMP not yet tested
+outside readonly session — m5 fix still open).
+
+**M1 confirmed in read:** `type_formulas` shows formula `r` with `norm_refs[0].status =
+"verified"` — must be `"unverified"` after the fix of M1.
+
+**Summary:** the cycle runs end-to-end without errors. Bugs B1 and M1 are reproduced and
+confirmed. The fix branch `fix/normative-catalog/data` must address both before Akim's
+second review.
