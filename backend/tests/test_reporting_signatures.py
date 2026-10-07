@@ -14,6 +14,7 @@ from app.reporting.title_block import (
     DATE_SIZE_PT,
     SIGNATURE_COLUMNS,
     SIGNATURE_ROWS,
+    SURNAME_SIZE_PT,
 )
 from app.schemas.report import ReportRequest, Signatory
 
@@ -88,3 +89,14 @@ def test_the_date_prints_small_enough_for_column_13() -> None:
     runs = table.cell(SIGNATURE_ROWS["developer"], SIGNATURE_COLUMNS["13"]).paragraphs[0].runs
 
     assert [(run.text, run.font.size.pt if run.font.size else None) for run in runs] == [("30.09.26", DATE_SIZE_PT)]
+
+
+def test_every_surname_prints_at_six_points() -> None:
+    table = form5(with_request(checker=CHECKER))
+    sizes = {
+        role: [run.font.size.pt if run.font.size else None for run in table.cell(SIGNATURE_ROWS[role], SIGNATURE_COLUMNS["11"]).paragraphs[0].runs]
+        for role in ("developer", "checker", "normative_control")
+    }
+
+    assert SURNAME_SIZE_PT == 6
+    assert sizes == {"developer": [6.0], "checker": [6.0], "normative_control": [6.0]}

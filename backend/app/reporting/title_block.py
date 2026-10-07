@@ -80,6 +80,10 @@ CHECKER_CAPTION = "Пров."
 DATE_SIZE_PT = 6
 """Дата ``ДД.ММ.ГГ`` шириной около 3,9 em; кеглем 6 пт она помещается в графу 13 (10 мм за вычетом полей ячейки)."""
 
+SURNAME_SIZE_PT = 6
+"""Фамилия в графе 11 печатается кеглем даты, чтобы узкая графа вмещала больше символов;
+выбор вёрстки, а не значение нормы (``report-title-block-limits`` design.md, решение 6)."""
+
 FORM6_WIDTHS_MM = (10, 10, 10, 10, 15, 10, 110, 10)
 """Ширины граф формы 6 слева направо (GOST R 21.101-2026, edition unverified, приложение Е)."""
 
@@ -134,8 +138,14 @@ FORMAT_BOX_MM = (150, 40)
 
 TITLE_STYLE = "DEC Title Block"
 TITLE_SIZE_PT = 7
+"""Кегль подписей граф и текстов граф 6 и 9; выбор вёрстки, а не значение нормы."""
 LARGE_SIZE_PT = 10
 """Графы 1 и 5 печатаются крупнее подписей; выбор вёрстки, а не значение нормы."""
+
+COLUMN_SIZES_PT: MappingProxyType[str, int] = MappingProxyType(
+    {"1": LARGE_SIZE_PT, "5": LARGE_SIZE_PT, "6": TITLE_SIZE_PT, "9": TITLE_SIZE_PT, "11": SURNAME_SIZE_PT}
+)
+"""Кегль текста запроса в каждой заполняемой графе."""
 
 FIELDS: MappingProxyType[str, str] = MappingProxyType({"7": "PAGE", "8": "NUMPAGES"})
 """Графа 7 (номер листа) и графа 8 (число листов) как поля Word."""
@@ -161,6 +171,7 @@ def _title_style(document: Document) -> str:
     style.font.size = Pt(TITLE_SIZE_PT)
     paragraph = style.paragraph_format
     paragraph.space_before = paragraph.space_after = Pt(0)
+    paragraph.line_spacing = 1.0
     paragraph.left_indent = paragraph.right_indent = Mm(0)
     paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
     return TITLE_STYLE
@@ -302,13 +313,13 @@ def _field(paragraph: Paragraph, instruction: str) -> None:
 def _fill(
     table: Table,
     form: Form,
-    texts: Mapping[str, tuple[str, int]],
+    texts: Mapping[str, str],
     fields: Mapping[str, str],
 ) -> None:
-    for column, (text, size) in texts.items():
+    for column, text in texts.items():
         cell = table.cell(*form.columns[column])
         cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
-        cell.paragraphs[0].add_run(text).font.size = Pt(size)
+        cell.paragraphs[0].add_run(text).font.size = Pt(COLUMN_SIZES_PT[column])
     for column, instruction in fields.items():
         _field(table.cell(*form.columns[column]).paragraphs[0], instruction)
 
@@ -323,7 +334,9 @@ def _footer_form(footer: _Footer, style: str, form: Form) -> Table:
 
 
 def _sign(table: Table, row: int, signatory: Signatory) -> None:
-    table.cell(row, SIGNATURE_COLUMNS["11"]).paragraphs[0].add_run(signatory.surname)
+    table.cell(row, SIGNATURE_COLUMNS["11"]).paragraphs[0].add_run(signatory.surname).font.size = Pt(
+        COLUMN_SIZES_PT["11"]
+    )
     date = format_date(signatory.date) if signatory.date else ""
     table.cell(row, SIGNATURE_COLUMNS["13"]).paragraphs[0].add_run(date).font.size = Pt(DATE_SIZE_PT)
 
@@ -365,14 +378,14 @@ def add_title_blocks(document: Document, request: ReportRequest) -> tuple[Table,
         first,
         FORM5,
         {
-            "1": (title.designation, LARGE_SIZE_PT),
-            "5": (title.document_name, LARGE_SIZE_PT),
-            "6": (title.documentation_kind, TITLE_SIZE_PT),
-            "9": (title.organization, TITLE_SIZE_PT),
+            "1": title.designation,
+            "5": title.document_name,
+            "6": title.documentation_kind,
+            "9": title.organization,
         },
         FIELDS,
     )
     _signatures(first, request)
     following = _footer_form(section.footer, style, FORM6)
-    _fill(following, FORM6, {"1": (title.designation, LARGE_SIZE_PT)}, {"7": FIELDS["7"]})
+    _fill(following, FORM6, {"1": title.designation}, {"7": FIELDS["7"]})
     return first, following

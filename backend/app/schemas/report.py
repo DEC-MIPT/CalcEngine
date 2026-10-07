@@ -1,8 +1,9 @@
 import datetime
 import unicodedata
+from types import MappingProxyType
 from typing import Annotated
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
 XML_FORBIDDEN = frozenset({0xFFFE, 0xFFFF})
 """Символы вне управляющих и суррогатов, которых нет в наборе символов XML 1.0."""
@@ -48,7 +49,15 @@ def _writable_text(text: str) -> str:
     return text
 
 
-Text = Annotated[str, AfterValidator(_writable_text)]
+MAX_LENGTH: MappingProxyType[str, int] = MappingProxyType({"1": 123, "5": 150, "6": 7, "9": 130, "11": 11})
+"""Лимит символов текста каждой заполняемой графы основной надписи по её номеру.
+
+Вместимость ячейки при её кегле, чтобы обычный текст на лимите помещался целиком
+(``report-generator`` "Title-block text length"; ``report-title-block-limits`` design.md,
+решения 2-5). Выбор вёрстки, а не значение нормы; тест ``reporting`` сверяет каждый лимит с
+вместимостью, вычисленной из геометрии форм. В аннотации поля лимит стоит раньше проверки
+символов: так pydantic проверяет длину строки и отвечает ошибкой ``string_too_long``.
+"""
 
 
 class TitleBlockData(BaseModel):
@@ -61,10 +70,10 @@ class TitleBlockData(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    designation: Text
-    document_name: Text
-    documentation_kind: Text = ""
-    organization: Text
+    designation: Annotated[str, Field(max_length=MAX_LENGTH["1"]), AfterValidator(_writable_text)]
+    document_name: Annotated[str, Field(max_length=MAX_LENGTH["5"]), AfterValidator(_writable_text)]
+    documentation_kind: Annotated[str, Field(max_length=MAX_LENGTH["6"]), AfterValidator(_writable_text)] = ""
+    organization: Annotated[str, Field(max_length=MAX_LENGTH["9"]), AfterValidator(_writable_text)]
 
 
 class Signatory(BaseModel):
@@ -72,7 +81,7 @@ class Signatory(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    surname: Text = ""
+    surname: Annotated[str, Field(max_length=MAX_LENGTH["11"]), AfterValidator(_writable_text)] = ""
     date: datetime.date | None = None
 
     @property

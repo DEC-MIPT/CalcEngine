@@ -31,7 +31,7 @@ REPORT_REQUEST = ReportRequest(
         designation="<DESIGNATION>", document_name="<DOCUMENT-NAME>", organization="<ORGANIZATION>"
     ),
     developer=Signatory(surname="<DEVELOPER>", date=DAY),
-    normative_control=Signatory(surname="<NORM-CONTROL>", date=DAY),
+    normative_control=Signatory(surname="<NORM-CTRL>", date=DAY),
 )
 HEADINGS = ["1 Исходные данные", "2 Расчёт", "3 Заключение", "4 Подотчётность результата"]
 

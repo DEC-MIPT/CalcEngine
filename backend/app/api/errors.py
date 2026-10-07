@@ -55,6 +55,7 @@ STATIC_MESSAGE_TYPES = frozenset(
         "extra_forbidden",
         "string_type",
         "string_too_short",
+        "string_too_long",
         "float_type",
         "float_parsing",
         "finite_number",

@@ -7,6 +7,7 @@ from docx import Document
 from pydantic import ValidationError
 
 from app.schemas.report import (
+    MAX_LENGTH,
     ReportRequest,
     Signatory,
     TitleBlockData,
@@ -105,8 +106,10 @@ def test_a_character_xml_does_not_allow_is_rejected(field: str, character: str) 
     text = f"a{character}b"
     changes = {"developer": person(surname=text)} if field == "surname" else {"title": title(**{field: text})}
 
-    with pytest.raises(ValidationError, match="XML 1.0"):
+    with pytest.raises(ValidationError) as rejected:
         request(**changes)
+    expected = "string_unicode" if 0xD800 <= ord(character) <= 0xDFFF else "value_error"
+    assert [error["type"] for error in rejected.value.errors()] == [expected]
 
 
 def test_every_character_the_schema_accepts_can_be_written_to_a_docx() -> None:
@@ -121,3 +124,58 @@ def test_every_character_the_schema_accepts_can_be_written_to_a_docx() -> None:
     document.save(BytesIO())
 
     assert len(accepted) == 0x10000 - 0x20 - 0x21 - 0x800 - 2 + 3
+
+
+TITLE_FIELDS = {"designation": "1", "document_name": "5", "documentation_kind": "6", "organization": "9"}
+ROLES = ("developer", "checker", "normative_control")
+
+
+def cyrillic(length: int) -> str:
+    return ("Ж" * length)[:length]
+
+
+@pytest.mark.parametrize("field", list(TITLE_FIELDS))
+def test_a_title_text_at_its_limit_is_accepted_and_one_more_character_is_rejected(field: str) -> None:
+    limit = MAX_LENGTH[TITLE_FIELDS[field]]
+
+    assert getattr(TitleBlockData.model_validate(title(**{field: cyrillic(limit)})), field) == cyrillic(limit)
+    with pytest.raises(ValidationError) as rejected:
+        TitleBlockData.model_validate(title(**{field: cyrillic(limit + 1)}))
+    assert [(error["type"], error["loc"], error["ctx"]) for error in rejected.value.errors()] == [
+        ("string_too_long", (field,), {"max_length": limit})
+    ]
+
+
+@pytest.mark.parametrize("role", ROLES)
+def test_a_surname_at_its_limit_is_accepted_and_one_more_character_is_rejected(role: str) -> None:
+    limit = MAX_LENGTH["11"]
+
+    assert getattr(request(**{role: person(surname=cyrillic(limit))}), role).surname == cyrillic(limit)
+    with pytest.raises(ValidationError) as rejected:
+        request(**{role: person(surname=cyrillic(limit + 1))})
+    assert [(error["type"], error["loc"]) for error in rejected.value.errors()] == [
+        ("string_too_long", (role, "surname"))
+    ]
+
+
+def test_the_limit_counts_characters_not_bytes() -> None:
+    text = cyrillic(MAX_LENGTH["1"])
+
+    assert len(text.encode()) > MAX_LENGTH["1"]
+    assert TitleBlockData.model_validate(title(designation=text)).designation == text
+
+
+def test_the_length_is_checked_before_the_characters() -> None:
+    with pytest.raises(ValidationError) as rejected:
+        TitleBlockData.model_validate(title(designation=cyrillic(MAX_LENGTH["1"]) + "\x00"))
+    assert [error["type"] for error in rejected.value.errors()] == ["string_too_long"]
+
+
+def test_the_limits_are_in_the_json_schema() -> None:
+    definitions = ReportRequest.model_json_schema()["$defs"]
+    title_properties = definitions["TitleBlockData"]["properties"]
+
+    assert {field: title_properties[field]["maxLength"] for field in TITLE_FIELDS} == {
+        field: MAX_LENGTH[column] for field, column in TITLE_FIELDS.items()
+    }
+    assert definitions["Signatory"]["properties"]["surname"]["maxLength"] == MAX_LENGTH["11"]

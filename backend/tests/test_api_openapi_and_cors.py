@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from app.core.config import ApiSettings
 from app.engine.registry import CalculatorRegistry
 from app.main import create_app
+from app.schemas.report import MAX_LENGTH
 
 DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ERROR_BODY = "#/components/schemas/ErrorBody"
@@ -62,6 +63,19 @@ def test_the_request_schemas_are_described(openapi: dict[str, Any]) -> None:
     assert body_ref("/calculations/{result_id}/report").endswith("/ReportRequest")
     parameters = operation(openapi, "/calculations/{result_id}", "get")["parameters"]
     assert [(p["name"], p["in"], p["schema"]["format"]) for p in parameters] == [("result_id", "path", "uuid")]
+
+
+def test_the_report_text_limits_are_published_as_max_length(openapi: dict[str, Any]) -> None:
+    schemas = openapi["components"]["schemas"]
+    title = schemas["TitleBlockData"]["properties"]
+
+    assert {field: title[field]["maxLength"] for field in ("designation", "document_name", "documentation_kind", "organization")} == {
+        "designation": MAX_LENGTH["1"],
+        "document_name": MAX_LENGTH["5"],
+        "documentation_kind": MAX_LENGTH["6"],
+        "organization": MAX_LENGTH["9"],
+    }
+    assert schemas["Signatory"]["properties"]["surname"]["maxLength"] == MAX_LENGTH["11"]
 
 
 def test_the_success_responses_are_described(openapi: dict[str, Any]) -> None:

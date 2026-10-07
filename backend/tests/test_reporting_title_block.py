@@ -42,6 +42,7 @@ from app.reporting.title_block import (
     INNER_LINE,
     OUTER_LINE,
     ROW_HEIGHT_MM,
+    TITLE_STYLE,
     Form,
     footer_distance_mm,
     indent_mm,
@@ -320,3 +321,10 @@ def test_a_report_of_two_sheets_or_more_renders_with_both_forms() -> None:
 
     assert [len(section.first_page_footer.tables), len(section.footer.tables)] == [1, 1]
     assert len(section.footer.tables[0].columns) == len(FORM6_WIDTHS_MM)
+
+
+def test_the_title_block_is_single_spaced_although_the_document_default_is_not(document: DocumentObject) -> None:
+    defaults = document.styles.element.find(qn("w:docDefaults")).find(qn("w:pPrDefault")).find(qn("w:pPr")).find(qn("w:spacing"))
+
+    assert document.styles[TITLE_STYLE].paragraph_format.line_spacing == 1.0
+    assert defaults.get(qn("w:line")) == "276"

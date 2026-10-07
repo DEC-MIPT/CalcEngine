@@ -2,9 +2,11 @@ import json
 import logging
 import uuid
 from collections.abc import Iterator
+from io import BytesIO
 from typing import Any
 
 import pytest
+from docx import Document
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import Engine, create_engine, func, select
@@ -19,7 +21,14 @@ from app.engine.registry import CalculatorRegistry
 from app.main import create_app
 from app.models import Base
 from app.models.calculation_result import CalculationResultRow
+from app.reporting.title_block import (
+    FORM5_COLUMNS,
+    FORM6_COLUMNS,
+    SIGNATURE_COLUMNS,
+    SIGNATURE_ROWS,
+)
 from app.schemas.calculation import MethodBound, ValidatedBound
+from app.schemas.report import MAX_LENGTH
 
 INPUTS: dict[str, Any] = {
     "b": {"value": 1.5, "unit": "m"},
@@ -389,3 +398,68 @@ def test_a_report_request_with_a_character_xml_does_not_allow_is_422(
 
     assert (response.status_code, response.json()["code"]) == (422, "validation_error")
     assert [field["location"] for field in response.json()["fields"]] == [["body", "title", "designation"]]
+
+
+LIMITED_FIELDS = [
+    (("title", "designation"), "1"),
+    (("title", "document_name"), "5"),
+    (("title", "documentation_kind"), "6"),
+    (("title", "organization"), "9"),
+    (("developer", "surname"), "11"),
+    (("checker", "surname"), "11"),
+    (("normative_control", "surname"), "11"),
+]
+
+
+def report_with(path: tuple[str, str], text: str) -> dict[str, Any]:
+    group, field = path
+    signatory = {"surname": "<SURNAME>", "date": "2026-10-07"}
+    current = REPORT_BODY.get(group) or signatory
+    return REPORT_BODY | {group: current | {field: text}}
+
+
+@pytest.mark.parametrize(("path", "column"), LIMITED_FIELDS, ids=[".".join(path) for path, _ in LIMITED_FIELDS])
+def test_a_report_text_over_its_limit_is_422_naming_the_limit_and_echoing_no_text(
+    client: TestClient, caplog: pytest.LogCaptureFixture, path: tuple[str, str], column: str
+) -> None:
+    created = client.post("/calculations", json=body()).json()
+    text = "Щ" * (MAX_LENGTH[column] + 1)
+
+    with caplog.at_level(logging.INFO, logger="app.api"):
+        response = client.post(f"/calculations/{created['result_id']}/report", json=report_with(path, text))
+
+    logged = "\n".join(record.getMessage() for record in caplog.records)
+    assert (response.status_code, response.json()["code"]) == (422, "validation_error")
+    assert response.json()["fields"] == [
+        {"location": ["body", *path], "message": f"String should have at most {MAX_LENGTH[column]} characters"}
+    ]
+    assert text not in response.text and text not in logged
+    assert "code=validation_error" in logged
+
+
+def test_a_report_with_every_text_at_its_limit_prints_each_text_whole(client: TestClient) -> None:
+    created = client.post("/calculations", json=body()).json()
+    sent = {path: f"{path[0][:3]}-" + "ж" * (MAX_LENGTH[column] - 4) for path, column in LIMITED_FIELDS}
+    report: dict[str, Any] = {"title": REPORT_BODY["title"], "signature_block": True}
+    for (group, field), text in sent.items():
+        defaults = {} if group == "title" else {"date": "2026-10-07"}
+        report[group] = defaults | report.get(group, {}) | {field: text}
+
+    response = client.post(f"/calculations/{created['result_id']}/report", json=report)
+
+    assert response.status_code == 200
+    footers = Document(BytesIO(response.content)).sections[0]
+    form5, form6 = footers.first_page_footer.tables[0], footers.footer.tables[0]
+    printed = {
+        ("title", "designation"): form5.cell(*FORM5_COLUMNS["1"]).text,
+        ("title", "document_name"): form5.cell(*FORM5_COLUMNS["5"]).text,
+        ("title", "documentation_kind"): form5.cell(*FORM5_COLUMNS["6"]).text,
+        ("title", "organization"): form5.cell(*FORM5_COLUMNS["9"]).text,
+        **{
+            (role, "surname"): form5.cell(SIGNATURE_ROWS[role], SIGNATURE_COLUMNS["11"]).text
+            for role in ("developer", "checker", "normative_control")
+        },
+    }
+    assert printed == sent
+    assert [len(sent[path]) for path, _ in LIMITED_FIELDS] == [MAX_LENGTH[column] for _, column in LIMITED_FIELDS]
+    assert form6.cell(*FORM6_COLUMNS["1"]).text == sent[("title", "designation")]
