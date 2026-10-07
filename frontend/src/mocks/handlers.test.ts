@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { createApi, unwrap } from '../api/client'
-import { calculationTypes, FAIL_ID, failEnvelope, PASS_ID, passEnvelope } from './fixtures'
+import {
+  calculationTypes,
+  FAIL_ID,
+  failEnvelope,
+  PASS_ID,
+  passEnvelope,
+  REFUSED_ID,
+  refusedEnvelope,
+  WARNING_ID,
+  warningEnvelope,
+} from './fixtures'
 import { serviceUnavailable } from './handlers'
 import { server } from './server'
 
@@ -51,6 +61,21 @@ describe('mock handlers', () => {
     expect(result).toEqual({ ok: true, data: failEnvelope })
   })
 
+  it('answer a width beyond the method range with the refused envelope', async () => {
+    const result = await create({ ...givenInputs, b: { value: 12, unit: 'm' } })
+
+    expect(result).toEqual({ ok: true, data: refusedEnvelope })
+    expect(refusedEnvelope).toMatchObject({ verdict: 'refused', outputs: [], verdict_reason: { kind: 'bound' } })
+  })
+
+  it('answer a width beyond the validated range with the warning envelope, in any unit', async () => {
+    const result = await create({ ...givenInputs, b: { value: 600, unit: 'cm' } })
+
+    expect(result).toEqual({ ok: true, data: warningEnvelope })
+    expect(warningEnvelope.warnings).toHaveLength(1)
+    expect(warningEnvelope.verdict).toBe('pass')
+  })
+
   it('answer a missing input with a 422 that names its place', async () => {
     const { p, ...withoutP } = givenInputs
     expect(p).toBeDefined()
@@ -84,6 +109,8 @@ describe('mock handlers', () => {
   it.each([
     [PASS_ID, passEnvelope],
     [FAIL_ID, failEnvelope],
+    [REFUSED_ID, refusedEnvelope],
+    [WARNING_ID, warningEnvelope],
   ])('return the stored result %s', async (id, envelope) => {
     const result = await unwrap(
       api.GET('/calculations/{result_id}', { params: { path: { result_id: id } } }),

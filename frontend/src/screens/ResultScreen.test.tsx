@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { http, HttpResponse } from 'msw'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { PASS_ID, passEnvelope } from '@/mocks/fixtures'
+import { PASS_ID, passEnvelope, REFUSED_ID, WARNING_ID } from '@/mocks/fixtures'
 import { server } from '@/mocks/server'
 import { routes } from '@/routes'
 import { expectNoA11yViolations } from '@/test/axe'
@@ -120,5 +120,90 @@ describe('link from the result to the report (4.4)', () => {
 
     expect(router.state.location.pathname).toBe(`/calculations/${PASS_ID}/report`)
     expect(screen.getByText(PASS_ID)).toBeInTheDocument()
+  })
+})
+
+
+const region = (name: RegExp) => screen.findByRole('region', { name })
+
+describe('refusal (6.4b)', () => {
+  it('shows the violated bound, the input value and the bound sources, and no result value', async () => {
+    const { container } = open(`/calculations/${REFUSED_ID}`)
+    const refusal = await region(/^Расчёт не выполнен: входное значение вне диапазона метода$/)
+
+    expect(refusal.querySelector('[data-fact="input"]')).toHaveTextContent('b = 12 м')
+    expect(refusal.querySelector('[data-fact="bound"]')).toHaveTextContent('b ≤меньше или равно 10 м')
+    expect(within(refusal).getByText('Источник границы').nextElementSibling).toHaveTextContent('<NORM-DOC-PLACEHOLDER>')
+    expect(within(refusal).getByText(/Результат не вычислялся/)).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Выходные величины' })).toBeNull()
+    expect(screen.queryByRole('heading', { name: 'Ход расчёта' })).toBeNull()
+    expect(container).not.toHaveTextContent('кПа')
+    expect(screen.getByRole('link', { name: 'Запросить отчёт' })).toBeInTheDocument()
+    await expectNoA11yViolations(container)
+  })
+})
+
+describe('applicability warning (6.4c)', () => {
+  it('shows the input, the violated validated bound and its engineer-set source next to the outputs', async () => {
+    const { container } = open(`/calculations/${WARNING_ID}`)
+    const warning = await region(/^Предупреждение: входное значение вне проверенного диапазона$/)
+    const outputs = screen.getByRole('heading', { name: 'Выходные величины' }).closest('section')!
+
+    expect(outputs).toHaveTextContent('183,8 кПа')
+    expect(outputs.nextElementSibling).toContainElement(warning)
+    expect(warning.querySelector('[data-fact="input"]')).toHaveTextContent('b = 6 м')
+    expect(warning.querySelector('[data-fact="bound"]')).toHaveTextContent('b ≤меньше или равно 5 м')
+    expect(within(warning).getByText('Задано инженером')).toBeInTheDocument()
+    expect(within(warning).getByText('Инженер: <ENGINEER>')).toBeInTheDocument()
+    expect(within(warning).getByText('Обоснование: <RATIONALE>')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Ход расчёта' })).toBeInTheDocument()
+    await expectNoA11yViolations(container)
+  })
+
+  it('shows no warning for a result without one', async () => {
+    open(`/calculations/${PASS_ID}`)
+
+    await screen.findByRole('heading', { name: 'Выходные величины' })
+    expect(screen.queryByRole('region', { name: /^Предупреждение/ })).toBeNull()
+  })
+})
+
+describe('a value outside the range is sent and decided by the backend (5.4)', () => {
+  it.each([
+    ['12', 'm', /^Расчёт не выполнен/],
+    ['600', 'cm', /^Предупреждение/],
+  ])('sends b = %s %s as entered and shows the outcome', async (value, unit, outcome) => {
+    const bodies: unknown[] = []
+    server.events.on('request:start', async ({ request }) => {
+      if (request.method === 'POST') bodies.push(await request.clone().json())
+    })
+    open('/calculations/new?type=foundations_shallow_r')
+    const values: Record<string, string> = {
+      b: value,
+      d_1: '1.5',
+      d_b: '0',
+      gamma_II: '18',
+      gamma_II_prime: '18',
+      c_II: '10',
+      phi_II: '20',
+      p: '100',
+    }
+    await screen.findByRole('button', { name: 'Рассчитать' })
+    for (const [name, entered] of Object.entries(values)) {
+      fireEvent.change(document.getElementById(`field-${name}`)!, { target: { value: entered } })
+    }
+    if (unit !== 'm') {
+      fireEvent.change(screen.getByRole('combobox', { name: 'Единица: Ширина подошвы фундамента' }), {
+        target: { value: unit },
+      })
+    }
+
+    fireEvent.click(screen.getByRole('button', { name: 'Рассчитать' }))
+
+    expect(await region(outcome)).toBeInTheDocument()
+    expect(bodies).toEqual([
+      expect.objectContaining({ inputs: expect.objectContaining({ b: { value: Number(value), unit } }) }),
+    ])
+    server.events.removeAllListeners('request:start')
   })
 })

@@ -1,18 +1,43 @@
 import { http, HttpResponse } from 'msw'
 import type { components } from '../api/schema'
-import { calculationTypes, FAIL_ID, failEnvelope, PASS_ID, passEnvelope } from './fixtures'
+import {
+  calculationTypes,
+  FAIL_ID,
+  failEnvelope,
+  PASS_ID,
+  passEnvelope,
+  REFUSED_ID,
+  refusedEnvelope,
+  WARNING_ID,
+  warningEnvelope,
+} from './fixtures'
 
 type CalculationRequest = components['schemas']['CalculationRequest']
 type ErrorBody = components['schemas']['ErrorBody']
 
 const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 const RESISTANCE_KPA = 172.5
+const METRES: Record<string, number> = { m: 1, cm: 0.01, mm: 0.001 }
+const METHOD_MAX_B_M = refusedEnvelope.verdict_reason.bound.value
+const VALIDATED_MAX_B_M = warningEnvelope.warnings[0].bound.value
 
-const envelopes = { [PASS_ID]: passEnvelope, [FAIL_ID]: failEnvelope } as const
+const envelopes = {
+  [PASS_ID]: passEnvelope,
+  [FAIL_ID]: failEnvelope,
+  [REFUSED_ID]: refusedEnvelope,
+  [WARNING_ID]: warningEnvelope,
+} as const
 
 function lookup(id: unknown) {
   const key = String(id)
   return Object.hasOwn(envelopes, key) ? envelopes[key as keyof typeof envelopes] : undefined
+}
+
+function scenario(inputs: CalculationRequest['inputs']) {
+  const widthM = inputs.b.value * METRES[inputs.b.unit]
+  if (widthM > METHOD_MAX_B_M) return refusedEnvelope
+  if (widthM > VALIDATED_MAX_B_M) return warningEnvelope
+  return inputs.p.value > RESISTANCE_KPA ? failEnvelope : passEnvelope
 }
 
 function error(status: number, body: ErrorBody) {
@@ -47,7 +72,7 @@ export const handlers = [
     if (missing) {
       return invalidInput(['body', 'inputs', missing.name], 'Missing input.')
     }
-    const envelope = inputs.p.value > RESISTANCE_KPA ? failEnvelope : passEnvelope
+    const envelope = scenario(inputs)
     return HttpResponse.json(envelope, {
       status: 201,
       headers: { Location: `/calculations/${envelope.result_id}` },

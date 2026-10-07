@@ -3,8 +3,10 @@ import { Link, useParams } from 'react-router'
 import { api, unwrap } from '@/api/client'
 import { useRequest } from '@/api/useRequest'
 import { Outputs } from '@/components/Outputs'
+import { Refusal } from '@/components/Refusal'
 import { ErrorState, LoadingState, NotFoundState } from '@/components/RequestStates'
 import { Trace } from '@/components/Trace'
+import { Warnings } from '@/components/Warnings'
 import { useI18n } from '@/i18n/context'
 
 export function ResultScreen() {
@@ -32,8 +34,15 @@ export function ResultScreen() {
           <p>
             <Link to={`/calculations/${state.data.result_id}/report`}>{t('result.toReport')}</Link>
           </p>
-          <Outputs outputs={state.data.outputs} />
-          <Trace steps={state.data.trace} unverifiedStepCount={state.data.unverified_step_count} />
+          {state.data.verdict_reason.kind === 'bound' ? (
+            <Refusal reason={state.data.verdict_reason} />
+          ) : (
+            <>
+              <Outputs outputs={state.data.outputs} />
+              <Warnings warnings={state.data.warnings} />
+              <Trace steps={state.data.trace} unverifiedStepCount={state.data.unverified_step_count} />
+            </>
+          )}
         </>
       )}
     </>

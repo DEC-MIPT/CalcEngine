@@ -67,6 +67,15 @@ export const ru = {
   'source.engineerSet': 'Задано инженером',
   'source.engineer': 'Инженер',
   'source.rationale': 'Обоснование',
+  'status.warning': 'Предупреждение',
+  'status.refusal': 'Расчёт не выполнен',
+  'refusal.title': 'входное значение вне диапазона метода',
+  'refusal.noResult': 'Результат не вычислялся: метод неприменим к этому значению.',
+  'warning.title': 'входное значение вне проверенного диапазона',
+  'bound.input': 'Входное значение',
+  'bound.method': 'Нарушенная граница диапазона метода',
+  'bound.validated': 'Нарушенная граница проверенного диапазона',
+  'bound.source': 'Источник границы',
 } as const
 
 export type TextKey = keyof typeof ru
@@ -137,6 +146,15 @@ export const en: PartialDictionary = {
   'source.engineerSet': 'Set by the engineer',
   'source.engineer': 'Engineer',
   'source.rationale': 'Rationale',
+  'status.warning': 'Warning',
+  'status.refusal': 'Calculation refused',
+  'refusal.title': 'an input is outside the method range',
+  'refusal.noResult': 'No result was computed: the method does not apply to this value.',
+  'warning.title': 'an input is outside the validated range',
+  'bound.input': 'Input value',
+  'bound.method': 'Violated bound of the method range',
+  'bound.validated': 'Violated bound of the validated range',
+  'bound.source': 'Source of the bound',
 }
 
 export interface Dictionaries {
