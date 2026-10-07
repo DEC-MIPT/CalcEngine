@@ -12,7 +12,7 @@ describe('routes', () => {
   it.each([
     ['/calculations/new?type=foundations_shallow_r', 'Исходные данные'],
     [`/calculations/${PASS_ID}`, 'Результат расчёта'],
-    ['/calculations/abc/report', 'Report request'],
+    ['/calculations/abc/report', 'Запрос отчёта'],
   ])('renders the screen of %s', (address, heading) => {
     open(address)
 
@@ -40,7 +40,7 @@ describe('routes', () => {
     cleanup()
 
     open('/calculations/abc/report')
-    expect(screen.getByText('abc')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Результат № abc' })).toHaveAttribute('href', '/calculations/abc')
   })
 
   it('renders a not found screen with a link to the type selection for an unknown address', () => {

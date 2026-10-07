@@ -40,13 +40,13 @@ export async function unwrap<T>(
   if (outcome.error === undefined) {
     return { ok: true, data: outcome.data as T }
   }
-  const { status } = outcome.response
-  if (isErrorBody(outcome.error)) {
-    const { code, message, fields } = outcome.error
-    return { ok: false, error: { kind: 'api', status, code, message, fields: fields ?? [] } }
+  return { ok: false, error: errorOf(outcome.error, outcome.response.status) }
+}
+
+export function errorOf(body: unknown, status: number): ApiError {
+  if (isErrorBody(body)) {
+    const { code, message, fields } = body
+    return { kind: 'api', status, code, message, fields: fields ?? [] }
   }
-  return {
-    ok: false,
-    error: { kind: 'api', status, code: 'unexpected_response', message: 'Unexpected response', fields: [] },
-  }
+  return { kind: 'api', status, code: 'unexpected_response', message: 'Unexpected response', fields: [] }
 }
