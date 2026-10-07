@@ -44,7 +44,15 @@ See `proposal.md`.
 
 ## Boundary
 
-The C/C++ hot-swap boundary of the engine is untouched; the pipeline computes nothing.
+**C/C++ hot-swap:** no numeric hot-swap boundary exists in this capability. The pipeline
+is I/O and text-processing only (PDF text extraction, regex, tsvector search, Postgres
+writes); it contains no arithmetic hot path and none is planned. Hot-path replacement to
+C/C++ is reserved for the calculation engine (Akim's zone).
+
+**ML/NLP evolution boundary:** the deterministic extraction stack (pdftotext + regex +
+`pg_trgm`) is the internal boundary for Egor's zone. NLP/RAG/ML models may replace or
+augment this layer in the future; the backend (Akim's zone) reads only the agreed views
+in `catalog_read` and is unaffected by any pipeline-internal change.
 
 ## Deterministic extraction stack (rationale)
 
