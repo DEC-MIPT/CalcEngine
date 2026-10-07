@@ -85,3 +85,50 @@ You found that the ingested PDF is the base 2016 text without amendments. My cop
 text with amendments 1-5 (formula (5.7) is marked "Измененная редакция, Изм. № 5"). WP9
 task 7.1 should run on it. I can send you the file; where do you want it (it is not
 tracked: `docs/normative-base/` is ignored), and when can you re-ingest?
+
+## 8. WP9 task 8.1: your agreement with my notes in WP2, WP5 and WP8
+
+Task 8.1 of `normative-catalog-backend` asks both owners to agree to three notes I wrote
+on 2026-10-05 (`5282daa`); the task stays open until you do:
+
+- `backend-layered-architecture/design.md`, decision 2: WP9 settles old item 9.3, and the
+  catalog parameter source sits in `services` (`services/catalog_source.py`), not in
+  `parameters`, because it also needs the engine's unit conversion and applicability
+  check, which `parameters` may not import (WP9 `design.md` decision 5).
+- `calculation-api/design.md`, error table: the row `CatalogUnavailableError` | 503 |
+  `catalog_unavailable` for the two catalog endpoints (WP9 decisions 4 and 8); and
+  `invalid_input` also covers a selecting input inside the method's range that matches
+  no row of the catalog's table, located at `["body", "inputs", "<heading symbol>"]`
+  (WP9 decision 6). An input outside the range stays a stored refusal (`201`).
+- `calculation-core-contract/tasks.md`: minor 6 of the engine review (table entries carry
+  no selector values) is fixed by WP9 tasks 5.1a-5.1b, and WP2 task 7.1c is carried out
+  as WP9 task 7.1.
+
+None of them changes your zone or the read contract. A line "agree with the 8.1 notes"
+under `## Answers` is enough; otherwise say which note to change.
+
+## 9. WP4 task 4.1: the correctness gate in the shared test files
+
+`calculation-verification` (WP4) adds the requirement "Correctness gate for calculation
+changes" to `development-process` (its delta
+`specs/development-process/spec.md`, marked "Needs Egor review"). For a change with code
+that adds or modifies a calculation, the `tester` also checks: the reference suite passes
+within tolerance, the invariant tests pass, the metrics "deviation from the references",
+"reproducibility rate" and "traceability completeness" are attached to the GO verdict,
+and the regression corpus shows no undeclared difference. The 95% branch coverage gate
+stays as it is, and a change without calculation code is not affected (your pipeline
+included: it computes nothing, as your `normatives-formula-contract` design says).
+
+Task 4.1 asks you to agree before anything is applied, because the files are shared:
+
+- the delta above;
+- `.claude/agents/tester.md`, lines 16-19 (the GO rule), and its mirror
+  `.kilo/agent/tester.md`, kept identical. Proposed wording:
+  - "GO: all tests pass with >= 95% branch coverage and, for a change that adds or
+    modifies a calculation, the correctness gate of `development-process` holds."
+  - "NO-GO: any test failure, coverage < 95%, or a failed correctness gate."
+- the `test-process` skill (`.claude/skills/` and `.kilo/skills/`, lines 21-22): the same
+  two lines, and a step "attach the correctness metrics" after "measure branch coverage".
+
+Do you agree, or what would you change? The edits are applied by me in one commit on
+`develop` after your answer, and the archive of WP4 syncs the delta.
