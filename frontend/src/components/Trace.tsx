@@ -1,9 +1,11 @@
-import { CheckCircle, WarningCircle, XCircle } from '@phosphor-icons/react'
+import { CaretRight, CheckCircle, WarningCircle, XCircle } from '@phosphor-icons/react'
+import { useId, useState } from 'react'
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
 import { unitLabel } from '@/i18n/units'
 import { Formula } from './Formula'
 import { NormRefList } from './NormRefList'
+import { Button } from './ui/button'
 
 type Step = components['schemas']['ResultEnvelope']['trace'][number]
 type Quantity = components['schemas']['QuantityValue']
@@ -45,43 +47,70 @@ function Comparison({ step }: { step: CheckStep }) {
   )
 }
 
-function TraceStep({ step }: { step: Step }) {
+function StepSummary({ step }: { step: Step }) {
   const { t } = useI18n()
   return (
-    <li className="grid gap-3 border border-border bg-card p-4" data-step={step.step_id}>
-      <h3 className="flex flex-wrap items-baseline gap-x-3 text-base">
-        <code className="font-semibold">{step.step_id}</code>
-        <span className="text-sm font-normal text-muted-foreground">{t(`trace.kind.${step.kind}`)}</span>
+    <span className="ml-auto font-normal" data-summary>
+      <Value quantity={step.result} />
+      {step.kind === 'check' && <> · {t(step.passed ? 'trace.check.passed' : 'trace.check.failed')}</>}
+    </span>
+  )
+}
+
+function TraceStep({ step, expanded, onToggle }: { step: Step; expanded: boolean; onToggle: () => void }) {
+  const { t } = useI18n()
+  const detailsId = useId()
+  return (
+    <li className="border border-border bg-card" data-step={step.step_id}>
+      <h3 className="text-base">
+        <button
+          type="button"
+          aria-expanded={expanded}
+          aria-controls={detailsId}
+          onClick={onToggle}
+          className="flex w-full cursor-pointer flex-wrap items-baseline gap-x-3 p-4 text-left hover:bg-secondary focus-visible:outline-offset-[-2px]"
+        >
+          <CaretRight
+            aria-hidden="true"
+            size={16}
+            className={`shrink-0 self-center transition-transform motion-reduce:transition-none ${expanded ? 'rotate-90' : ''}`}
+          />
+          <code className="font-semibold">{step.step_id}</code>
+          <span className="text-sm font-normal text-muted-foreground">{t(`trace.kind.${step.kind}`)}</span>
+          <StepSummary step={step} />
+        </button>
       </h3>
-      <div className="overflow-x-auto">
-        <Formula latex={step.expression} display />
+      <div id={detailsId} hidden={!expanded} className="grid gap-3 border-t border-border p-4">
+        <div className="overflow-x-auto">
+          <Formula latex={step.expression} display />
+        </div>
+        {step.substitutions.length > 0 && (
+          <div>
+            <h4 className="text-sm font-medium">{t('trace.substitutions')}</h4>
+            <ul className="flex flex-wrap gap-x-5 gap-y-1">
+              {step.substitutions.map((substitution) => (
+                <li key={substitution.symbol} className="flex items-baseline gap-1">
+                  <Formula latex={substitution.symbol} /> <span>=</span> <Value quantity={substitution} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {step.kind === 'check' ? (
+          <Comparison step={step} />
+        ) : (
+          <p>
+            <span className="text-sm font-medium">{t('trace.result')}: </span>
+            <Value quantity={step.result} />
+          </p>
+        )}
+        {step.norm_refs.length > 0 && (
+          <div>
+            <h4 className="text-sm font-medium">{t('trace.norms')}</h4>
+            <NormRefList refs={step.norm_refs} />
+          </div>
+        )}
       </div>
-      {step.substitutions.length > 0 && (
-        <div>
-          <h4 className="text-sm font-medium">{t('trace.substitutions')}</h4>
-          <ul className="flex flex-wrap gap-x-5 gap-y-1">
-            {step.substitutions.map((substitution) => (
-              <li key={substitution.symbol} className="flex items-baseline gap-1">
-                <Formula latex={substitution.symbol} /> <span>=</span> <Value quantity={substitution} />
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {step.kind === 'check' ? (
-        <Comparison step={step} />
-      ) : (
-        <p>
-          <span className="text-sm font-medium">{t('trace.result')}: </span>
-          <Value quantity={step.result} />
-        </p>
-      )}
-      {step.norm_refs.length > 0 && (
-        <div>
-          <h4 className="text-sm font-medium">{t('trace.norms')}</h4>
-          <NormRefList refs={step.norm_refs} />
-        </div>
-      )}
     </li>
   )
 }
@@ -94,6 +123,13 @@ export function Trace({
   unverifiedStepCount: number
 }) {
   const { t, formatNumber } = useI18n()
+  const [expanded, setExpanded] = useState<ReadonlySet<number>>(() => new Set())
+  const toggle = (index: number) =>
+    setExpanded((current) => {
+      const next = new Set(current)
+      if (!next.delete(index)) next.add(index)
+      return next
+    })
   return (
     <section aria-labelledby="trace-title" className="mt-8 grid gap-4">
       <h2 id="trace-title">{t('trace.title')}</h2>
@@ -105,9 +141,25 @@ export function Trace({
           </span>
         </p>
       )}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          className="border-border bg-card text-foreground hover:bg-secondary"
+          onClick={() => setExpanded(new Set(steps.map((_, index) => index)))}
+        >
+          {t('trace.expandAll')}
+        </Button>
+        <Button className="border-border bg-card text-foreground hover:bg-secondary" onClick={() => setExpanded(new Set())}>
+          {t('trace.collapseAll')}
+        </Button>
+      </div>
       <ol className="grid gap-3">
         {steps.map((step, index) => (
-          <TraceStep key={`${step.step_id}-${index}`} step={step} />
+          <TraceStep
+            key={`${step.step_id}-${index}`}
+            step={step}
+            expanded={expanded.has(index)}
+            onToggle={() => toggle(index)}
+          />
         ))}
       </ol>
     </section>

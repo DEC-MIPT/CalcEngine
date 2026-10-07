@@ -1,4 +1,5 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import type { components } from '@/api/schema'
 import { I18nProvider } from '@/i18n/I18nProvider'
@@ -19,12 +20,16 @@ const ref = {
   provenance: 'human-verified',
 } as const
 
-function show(trace: Step[], language: Language = 'ru', unverifiedStepCount = 0) {
-  return render(
+const EXPAND_ALL = { ru: 'Развернуть все шаги', en: 'Expand all steps' } as const
+
+function show(trace: Step[], language: Language = 'ru', unverifiedStepCount = 0, expand = true) {
+  const rendered = render(
     <I18nProvider initialLanguage={language}>
       <Trace steps={trace} unverifiedStepCount={unverifiedStepCount} />
     </I18nProvider>,
   )
+  if (expand) fireEvent.click(screen.getByRole('button', { name: EXPAND_ALL[language] }))
+  return rendered
 }
 
 const stepOf = (id: string) => document.querySelector<HTMLElement>(`[data-step="${id}"]`)!
@@ -184,6 +189,96 @@ describe('Trace: check steps and the unverified summary (6.1b)', () => {
   it('has no accessibility violations with a summary and a failed check', async () => {
     const failedTrace = failEnvelope.trace as unknown as Step[]
     const { container } = show(failedTrace, 'ru', 9)
+
+    await expectNoA11yViolations(container)
+  })
+})
+
+
+const check = steps.find((step) => step.kind === 'check')!
+const header = (id: string) => within(stepOf(id)).getByRole('button')
+const details = (id: string) => document.getElementById(header(id).getAttribute('aria-controls')!)!
+
+describe('Trace: expandable steps (6.3)', () => {
+  it('opens with every step collapsed and its header showing the result with its unit', () => {
+    show(steps, 'ru', 0, false)
+
+    expect(screen.getAllByRole('button', { expanded: false })).toHaveLength(steps.length)
+    for (const step of steps) {
+      expect(details(step.step_id)).not.toBeVisible()
+    }
+    expect(header(formula.step_id).querySelector('[data-summary]')).toHaveTextContent('172,5 кПа')
+    expect(header(check.step_id).querySelector('[data-summary]')).toHaveTextContent('100 кПа · Проверка выполнена')
+  })
+
+  it('expands a step on a click, collapses it on a second click, and points the header at its details', () => {
+    show(steps, 'ru', 0, false)
+    const button = header(formula.step_id)
+
+    fireEvent.click(button)
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+    expect(details(formula.step_id)).toBeVisible()
+    expect(within(details(formula.step_id)).getByText(/Результат:/)).toBeInTheDocument()
+
+    fireEvent.click(button)
+    expect(button).toHaveAttribute('aria-expanded', 'false')
+    expect(details(formula.step_id)).not.toBeVisible()
+  })
+
+  it('expands and collapses a step with Enter and with Space', async () => {
+    const user = userEvent.setup()
+    show(steps, 'ru', 0, false)
+    const button = header(check.step_id)
+    button.focus()
+
+    await user.keyboard('{Enter}')
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+    expect(details(check.step_id)).toBeVisible()
+
+    await user.keyboard(' ')
+    expect(button).toHaveAttribute('aria-expanded', 'false')
+    expect(details(check.step_id)).not.toBeVisible()
+  })
+
+  it('reaches the step headers with the Tab key', async () => {
+    const user = userEvent.setup()
+    show(steps, 'ru', 0, false)
+
+    await user.tab()
+    await user.tab()
+    await user.tab()
+
+    expect(header(steps[0].step_id)).toHaveFocus()
+  })
+
+  it('expands every step and collapses every step with the two buttons', () => {
+    show(steps, 'ru', 0, false)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Развернуть все шаги' }))
+    expect(screen.getAllByRole('button', { expanded: true })).toHaveLength(steps.length)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Свернуть все шаги' }))
+    expect(screen.getAllByRole('button', { expanded: false })).toHaveLength(steps.length)
+  })
+
+  it('keeps the other steps as they are when one is toggled after expanding all', () => {
+    show(steps)
+
+    fireEvent.click(header(formula.step_id))
+
+    expect(header(formula.step_id)).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getAllByRole('button', { expanded: true })).toHaveLength(steps.length - 1)
+  })
+
+  it('names the two buttons in English', () => {
+    show(steps, 'en', 0, false)
+
+    expect(screen.getByRole('button', { name: 'Expand all steps' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Collapse all steps' })).toBeInTheDocument()
+  })
+
+  it('has no accessibility violations collapsed', async () => {
+    const { container } = show(steps, 'ru', 0, false)
 
     await expectNoA11yViolations(container)
   })
