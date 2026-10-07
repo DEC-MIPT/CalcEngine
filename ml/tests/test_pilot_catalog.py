@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
+from conftest import require_test_db_url
 
 from normatives_pipeline import catalog_contract, db, pilot_catalog
 from normatives_pipeline.ingest import ingest
@@ -40,17 +41,15 @@ _TWO_HALF_CELLS = [
 
 @pytest.fixture(scope="module")
 def pilot_conn():
-    try:
-        conn = db.connect()
-    except Exception as exc:  # noqa: BLE001
-        pytest.skip(f"нет БД: {exc}")
+    require_test_db_url()
+    conn = db.connect()
     db.init_schema(conn)
     catalog_contract.ensure_catalog_read(conn)
-    if db.fetch_document_id(conn, pilot_catalog.DESIGNATION) is None:
-        if not PILOT_PDF.exists():
-            conn.close()
-            pytest.skip("СП 22.13330.2016 не ингестирован и файла нет")
-        ingest(PILOT_PDF)
+    if not PILOT_PDF.exists() and db.fetch_document_id(conn, pilot_catalog.DESIGNATION) is None:
+        conn.close()
+        pytest.skip("СП 22.13330.2016 не ингестирован и файла нет")
+    if PILOT_PDF.exists():
+        ingest(PILOT_PDF, force=True)
     pilot_catalog.sync_pilot_catalog(conn)
     yield conn
     conn.close()
@@ -113,7 +112,7 @@ def test_notation_result_symbol_prefers_output() -> None:
 
 def test_notation_result_symbol_falls_back_and_is_empty_safe() -> None:
     assert pilot_catalog.notation_result_symbol([{"symbol": "x", "kind": "input"}]) == "x"
-    assert pilot_catalog.notation_result_symbol([]) == "R"
+    assert pilot_catalog.notation_result_symbol([]) is None
 
 
 def test_parse_heading_rows_skips_non_numeric_tail() -> None:
@@ -179,13 +178,9 @@ def test_sync_skips_r_binding_when_formula_unconvertible(monkeypatch) -> None:
     assert all(row[1] != "r" for row in captured["rows"])
 
 
-def test_sync_without_document_is_noop() -> None:
-    conn = db.connect()
-    try:
-        db.init_schema(conn)
-        assert pilot_catalog.sync_pilot_catalog(conn, "СП 00.00000.0000") is False
-    finally:
-        conn.close()
+def test_sync_without_document_is_noop(monkeypatch) -> None:
+    monkeypatch.setattr(pilot_catalog.db, "fetch_document_id", lambda *_a, **_k: None)
+    assert pilot_catalog.sync_pilot_catalog(object(), "СП 00.00000.0000") is False
 
 
 def test_binding_one_row_per_parameter_and_no_value_column(pilot_conn) -> None:
@@ -237,12 +232,8 @@ def test_status_and_provenance_on_every_view_row(pilot_conn) -> None:
             refs = _load(row["norm_refs"])
             assert refs
             for ref in refs:
-                assert ref["status"] in {"verified", "unverified"}
-                assert ref["provenance"] in {"human-verified", "machine-extracted"}
-                assert not (
-                    ref["provenance"] == "machine-extracted"
-                    and ref["status"] == "verified"
-                )
+                assert ref["status"] == "unverified", view
+                assert ref["provenance"] == "machine-extracted", view
 
 
 def test_table_headings_unique_and_bounds_name_inputs(pilot_conn) -> None:
@@ -296,3 +287,43 @@ def test_coefficients_and_thresholds_are_stored(pilot_conn) -> None:
     assert [(row["parameter"], row["unit"]) for row in thresholds] == [
         ("k_z_threshold", "m"),
     ]
+
+
+def test_bind_registry_formula_with_missing_notation_symbol_returns_false(monkeypatch) -> None:
+    """M2: символ дерева без notation entry → отказ (не dimensionless 1)."""
+    monkeypatch.setattr(
+        pilot_catalog.db, "fetch_formula_by_number",
+        lambda *a, **k: {"id": 1, "expression": "x + y"},
+    )
+    monkeypatch.setattr(
+        pilot_catalog.db, "fetch_notation",
+        lambda *a, **k: [{"symbol": "x", "unit": "m", "kind": "output"}],
+    )
+    assert pilot_catalog._bind_registry_formula(object(), 1, "9.9") is False
+
+
+def test_ingesting_second_document_leaves_pilot_catalog_on_sp22(pilot_conn) -> None:
+    """B1: инжестирование постороннего документа не перепривязывает каталог пилота."""
+    before = _rows(
+        pilot_conn,
+        "SELECT document_id FROM catalog_read.type_formulas WHERE calculation_type = %s",
+        (CT,),
+    )
+    assert before, "pilot catalog must be populated"
+    pilot_doc_id = before[0]["document_id"]
+
+    fake_designation = "ТЕСТ-ФЕЙК-00.00000.0000"
+    db.delete_document(pilot_conn, fake_designation)
+    fake_doc_id = db.upsert_document(pilot_conn, fake_designation, title="fake", edition="2000")
+    pilot_catalog.sync_pilot_catalog(pilot_conn)
+
+    after = _rows(
+        pilot_conn,
+        "SELECT document_id FROM catalog_read.type_formulas WHERE calculation_type = %s",
+        (CT,),
+    )
+    assert all(row["document_id"] == pilot_doc_id for row in after), (
+        "pilot catalog must remain bound to СП 22, not to the fake document"
+    )
+    db.delete_document(pilot_conn, fake_designation)
+    _ = fake_doc_id

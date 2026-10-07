@@ -8,7 +8,6 @@ from pathlib import Path
 from . import catalog_contract, db, pilot_catalog
 from .config import formula_manifest, output_config, parser_config
 from .formulas import source
-from .formulas.validation import canonical_latex
 from .parser import extractors, symbols, text_layer
 from .retrieval import normalize_text
 
@@ -83,9 +82,7 @@ def ingest(path: Path, force: bool = False) -> int:
         for f in formulas:
             m = manifest.get((designation, f.number))
             f_latex = m["latex"] if m else f.latex
-            f_expression = m["expression"] if m else (
-                str(canonical_latex(f_latex)) if f_latex else ""
-            )
+            f_expression = m["expression"] if m else ""
             f_clause = m["clause"] if m and m.get("clause") else f.clause
 
             meanings = [n.meaning for n in formula_notation.get(f.number, [])]
@@ -94,10 +91,7 @@ def ingest(path: Path, force: bool = False) -> int:
                 + " ".join(meanings)
                 + f" {f_latex}"
             )
-            if m:
-                status, provenance = "verified", "human-verified"
-            else:
-                status, provenance = "unverified", "machine-extracted"
+            status, provenance = "unverified", "machine-extracted"
             formula_rows.append(
                 (
                     f.number, f_clause, f_latex, f_expression, f.raw_text, f.page,
@@ -148,7 +142,7 @@ def ingest(path: Path, force: bool = False) -> int:
             if value
         ]
         db.insert_coefficients(conn, doc_id, coeff_rows)
-        pilot_catalog.sync_pilot_catalog(conn, designation)
+        pilot_catalog.sync_pilot_catalog(conn)
 
         print(
             f"[ingested] {designation}: пунктов {len(clauses)}, формул {len(formulas)} "

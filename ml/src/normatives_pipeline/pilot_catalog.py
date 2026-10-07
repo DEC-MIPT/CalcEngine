@@ -237,10 +237,15 @@ def _bind_registry_formula(conn: Any, doc_id: int, number: str) -> bool:
     except expression_tree.ExpressionTreeError:
         return False
     result_symbol = notation_result_symbol(notation)
+    if result_symbol is None:
+        return False
+    all_symbols = {*tree_symbols, result_symbol}
+    if not all_symbols <= units_by_symbol.keys():
+        return False
     try:
         units = {
-            symbol: unit_symbol(units_by_symbol.get(symbol, ""))
-            for symbol in (*tree_symbols, result_symbol)
+            symbol: unit_symbol(units_by_symbol[symbol])
+            for symbol in all_symbols
         }
     except PilotCatalogError:
         return False
@@ -248,12 +253,12 @@ def _bind_registry_formula(conn: Any, doc_id: int, number: str) -> bool:
     return True
 
 
-def notation_result_symbol(notation: list[dict]) -> str:
-    """Возвращает id символа-результата по виду `output` (иначе первый символ)."""
+def notation_result_symbol(notation: list[dict]) -> str | None:
+    """Возвращает id символа-результата по виду `output` (иначе первый; None если нет)."""
     for entry in notation:
         if entry.get("kind") == "output":
             return entry["symbol"]
-    return notation[0]["symbol"] if notation else "R"
+    return notation[0]["symbol"] if notation else None
 
 
 def sync_pilot_catalog(conn: Any, designation: str = DESIGNATION) -> bool:
