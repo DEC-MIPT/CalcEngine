@@ -136,6 +136,17 @@
   .hero-title::after {
     background: currentColor;
   }
+  .field-row:focus-within {
+    background-color: var(--secondary);
+    box-shadow: -4px 0 0 var(--primary);
+  }
+  .field-row:has([aria-invalid='true']) {
+    box-shadow: -4px 0 0 var(--destructive);
+  }
+  .data-row:hover,
+  .data-row:focus-within {
+    box-shadow: inset 3px 0 0 var(--primary);
+  }
   .on-accent :focus-visible {
     outline-color: var(--primary-foreground);
   }
@@ -294,6 +305,18 @@
   height: 100%;
   width: 100%;
   background: var(--primary);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .field-row,
+  .data-row {
+    transition:
+      background-color 100ms linear,
+      box-shadow 100ms linear;
+  }
+  .field-message {
+    animation: dg-appear 100ms linear;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

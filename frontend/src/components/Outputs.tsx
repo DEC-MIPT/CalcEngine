@@ -15,7 +15,7 @@ function OutputRow({ output }: { output: Output }) {
   return (
     <tr
       data-output={output.quantity}
-      className="align-baseline not-last:border-b not-last:border-border max-sm:grid max-sm:grid-cols-[auto_auto_1fr] max-sm:items-baseline max-sm:gap-x-3 max-sm:gap-y-2 max-sm:p-3"
+      className="data-row align-baseline not-last:border-b not-last:border-border max-sm:grid max-sm:grid-cols-[auto_auto_1fr] max-sm:items-baseline max-sm:gap-x-3 max-sm:gap-y-2 max-sm:p-3"
     >
       <th scope="row" className="px-3 py-3 text-left font-normal max-sm:p-0">
         <code className="text-lg">{output.quantity}</code>

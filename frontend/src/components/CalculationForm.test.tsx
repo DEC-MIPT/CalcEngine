@@ -546,3 +546,14 @@ describe('CalculationForm: echo in the base unit (9.3)', () => {
     await expectNoA11yViolations(container)
   })
 })
+
+describe('CalculationForm: row states (UX bold pass, zone 3)', () => {
+  it('marks every field row and every field message for the side-rule states', () => {
+    const { container } = open(pilot)
+    submit()
+
+    expect(container.querySelectorAll('.field-row')).toHaveLength(pilot.inputs.length)
+    expect(container.querySelectorAll('.field-message')).toHaveLength(pilot.inputs.length)
+    expect(container.querySelector('.field-row [aria-invalid="true"]')).not.toBeNull()
+  })
+})

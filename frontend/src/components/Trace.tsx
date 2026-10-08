@@ -63,7 +63,7 @@ function TraceStep({ step, expanded, onToggle }: { step: Step; expanded: boolean
   const { t } = useI18n()
   const detailsId = useId()
   return (
-    <li className="not-last:border-b not-last:border-border" data-step={step.step_id}>
+    <li className="data-row not-last:border-b not-last:border-border" data-step={step.step_id}>
       <h3 className="text-base">
         <button
           type="button"

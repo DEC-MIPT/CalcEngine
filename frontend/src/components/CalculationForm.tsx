@@ -44,7 +44,7 @@ const row = 'grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 sm:grid-col
 
 function FieldMessage({ id, children }: { id: string; children: string }) {
   return (
-    <p id={id} className="flex items-start gap-1.5 text-sm text-destructive">
+    <p id={id} className="field-message flex items-start gap-1.5 text-sm text-destructive">
       <WarningCircle aria-hidden="true" weight="fill" size={16} className="mt-0.5 shrink-0" />
       {children}
     </p>
@@ -79,7 +79,7 @@ function Field({ input, value, unit, error, bound, locked, index, onValue, onUni
     .filter(Boolean)
     .join(' ')
   return (
-    <div data-row style={{ '--row': index } as CSSProperties} className={`${row} border-b border-border py-2.5`}>
+    <div data-row style={{ '--row': index } as CSSProperties} className={`field-row ${row} border-b border-border py-2.5`}>
       <span
         aria-hidden="true"
         className={`row-span-2 pt-0.5 text-lg sm:row-span-1 sm:pt-0 ${error ? 'text-destructive' : ''}`}
