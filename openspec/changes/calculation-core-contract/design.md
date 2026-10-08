@@ -271,7 +271,7 @@ the frame and the title blocks from GOST R 21.101-2026 and adds no norm value of
       optional columns (27, "Согласовано") are out of the MVP.
     - Risk: title-block rows have the fixed heights of the form, so a text longer than
       its cell is cut on the sheet. Length limits per column are a follow-up (tasks.md,
-      "Dependencies").
+      "Dependencies"), taken up on 2026-10-07 by the change `report-title-block-limits`.
     - The base requirement "GOST-compliant report assembly" still names GOST R 21.101-2020;
       it stays with WP3 as recorded in the section "NormRef", "Handoff to WP3".
     - The text of the report is Russian. The dimensions of the frame and the forms are
