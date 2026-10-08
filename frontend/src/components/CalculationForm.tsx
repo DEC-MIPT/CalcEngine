@@ -7,6 +7,7 @@ import { useI18n } from '@/i18n/context'
 import type { TextKey } from '@/i18n/dictionary'
 import { pickText } from '@/i18n/translate'
 import { unitLabel } from '@/i18n/units'
+import { toBaseUnit } from '@/lib/unitFactors'
 import { parseValue, type ParseError } from '@/form/parseValue'
 import { useDraft } from '@/form/draftContext'
 import { mapFieldErrors } from '@/form/serverErrors'
@@ -50,14 +51,20 @@ interface FieldProps {
 }
 
 function Field({ input, value, unit, error, bound, onValue, onUnit }: FieldProps) {
-  const { t, language } = useI18n()
+  const { t, language, formatNumber } = useI18n()
+  const [flashing, setFlashing] = useState(false)
   const label = pickText(input.label, language)
   const hint = input.hint ? pickText(input.hint, language) : null
   const hintId = `hint-${input.name}`
   const errorId = `error-${input.name}`
   const noteId = `bound-${input.name}`
-  const describedBy = [hint ? hintId : null, error ? errorId : null, bound ? noteId : null].filter(Boolean).join(' ')
   const fixedUnit = input.whole_values_only || input.units.length === 1
+  const echoId = `echo-${input.name}`
+  const parsed = parseValue(value, false)
+  const inBase = !fixedUnit && unit !== input.base_unit && parsed.ok ? toBaseUnit(parsed.value, unit, input.base_unit) : null
+  const describedBy = [hint ? hintId : null, error ? errorId : null, bound ? noteId : null, inBase !== null ? echoId : null]
+    .filter(Boolean)
+    .join(' ')
   return (
     <div className={`${row} border-b border-border py-2.5`}>
       <span
@@ -85,9 +92,10 @@ function Field({ input, value, unit, error, bound, onValue, onUnit }: FieldProps
           autoComplete="off"
           value={value}
           onChange={onValue}
+          onAnimationEnd={() => setFlashing(false)}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
-          className={`min-h-9 w-36 min-w-0 border ${bound && !error ? 'border-warning' : 'border-input'} bg-card px-2.5 py-1.5 text-right font-mono focus-visible:outline-offset-[-1px] aria-invalid:border-destructive aria-invalid:focus-visible:outline-destructive`}
+          className={`min-h-9 w-36 min-w-0 border ${bound && !error ? 'border-warning' : 'border-input'} bg-card px-2.5 py-1.5 text-right font-mono ${flashing ? 'unit-flash' : ''} focus-visible:outline-offset-[-1px] aria-invalid:border-destructive aria-invalid:focus-visible:outline-destructive`}
         />
         {fixedUnit ? (
           <span className="flex min-h-9 w-24 shrink-0 items-center px-2.5">{unitLabel(input.base_unit, language)}</span>
@@ -95,7 +103,10 @@ function Field({ input, value, unit, error, bound, onValue, onUnit }: FieldProps
           <span className="relative w-24 shrink-0">
             <select
               value={unit}
-              onChange={onUnit}
+              onChange={(event) => {
+                setFlashing(true)
+                onUnit(event)
+              }}
               aria-label={`${t('form.unit')}: ${label}`}
               className="min-h-9 w-full cursor-pointer appearance-none border border-input bg-card py-1.5 pr-7 pl-2.5 focus-visible:outline-offset-[-1px]"
             >
@@ -113,14 +124,15 @@ function Field({ input, value, unit, error, bound, onValue, onUnit }: FieldProps
           </span>
         )}
       </div>
-      {error && (
-        <div className="col-start-2 sm:col-start-3">
-          <FieldMessage id={errorId}>{error}</FieldMessage>
-        </div>
-      )}
-      {bound && !error && (
-        <div className="col-start-2 sm:col-start-3">
-          <BoundNote id={noteId} bound={bound} unit={input.base_unit} />
+      {(error || (bound && !error) || inBase !== null) && (
+        <div className="col-start-2 grid gap-1 sm:col-start-3">
+          {error && <FieldMessage id={errorId}>{error}</FieldMessage>}
+          {bound && !error && <BoundNote id={noteId} bound={bound} unit={input.base_unit} />}
+          {inBase !== null && (
+            <p id={echoId} className="font-mono text-sm text-muted-foreground">
+              = {formatNumber(inBase)} {unitLabel(input.base_unit, language)}
+            </p>
+          )}
         </div>
       )}
     </div>

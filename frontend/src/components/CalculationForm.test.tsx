@@ -431,3 +431,118 @@ describe('CalculationForm: the bound of a refusal (9.2b)', () => {
     expect(screen.getAllByText('Введите значение.').length).toBeGreaterThan(0)
   })
 })
+
+describe('CalculationForm: echo in the base unit (9.3)', () => {
+  const widthLabel = label('b')
+  const unitOf = (name: string) => screen.getByRole('combobox', { name: new RegExp(name) })
+  const chooseUnit = (name: string, unit: string) =>
+    fireEvent.change(unitOf(name), { target: { value: unit } })
+
+  it('shows the value in the base unit next to a field whose unit is another one', () => {
+    open(pilot)
+    type(widthLabel, '2')
+    chooseUnit(widthLabel, 'cm')
+
+    expect(screen.getByText('= 0,02 м')).toBeInTheDocument()
+    expect(screen.getByLabelText(widthLabel)).toHaveAccessibleDescription('= 0,02 м')
+  })
+
+  it('follows the typed value, reads a decimal comma and rounds to six significant digits', () => {
+    open(pilot)
+    chooseUnit(widthLabel, 'mm')
+    type(widthLabel, '1234,5678')
+
+    expect(screen.getByText('= 1,23457 м')).toBeInTheDocument()
+  })
+
+  it('writes the echo in English with a decimal point', () => {
+    open(pilot, 'en')
+    fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: 'cm' } })
+    fireEvent.change(screen.getAllByRole('textbox')[0], { target: { value: '2' } })
+
+    expect(screen.getByText('= 0.02 m')).toBeInTheDocument()
+  })
+
+  it.each([
+    ['the base unit is chosen', '2', 'm'],
+    ['the field is empty', '', 'cm'],
+    ['the value is not a number', 'abc', 'cm'],
+    ['the number is too large', '1e999', 'cm'],
+  ])('shows no echo when %s', (_case, text, unit) => {
+    open(pilot)
+    chooseUnit(widthLabel, unit)
+    type(widthLabel, text)
+
+    expect(screen.queryByText(/^= /)).not.toBeInTheDocument()
+  })
+
+  it('shows no echo for a unit with no factor', () => {
+    const odd: CalculationType = {
+      ...synthetic,
+      name: 'odd',
+      inputs: [{ ...synthetic.inputs[0], units: ['m', 'furlong'] }],
+    }
+    open(odd)
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'furlong' } })
+    type('Длина икс', '2')
+
+    expect(screen.queryByText(/^= /)).not.toBeInTheDocument()
+  })
+
+  it('shows no echo and no unit choice for an input fixed to its base unit', () => {
+    open(pilot)
+    type(label('phi_II'), '20')
+
+    expect(screen.queryByText(/^= /)).not.toBeInTheDocument()
+  })
+
+  it('sends the value and the unit as entered, not the echo', async () => {
+    const bodies = recordRequests()
+    open(pilot)
+    fillPilot()
+    chooseUnit(widthLabel, 'cm')
+    submit()
+
+    await waitFor(() => expect(bodies).toHaveLength(1))
+    expect(bodies[0].inputs.b).toEqual({ value: 2, unit: 'cm' })
+  })
+
+  it('shows the echo together with a server error of the same field', async () => {
+    server.use(
+      http.post('*/calculations', () =>
+        HttpResponse.json(
+          { code: 'invalid_input', message: 'x', fields: [{ location: ['body', 'inputs', 'b'], message: 'Expected a unit of length.' }] },
+          { status: 422 },
+        ),
+      ),
+    )
+    open(pilot)
+    fillPilot()
+    chooseUnit(widthLabel, 'cm')
+    submit()
+
+    expect(await screen.findByText('Expected a unit of length.')).toBeInTheDocument()
+    expect(screen.getByText('= 0,02 м')).toBeInTheDocument()
+  })
+
+  it('flashes the field once after a unit change', () => {
+    open(pilot)
+    const field = screen.getByLabelText(widthLabel)
+    expect(field).not.toHaveClass('unit-flash')
+
+    chooseUnit(widthLabel, 'cm')
+    expect(field).toHaveClass('unit-flash')
+
+    // jsdom has no AnimationEvent, so React listens for the prefixed name
+    fireEvent(field, new Event('webkitAnimationEnd', { bubbles: true }))
+    expect(field).not.toHaveClass('unit-flash')
+  })
+
+  it('has no accessibility violations with an echo', async () => {
+    const { container } = open(pilot)
+    type(widthLabel, '2')
+    chooseUnit(widthLabel, 'cm')
+
+    await expectNoA11yViolations(container)
+  })
+})
