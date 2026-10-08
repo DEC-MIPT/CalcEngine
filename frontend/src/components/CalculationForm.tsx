@@ -1,5 +1,5 @@
 import { CaretDown, WarningCircle } from '@phosphor-icons/react'
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { api, unwrap, type ApiError } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -11,6 +11,7 @@ import { toBaseUnit } from '@/lib/unitFactors'
 import { parseValue, type ParseError } from '@/form/parseValue'
 import { useDraft } from '@/form/draftContext'
 import { mapFieldErrors } from '@/form/serverErrors'
+import { useSendingHints, type SendingStage } from '@/form/useSendingHints'
 import { BoundNote, type BoundShape } from './Bound'
 import { ErrorState } from './RequestStates'
 import { Formula } from './Formula'
@@ -26,6 +27,12 @@ const parseErrorKey = {
   notFinite: 'form.error.notFinite',
   notWhole: 'form.error.notWhole',
 } as const satisfies Record<ParseError, TextKey>
+
+const stageText = {
+  sending: 'form.sending',
+  slow: 'form.sendingSlow',
+  longer: 'form.sendingLonger',
+} as const satisfies Record<SendingStage, TextKey>
 
 const fieldId = (name: string) => `field-${name}`
 
@@ -46,11 +53,12 @@ interface FieldProps {
   unit: string
   error: string | undefined
   bound: BoundShape | undefined
+  locked: boolean
   onValue: (event: ChangeEvent<HTMLInputElement>) => void
   onUnit: (event: ChangeEvent<HTMLSelectElement>) => void
 }
 
-function Field({ input, value, unit, error, bound, onValue, onUnit }: FieldProps) {
+function Field({ input, value, unit, error, bound, locked, onValue, onUnit }: FieldProps) {
   const { t, language, formatNumber } = useI18n()
   const [flashing, setFlashing] = useState(false)
   const label = pickText(input.label, language)
@@ -92,10 +100,11 @@ function Field({ input, value, unit, error, bound, onValue, onUnit }: FieldProps
           autoComplete="off"
           value={value}
           onChange={onValue}
+          readOnly={locked}
           onAnimationEnd={() => setFlashing(false)}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
-          className={`min-h-9 w-36 min-w-0 border ${bound && !error ? 'border-warning' : 'border-input'} bg-card px-2.5 py-1.5 text-right font-mono ${flashing ? 'unit-flash' : ''} focus-visible:outline-offset-[-1px] aria-invalid:border-destructive aria-invalid:focus-visible:outline-destructive`}
+          className={`min-h-9 w-36 min-w-0 border ${bound && !error ? 'border-warning' : 'border-input'} bg-card px-2.5 py-1.5 text-right font-mono ${flashing ? 'unit-flash' : ''} read-only:bg-secondary focus-visible:outline-offset-[-1px] aria-invalid:border-destructive aria-invalid:focus-visible:outline-destructive`}
         />
         {fixedUnit ? (
           <span className="flex min-h-9 w-24 shrink-0 items-center px-2.5">{unitLabel(input.base_unit, language)}</span>
@@ -103,12 +112,13 @@ function Field({ input, value, unit, error, bound, onValue, onUnit }: FieldProps
           <span className="relative w-24 shrink-0">
             <select
               value={unit}
+              disabled={locked}
               onChange={(event) => {
                 setFlashing(true)
                 onUnit(event)
               }}
               aria-label={`${t('form.unit')}: ${label}`}
-              className="min-h-9 w-full cursor-pointer appearance-none border border-input bg-card py-1.5 pr-7 pl-2.5 focus-visible:outline-offset-[-1px]"
+              className="min-h-9 w-full cursor-pointer appearance-none border border-input bg-card py-1.5 pr-7 pl-2.5 disabled:cursor-default disabled:bg-secondary focus-visible:outline-offset-[-1px]"
             >
               {input.units.map((code) => (
                 <option key={code} value={code}>
@@ -152,8 +162,11 @@ export function CalculationForm({ type }: { type: CalculationType }) {
   const [general, setGeneral] = useState<string[]>([])
   const [failure, setFailure] = useState<ApiError | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const inFlight = useRef(false)
+  const stage = useSendingHints(submitting)
 
   async function send() {
+    if (inFlight.current) return
     const inputs: Record<string, Quantity> = {}
     const invalid: Record<string, string> = {}
     for (const input of type.inputs) {
@@ -173,10 +186,12 @@ export function CalculationForm({ type }: { type: CalculationType }) {
       return
     }
 
+    inFlight.current = true
     setSubmitting(true)
     const result = await unwrap(
       api.POST('/calculations', { body: { calculation_type: type.name, inputs } }),
     )
+    inFlight.current = false
     setSubmitting(false)
     if (result.ok) {
       draft.remember(result.data.result_id, type.name)
@@ -252,16 +267,23 @@ export function CalculationForm({ type }: { type: CalculationType }) {
             unit={units[input.name] ?? input.base_unit}
             error={errors[input.name]}
             bound={bound?.quantity === input.name ? bound : undefined}
+            locked={submitting}
             onValue={(event) => change(input.name, event.target.value)}
             onUnit={(event) => draft.setUnit(type.name, input.name, event.target.value)}
           />
         ))}
       </div>
       <div className={row}>
-        <div className="col-start-2 sm:col-start-3">
+        <div className="col-start-2 grid gap-2 sm:col-start-3">
           <Button type="submit" disabled={submitting} className="w-full">
             {t(submitting ? 'form.submitting' : 'form.submit')}
           </Button>
+          <span aria-hidden="true" className="block h-0.5 bg-border">
+            {submitting && <span className="send-rule" />}
+          </span>
+          <p role="status" className="min-h-5 text-sm text-muted-foreground">
+            {stage && t(stageText[stage])}
+          </p>
         </div>
       </div>
     </form>

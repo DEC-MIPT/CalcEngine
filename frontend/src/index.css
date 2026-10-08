@@ -148,7 +148,26 @@
   }
 }
 
+@keyframes send-rule {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.send-rule {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--primary);
+}
+
 @media (prefers-reduced-motion: no-preference) {
+  .send-rule {
+    animation: send-rule 2s steps(10, end) infinite;
+  }
   .unit-flash {
     animation: unit-flash 120ms linear;
   }
