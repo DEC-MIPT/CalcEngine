@@ -86,9 +86,9 @@ function Field({ input, value, unit, error, onValue, onUnit }: FieldProps) {
           className="min-h-9 w-36 min-w-0 border border-input bg-card px-2.5 py-1.5 text-right font-mono focus-visible:outline-offset-[-1px] aria-invalid:border-destructive aria-invalid:focus-visible:outline-destructive"
         />
         {fixedUnit ? (
-          <span className="flex min-h-9 w-24 items-center px-2.5">{unitLabel(input.base_unit, language)}</span>
+          <span className="flex min-h-9 w-24 shrink-0 items-center px-2.5">{unitLabel(input.base_unit, language)}</span>
         ) : (
-          <span className="relative w-24">
+          <span className="relative w-24 shrink-0">
             <select
               value={unit}
               onChange={onUnit}

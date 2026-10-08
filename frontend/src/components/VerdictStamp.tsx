@@ -41,7 +41,7 @@ export function VerdictStamp({ envelope, reason }: { envelope: Envelope; reason:
       className={`grid border-2 bg-card sm:grid-cols-[1fr_auto] ${tone}`}
     >
       <div className="grid gap-2 p-4">
-        <h2 id={headingId} className={`flex items-center gap-2 text-2xl font-bold ${passed ? 'text-primary' : 'text-destructive'}`}>
+        <h2 id={headingId} className={`flex items-center gap-2 text-verdict font-bold ${passed ? 'text-primary' : 'text-destructive'}`}>
           <Icon aria-hidden="true" weight="fill" size={26} className="shrink-0" />
           {t(passed ? 'verdict.pass' : 'verdict.fail')}
         </h2>
@@ -50,7 +50,7 @@ export function VerdictStamp({ envelope, reason }: { envelope: Envelope; reason:
             <span className="text-xl">
               <Formula latex={check.expression} />
             </span>
-            <p className="font-mono text-2xl">
+            <p className="font-mono text-verdict">
               <Reading quantity={check.result} /> <span aria-hidden="true">{SYMBOLS[check.operator]}</span>
               <span className="sr-only">{t(`trace.op.${check.operator}`)}</span> <Reading quantity={check.right} />
             </p>

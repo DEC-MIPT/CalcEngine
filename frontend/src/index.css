@@ -12,6 +12,8 @@
   --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
   --default-transition-duration: 120ms;
   --default-transition-timing-function: linear;
+  --text-page: clamp(1.875rem, 1.5rem + 1.2vw, 2.25rem);
+  --text-verdict: clamp(1.5rem, 1.2rem + 0.9vw, 1.875rem);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -91,7 +93,7 @@
     line-height: 1.15;
   }
   h1 {
-    @apply relative mb-5 border-b border-foreground pb-2 text-3xl font-bold;
+    @apply relative mb-5 border-b border-foreground pb-2 text-page font-bold;
   }
   h1::before,
   h1::after {
