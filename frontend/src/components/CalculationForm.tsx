@@ -1,5 +1,5 @@
 import { CaretDown, WarningCircle } from '@phosphor-icons/react'
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { api, unwrap, type ApiError } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -7,6 +7,7 @@ import { useI18n } from '@/i18n/context'
 import type { TextKey } from '@/i18n/dictionary'
 import { pickText } from '@/i18n/translate'
 import { unitLabel } from '@/i18n/units'
+import { prefersReducedMotion, withMinimumDuration } from '@/lib/motion'
 import { toBaseUnit } from '@/lib/unitFactors'
 import { parseValue, type ParseError } from '@/form/parseValue'
 import { useDraft } from '@/form/draftContext'
@@ -14,6 +15,7 @@ import { mapFieldErrors } from '@/form/serverErrors'
 import { useSendingHints, type SendingStage } from '@/form/useSendingHints'
 import { BoundNote, type BoundShape } from './Bound'
 import { ErrorState } from './RequestStates'
+import { ComputePlot } from './ComputePlot'
 import { Formula } from './Formula'
 import { Button } from './ui/button'
 
@@ -33,6 +35,8 @@ const stageText = {
   slow: 'form.sendingSlow',
   longer: 'form.sendingLonger',
 } as const satisfies Record<SendingStage, TextKey>
+
+const COMPUTE_MS = 700
 
 const fieldId = (name: string) => `field-${name}`
 
@@ -54,11 +58,12 @@ interface FieldProps {
   error: string | undefined
   bound: BoundShape | undefined
   locked: boolean
+  index: number
   onValue: (event: ChangeEvent<HTMLInputElement>) => void
   onUnit: (event: ChangeEvent<HTMLSelectElement>) => void
 }
 
-function Field({ input, value, unit, error, bound, locked, onValue, onUnit }: FieldProps) {
+function Field({ input, value, unit, error, bound, locked, index, onValue, onUnit }: FieldProps) {
   const { t, language, formatNumber } = useI18n()
   const [flashing, setFlashing] = useState(false)
   const label = pickText(input.label, language)
@@ -74,7 +79,7 @@ function Field({ input, value, unit, error, bound, locked, onValue, onUnit }: Fi
     .filter(Boolean)
     .join(' ')
   return (
-    <div className={`${row} border-b border-border py-2.5`}>
+    <div data-row style={{ '--row': index } as CSSProperties} className={`${row} border-b border-border py-2.5`}>
       <span
         aria-hidden="true"
         className={`row-span-2 pt-0.5 text-lg sm:row-span-1 sm:pt-0 ${error ? 'text-destructive' : ''}`}
@@ -162,6 +167,7 @@ export function CalculationForm({ type }: { type: CalculationType }) {
   const [general, setGeneral] = useState<string[]>([])
   const [failure, setFailure] = useState<ApiError | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [computing, setComputing] = useState(false)
   const inFlight = useRef(false)
   const stage = useSendingHints(submitting)
 
@@ -187,10 +193,14 @@ export function CalculationForm({ type }: { type: CalculationType }) {
     }
 
     inFlight.current = true
+    const animated = !prefersReducedMotion()
+    setComputing(animated)
     setSubmitting(true)
-    const result = await unwrap(
-      api.POST('/calculations', { body: { calculation_type: type.name, inputs } }),
+    const result = await withMinimumDuration(
+      unwrap(api.POST('/calculations', { body: { calculation_type: type.name, inputs } })),
+      animated ? COMPUTE_MS : 0,
     )
+    setComputing(false)
     inFlight.current = false
     setSubmitting(false)
     if (result.ok) {
@@ -229,7 +239,7 @@ export function CalculationForm({ type }: { type: CalculationType }) {
 
   const invalidCount = Object.keys(errors).length
   return (
-    <form noValidate onSubmit={submit} className="grid gap-4">
+    <form noValidate onSubmit={submit} className={`grid gap-4 ${computing ? 'computing' : ''}`}>
       {general.length > 0 && (
         <div role="alert" className="max-w-2xl border border-destructive bg-destructive-surface p-4">
           <p className="font-medium">{t('form.rejected')}</p>
@@ -247,7 +257,8 @@ export function CalculationForm({ type }: { type: CalculationType }) {
           {t('form.summary')}: {invalidCount}
         </p>
       )}
-      <div>
+      <div className="relative">
+        {computing && <span aria-hidden="true" className="compute-scan" style={{ '--rows': type.inputs.length } as CSSProperties} />}
         <div
           aria-hidden="true"
           className={`${row} hidden border-b border-foreground pb-2 font-heading text-sm font-semibold text-muted-foreground sm:grid`}
@@ -259,9 +270,10 @@ export function CalculationForm({ type }: { type: CalculationType }) {
             <span className="w-24 px-2.5">{t('form.unit')}</span>
           </span>
         </div>
-        {type.inputs.map((input) => (
+        {type.inputs.map((input, index) => (
           <Field
             key={input.name}
+            index={index}
             input={input}
             value={values[input.name] ?? ''}
             unit={units[input.name] ?? input.base_unit}
@@ -274,7 +286,12 @@ export function CalculationForm({ type }: { type: CalculationType }) {
         ))}
       </div>
       <div className={row}>
-        <div className="col-start-2 grid gap-2 sm:col-start-3">
+        {computing && (
+          <div className="col-span-full row-start-2 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:self-start">
+            <ComputePlot />
+          </div>
+        )}
+        <div className="col-start-2 grid gap-2 sm:col-start-3 sm:self-start">
           <Button type="submit" disabled={submitting} className="w-full">
             {t(submitting ? 'form.submitting' : 'form.submit')}
           </Button>

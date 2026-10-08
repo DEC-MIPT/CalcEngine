@@ -192,6 +192,67 @@
   }
 }
 
+@keyframes compute-scan {
+  from {
+    top: 0;
+    opacity: 1;
+  }
+  96% {
+    opacity: 1;
+  }
+  to {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes row-read {
+  from {
+    background-color: color-mix(in srgb, var(--primary) 16%, transparent);
+    box-shadow: -6px 0 0 var(--primary);
+  }
+  to {
+    background-color: color-mix(in srgb, var(--primary) 5%, transparent);
+    box-shadow: -6px 0 0 var(--primary);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .compute-scan {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 1;
+    height: 3px;
+    background: var(--primary);
+    pointer-events: none;
+    animation: compute-scan calc(var(--rows) * 55ms) linear forwards;
+  }
+  .compute-scan::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: -5px;
+    width: 12px;
+    height: 13px;
+    background: var(--primary);
+  }
+  .computing [data-row] {
+    animation: row-read 160ms linear calc(var(--row) * 55ms) forwards;
+  }
+  .compute-plot .cp-frame path {
+    stroke-dasharray: 1;
+    animation: dg-draw 120ms linear 340ms backwards;
+  }
+  .compute-plot .cp-curve {
+    stroke-dasharray: 1;
+    animation: dg-draw 220ms steps(8, end) 440ms backwards;
+  }
+  .compute-plot .cp-mark {
+    animation: dg-appear 1ms linear 670ms backwards;
+  }
+}
+
 @keyframes unit-flash {
   from {
     box-shadow: inset 0 0 0 2px var(--primary);
