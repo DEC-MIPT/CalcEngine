@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { useState } from 'react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import type { components } from '@/api/schema'
@@ -77,5 +78,40 @@ describe('VerdictStamp (critique of the result screen)', () => {
     const { container } = show(envelope)
 
     await expectNoA11yViolations(container)
+  })
+})
+
+describe('VerdictStamp focus and frame (9.4)', () => {
+  it.each([
+    ['pass', passEnvelope, 'Проверка выполнена'],
+    ['fail', failEnvelope, 'Проверка не выполнена'],
+  ])('takes focus on arrival for a %s and carries the frame class', (_verdict, envelope, name) => {
+    show(envelope)
+    const stamp = screen.getByRole('region', { name })
+
+    expect(stamp).toHaveFocus()
+    expect(stamp).toHaveAttribute('tabindex', '-1')
+    expect(stamp).toHaveClass('stamp-frame')
+  })
+
+  it('takes focus once: a later drawing does not take it back', () => {
+    function Host() {
+      const [count, setCount] = useState(0)
+      return (
+        <I18nProvider initialLanguage="ru">
+          <button type="button" onClick={() => setCount(count + 1)}>
+            draw {count}
+          </button>
+          <VerdictStamp envelope={passEnvelope as Envelope} reason={passEnvelope.verdict_reason as CheckReason} />
+        </I18nProvider>
+      )
+    }
+    render(<RouterProvider router={createMemoryRouter([{ path: '/', element: <Host /> }])} />)
+    const button = screen.getByRole('button')
+    button.focus()
+
+    fireEvent.click(button)
+
+    expect(screen.getByRole('button', { name: 'draw 1' })).toHaveFocus()
   })
 })

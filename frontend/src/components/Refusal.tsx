@@ -9,7 +9,7 @@ type BoundViolation = components['schemas']['BoundViolation']
 export function Refusal({ reason }: { reason: BoundViolation }) {
   const { t } = useI18n()
   return (
-    <Status tone="refusal" title={t('refusal.title')}>
+    <Status tone="refusal" title={t('refusal.title')} focusOnMount>
       <BoundFacts value={reason.value} bound={reason.bound} boundLabel={t('bound.method')} />
       <div>
         <h3 className="text-sm font-medium">{t('bound.source')}</h3>

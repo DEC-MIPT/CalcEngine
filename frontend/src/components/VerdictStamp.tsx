@@ -5,6 +5,7 @@ import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
 import type { TextKey } from '@/i18n/dictionary'
 import { unitLabel } from '@/i18n/units'
+import { useFocusOnMount } from '@/lib/useFocusOnMount'
 import { EditInputsLink } from './EditInputsLink'
 import { Formula } from './Formula'
 import { buttonClass } from './ui/button'
@@ -37,6 +38,7 @@ export function VerdictStamp({
 }) {
   const { t, formatNumber } = useI18n()
   const headingId = useId()
+  const focus = useFocusOnMount<HTMLElement>()
   const passed = envelope.verdict === 'pass'
   const check = envelope.trace.find(
     (step): step is CheckStep => step.kind === 'check' && step.step_id === reason.step_id,
@@ -45,9 +47,11 @@ export function VerdictStamp({
   const tone = passed ? 'border-primary' : 'border-destructive'
   return (
     <section
+      ref={focus}
+      tabIndex={-1}
       aria-labelledby={headingId}
       data-verdict={envelope.verdict}
-      className={`grid border-2 bg-card sm:grid-cols-[1fr_auto] ${tone}`}
+      className={`stamp-frame grid border-2 bg-card sm:grid-cols-[1fr_auto] ${tone}`}
     >
       <div className="grid gap-2 p-4">
         <h2 id={headingId} className={`flex items-center gap-2 text-verdict font-bold ${passed ? 'text-primary' : 'text-destructive'}`}>

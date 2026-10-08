@@ -130,9 +130,33 @@
   }
 }
 
+@keyframes stamp-frame {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes stamp-content {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .unit-flash {
     animation: unit-flash 120ms linear;
+  }
+  .stamp-frame {
+    animation: stamp-frame 120ms linear;
+  }
+  .stamp-frame > * {
+    animation: stamp-content 1ms linear 120ms backwards;
   }
 }
 

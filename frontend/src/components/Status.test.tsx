@@ -62,3 +62,33 @@ describe('Status (6.4a)', () => {
     await expectNoA11yViolations(container)
   })
 })
+
+describe('Status focus (9.4)', () => {
+  function showFocusing(focusOnMount: boolean) {
+    return render(
+      <I18nProvider initialLanguage="ru">
+        <Status tone="refusal" title="заголовок" focusOnMount={focusOnMount}>
+          <p>подробности</p>
+        </Status>
+      </I18nProvider>,
+    )
+  }
+
+  it('takes focus on arrival and carries the frame class when asked to', () => {
+    showFocusing(true)
+    const region = screen.getByRole('region')
+
+    expect(region).toHaveFocus()
+    expect(region).toHaveAttribute('tabindex', '-1')
+    expect(region).toHaveClass('stamp-frame')
+  })
+
+  it('takes no focus and has no frame class by default, as a warning does', () => {
+    showFocusing(false)
+    const region = screen.getByRole('region')
+
+    expect(region).not.toHaveFocus()
+    expect(region).not.toHaveAttribute('tabindex')
+    expect(region).not.toHaveClass('stamp-frame')
+  })
+})
