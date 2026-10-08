@@ -1,6 +1,6 @@
 import { CaretDown, WarningCircle } from '@phosphor-icons/react'
-import { useState, type ChangeEvent, type FormEvent } from 'react'
-import { useNavigate } from 'react-router'
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useLocation, useNavigate } from 'react-router'
 import { api, unwrap, type ApiError } from '@/api/client'
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
@@ -8,7 +8,9 @@ import type { TextKey } from '@/i18n/dictionary'
 import { pickText } from '@/i18n/translate'
 import { unitLabel } from '@/i18n/units'
 import { parseValue, type ParseError } from '@/form/parseValue'
+import { useDraft } from '@/form/draftContext'
 import { mapFieldErrors } from '@/form/serverErrors'
+import { BoundNote, type BoundShape } from './Bound'
 import { ErrorState } from './RequestStates'
 import { Formula } from './Formula'
 import { Button } from './ui/button'
@@ -42,17 +44,19 @@ interface FieldProps {
   value: string
   unit: string
   error: string | undefined
+  bound: BoundShape | undefined
   onValue: (event: ChangeEvent<HTMLInputElement>) => void
   onUnit: (event: ChangeEvent<HTMLSelectElement>) => void
 }
 
-function Field({ input, value, unit, error, onValue, onUnit }: FieldProps) {
+function Field({ input, value, unit, error, bound, onValue, onUnit }: FieldProps) {
   const { t, language } = useI18n()
   const label = pickText(input.label, language)
   const hint = input.hint ? pickText(input.hint, language) : null
   const hintId = `hint-${input.name}`
   const errorId = `error-${input.name}`
-  const describedBy = [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(' ')
+  const noteId = `bound-${input.name}`
+  const describedBy = [hint ? hintId : null, error ? errorId : null, bound ? noteId : null].filter(Boolean).join(' ')
   const fixedUnit = input.whole_values_only || input.units.length === 1
   return (
     <div className={`${row} border-b border-border py-2.5`}>
@@ -83,7 +87,7 @@ function Field({ input, value, unit, error, onValue, onUnit }: FieldProps) {
           onChange={onValue}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
-          className="min-h-9 w-36 min-w-0 border border-input bg-card px-2.5 py-1.5 text-right font-mono focus-visible:outline-offset-[-1px] aria-invalid:border-destructive aria-invalid:focus-visible:outline-destructive"
+          className={`min-h-9 w-36 min-w-0 border ${bound && !error ? 'border-warning' : 'border-input'} bg-card px-2.5 py-1.5 text-right font-mono focus-visible:outline-offset-[-1px] aria-invalid:border-destructive aria-invalid:focus-visible:outline-destructive`}
         />
         {fixedUnit ? (
           <span className="flex min-h-9 w-24 shrink-0 items-center px-2.5">{unitLabel(input.base_unit, language)}</span>
@@ -114,6 +118,11 @@ function Field({ input, value, unit, error, onValue, onUnit }: FieldProps) {
           <FieldMessage id={errorId}>{error}</FieldMessage>
         </div>
       )}
+      {bound && !error && (
+        <div className="col-start-2 sm:col-start-3">
+          <BoundNote id={noteId} bound={bound} unit={input.base_unit} />
+        </div>
+      )}
     </div>
   )
 }
@@ -121,8 +130,12 @@ function Field({ input, value, unit, error, onValue, onUnit }: FieldProps) {
 export function CalculationForm({ type }: { type: CalculationType }) {
   const { t } = useI18n()
   const navigate = useNavigate()
-  const [values, setValues] = useState<Record<string, string>>({})
-  const [units, setUnits] = useState<Record<string, string>>({})
+  const draft = useDraft()
+  const { values, units } = draft.read(type.name)
+  const location = useLocation()
+  const [bound, setBound] = useState<BoundShape | null>(
+    () => (location.state as { bound?: BoundShape } | null)?.bound ?? null,
+  )
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [general, setGeneral] = useState<string[]>([])
   const [failure, setFailure] = useState<ApiError | null>(null)
@@ -154,6 +167,7 @@ export function CalculationForm({ type }: { type: CalculationType }) {
     )
     setSubmitting(false)
     if (result.ok) {
+      draft.remember(result.data.result_id, type.name)
       void navigate(`/calculations/${result.data.result_id}`)
     } else if (result.error.kind === 'api' && result.error.status === 422) {
       const mapped = mapFieldErrors(
@@ -176,8 +190,13 @@ export function CalculationForm({ type }: { type: CalculationType }) {
     void send()
   }
 
+  useEffect(() => {
+    if (bound) document.getElementById(fieldId(bound.quantity))?.focus()
+  }, [bound])
+
   function change(name: string, text: string) {
-    setValues((current) => ({ ...current, [name]: text }))
+    draft.setValue(type.name, name, text)
+    if (bound?.quantity === name) setBound(null)
     setErrors((current) => Object.fromEntries(Object.entries(current).filter(([key]) => key !== name)))
   }
 
@@ -220,8 +239,9 @@ export function CalculationForm({ type }: { type: CalculationType }) {
             value={values[input.name] ?? ''}
             unit={units[input.name] ?? input.base_unit}
             error={errors[input.name]}
+            bound={bound?.quantity === input.name ? bound : undefined}
             onValue={(event) => change(input.name, event.target.value)}
-            onUnit={(event) => setUnits((current) => ({ ...current, [input.name]: event.target.value }))}
+            onUnit={(event) => draft.setUnit(type.name, input.name, event.target.value)}
           />
         ))}
       </div>

@@ -1,5 +1,6 @@
 import { CaretRight, Flask } from '@phosphor-icons/react'
 import { Link, NavLink, Outlet, useMatches } from 'react-router'
+import { DraftProvider } from '@/form/DraftProvider'
 import { I18nProvider } from '@/i18n/I18nProvider'
 import { useI18n } from '@/i18n/context'
 
@@ -95,7 +96,9 @@ function Shell() {
 export function AppShell() {
   return (
     <I18nProvider>
-      <Shell />
+      <DraftProvider>
+        <Shell />
+      </DraftProvider>
     </I18nProvider>
   )
 }

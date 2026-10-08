@@ -3,6 +3,7 @@ import { http, HttpResponse } from 'msw'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import type { components } from '@/api/schema'
+import { DraftProvider } from '@/form/DraftProvider'
 import { I18nProvider } from '@/i18n/I18nProvider'
 import type { Language } from '@/i18n/dictionary'
 import { calculationTypes, FAIL_ID, failEnvelope, passEnvelope } from '@/mocks/fixtures'
@@ -66,7 +67,9 @@ function open(type: CalculationType, language: Language = 'ru') {
         path: '/calculations/new',
         element: (
           <I18nProvider initialLanguage={language}>
-            <CalculationForm type={type} />
+            <DraftProvider>
+              <CalculationForm type={type} />
+            </DraftProvider>
           </I18nProvider>
         ),
       },
@@ -374,5 +377,57 @@ describe('CalculationForm: values outside the method range (5.4)', () => {
     expect(await screen.findByRole('button', { name: 'Расчёт…' })).toBeDisabled()
     release()
     await waitFor(() => expect(screen.queryByRole('button', { name: 'Расчёт…' })).not.toBeInTheDocument())
+  })
+})
+
+describe('CalculationForm: the bound of a refusal (9.2b)', () => {
+  const bound = { quantity: 'b', kind: 'max', value: 10, inclusive: true } as const
+
+  function openWithBound(state: unknown, language: Language = 'ru') {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/calculations/new',
+          element: (
+            <I18nProvider initialLanguage={language}>
+              <DraftProvider>
+                <CalculationForm type={pilot} />
+              </DraftProvider>
+            </I18nProvider>
+          ),
+        },
+      ],
+      { initialEntries: [{ pathname: '/calculations/new', state }] },
+    )
+    return render(<RouterProvider router={router} />)
+  }
+
+  it('focuses the named field and shows the bound next to it, in English too', () => {
+    openWithBound({ bound }, 'en')
+
+    const field = document.getElementById('field-b')!
+    expect(field).toHaveFocus()
+    expect(field).toHaveAccessibleDescription('The method allows: b less than or equal to 10 m')
+  })
+
+  it('shows no bound and focuses nothing when the bound names no field of the type', () => {
+    openWithBound({ bound: { ...bound, quantity: 'zz' } })
+
+    expect(screen.queryByText(/Метод допускает/)).not.toBeInTheDocument()
+    expect(document.body).toHaveFocus()
+  })
+
+  it('shows no bound when the form is opened without one', () => {
+    openWithBound(null)
+
+    expect(screen.queryByText(/Метод допускает/)).not.toBeInTheDocument()
+  })
+
+  it('shows the field error instead of the bound after an empty submit', () => {
+    openWithBound({ bound })
+    fireEvent.click(screen.getByRole('button', { name: 'Рассчитать' }))
+
+    expect(screen.queryByText(/Метод допускает/)).not.toBeInTheDocument()
+    expect(screen.getAllByText('Введите значение.').length).toBeGreaterThan(0)
   })
 })

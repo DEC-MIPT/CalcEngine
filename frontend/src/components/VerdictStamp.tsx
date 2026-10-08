@@ -5,6 +5,7 @@ import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
 import type { TextKey } from '@/i18n/dictionary'
 import { unitLabel } from '@/i18n/units'
+import { EditInputsLink } from './EditInputsLink'
 import { Formula } from './Formula'
 import { buttonClass } from './ui/button'
 
@@ -25,7 +26,15 @@ function Reading({ quantity }: { quantity: Quantity }) {
   )
 }
 
-export function VerdictStamp({ envelope, reason }: { envelope: Envelope; reason: CheckReason }) {
+export function VerdictStamp({
+  envelope,
+  reason,
+  editType = null,
+}: {
+  envelope: Envelope
+  reason: CheckReason
+  editType?: string | null
+}) {
   const { t, formatNumber } = useI18n()
   const headingId = useId()
   const passed = envelope.verdict === 'pass'
@@ -57,11 +66,12 @@ export function VerdictStamp({ envelope, reason }: { envelope: Envelope; reason:
           </div>
         )}
       </div>
-      <div className={`flex items-center border-t-2 p-4 sm:border-t-0 sm:border-l-2 ${tone}`}>
+      <div className={`grid content-center gap-2 border-t-2 p-4 sm:border-t-0 sm:border-l-2 ${tone}`}>
         <Link to={`/calculations/${envelope.result_id}/report`} className={buttonClass}>
           {t('result.toReport')}
           <ArrowRight aria-hidden="true" size={18} />
         </Link>
+        {editType && <EditInputsLink type={editType} primary={false} />}
       </div>
       <dl className={`col-span-full grid border-t text-sm sm:grid-cols-3 ${tone}`}>
         {(
