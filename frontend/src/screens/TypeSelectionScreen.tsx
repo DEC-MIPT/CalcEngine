@@ -5,6 +5,7 @@ import { api, unwrap } from '@/api/client'
 import type { components } from '@/api/schema'
 import { useRequest } from '@/api/useRequest'
 import { Formula } from '@/components/Formula'
+import { DimensionGrid } from '@/components/DimensionGrid'
 import { ErrorState, LoadingState } from '@/components/RequestStates'
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n/context'
@@ -15,18 +16,18 @@ type CalculationType = components['schemas']['CalculationTypeView']
 
 const loadTypes = () => unwrap(api.GET('/calculation-types'))
 
-const headCell = 'px-3 py-2 text-left font-heading text-sm font-semibold text-muted-foreground'
+const headCell = 'px-3 py-2.5 sm:px-4 text-left font-heading text-sm font-semibold tracking-wide text-muted-foreground uppercase'
 
 function Registry({ children }: { children: ReactNode }) {
   const { t } = useI18n()
   return (
-    <table className="w-full border-collapse border border-border bg-card">
-      <thead className="border-b border-foreground">
+    <table className="w-full border-collapse border-2 border-foreground bg-card">
+      <thead className="border-b-2 border-foreground">
         <tr>
           <th scope="col" className={headCell}>
             {t('types.column.result')}
           </th>
-          <th scope="col" className={`${headCell} w-24 text-right`}>
+          <th scope="col" className={`${headCell} hidden w-24 text-right sm:table-cell`}>
             {t('types.column.inputs')}
           </th>
           <th scope="col" className={`${headCell} hidden w-64 sm:table-cell`}>
@@ -55,15 +56,18 @@ function Notice({ children }: { children: ReactNode }) {
 function TypeRow({ type }: { type: CalculationType }) {
   const { language } = useI18n()
   return (
-    <tr className="relative not-last:border-b not-last:border-border hover:bg-secondary has-[a:focus-visible]:bg-secondary">
-      <td className="px-3 py-3">
+    <tr className="registry-row group relative not-last:border-b not-last:border-border">
+      <td className="px-3 py-4 sm:px-4 sm:py-5">
         <Link
           to={`/calculations/new?type=${encodeURIComponent(type.name)}`}
-          className="font-medium text-foreground no-underline after:absolute after:inset-0 focus-visible:outline-offset-[-2px]"
+          className="font-heading text-xl font-semibold text-foreground no-underline group-hover:text-primary-foreground group-has-[a:focus-visible]:text-primary-foreground after:absolute after:inset-0 focus-visible:outline-offset-[-4px] focus-visible:outline-primary-foreground sm:text-3xl"
         >
           {typeName(type, language)}
         </Link>
-        <span aria-hidden="true" className="mt-0.5 flex flex-wrap gap-x-3 text-sm text-muted-foreground">
+        <span
+          aria-hidden="true"
+          className="mt-1 flex flex-wrap gap-x-3 text-sm text-muted-foreground group-hover:text-primary-foreground group-has-[a:focus-visible]:text-primary-foreground"
+        >
           {type.outputs.map((output) => (
             <span key={output.name} className="inline-flex items-baseline">
               <Formula latex={output.symbol} />, {unitLabel(output.base_unit, language)}
@@ -71,12 +75,37 @@ function TypeRow({ type }: { type: CalculationType }) {
           ))}
         </span>
       </td>
-      <td className="px-3 py-3 text-right font-mono">{type.inputs.length}</td>
-      <td className="hidden px-3 py-3 font-mono text-sm text-muted-foreground sm:table-cell">{type.name}</td>
-      <td className="px-3 py-3 text-primary">
-        <ArrowRight aria-hidden="true" size={18} />
+      <td className="hidden px-3 py-4 text-right font-mono text-lg sm:table-cell sm:px-4 sm:py-5 group-hover:text-primary-foreground group-has-[a:focus-visible]:text-primary-foreground">
+        {type.inputs.length}
+      </td>
+      <td className="hidden px-3 py-4 sm:px-4 sm:py-5 font-mono text-xs text-muted-foreground group-hover:text-primary-foreground group-has-[a:focus-visible]:text-primary-foreground sm:table-cell">
+        {type.name}
+      </td>
+      <td className="px-3 py-4 sm:px-4 sm:py-5 text-primary group-hover:text-primary-foreground group-has-[a:focus-visible]:text-primary-foreground">
+        <ArrowRight
+          aria-hidden="true"
+          size={24}
+          weight="bold"
+          className="transition-transform group-hover:translate-x-1.5 group-has-[a:focus-visible]:translate-x-1.5"
+        />
       </td>
     </tr>
+  )
+}
+
+function Hero() {
+  const { t } = useI18n()
+  return (
+    <section className="hero on-accent bg-primary text-primary-foreground">
+      <div className="mx-auto grid max-w-5xl items-end gap-x-10 gap-y-8 px-4 pt-10 pb-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:pt-16 lg:pb-16">
+        <div className="grid gap-5">
+          <p className="font-mono text-xs tracking-[0.25em] uppercase opacity-85">{t('hero.kicker')}</p>
+          <h1 className="hero-title">{t('types.title')}</h1>
+          <p className="max-w-xl text-base/relaxed opacity-90 sm:text-lg/relaxed">{t('hero.lede')}</p>
+        </div>
+        <DimensionGrid />
+      </div>
+    </section>
   )
 }
 
@@ -85,27 +114,29 @@ export function TypeSelectionScreen() {
   const { state, retry } = useRequest(loadTypes)
   return (
     <>
-      <h1>{t('types.title')}</h1>
-      {state.status === 'error' ? (
-        <ErrorState error={state.error} onRetry={retry} title="types.loadFailed" />
-      ) : (
-        <Registry>
-          {state.status === 'loading' && (
-            <Notice>
-              <LoadingState />
-            </Notice>
-          )}
-          {state.status === 'ok' && state.data.length === 0 && (
-            <Notice>
-              <div className="grid justify-items-start gap-3">
-                <p>{t('types.empty')}</p>
-                <Button onClick={retry}>{t('state.retry')}</Button>
-              </div>
-            </Notice>
-          )}
-          {state.status === 'ok' && state.data.map((type) => <TypeRow key={type.name} type={type} />)}
-        </Registry>
-      )}
+      <Hero />
+      <div className="mx-auto max-w-5xl px-4 py-10">
+        {state.status === 'error' ? (
+          <ErrorState error={state.error} onRetry={retry} title="types.loadFailed" />
+        ) : (
+          <Registry>
+            {state.status === 'loading' && (
+              <Notice>
+                <LoadingState />
+              </Notice>
+            )}
+            {state.status === 'ok' && state.data.length === 0 && (
+              <Notice>
+                <div className="grid justify-items-start gap-3">
+                  <p>{t('types.empty')}</p>
+                  <Button onClick={retry}>{t('state.retry')}</Button>
+                </div>
+              </Notice>
+            )}
+            {state.status === 'ok' && state.data.map((type) => <TypeRow key={type.name} type={type} />)}
+          </Registry>
+        )}
+      </div>
     </>
   )
 }

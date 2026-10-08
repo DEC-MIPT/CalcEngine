@@ -12,7 +12,7 @@ export const routes: RouteObject[] = [
   {
     element: <AppShell />,
     children: [
-      { path: '/', element: <TypeSelectionScreen /> },
+      { path: '/', element: <TypeSelectionScreen />, handle: { bleed: true } },
       { path: '/calculations/new', element: <CalculationFormScreen />, handle: trail('form') },
       { path: '/calculations/:id', element: <ResultScreen />, handle: trail('result') },
       { path: '/calculations/:id/report', element: <ReportScreen />, handle: trail('result', 'report') },

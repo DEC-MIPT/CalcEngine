@@ -94,3 +94,25 @@ describe('TypeSelectionScreen', () => {
     expect(await screen.findByRole('link', { name: PILOT_NAME })).toBeInTheDocument()
   })
 })
+
+describe('TypeSelectionScreen hero (UX bold pass, zone 1)', () => {
+  it('puts the page heading in a full-bleed hero with the kicker, the lede and a hidden drawing', async () => {
+    const { container } = open()
+
+    const heading = screen.getByRole('heading', { level: 1, name: 'Выберите тип расчёта' })
+    const hero = heading.closest('section')!
+    expect(hero).toHaveClass('on-accent')
+    expect(within(hero).getByText('Прозрачный расчёт по нормам')).toBeInTheDocument()
+    expect(within(hero).getByText(/Каждый шаг — с формулой/)).toBeInTheDocument()
+    expect(hero.querySelector('svg.dimension-grid')).toHaveAttribute('aria-hidden', 'true')
+    expect(screen.getByRole('main')).not.toHaveClass('max-w-5xl')
+    await screen.findByRole('link', { name: PILOT_NAME })
+    await expectNoA11yViolations(container)
+  })
+
+  it('keeps the other screens inside the page column', () => {
+    render(<RouterProvider router={createMemoryRouter(routes, { initialEntries: ['/nowhere'] })} />)
+
+    expect(screen.getByRole('main')).toHaveClass('max-w-5xl')
+  })
+})

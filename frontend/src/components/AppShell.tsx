@@ -76,17 +76,23 @@ function DemoBadge() {
 
 function Shell() {
   const { t } = useI18n()
+  const bleed = (useMatches().at(-1)?.handle as { bleed?: boolean } | undefined)?.bleed === true
   return (
     <>
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
-          <p className="font-heading text-lg font-semibold">{t('app.title')}</p>
+          <p className="flex items-center gap-2 font-heading text-lg font-semibold">
+            <span aria-hidden="true" className="bg-primary px-1.5 font-mono text-sm font-bold tracking-widest text-primary-foreground">
+              DEC
+            </span>
+            {t('app.title')}
+          </p>
           <span aria-hidden="true" className="h-5 w-px bg-border max-sm:hidden" />
           <Trail />
           <DemoBadge />
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-4 py-8">
+      <main className={bleed ? undefined : 'mx-auto max-w-5xl px-4 py-8'}>
         <Outlet />
       </main>
     </>

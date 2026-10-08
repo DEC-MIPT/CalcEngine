@@ -14,6 +14,7 @@
   --default-transition-timing-function: linear;
   --text-page: clamp(1.875rem, 1.5rem + 1.2vw, 2.25rem);
   --text-verdict: clamp(1.5rem, 1.2rem + 0.9vw, 1.875rem);
+  --text-hero: clamp(2.75rem, 1.4rem + 5.2vw, 6rem);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -118,6 +119,76 @@
   samp {
     @apply font-mono;
     font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .hero-title {
+    font-size: var(--text-hero);
+    line-height: 0.92;
+    letter-spacing: -0.025em;
+    margin-bottom: 0;
+    padding-bottom: 0.75rem;
+    border-color: currentColor;
+    text-wrap: balance;
+  }
+  .hero-title::before,
+  .hero-title::after {
+    background: currentColor;
+  }
+  .on-accent :focus-visible {
+    outline-color: var(--primary-foreground);
+  }
+  .registry-row {
+    background-image: linear-gradient(var(--primary), var(--primary));
+    background-repeat: no-repeat;
+    background-position: left;
+    background-size: 0% 100%;
+    transition: background-size 150ms linear;
+  }
+  .registry-row:hover,
+  .registry-row:has(a:focus-visible) {
+    background-size: 100% 100%;
+  }
+}
+
+@keyframes dg-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes dg-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dimension-grid :is(line, path) {
+    stroke-dasharray: 1;
+    animation: dg-draw 360ms steps(12, end) backwards;
+  }
+  .dimension-grid .dg-grid line {
+    animation-duration: 240ms;
+  }
+  .dimension-grid .dg-ground :is(line, path) {
+    animation-delay: 160ms;
+  }
+  .dimension-grid .dg-body :is(line, path) {
+    animation-delay: 280ms;
+  }
+  .dimension-grid .dg-dims :is(line, path) {
+    animation-delay: 520ms;
+  }
+  .dimension-grid .dg-labels {
+    animation: dg-appear 1ms linear 860ms backwards;
   }
 }
 
