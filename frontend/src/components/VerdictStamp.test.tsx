@@ -153,7 +153,7 @@ describe('VerdictStamp: reveal after the trace playback', () => {
     expect(screen.getByRole('heading', { name: 'Проверка выполнена' })).toBeInTheDocument()
     const status = stamp.querySelector('[data-stamp-status]')!
     expect(status).toHaveAttribute('aria-hidden', 'true')
-    expect(status.textContent).toBe('ВЫПОЛНЕНИЕ РАСЧЕТА▮')
+    expect(status.textContent).toBe('ВЫПОЛНЕНИЕ РАСЧЁТА▮')
   })
 
   it('announces a passed check politely', () => {
