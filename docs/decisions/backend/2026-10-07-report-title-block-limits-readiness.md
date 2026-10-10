@@ -61,3 +61,35 @@ GOST R 21.101-2026 (edition unverified), Annex E. Its recommendations 1 and 2 ar
 of columns 1, 5, 6 and 9 are stated as layout choices. Recommendation 3, the edition conflict
 (GOST R 21.101-2020 in the base spec `report-generator`, 2026 in the changes and the code), is
 not caused here; it stays with WP3 as `calculation-core-contract` records.
+
+## `tester` verdict (task 3.1, 2026-10-10)
+
+**GO for `feature/report-title-limits/backend`** at `61fb8d4` (the feature code is `9c76303`;
+`61fb8d4` only merges documents from `develop`).
+
+- `backend/check.sh`: `ruff`, `mypy` (117 files) and `lint-imports` (4 contracts kept) pass;
+  `pytest` 752 passed, 1 skipped (the `postgres` module without its URL); branch coverage of
+  `app` and `scripts` 100% (gate 95%).
+- `pytest -m postgres` on `dec_app_wp8_test`: 5 passed.
+- `pre-commit run --files` on the 13 files of `9c76303`: passed, the baseline unchanged.
+- `openspec validate --all --strict`: 21/21.
+- Every scenario of "Title-block text length" and every verify clause of tasks 2.1-2.6 is
+  mapped to its tests; no NO-GO criterion of `tasks.md` is hit.
+- Task 2.6 reproduced by the `tester`: the reference texts of 9- and 14-letter words at the
+  limits, LibreOffice 24.2.7.2; form 5 of the first sheet and form 6 of the second show every
+  line whole, none cut by a lower border, no letter across a side border.
+- Mutation probes: 9 of 10 mutants caught; the tenth is finding m1.
+- UI/UX: N/A, the change has no UI.
+
+Minor findings, none blocking GO:
+
+| # | Finding | Outcome |
+|---|---|---|
+| m1 | No test asserted the size the renderer gives the texts of columns 1, 5, 6 and 9 (the surviving mutant: `Pt(12)` in `_fill`) | Fixed in `68e0074`: `test_each_datum_prints_at_the_size_of_its_column` (form 5 columns 1, 5, 6, 9; form 6 column 1); the mutant now fails it |
+| m2 | The over-limit API test looked for the whole sent text only, so a partial echo in the log would pass | Fixed in `68e0074`: no character of the sent text is in the body or the log |
+| m3 | "No report is built" is covered only implicitly: the answer is a JSON `422` | No action: the schema rejects the request before the handler runs |
+| m4 | The surname limit test did not check `ctx.max_length`, unlike the title-field test | Fixed in `68e0074` |
+| m5 | The cell-size test would pass on an empty list of cells | No action: `column_capacity` and the cell-list tests guard it |
+
+After `68e0074` (tests only): `backend/check.sh` 753 passed, 1 skipped, coverage 100%; the hooks
+pass.
