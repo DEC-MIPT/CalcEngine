@@ -433,7 +433,7 @@ def test_a_report_text_over_its_limit_is_422_naming_the_limit_and_echoing_no_tex
     assert response.json()["fields"] == [
         {"location": ["body", *path], "message": f"String should have at most {MAX_LENGTH[column]} characters"}
     ]
-    assert text not in response.text and text not in logged
+    assert "Щ" not in response.text and "Щ" not in logged
     assert "code=validation_error" in logged
 
 

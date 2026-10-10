@@ -153,8 +153,8 @@ def test_a_surname_at_its_limit_is_accepted_and_one_more_character_is_rejected(r
     assert getattr(request(**{role: person(surname=cyrillic(limit))}), role).surname == cyrillic(limit)
     with pytest.raises(ValidationError) as rejected:
         request(**{role: person(surname=cyrillic(limit + 1))})
-    assert [(error["type"], error["loc"]) for error in rejected.value.errors()] == [
-        ("string_too_long", (role, "surname"))
+    assert [(error["type"], error["loc"], error["ctx"]) for error in rejected.value.errors()] == [
+        ("string_too_long", (role, "surname"), {"max_length": limit})
     ]
 
 

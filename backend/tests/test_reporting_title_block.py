@@ -301,6 +301,16 @@ def test_form6_carries_column_1_and_the_sheet_number(filled_document: DocumentOb
     assert [table.cell(*position).text for position in FORM6_CHANGE_CELLS] == [""] * 12
 
 
+def test_each_datum_prints_at_the_size_of_its_column(filled_document: DocumentObject) -> None:
+    form5 = filled_document.sections[0].first_page_footer.tables[0]
+    form6 = filled_document.sections[0].footer.tables[0]
+    cells = {("5", column): form5.cell(*FORM5_COLUMNS[column]) for column in ("1", "5", "6", "9")}
+    cells[("6", "1")] = form6.cell(*FORM6_COLUMNS["1"])
+    sizes = {key: [run.font.size.pt if run.font.size else None for run in cell.paragraphs[0].runs] for key, cell in cells.items()}
+
+    assert sizes == {("5", "1"): [10.0], ("5", "5"): [10.0], ("5", "6"): [7.0], ("5", "9"): [7.0], ("6", "1"): [10.0]}
+
+
 def test_the_following_sheets_have_column_26_too(document: DocumentObject) -> None:
     paragraph = document.sections[0].footer.paragraphs[0]
 
