@@ -98,10 +98,12 @@ Akim's zone), created before task 2.1.
 
 ## 3. Verify and close
 
-- [ ] 3.1 `tester` GO for `feature/report-title-limits/backend`; verify: the verdict with the
-  test count and the coverage is recorded in the readiness file
-- [ ] 3.2 Review by the orchestrator or Egor; verify: the review is recorded in the readiness
-  file, with no open blocker or major finding
+- [x] 3.1 `tester` GO for `feature/report-title-limits/backend`; verify: the verdict with the
+  test count and the coverage is recorded in the readiness file (done 2026-10-10: GO at
+  `61fb8d4`, 752 passed, coverage 100%; findings m1, m2, m4 fixed in `68e0074`)
+- [x] 3.2 Review by the orchestrator or Egor; verify: the review is recorded in the readiness
+  file, with no open blocker or major finding (done 2026-10-10: `orchestrator` APPROVE, no
+  blocker or major; m1, m2, n1, n4, n5 fixed in `95512e2`, 753 passed, coverage 100%)
 - [ ] 3.3 Merge the feature into `develop` (backend, with Akim's word); verify: `develop`
   passes `backend/check.sh`
 - [ ] 3.4 (spec) Tell the frontend: if `npm run gen:api` on `feature/frontend-app/frontend`

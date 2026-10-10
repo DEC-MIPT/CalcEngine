@@ -93,3 +93,39 @@ Minor findings, none blocking GO:
 
 After `68e0074` (tests only): `backend/check.sh` 753 passed, 1 skipped, coverage 100%; the hooks
 pass.
+
+## Review (task 3.2, 2026-10-10)
+
+**APPROVE** by the `orchestrator` (read-only review in place of the other developer) of
+`9c76303` and `68e0074`; no blocker, no major finding.
+
+- Checked: every cell capacity recomputed by hand (123/150/7/130/11 agree with `design.md`
+  decision 4 and `MAX_LENGTH`); the fixture checked against the font file itself (SHA-256 of
+  decision 3, units per em, `hhea`, all 65 advance widths); the calibration reproduced (at
+  0.752 em column 5 overflows, from 0.753 em nothing does); the message of `string_too_long`
+  carries only the limit, the log line is unchanged, a lone surrogate still answers "Invalid
+  value."; `capacity.py` stays in the `reporting` layer, no new dependency; the limits, font
+  constants and sizes are stated as layout choices, the cell sizes keep their citation of
+  GOST R 21.101-2026 (edition unverified); docstrings and commits follow the conventions.
+
+| # | Finding | Outcome |
+|---|---|---|
+| m1 | `column_capacity` taking the minimum was not tested: form 6, the tighter cell, is the last of column 1, so `capacities[-1]` would pass; the second half of `== 3 * 41 < 3 * 44` is always true | Fixed in `95512e2`: the test checks each cell (132, 123) and the minimum with the cells in reverse order; the mutant `capacities[-1]` now fails it |
+| m2 | The single-spacing test also asserted python-docx's template default `w:line="276"` | Fixed in `95512e2`: the assertion dropped, the test renamed `test_the_title_block_style_is_single_spaced` |
+| n1 | A no-op slice in `cyrillic()` (`test_schemas_report.py`) | Fixed in `95512e2` |
+| n2 | Each per-column fit test lays out all columns | No action: the whole suite runs in about 10 s |
+| n3 | `PT_MM` in `capacity.py` repeats the conversion of `layout.line_mm` | No action: merging them touches `layout.py`, outside this change |
+| n4 | The app does not call `capacity.py` at runtime, so it may read as dead code | Fixed in `95512e2`, in the docstring of `column_capacity` (no module in `app` has a module docstring) |
+| n5 | An awkward wrap of the surname size in `_sign` | Fixed in `95512e2`: written as in `_fill` |
+
+After `95512e2`: `backend/check.sh` 753 passed, 1 skipped, coverage 100%; the hooks pass.
+
+Outside this change, recorded for later:
+
+- A `422` for an `extra_forbidden` error carries the key name the client sent in its
+  `location` (for example `["body", "title", "<client key>"]`). This comes from
+  `calculation-api`, not from this branch; a follow-up should decide whether it breaks the
+  rule that no response repeats a client text.
+- The server counts the limits in Unicode code points, an HTML `maxLength` in UTF-16 code
+  units, so a browser limits characters outside the Basic Multilingual Plane (emoji) more
+  strictly. Goes into the note of task 3.4.
