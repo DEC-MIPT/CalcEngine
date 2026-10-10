@@ -77,6 +77,16 @@ function, its boundary (WP5 decision 7) and the engine are unchanged.
    - Motion (intent): precise and mechanical: short linear or stepped transitions (for example
      100-150 ms) or an instant change of state; no springs, bounces or overshoot. All motion
      follows `prefers-reduced-motion`.
+   - Responsive type and feedback (Akim, 2026-10-08,
+     `docs/decisions/frontend/2026-10-08-frontend-ux-improvements-kickoff.md`, after the heuristic
+     review of the same day; the direction above is kept). Type is a hybrid: body text, labels,
+     fields and the columns of figures stay on whole-pixel steps (the `sm:` steps of the layout),
+     and only the page heading and the verdict line scale with `clamp()` between rem bounds, never
+     below their present size on a phone. Figures in a column keep their fixed column and the
+     tabular face (Geist Mono has one advance width at every size). Micro-interactions are quiet
+     (a flash of 1 px or a colour, a stepped rule, an echo in text) except one expressive moment, the
+     verdict: its frame is drawn in 120 ms and its word follows, with focus moved to it. Every such
+     animation lives inside `@media (prefers-reduced-motion: no-preference)`.
    - Reference directions: (1) the title block and frame of a drawing sheet under GOST R 21.101
      (edition unverified; the report's own source is in `calculation-core-contract`), as the report
      uses it; (2) the readout of an inspection or measuring instrument (a value, its unit and its

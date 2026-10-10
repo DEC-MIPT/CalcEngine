@@ -29,20 +29,23 @@ Akim's zone), created before task 2.1.
 
 ## 2. Backend (feature `report-title-limits/backend`)
 
-- [ ] 2.1 Print the surname of column 11 at 6 pt (`SURNAME_SIZE_PT`), and keep the font sizes
+- [x] 2.1 Print the surname of column 11 at 6 pt (`SURNAME_SIZE_PT`), and keep the font sizes
   of columns 1, 5, 6, 9 and 11 in one mapping of `backend/app/reporting/title_block.py` that
   `add_title_blocks` and `_sign` use (`design.md` decision 6) (backend); verify: a test reads
   every surname run of form 5 at 6 pt, and the existing title-block and signature tests pass
   unchanged (none of them asserts the size of a surname run; the one size assertion,
   `test_reporting_signatures.py`, checks the date run)
-- [ ] 2.2 Add pure functions for the extent of a cell (`W`, `H` from the grid widths, the
+  (done 2026-10-07 on `feature/report-title-limits/backend`, `9c76303`)
+- [x] 2.2 Add pure functions for the extent of a cell (`W`, `H` from the grid widths, the
   merges and `row_heights_mm`) and its capacity, and the constants `LINE_HEIGHT_EM` and
   `REFERENCE_WIDTH_EM` with their source (`design.md` decisions 2-5) (backend); verify: tests
   find the cell sizes of the table in decision 4 within 0.01 mm, the lines and characters
   per line of each column, the smaller of forms 5 and 6 for column 1, and one line for
   columns 6 and 11
-- [ ] 2.2a Add the fixture `backend/tests/fixtures/liberation_sans_metrics.json` (font version
-  and SHA-256, units per em, the three `hhea` values, the advance widths of the space and of
+  (done 2026-10-07 on `feature/report-title-limits/backend`, `9c76303`; in a module of its
+  own, `backend/app/reporting/capacity.py`, `design.md` decision 7)
+- [x] 2.2a Add the fixture `backend/tests/fixtures/liberation_sans_metrics.json` (font name
+  and version, units per em, the three `hhea` values, the advance widths of the space and of
   а-я and А-Я without ё and Ё), copied once from the font file of `design.md` decision 3, and
   the fit tests of decision 7 with a greedy word wrap written in the test module, and record
   the `fontTools` snippet that produced the fixture in the code journal (backend);
@@ -50,12 +53,18 @@ Akim's zone), created before task 2.1.
   cell at its limit (form 5 and form 6 for the designation); with `REFERENCE_WIDTH_EM − 0.001`
   at least one reference text overflows; `LINE_HEIGHT_EM` equals the fixture's `hhea` sum over
   units per em
-- [ ] 2.3 Add the five limits to `backend/app/schemas/report.py` as `max_length` of the
+  (done 2026-10-07 on `feature/report-title-limits/backend`, `9c76303`; the font's SHA-256
+  stays in `design.md` decision 3, not in the fixture, since `detect-secrets` reports it
+  there)
+- [x] 2.3 Add the five limits to `backend/app/schemas/report.py` as `max_length` of the
   fields, keeping the character check (`design.md` decisions 1, 7) (backend); verify: for
   each field and each signatory role, Cyrillic text at its limit is accepted and one
   character more fails with `string_too_long`; a test in the reporting tests asserts that
   each schema limit equals the capacity of task 2.2 (`design.md` decision 7)
-- [ ] 2.4 Add `string_too_long` to `STATIC_MESSAGE_TYPES` in `backend/app/api/errors.py`
+  (done 2026-10-07 on `feature/report-title-limits/backend`, `9c76303`; the alias `Text`
+  removed, the limit placed before the character check, a lone surrogate now rejected by
+  pydantic as `string_unicode`, `design.md` decision 1)
+- [x] 2.4 Add `string_too_long` to `STATIC_MESSAGE_TYPES` in `backend/app/api/errors.py`
   (`design.md` decision 8) (backend); verify: `POST /calculations/{result_id}/report` with a
   designation one character over the limit answers `422 validation_error` with one field at
   `["body", "title", "designation"]`, a message naming the limit and no part of the sent text
@@ -64,20 +73,28 @@ Akim's zone), created before task 2.1.
   `["body", <role>, "surname"]`; `/openapi.json` gives `maxLength` for the five fields; a
   report requested with every text at its limit returns `200`, and the text of each cell of
   the returned `.docx` equals the text sent
-- [ ] 2.5 Shorten any existing test text or fixture that exceeds a new limit (known:
+  (done 2026-10-07 on `feature/report-title-limits/backend`, `9c76303`)
+- [x] 2.5 Shorten any existing test text or fixture that exceeds a new limit (known:
   `"<NORM-CONTROL>"`, 14 characters, in `backend/tests/test_services_report.py`), and run
   `backend/check.sh`, the `postgres` module and the `pre-commit` hooks (backend); verify:
   `ruff`, `mypy`, `lint-imports` pass, branch coverage of `app` stays 100%, the `postgres`
   module passes against `dec_app_wp8_test`, the hooks pass
-- [ ] 2.6 Check by eye that the simulation agrees with a renderer: build two reports with
+  (done 2026-10-07 on `feature/report-title-limits/backend`, `9c76303`; `"<NORM-CONTROL>"`
+  became `"<NORM-CTRL>"`; 752 passed, coverage 100%, `postgres` 5 passed)
+- [x] 2.6 Check by eye that the simulation agrees with a renderer: build two reports with
   every field at its limit, one with the reference text of 9-letter words and one with
   14-letter words (`design.md` decision 3), convert them to PDF with
   `soffice --headless --convert-to pdf`, and look at form 5 of the first sheet and form 6 of
   the second (backend); verify: in each cell every line is visible, no line is cut by the
   cell's lower border and no letter crosses a side border; recorded in the code journal with
   the LibreOffice version and the two PDFs' names. If a text overflows, the simulation does
-  not match the renderer: raise `REFERENCE_WIDTH_EM`, recompute the limits and repeat tasks
-  2.2-2.6
+  not match the renderer: if the lines are spaced wider than `LINE_HEIGHT_EM`, make the
+  title-block style single-spaced (`design.md` decision 3); if letters cross a side border,
+  raise `REFERENCE_WIDTH_EM`, recompute the limits and repeat tasks 2.2-2.6
+  (done 2026-10-07 on `feature/report-title-limits/backend`, `9c76303`; LibreOffice 24.2.7.2,
+  `limits-9.pdf` and `limits-14.pdf`; the first run cut the last line of column 9, since the
+  title block inherited the document's 1.15 spacing; fixed by a single-spaced title-block
+  style with its test, the limits unchanged; the second run passed)
 
 ## 3. Verify and close
 
