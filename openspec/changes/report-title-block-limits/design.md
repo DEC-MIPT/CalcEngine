@@ -24,10 +24,15 @@ capitals.
    gets `max_length` in `schemas/report.py`, so pydantic rejects a longer text with the error
    type `string_too_long`, and FastAPI publishes the limit as `maxLength` in the OpenAPI
    schema. Length is counted in Unicode code points, as `str` length in Python. The check of
-   characters (`_writable_text`) stays as it is. A fit check of each request that simulates
-   word wrap with the font's glyph widths was considered and not taken (proposal,
-   "Non-goals"): it gives no number a client can show, and it moves validation out of the
-   schema.
+   characters (`_writable_text`) stays; the alias `Text` goes, and each field is annotated
+   `Annotated[str, Field(max_length=...), AfterValidator(_writable_text)]`, the length before
+   the characters, since a limit placed after the validator is reported as `too_long`, not
+   `string_too_long`. With the length checked first, pydantic itself rejects a lone surrogate
+   (`string_unicode`) before `_writable_text` sees it; the request is still rejected with
+   `422 validation_error` and the message "Invalid value." (changed 2026-10-07, task 2.3).
+   A fit check of each request that simulates word wrap with the font's glyph widths was
+   considered and not taken (proposal, "Non-goals"): it gives no number a client can show,
+   and it moves validation out of the schema.
 
 2. **The capacity rule.** For a cell of width `W` mm and height `H` mm printed at `S` pt:
 
@@ -50,7 +55,10 @@ capitals.
    LibreOffice substitutes for it; 2048 units per em:
 
    - `LINE_HEIGHT_EM = 2355 / 2048` (about 1.150): ascender 1854 + descender 434 + line gap 67
-     of the `hhea` table, the height of a single-spaced line;
+     of the `hhea` table, the height of a single-spaced line. The title-block style therefore
+     sets single spacing (`line_spacing = 1.0`): the document defaults (`w:docDefaults`,
+     `w:line="276"`) give 1.15, a line step of about 1.32 em on the render, which cut the last
+     line of column 9 in the first check by eye of task 2.6 (2026-10-07);
    - `REFERENCE_WIDTH_EM = 0.753`: calibrated, not measured. The mean advance of the 32
      Cyrillic capitals А-Я without Ё is 0.726 em (lowercase 0.578 em), but limits from 0.726
      let ordinary text overflow columns 5 and 9, because word wrap leaves the end of a line
@@ -76,9 +84,12 @@ capitals.
 
    The advance widths of the space and of the letters а-я and А-Я (without ё, Ё) and the three
    `hhea` values are copied once from the font file with `fontTools` outside the project into
-   a test fixture, `backend/tests/fixtures/liberation_sans_metrics.json`, with the font's
-   version and hash. The project gets no new dependency; the fixture lets a test lay out the
-   reference text, check `LINE_HEIGHT_EM` against the `hhea` values, and check that
+   a test fixture, `backend/tests/fixtures/liberation_sans_metrics.json`, with the font's name
+   and version. The SHA-256 above is kept only here: `detect-secrets` reports it in the JSON
+   as a high-entropy string, JSON takes no allowlist pragma, and no test could check it,
+   since the font file is not in the repository (changed 2026-10-07, task 2.2a). The project
+   gets no new dependency; the fixture lets a test lay out the reference text, check
+   `LINE_HEIGHT_EM` against the `hhea` values, and check that
    `REFERENCE_WIDTH_EM` is the smallest width that fits (decision 7).
 
 4. **The cells and the limits.** From `FORM5_MERGES`, `FORM5_COLUMNS` and the form-6 grid:
@@ -114,8 +125,11 @@ capitals.
 7. **Limits live in `schemas`, geometry in `reporting`, and tests tie them.** `reporting`
    imports `schemas`, not the other way round (`backend-layered-architecture` decision 2,
    the `lint-imports` contracts), so the five numbers are constants in `schemas/report.py`.
-   `reporting/title_block.py` gets pure functions for the extent of a cell and its capacity,
-   and the constants `LINE_HEIGHT_EM` and `REFERENCE_WIDTH_EM`. Three tests tie them:
+   A module of its own, `reporting/capacity.py`, gets pure functions for the extent of a cell
+   and its capacity, and the constants `LINE_HEIGHT_EM` and `REFERENCE_WIDTH_EM`;
+   `title_block.py` keeps the grids and the font-size mapping (decision 6) and stays the
+   renderer (changed 2026-10-07, task 2.2, so that `title_block.py` does not grow). Three
+   tests tie them:
    - the capacity of every column, computed from the forms, equals the schema's constant;
    - the reference text of every field and word length fits its cell at its limit, laid out
      with the fixture's widths;
