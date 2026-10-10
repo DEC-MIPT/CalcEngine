@@ -1,18 +1,25 @@
-import { CheckCircle, DownloadSimple, WarningCircle } from '@phosphor-icons/react'
-import { useState, type FormEvent } from 'react'
+import { CheckCircle, FileDoc, WarningCircle } from '@phosphor-icons/react'
+import { useRef, useState, type FormEvent } from 'react'
 import { api, errorOf, type ApiError } from '@/api/client'
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
 import type { TextKey } from '@/i18n/dictionary'
+import { prefersReducedMotion, withMinimumDuration } from '@/lib/motion'
+import { cn } from '@/lib/utils'
 import { fileNameFrom, saveFile } from '@/report/download'
 import { mapReportErrors } from '@/report/errors'
+import { ReportStamp, type StampStrike, type StampTitle } from './ReportStamp'
 import { ErrorState } from './RequestStates'
-import { Button } from './ui/button'
+import { Button, secondaryButtonClass } from './ui/button'
 
 type ReportRequest = components['schemas']['ReportRequest']
 type TitleName = keyof ReportRequest['title']
 type Role = 'developer' | 'normative_control' | 'checker'
 type Person = { surname: string; date: string }
+type Phase = 'idle' | 'sending' | 'ready'
+type Issued = { blob: Blob; name: string; title: StampTitle; strike: StampStrike; saved: boolean }
+
+export const REPORT_MS = 600
 
 const TITLE_FIELDS: readonly { name: TitleName; column: string; required: boolean }[] = [
   { name: 'designation', column: '1', required: true },
@@ -138,45 +145,59 @@ export function ReportForm({ resultId }: { resultId: string }) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [general, setGeneral] = useState<string[]>([])
   const [failure, setFailure] = useState<ApiError | null>(null)
-  const [saved, setSaved] = useState<string | null>(null)
-  const [sending, setSending] = useState(false)
+  const [phase, setPhase] = useState<Phase>('idle')
+  const [issued, setIssued] = useState<Issued | null>(null)
+  const inFlight = useRef(false)
+
+  function reset() {
+    setIssued(null)
+    setPhase((current) => (current === 'ready' ? 'idle' : current))
+  }
 
   function clear(key: string) {
     setErrors((current) => Object.fromEntries(Object.entries(current).filter(([name]) => name !== key)))
-    setSaved(null)
+    reset()
   }
 
   async function send() {
+    if (inFlight.current || phase === 'ready') return
     const invalid = validate(title, signatureBlock, people)
     setErrors(Object.fromEntries(Object.entries(invalid).map(([key, message]) => [key, t(message)])))
     setGeneral([])
     setFailure(null)
-    setSaved(null)
     const first = FIELD_KEYS.find((key) => key in invalid)
     if (first) {
       document.getElementById(fieldId(first))?.focus()
       return
     }
-    setSending(true)
+    inFlight.current = true
+    const animated = !prefersReducedMotion()
+    const sent = { designation: title.designation, document_name: title.document_name, organization: title.organization }
+    setPhase('sending')
     let outcome
     try {
-      outcome = await api.POST('/calculations/{result_id}/report', {
-        params: { path: { result_id: resultId } },
-        body: requestBody(title, signatureBlock, people),
-        parseAs: 'blob',
-      })
+      outcome = await withMinimumDuration(
+        api.POST('/calculations/{result_id}/report', {
+          params: { path: { result_id: resultId } },
+          body: requestBody(title, signatureBlock, people),
+          parseAs: 'blob',
+        }),
+        animated ? REPORT_MS : 0,
+      )
     } catch {
-      setSending(false)
+      inFlight.current = false
+      setPhase('idle')
       setFailure({ kind: 'network' })
       return
     }
-    setSending(false)
+    inFlight.current = false
     if (outcome.error === undefined) {
       const name = fileNameFrom(outcome.response.headers.get('Content-Disposition'), `dec-report-${resultId}.docx`)
-      saveFile(outcome.data as Blob, name)
-      setSaved(name)
+      setIssued({ blob: outcome.data as Blob, name, title: sent, strike: animated ? 'animated' : 'instant', saved: false })
+      setPhase('ready')
       return
     }
+    setPhase('idle')
     const error = errorOf(outcome.error, outcome.response.status)
     if (error.kind === 'api' && error.status === 422) {
       const mapped = mapReportErrors(error.fields, FIELD_KEYS)
@@ -192,9 +213,24 @@ export function ReportForm({ resultId }: { resultId: string }) {
     void send()
   }
 
+  function download(report: Issued) {
+    saveFile(report.blob, report.name)
+    setIssued({ ...report, saved: true })
+  }
+
   const invalidCount = Object.keys(errors).length
+  const busy = phase === 'sending'
+  const ready = phase === 'ready' && issued !== null
+  let status = ''
+  if (busy) status = t('report.submitting')
+  else if (ready) status = `${t(issued.saved ? 'report.saved' : 'report.ready')}: ${issued.name}`
   return (
-    <form noValidate onSubmit={submit} className="grid gap-6">
+    <form
+      noValidate
+      onSubmit={submit}
+      className={`grid gap-6${ready && issued.strike === 'animated' ? ' report-jolt' : ''}`}
+      data-report-phase={phase}
+    >
       {general.length > 0 && (
         <div role="alert" className="max-w-2xl border border-destructive bg-destructive-surface p-4">
           <p className="font-medium">{t('form.rejected')}</p>
@@ -255,7 +291,7 @@ export function ReportForm({ resultId }: { resultId: string }) {
             onChange={(event) => {
               setSignatureBlock(event.target.checked)
               setErrors({})
-              setSaved(null)
+              reset()
             }}
             className="mt-1 size-4 shrink-0 cursor-pointer accent-primary"
           />
@@ -308,17 +344,35 @@ export function ReportForm({ resultId }: { resultId: string }) {
         )}
       </fieldset>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <Button type="submit" disabled={sending}>
-          <DownloadSimple aria-hidden="true" size={18} />
-          {t(sending ? 'report.submitting' : 'report.submit')}
-        </Button>
-        {saved && (
-          <p role="status" className="inline-flex items-center gap-1.5 text-sm">
-            <CheckCircle aria-hidden="true" weight="fill" size={18} className="text-primary" />
-            {t('report.saved')}: <span className="font-mono">{saved}</span>
+      <div className="grid gap-4">
+        <div className="grid w-fit gap-2">
+          <Button
+            type="submit"
+            aria-disabled={busy || ready ? true : undefined}
+            aria-busy={busy ? true : undefined}
+            className={cn(
+              'report-submit min-w-64 aria-disabled:cursor-not-allowed aria-disabled:active:translate-y-0',
+              busy && 'hover:bg-primary',
+              ready && cn(secondaryButtonClass, 'hover:bg-card'),
+            )}
+          >
+            <span key={phase} className="report-submit-label inline-flex items-center gap-2">
+              {ready ? (
+                <CheckCircle aria-hidden="true" weight="fill" size={18} className="text-primary" />
+              ) : (
+                <FileDoc aria-hidden="true" size={18} />
+              )}
+              {t(busy ? 'report.submitting' : ready ? 'report.ready' : 'report.submit')}
+            </span>
+          </Button>
+          <span aria-hidden="true" className="block h-0.5 bg-border">
+            {busy && <span className="send-rule" />}
+          </span>
+          <p role="status" className="min-h-5 text-sm text-muted-foreground" data-report-status>
+            {status}
           </p>
-        )}
+        </div>
+        {ready && <ReportStamp title={issued.title} fileName={issued.name} strike={issued.strike} onDownload={() => download(issued)} />}
       </div>
     </form>
   )

@@ -2,12 +2,13 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { http, HttpResponse } from 'msw'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { REPORT_MS } from '@/components/ReportForm'
 import { PASS_ID, REFUSED_ID } from '@/mocks/fixtures'
 import { server } from '@/mocks/server'
 import { routes } from '@/routes'
 import { expectNoA11yViolations } from '@/test/axe'
 
-const SUBMIT = /Скачать отчёт/
+const SUBMIT = /Сформировать отчёт/
 const TITLE = {
   'Обозначение документа': 'ДЕК-2026-001-РР',
   'Наименование документа': 'Расчёт сопротивления грунта',
@@ -38,6 +39,7 @@ beforeEach(() => {
 afterEach(() => {
   server.events.removeAllListeners('request:start')
   vi.restoreAllMocks()
+  vi.unstubAllGlobals()
   Reflect.deleteProperty(URL, 'createObjectURL')
   Reflect.deleteProperty(URL, 'revokeObjectURL')
 })
@@ -54,6 +56,9 @@ function fill(values: Record<string, string>) {
 }
 
 const submit = () => fireEvent.click(screen.getByRole('button', { name: SUBMIT }))
+const issued = () => screen.findByRole('region', { name: 'Отчёт сформирован' })
+const stampOf = () => document.querySelector('[data-report-stamp]')
+const statusOf = () => document.querySelector('[data-report-status]')!
 const messageOf = (label: string | RegExp) => {
   const field = screen.getByLabelText(label)
   return field.getAttribute('aria-invalid') ? document.getElementById(field.getAttribute('aria-describedby')!)?.textContent : null
@@ -86,7 +91,7 @@ describe('report form: title block and switch (7.1a)', () => {
     expect(screen.getByText(/печатаются без фамилий и дат/)).toBeInTheDocument()
     submit()
 
-    await screen.findByRole('status')
+    await issued()
     expect(bodies).toEqual([
       {
         title: { designation: 'ДЕК-2026-001-РР', document_name: 'Расчёт сопротивления грунта', documentation_kind: '', organization: 'ООО «Проект»' },
@@ -152,7 +157,7 @@ describe('report form: signatories (7.1b)', () => {
     open()
     fill({ ...TITLE, ...SIGNATURES })
     submit()
-    await screen.findByRole('status')
+    await issued()
     fill({ 'Проверил: Фамилия': 'Сидоров', 'Проверил: Дата': '2026-10-09' })
     submit()
 
@@ -173,9 +178,13 @@ describe('report download and errors (7.2)', () => {
     fill({ ...TITLE, ...SIGNATURES })
 
     submit()
+    const stamp = await issued()
 
-    expect(await screen.findByRole('status')).toHaveTextContent('Отчёт сохранён: report.docx')
+    expect(saved).toEqual([])
+    expect(statusOf()).toHaveTextContent('Отчёт сформирован: report.docx')
+    fireEvent.click(within(stamp).getByRole('button', { name: 'Скачать report.docx' }))
     expect(saved).toEqual([{ href: 'blob:report', download: 'report.docx' }])
+    expect(statusOf()).toHaveTextContent('Отчёт сохранён: report.docx')
     expect(router.state.location.pathname).toBe(`/calculations/${PASS_ID}/report`)
   })
 
@@ -188,7 +197,7 @@ describe('report download and errors (7.2)', () => {
 
     submit()
 
-    await screen.findByRole('status')
+    fireEvent.click(within(await issued()).getByRole('button', { name: /^Скачать/ }))
     expect(saved[0].download).toBe(`dec-report-${PASS_ID}.docx`)
   })
 
@@ -198,7 +207,7 @@ describe('report download and errors (7.2)', () => {
 
     submit()
 
-    await screen.findByRole('status')
+    fireEvent.click(within(await issued()).getByRole('button', { name: /^Скачать/ }))
     expect(saved).toHaveLength(1)
     expect(screen.queryByRole('alert')).toBeNull()
   })
@@ -231,6 +240,7 @@ describe('report download and errors (7.2)', () => {
     expect(messageOf('Обозначение документа')).toBe('String should have at most 123 characters')
     expect(screen.getByText('Input should be a valid boolean')).toBeInTheDocument()
     expect(saved).toEqual([])
+    expect(stampOf()).toBeNull()
   })
 
   it('shows the message of a 422 that names no field', async () => {
@@ -263,6 +273,8 @@ describe('report download and errors (7.2)', () => {
     expect(alert).toHaveTextContent('Не удалось выполнить запрос.')
     expect(alert).toHaveTextContent(code)
     expect(saved).toEqual([])
+    expect(stampOf()).toBeNull()
+    expect(statusOf()).toBeEmptyDOMElement()
     fireEvent.click(within(alert).getByRole('button', { name: 'Повторить' }))
     await waitFor(() => expect(bodies).toHaveLength(2))
   })
@@ -276,5 +288,140 @@ describe('report download and errors (7.2)', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Расчёт сейчас недоступен.')
     expect(saved).toEqual([])
+    expect(stampOf()).toBeNull()
+    expect(screen.getByRole('button', { name: SUBMIT })).not.toHaveAttribute('aria-busy')
+  })
+})
+
+function holdReport() {
+  let release = () => {}
+  const gate = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  server.use(
+    http.post('*/calculations/:id/report', async () => {
+      await gate
+      return new HttpResponse(new Uint8Array([1]), { headers: { 'Content-Disposition': 'attachment; filename="report.docx"' } })
+    }),
+  )
+  return release
+}
+
+const formOf = () => document.querySelector('form')!
+
+describe('report generation: button states and the title-block stamp', () => {
+  it('keeps the button focusable but busy while the report is built, and sends it once', async () => {
+    const release = holdReport()
+    open()
+    fill({ ...TITLE, ...SIGNATURES })
+    const button = screen.getByRole('button', { name: SUBMIT })
+
+    submit()
+    await waitFor(() => expect(bodies).toHaveLength(1))
+
+    expect(button).toHaveAccessibleName('Формирование отчёта…')
+    expect(button).toHaveAttribute('aria-busy', 'true')
+    expect(button).toHaveAttribute('aria-disabled', 'true')
+    expect(button).toBeEnabled()
+    expect(statusOf()).toHaveTextContent('Формирование отчёта…')
+    expect(document.querySelector('.send-rule')).not.toBeNull()
+    expect(formOf()).toHaveAttribute('data-report-phase', 'sending')
+    fireEvent.click(button)
+    fireEvent.submit(formOf())
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(bodies).toHaveLength(1)
+
+    release()
+    await issued()
+    expect(button).toHaveAccessibleName('Отчёт сформирован')
+    expect(button).not.toHaveAttribute('aria-busy')
+    expect(button).toHaveAttribute('aria-disabled', 'true')
+    expect(document.querySelector('.send-rule')).toBeNull()
+    fireEvent.click(button)
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(bodies).toHaveLength(1)
+  })
+
+  it('stamps columns 1, 5 and 9 of the title block and moves focus to the download', async () => {
+    open()
+    fill({ ...TITLE, ...SIGNATURES })
+
+    submit()
+    const stamp = await issued()
+
+    expect([...stamp.querySelectorAll('[data-column]')].map((row) => row.getAttribute('data-column'))).toEqual(['1', '5', '9'])
+    expect(within(stamp).getByText('ДЕК-2026-001-РР')).toBeInTheDocument()
+    expect(within(stamp).getByText('Расчёт сопротивления грунта')).toBeInTheDocument()
+    expect(within(stamp).getByText('ООО «Проект»')).toBeInTheDocument()
+    expect(within(stamp).getByText('ВЫПУЩЕН')).toBeInTheDocument()
+    expect(within(stamp).getByRole('button', { name: 'Скачать report.docx' })).toHaveFocus()
+  })
+
+  it('shows the stamp at once, with no strike or jolt, under reduced motion', async () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: true }))
+    open()
+    fill({ ...TITLE, ...SIGNATURES })
+
+    submit()
+    const stamp = await issued()
+
+    expect(stamp).toHaveAttribute('data-strike', 'instant')
+    expect(stamp.className).not.toContain('report-strike')
+    expect(formOf().className).not.toContain('report-jolt')
+  })
+
+  it('holds the loading state for the minimum time, then strikes the stamp and jolts the sheet', async () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: false }))
+    open()
+    fill({ ...TITLE, ...SIGNATURES })
+    const started = performance.now()
+
+    submit()
+    const stamp = await issued()
+
+    expect(performance.now() - started).toBeGreaterThanOrEqual(REPORT_MS - 20)
+    expect(stamp).toHaveAttribute('data-strike', 'animated')
+    expect(stamp.className).toContain('report-strike')
+    expect(formOf().className).toContain('report-jolt')
+  })
+
+  it('gives a failed report no stamp and no jolt, even when motion is allowed', async () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: false }))
+    server.use(http.post('*/calculations/:id/report', () => HttpResponse.json({ code: 'internal_error', message: 'Boom.' }, { status: 500 })))
+    open()
+    fill({ ...TITLE, ...SIGNATURES })
+
+    submit()
+
+    expect(await screen.findByRole('alert', {}, { timeout: 2000 })).toHaveTextContent('internal_error')
+    expect(stampOf()).toBeNull()
+    expect(formOf().className).not.toContain('report-jolt')
+    expect(screen.getByRole('button', { name: SUBMIT })).not.toHaveAttribute('aria-disabled')
+  })
+
+  it('takes the stamp away and restores the button when a field or the switch changes', async () => {
+    open()
+    fill({ ...TITLE, ...SIGNATURES })
+    submit()
+    await issued()
+
+    fill({ Организация: 'ООО «Другая»' })
+
+    expect(stampOf()).toBeNull()
+    expect(statusOf()).toBeEmptyDOMElement()
+    expect(screen.getByRole('button', { name: SUBMIT })).not.toHaveAttribute('aria-disabled')
+    submit()
+    expect(within(await issued()).getByText('ООО «Другая»')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('switch', { name: 'Заполнить блок подписей' }))
+    expect(stampOf()).toBeNull()
+  })
+
+  it('has no accessibility violations with the stamp', async () => {
+    const { container } = open()
+    fill({ ...TITLE, ...SIGNATURES })
+    submit()
+    await issued()
+
+    await expectNoA11yViolations(container)
   })
 })
