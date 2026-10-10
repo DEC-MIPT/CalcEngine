@@ -61,7 +61,8 @@ None.
 ## Impact
 
 - `backend/app/schemas/report.py` (limits), `backend/app/reporting/title_block.py`
-  (surname size, the capacity of a cell), `backend/app/api/errors.py` (one error type).
+  (surname size, single-spaced title-block style), `backend/app/reporting/capacity.py` (the
+  capacity of a cell), `backend/app/api/errors.py` (one error type).
 - `backend/tests/` for the above.
 - The OpenAPI schema of `POST /calculations/{result_id}/report` gains `maxLength` on five
   fields; `frontend/src/api/schema.d.ts` on `feature/frontend-app/frontend` is regenerated if
