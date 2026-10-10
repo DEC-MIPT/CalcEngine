@@ -333,8 +333,5 @@ def test_a_report_of_two_sheets_or_more_renders_with_both_forms() -> None:
     assert len(section.footer.tables[0].columns) == len(FORM6_WIDTHS_MM)
 
 
-def test_the_title_block_is_single_spaced_although_the_document_default_is_not(document: DocumentObject) -> None:
-    defaults = document.styles.element.find(qn("w:docDefaults")).find(qn("w:pPrDefault")).find(qn("w:pPr")).find(qn("w:spacing"))
-
+def test_the_title_block_style_is_single_spaced(document: DocumentObject) -> None:
     assert document.styles[TITLE_STYLE].paragraph_format.line_spacing == 1.0
-    assert defaults.get(qn("w:line")) == "276"

@@ -1,5 +1,6 @@
 import pytest
 
+from app.reporting import capacity
 from app.reporting.capacity import (
     SINGLE_LINE_COLUMNS,
     cell_extent_mm,
@@ -43,9 +44,19 @@ def test_every_cell_of_a_column_has_the_size_lines_and_characters_of_the_design(
         assert characters_per_line(width, size) == per_line
 
 
-def test_the_designation_is_printed_in_both_forms_and_takes_the_smaller_capacity() -> None:
-    assert [name(form) for form, _ in column_cells("1")] == ["form5", "form6"]
-    assert column_capacity("1") == 3 * 41 < 3 * 44
+def test_the_designation_is_printed_in_both_forms_and_takes_the_smaller_capacity(monkeypatch: pytest.MonkeyPatch) -> None:
+    cells = column_cells("1")
+    size = COLUMN_SIZES_PT["1"]
+    capacities = [
+        line_count(height, size, single_line=False) * characters_per_line(width, size)
+        for width, height in (cell_extent_mm(form, cell) for form, cell in cells)
+    ]
+
+    assert [name(form) for form, _ in cells] == ["form5", "form6"]
+    assert capacities == [132, 123]
+    assert column_capacity("1") == 123
+    monkeypatch.setattr(capacity, "column_cells", lambda column: cells[::-1])
+    assert column_capacity("1") == 123
 
 
 def test_the_surname_cells_are_the_three_signature_rows() -> None:

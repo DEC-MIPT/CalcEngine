@@ -92,6 +92,9 @@ def column_cells(column: str) -> tuple[tuple[Form, tuple[int, int]], ...]:
 def column_capacity(column: str) -> int:
     """Вычисляет лимит символов графы: наименьшую вместимость её ячеек (design.md, решения 2-5).
 
+    Приложение во время работы не вызывает этот модуль: лимиты — постоянные ``MAX_LENGTH``
+    схемы запроса, а тесты сверяют их с вместимостью, вычисленной здесь (design.md, решение 7).
+
     Args:
         column: номер графы из ``COLUMN_SIZES_PT``.
 

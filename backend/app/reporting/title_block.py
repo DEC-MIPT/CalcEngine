@@ -334,9 +334,8 @@ def _footer_form(footer: _Footer, style: str, form: Form) -> Table:
 
 
 def _sign(table: Table, row: int, signatory: Signatory) -> None:
-    table.cell(row, SIGNATURE_COLUMNS["11"]).paragraphs[0].add_run(signatory.surname).font.size = Pt(
-        COLUMN_SIZES_PT["11"]
-    )
+    surname = table.cell(row, SIGNATURE_COLUMNS["11"]).paragraphs[0].add_run(signatory.surname)
+    surname.font.size = Pt(COLUMN_SIZES_PT["11"])
     date = format_date(signatory.date) if signatory.date else ""
     table.cell(row, SIGNATURE_COLUMNS["13"]).paragraphs[0].add_run(date).font.size = Pt(DATE_SIZE_PT)
 

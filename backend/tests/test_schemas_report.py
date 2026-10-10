@@ -131,7 +131,7 @@ ROLES = ("developer", "checker", "normative_control")
 
 
 def cyrillic(length: int) -> str:
-    return ("Ж" * length)[:length]
+    return "Ж" * length
 
 
 @pytest.mark.parametrize("field", list(TITLE_FIELDS))
