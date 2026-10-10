@@ -17,6 +17,7 @@ import { BoundNote, type BoundShape } from './Bound'
 import { ErrorState } from './RequestStates'
 import { ComputePlot } from './ComputePlot'
 import { Formula } from './Formula'
+import { QuantityText, UnitText } from './Quantity'
 import { Button } from './ui/button'
 
 type CalculationType = components['schemas']['CalculationTypeView']
@@ -64,7 +65,7 @@ interface FieldProps {
 }
 
 function Field({ input, value, unit, error, bound, locked, index, onValue, onUnit }: FieldProps) {
-  const { t, language, formatNumber } = useI18n()
+  const { t, language } = useI18n()
   const [flashing, setFlashing] = useState(false)
   const label = pickText(input.label, language)
   const hint = input.hint ? pickText(input.hint, language) : null
@@ -112,7 +113,9 @@ function Field({ input, value, unit, error, bound, locked, index, onValue, onUni
           className={`min-h-9 w-36 min-w-0 border ${bound && !error ? 'border-warning' : 'border-input'} bg-card px-2.5 py-1.5 text-right font-mono ${flashing ? 'unit-flash' : ''} read-only:bg-secondary focus-visible:outline-offset-[-1px] aria-invalid:border-destructive aria-invalid:focus-visible:outline-destructive`}
         />
         {fixedUnit ? (
-          <span className="flex min-h-9 w-24 shrink-0 items-center px-2.5">{unitLabel(input.base_unit, language)}</span>
+          <span className="flex min-h-9 w-24 shrink-0 items-center px-2.5">
+            <UnitText unit={input.base_unit} />
+          </span>
         ) : (
           <span className="relative w-24 shrink-0">
             <select
@@ -127,7 +130,7 @@ function Field({ input, value, unit, error, bound, locked, index, onValue, onUni
             >
               {input.units.map((code) => (
                 <option key={code} value={code}>
-                  {unitLabel(code, language)}
+                  {unitLabel(code, language) || '—'}
                 </option>
               ))}
             </select>
@@ -145,7 +148,7 @@ function Field({ input, value, unit, error, bound, locked, index, onValue, onUni
           {bound && !error && <BoundNote id={noteId} bound={bound} unit={input.base_unit} />}
           {inBase !== null && (
             <p id={echoId} className="font-mono text-sm text-muted-foreground">
-              = {formatNumber(inBase)} {unitLabel(input.base_unit, language)}
+              = <QuantityText value={inBase} unit={input.base_unit} />
             </p>
           )}
         </div>

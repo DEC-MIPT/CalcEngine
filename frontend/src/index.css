@@ -150,6 +150,14 @@
   .on-accent :focus-visible {
     outline-color: var(--primary-foreground);
   }
+  .h1-ruled {
+    margin-bottom: 0;
+    border-bottom-width: 0;
+  }
+  .h1-ruled::before,
+  .h1-ruled::after {
+    content: none;
+  }
   .registry-row {
     background-image: linear-gradient(var(--primary), var(--primary));
     background-repeat: no-repeat;
@@ -329,7 +337,7 @@
   .stamp-frame {
     animation: stamp-frame 120ms linear;
   }
-  .stamp-frame > * {
+  .stamp-enter > * {
     animation: stamp-content 1ms linear 120ms backwards;
   }
 }
@@ -342,5 +350,343 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+.step-pending {
+  opacity: 0;
+}
+
+.stamp-pending > :not(.stamp-status) {
+  opacity: 0;
+}
+
+.stamp-status {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 1rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+}
+
+.stamp-mark {
+  display: none;
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes trace-type {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes trace-print {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes trace-head {
+  from {
+    left: 0;
+    opacity: 1;
+  }
+  99% {
+    left: calc(100% - 0.5rem);
+    opacity: 1;
+  }
+  to {
+    left: calc(100% - 0.5rem);
+    opacity: 0;
+  }
+}
+
+@keyframes stamp-scan {
+  from {
+    top: 0;
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+  }
+  to {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes stamp-reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes stamp-flash {
+  from {
+    box-shadow: 0 0 0 4px var(--primary);
+  }
+  to {
+    box-shadow: 0 0 0 0 var(--primary);
+  }
+}
+
+@keyframes stamp-mark {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .trace-caret {
+    animation: caret-blink 800ms steps(1, end) infinite;
+  }
+  .step-reveal {
+    animation: row-read 420ms linear;
+  }
+  .step-reveal > h3 {
+    position: relative;
+    animation: trace-type 180ms steps(6, end) backwards;
+  }
+  .step-reveal > .step-details {
+    animation: trace-print 240ms steps(4, end) 180ms backwards;
+  }
+  .step-reveal > h3::after {
+    content: '';
+    position: absolute;
+    top: 0.625rem;
+    bottom: 0.625rem;
+    width: 0.5rem;
+    background: var(--primary);
+    pointer-events: none;
+    opacity: 0;
+    animation: trace-head 180ms steps(6, end);
+  }
+  .stamp-celebrate {
+    animation: stamp-flash 240ms steps(2, end) 520ms;
+  }
+  .stamp-celebrate::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 2;
+    height: 3px;
+    background: var(--primary);
+    pointer-events: none;
+    opacity: 0;
+    animation: stamp-scan 320ms steps(12, end) 200ms;
+  }
+  .stamp-celebrate > * {
+    animation: stamp-reveal 1ms linear 520ms backwards;
+  }
+  .stamp-celebrate .stamp-mark {
+    display: block;
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    width: 4.5rem;
+    height: 4.5rem;
+    translate: 0 -50%;
+    stroke: var(--primary);
+    pointer-events: none;
+    animation: stamp-mark 300ms steps(3, end) 1600ms forwards;
+  }
+  .stamp-celebrate .stamp-mark path {
+    stroke-dasharray: 1;
+  }
+  .stamp-celebrate .sm-frame {
+    animation: dg-draw 200ms steps(8, end) 520ms backwards;
+  }
+  .stamp-celebrate .sm-tick {
+    animation: dg-draw 260ms linear 720ms backwards;
+  }
+}
+
+.trace-ruler {
+  --tr-bar: 0.875rem;
+  --tr-end: 1.75rem;
+  container-type: inline-size;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--steps), minmax(0, 1fr)) var(--tr-end);
+  margin-bottom: 1.25rem;
+}
+
+.trace-ruler::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: var(--tr-bar);
+  background: var(--foreground);
+}
+
+.trace-ruler[data-ruler='0'] {
+  height: var(--tr-bar);
+  background: linear-gradient(var(--foreground), var(--foreground)) bottom / 100% 1px no-repeat;
+}
+
+.trace-ruler[data-ruler='0']::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: var(--tr-bar);
+  background: var(--foreground);
+}
+
+.tr-step {
+  display: grid;
+  grid-template-rows: var(--tr-bar) auto;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.tr-bar {
+  position: relative;
+  border-bottom: 1px solid var(--foreground);
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0 calc(25% - 1px),
+    var(--muted-foreground) calc(25% - 1px) 25%
+  );
+  background-position: left bottom;
+  background-size: 100% 40%;
+  background-repeat: no-repeat;
+}
+
+.tr-bar::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--foreground);
+  transform-origin: bottom;
+}
+
+.tr-label {
+  --tr-slot: calc((100cqw - var(--tr-end)) / var(--steps));
+  height: 1rem;
+  overflow: hidden;
+  padding: 0.125rem 3px 0 0;
+  font-family: var(--font-mono);
+  font-size: clamp(0px, (var(--tr-slot) - 3.5rem) * 1000, 0.6875rem);
+  line-height: 1;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tr-step:hover .tr-bar {
+  background-color: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.tr-step:hover .tr-bar::after {
+  background: var(--primary);
+}
+
+.tr-step:hover .tr-label {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+  color: var(--primary);
+  font-size: 0.6875rem;
+}
+
+.tr-pending .tr-bar {
+  border-bottom-color: var(--border);
+  background-image: none;
+}
+
+.tr-pending .tr-bar::after {
+  transform: scaleY(0);
+}
+
+.tr-pending .tr-label {
+  visibility: hidden;
+}
+
+.tr-cursor {
+  position: absolute;
+  top: 0;
+  left: calc((100% - var(--tr-end)) * var(--at) / var(--steps) - 0.25rem);
+  width: 0.5rem;
+  height: var(--tr-bar);
+  background: var(--primary);
+}
+
+.tr-end {
+  display: grid;
+  height: var(--tr-bar);
+  place-items: end center;
+}
+
+.tr-mark {
+  width: 1rem;
+  height: 1rem;
+  overflow: visible;
+}
+
+@keyframes tr-tick {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes tr-fill {
+  from {
+    background-size: 0% 40%;
+  }
+  to {
+    background-size: 100% 40%;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tr-reveal .tr-bar {
+    animation: tr-fill 150ms steps(4, end) backwards;
+  }
+  .tr-reveal .tr-bar::after {
+    animation: tr-tick 120ms steps(3, end) 120ms backwards;
+  }
+  .tr-reveal .tr-label {
+    animation: trace-type 180ms steps(6, end) 120ms backwards;
+  }
+  .tr-cursor {
+    transition: left 150ms steps(3, end);
+  }
+  .tr-celebrate .tr-mark path {
+    stroke-dasharray: 1;
+    animation: dg-draw 260ms linear 720ms backwards;
   }
 }

@@ -1,22 +1,18 @@
 import { CaretRight, CheckCircle, WarningCircle, XCircle } from '@phosphor-icons/react'
-import { useId, useState } from 'react'
+import { useId, useLayoutEffect, useRef, useState } from 'react'
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
-import { unitLabel } from '@/i18n/units'
+import { arrivalOf, type Arrival, type TracePlayback } from '@/lib/useTracePlayback'
 import { Formula } from './Formula'
 import { NormRefList } from './NormRefList'
+import { QuantityText } from './Quantity'
 import { Button } from './ui/button'
 
 type Step = components['schemas']['ResultEnvelope']['trace'][number]
 type Quantity = components['schemas']['QuantityValue']
 
 function Value({ quantity }: { quantity: Quantity }) {
-  const { language, formatNumber } = useI18n()
-  return (
-    <>
-      {formatNumber(quantity.value)} {unitLabel(quantity.unit, language)}
-    </>
-  )
+  return <QuantityText value={quantity.value} unit={quantity.unit} />
 }
 
 const SYMBOLS = { le: '≤', lt: '<', ge: '≥', gt: '>' } as const
@@ -59,11 +55,31 @@ function StepSummary({ step }: { step: Step }) {
   )
 }
 
-function TraceStep({ step, expanded, onToggle }: { step: Step; expanded: boolean; onToggle: () => void }) {
+const ARRIVAL_CLASS: Record<Arrival, string> = { pending: ' step-pending', reveal: ' step-reveal', shown: '' }
+
+function TraceStep({
+  step,
+  index,
+  expanded,
+  onToggle,
+  arrival,
+}: {
+  step: Step
+  index: number
+  expanded: boolean
+  onToggle: () => void
+  arrival: Arrival
+}) {
   const { t } = useI18n()
   const detailsId = useId()
   return (
-    <li className="data-row not-last:border-b not-last:border-border" data-step={step.step_id}>
+    <li
+      id={`trace-step-${index}`}
+      className={`data-row scroll-mt-4 not-last:border-b not-last:border-border${ARRIVAL_CLASS[arrival]}`}
+      data-step={step.step_id}
+      data-arrival={arrival}
+      inert={arrival === 'pending'}
+    >
       <h3 className="text-base">
         <button
           type="button"
@@ -82,7 +98,7 @@ function TraceStep({ step, expanded, onToggle }: { step: Step; expanded: boolean
           <StepSummary step={step} />
         </button>
       </h3>
-      <div id={detailsId} hidden={!expanded} className="grid gap-3 border-t border-dashed border-border bg-background/40 px-3 py-3 pl-10">
+      <div id={detailsId} hidden={!expanded} className="step-details grid gap-3 border-t border-dashed border-border bg-background/40 px-3 py-3 pl-10">
         <div className="overflow-x-auto">
           <Formula latex={step.expression} display />
         </div>
@@ -117,15 +133,35 @@ function TraceStep({ step, expanded, onToggle }: { step: Step; expanded: boolean
   )
 }
 
+function Counter({ shown, total }: { shown: number; total: number }) {
+  const width = String(total).length
+  return (
+    <>
+      {String(shown).padStart(width, '0')}/{total}
+    </>
+  )
+}
+
 export function Trace({
   steps,
   unverifiedStepCount,
+  playback,
 }: {
   steps: readonly Step[]
   unverifiedStepCount: number
+  playback?: TracePlayback
 }) {
   const { t, formatNumber } = useI18n()
-  const [expanded, setExpanded] = useState<ReadonlySet<number>>(() => new Set())
+  const section = useRef<HTMLElement>(null)
+  const playing = playback?.phase === 'playing'
+  const skip = playback?.skip
+  useLayoutEffect(() => {
+    const node = section.current
+    if (!playing || !node || !skip) return
+    node.addEventListener('click', skip)
+    return () => node.removeEventListener('click', skip)
+  }, [playing, skip])
+  const [expanded, setExpanded] = useState<ReadonlySet<number>>(() => new Set(steps.map((_, index) => index)))
   const toggle = (index: number) =>
     setExpanded((current) => {
       const next = new Set(current)
@@ -133,8 +169,10 @@ export function Trace({
       return next
     })
   return (
-    <section aria-labelledby="trace-title" className="mt-8 grid gap-4">
-      <h2 id="trace-title">{t('trace.title')}</h2>
+    <section ref={section} aria-labelledby="trace-title" className="mt-8 grid gap-4" data-playback={playback?.phase ?? 'idle'}>
+      <h2 id="trace-title" tabIndex={-1} className="scroll-mt-4">
+        {t('trace.title')}
+      </h2>
       {unverifiedStepCount > 0 && (
         <p className="flex w-fit items-center gap-2 border border-warning bg-warning-surface px-3 py-2 text-warning-foreground">
           <WarningCircle aria-hidden="true" weight="fill" size={20} />
@@ -154,13 +192,23 @@ export function Trace({
           {t('trace.collapseAll')}
         </Button>
       </div>
+      {playing && (
+        <p aria-hidden="true" className="trace-hint flex flex-wrap items-baseline gap-x-3 font-mono text-sm text-muted-foreground" data-skip-hint>
+          <span className="text-foreground">
+            <span className="trace-caret">▮</span> {t('trace.playing')} <Counter shown={playback.shown} total={steps.length} />
+          </span>
+          <span>{t('trace.skipHint')}</span>
+        </p>
+      )}
       <ol className="border border-border bg-card">
         {steps.map((step, index) => (
           <TraceStep
             key={`${step.step_id}-${index}`}
             step={step}
+            index={index}
             expanded={expanded.has(index)}
             onToggle={() => toggle(index)}
+            arrival={arrivalOf(index, playback)}
           />
         ))}
       </ol>

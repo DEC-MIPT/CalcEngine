@@ -1,7 +1,7 @@
 import { WarningCircle } from '@phosphor-icons/react'
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
-import { unitLabel } from '@/i18n/units'
+import { QuantityText } from './Quantity'
 
 type Quantity = components['schemas']['QuantityValue']
 export type BoundShape = { quantity: string; kind: 'min' | 'max'; value: number; inclusive: boolean }
@@ -14,12 +14,7 @@ const OPERATORS = {
 const SYMBOLS = { le: '≤', lt: '<', ge: '≥', gt: '>' } as const
 
 function Amount({ value, unit }: { value: number; unit: string }) {
-  const { language, formatNumber } = useI18n()
-  return (
-    <>
-      {formatNumber(value)} {unitLabel(unit, language)}
-    </>
-  )
+  return <QuantityText value={value} unit={unit} />
 }
 
 export function BoundNote({ id, bound, unit }: { id: string; bound: BoundShape; unit: string }) {

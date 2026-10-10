@@ -9,9 +9,12 @@ describe('unitLabel', () => {
     ['kN/m3', 'кН/м³'],
     ['deg', '°'],
     ['rad', 'рад'],
-    ['1', 'безразм.'],
   ])('shows %s as %s in Russian', (code, label) => {
     expect(unitLabel(code, 'ru')).toBe(label)
+  })
+
+  it.each(['ru', 'en'] as const)('gives a dimensionless quantity no designation in %s', (language) => {
+    expect(unitLabel('1', language)).toBe('')
   })
 
   it('keeps the code in English and for a code outside the vocabulary', () => {

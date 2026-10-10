@@ -1,6 +1,6 @@
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
-import { unitLabel } from '@/i18n/units'
+import { UnitText } from './Quantity'
 import { Source } from './Source'
 
 type Output = components['schemas']['OutputValue']
@@ -10,7 +10,7 @@ const detailCell = 'px-3 py-3 text-sm max-sm:col-span-full max-sm:p-0'
 const mobileLabel = 'text-sm font-medium sm:hidden'
 
 function OutputRow({ output }: { output: Output }) {
-  const { t, language, formatNumber } = useI18n()
+  const { t, formatNumber } = useI18n()
   const { rounding_rule: rule } = output
   return (
     <tr
@@ -23,7 +23,7 @@ function OutputRow({ output }: { output: Output }) {
       <td className="px-3 py-3 text-right font-mono text-3xl font-semibold whitespace-nowrap max-sm:p-0" data-value>
         {formatNumber(output.value, rule.decimals)}
       </td>
-      <td className="px-3 py-3 text-lg text-muted-foreground max-sm:p-0">{unitLabel(output.unit, language)}</td>
+      <td className="px-3 py-3 text-lg text-muted-foreground max-sm:p-0"><UnitText unit={output.unit} /></td>
       <td className={detailCell} data-rounding>
         <span className={mobileLabel}>{t('outputs.rounding')}: </span>
         {t(`outputs.mode.${rule.mode}`)}; {t('outputs.decimals')}: <span className="font-mono">{rule.decimals}</span>

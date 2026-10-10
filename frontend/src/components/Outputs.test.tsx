@@ -96,6 +96,15 @@ describe('Outputs (6.2)', () => {
     expect(item.getByText('Rounding:').parentElement).toHaveTextContent('to nearest, ties up; decimal places: 1')
   })
 
+  it('shows a dash in the unit column for a dimensionless output, said in words', () => {
+    show([{ ...engineerSet, quantity: 'k_z', unit: '1' }])
+    const row = rowOf('k_z')
+
+    expect(row).not.toHaveTextContent('безразм.')
+    expect(within(row).getByText('—')).toHaveAttribute('aria-hidden', 'true')
+    expect(within(row).getByText('безразмерная')).toHaveClass('sr-only')
+  })
+
   it('has no accessibility violations', async () => {
     const { container } = show(outputs)
 

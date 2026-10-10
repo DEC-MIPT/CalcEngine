@@ -557,3 +557,42 @@ describe('CalculationForm: row states (UX bold pass, zone 3)', () => {
     expect(container.querySelector('.field-row [aria-invalid="true"]')).not.toBeNull()
   })
 })
+
+describe('CalculationForm: a dimensionless input', () => {
+  const dimensionless: CalculationType = {
+    name: 'dimensionless',
+    outputs: [],
+    inputs: [
+      {
+        name: 'k',
+        base_unit: '1',
+        dimension: 'dimensionless',
+        units: ['1'],
+        label: { ru: 'Коэффициент ка' },
+        symbol: 'k',
+        hint: null,
+        whole_values_only: false,
+      },
+      {
+        name: 'r',
+        base_unit: '1',
+        dimension: 'dimensionless',
+        units: ['1', 'mm'],
+        label: { ru: 'Отношение эр' },
+        symbol: 'r',
+        hint: null,
+        whole_values_only: false,
+      },
+    ],
+  } as unknown as CalculationType
+
+  it('shows a dash instead of a designation, in words for assistive technology', () => {
+    open(dimensionless)
+
+    const row = screen.getByLabelText('Коэффициент ка').closest('div')!
+    expect(row).not.toHaveTextContent('безразм.')
+    expect(within(row).getByText('—')).toHaveAttribute('aria-hidden', 'true')
+    expect(within(row).getByText('безразмерная')).toHaveClass('sr-only')
+    expect(screen.getByRole('option', { name: '—' })).toHaveValue('1')
+  })
+})

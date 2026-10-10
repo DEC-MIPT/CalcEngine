@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import type { components } from '@/api/schema'
 import { I18nProvider } from '@/i18n/I18nProvider'
 import type { Language } from '@/i18n/dictionary'
@@ -70,10 +70,12 @@ describe('Trace: every field of a step (6.1a)', () => {
     expect(within(stepOf('p_le_R')).getByText('Проверка')).toBeInTheDocument()
   })
 
-  it('shows a dimensionless result with a word and a step with nothing to substitute without an empty block', () => {
+  it('shows a dimensionless result as a bare number and a step with nothing to substitute without an empty block', () => {
     show(steps)
 
-    expect(within(stepOf('gamma_c1')).getByText(/Результат:/).parentElement).toHaveTextContent('Результат: 2 безразм.')
+    const result = within(stepOf('gamma_c1')).getByText(/Результат:/).parentElement!
+    expect(result.textContent).toBe('Результат: 2')
+    expect(stepOf('gamma_c1').querySelector('[data-summary]')!.textContent).toBe('2')
     expect(within(stepOf('gamma_c1')).queryByText('Подстановка')).not.toBeInTheDocument()
   })
 
@@ -207,44 +209,44 @@ const header = (id: string) => within(stepOf(id)).getByRole('button')
 const details = (id: string) => document.getElementById(header(id).getAttribute('aria-controls')!)!
 
 describe('Trace: expandable steps (6.3)', () => {
-  it('opens with every step collapsed and its header showing the result with its unit', () => {
+  it('opens with every step expanded and its header showing the result with its unit', () => {
     show(steps, 'ru', 0, false)
 
-    expect(screen.getAllByRole('button', { expanded: false })).toHaveLength(steps.length)
+    expect(screen.getAllByRole('button', { expanded: true })).toHaveLength(steps.length)
     for (const step of steps) {
-      expect(details(step.step_id)).not.toBeVisible()
+      expect(details(step.step_id)).toBeVisible()
     }
     expect(header(formula.step_id).querySelector('[data-summary]')).toHaveTextContent('172,5 кПа')
     expect(header(check.step_id).querySelector('[data-summary]')).toHaveTextContent('100 кПа · Проверка выполнена')
   })
 
-  it('expands a step on a click, collapses it on a second click, and points the header at its details', () => {
+  it('collapses a step on a click, expands it on a second click, and points the header at its details', () => {
     show(steps, 'ru', 0, false)
     const button = header(formula.step_id)
+
+    fireEvent.click(button)
+    expect(button).toHaveAttribute('aria-expanded', 'false')
+    expect(details(formula.step_id)).not.toBeVisible()
 
     fireEvent.click(button)
     expect(button).toHaveAttribute('aria-expanded', 'true')
     expect(details(formula.step_id)).toBeVisible()
     expect(within(details(formula.step_id)).getByText(/Результат:/)).toBeInTheDocument()
-
-    fireEvent.click(button)
-    expect(button).toHaveAttribute('aria-expanded', 'false')
-    expect(details(formula.step_id)).not.toBeVisible()
   })
 
-  it('expands and collapses a step with Enter and with Space', async () => {
+  it('collapses and expands a step with Enter and with Space', async () => {
     const user = userEvent.setup()
     show(steps, 'ru', 0, false)
     const button = header(check.step_id)
     button.focus()
 
     await user.keyboard('{Enter}')
-    expect(button).toHaveAttribute('aria-expanded', 'true')
-    expect(details(check.step_id)).toBeVisible()
-
-    await user.keyboard(' ')
     expect(button).toHaveAttribute('aria-expanded', 'false')
     expect(details(check.step_id)).not.toBeVisible()
+
+    await user.keyboard(' ')
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+    expect(details(check.step_id)).toBeVisible()
   })
 
   it('reaches the step headers with the Tab key', async () => {
@@ -258,14 +260,21 @@ describe('Trace: expandable steps (6.3)', () => {
     expect(header(steps[0].step_id)).toHaveFocus()
   })
 
-  it('expands every step and collapses every step with the two buttons', () => {
+  it('collapses every step and expands every step with the two buttons', () => {
     show(steps, 'ru', 0, false)
-
-    fireEvent.click(screen.getByRole('button', { name: 'Развернуть все шаги' }))
-    expect(screen.getAllByRole('button', { expanded: true })).toHaveLength(steps.length)
 
     fireEvent.click(screen.getByRole('button', { name: 'Свернуть все шаги' }))
     expect(screen.getAllByRole('button', { expanded: false })).toHaveLength(steps.length)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Развернуть все шаги' }))
+    expect(screen.getAllByRole('button', { expanded: true })).toHaveLength(steps.length)
+  })
+
+  it('gives each step an anchor by its position', () => {
+    show(steps, 'ru', 0, false)
+
+    expect(document.getElementById('trace-step-0')).toHaveAttribute('data-step', steps[0].step_id)
+    expect(document.getElementById(`trace-step-${steps.length - 1}`)).toHaveAttribute('data-step', check.step_id)
   })
 
   it('keeps the other steps as they are when one is toggled after expanding all', () => {
@@ -286,6 +295,87 @@ describe('Trace: expandable steps (6.3)', () => {
 
   it('has no accessibility violations collapsed', async () => {
     const { container } = show(steps, 'ru', 0, false)
+    fireEvent.click(screen.getByRole('button', { name: 'Свернуть все шаги' }))
+
+    await expectNoA11yViolations(container)
+  })
+})
+
+describe('Trace: step-by-step playback', () => {
+  function play(phase: 'playing' | 'ended' | 'skipped', shown: number, skip = vi.fn()) {
+    render(
+      <I18nProvider initialLanguage="ru">
+        <Trace steps={steps} unverifiedStepCount={0} playback={{ phase, shown, skip }} />
+      </I18nProvider>,
+    )
+    return skip
+  }
+
+  const arrivals = () => [...document.querySelectorAll('[data-step]')].map((step) => step.getAttribute('data-arrival'))
+
+  it('keeps the steps not yet shown inert and out of the tab order', () => {
+    play('playing', 2)
+
+    expect(arrivals()).toEqual(['reveal', 'reveal', ...Array(steps.length - 2).fill('pending')])
+    const pending = document.querySelectorAll<HTMLElement>('[data-arrival="pending"]')
+    for (const step of pending) {
+      expect(step).toHaveAttribute('inert')
+      expect(step.className).toContain('step-pending')
+    }
+    expect(stepOf(steps[0].step_id)).not.toHaveAttribute('inert')
+    expect(stepOf(steps[0].step_id).className).toContain('step-reveal')
+  })
+
+  it('shows the progress and the way to skip while playing', () => {
+    play('playing', 3)
+
+    const hint = document.querySelector('[data-skip-hint]')!
+    expect(hint).toHaveAttribute('aria-hidden', 'true')
+    expect(hint).toHaveTextContent(`трасса 3/${steps.length}`)
+    expect(hint).toHaveTextContent('пробел или щелчок — показать всё')
+  })
+
+  it('pads the counter to the width of the total', () => {
+    render(
+      <I18nProvider initialLanguage="ru">
+        <Trace steps={[...steps, ...steps]} unverifiedStepCount={0} playback={{ phase: 'playing', shown: 3, skip: vi.fn() }} />
+      </I18nProvider>,
+    )
+
+    expect(document.querySelector('[data-skip-hint]')).toHaveTextContent(`03/${steps.length * 2}`)
+  })
+
+  it('skips on a click anywhere in the trace', () => {
+    const skip = play('playing', 1)
+
+    fireEvent.click(screen.getByRole('heading', { name: 'Ход расчёта' }))
+
+    expect(skip).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not listen to clicks once the playback is over', () => {
+    const skip = play('ended', steps.length)
+
+    fireEvent.click(screen.getByRole('heading', { name: 'Ход расчёта' }))
+
+    expect(skip).not.toHaveBeenCalled()
+    expect(document.querySelector('[data-skip-hint]')).toBeNull()
+    expect(arrivals().every((arrival) => arrival === 'reveal')).toBe(true)
+  })
+
+  it('shows every step without the reveal after a skip', () => {
+    play('skipped', steps.length)
+
+    expect(arrivals().every((arrival) => arrival === 'shown')).toBe(true)
+    expect(document.querySelector('.step-reveal')).toBeNull()
+  })
+
+  it('reports no accessibility violation while playing', async () => {
+    const { container } = render(
+      <I18nProvider initialLanguage="ru">
+        <Trace steps={steps} unverifiedStepCount={0} playback={{ phase: 'playing', shown: 2, skip: vi.fn() }} />
+      </I18nProvider>,
+    )
 
     await expectNoA11yViolations(container)
   })

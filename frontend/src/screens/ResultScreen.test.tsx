@@ -209,11 +209,13 @@ describe('a value outside the range is sent and decided by the backend (5.4)', (
 
 
 describe('verdict first (critique of the result screen)', () => {
-  it('puts the verdict stamp right under the title and no result id on the screen', async () => {
+  it('puts the trace ruler and then the verdict stamp right under the title and no result id on the screen', async () => {
     const { container } = open(`/calculations/${PASS_ID}`)
     const stamp = await screen.findByRole('region', { name: 'Проверка выполнена' })
 
-    expect(screen.getByRole('heading', { level: 1 }).nextElementSibling).toBe(stamp)
+    const ruler = screen.getByRole('heading', { level: 1 }).nextElementSibling!
+    expect(ruler).toHaveAttribute('data-ruler', String(passEnvelope.trace.length))
+    expect(ruler.nextElementSibling).toBe(stamp)
     expect(container).not.toHaveTextContent(PASS_ID)
     expect(screen.getAllByRole('link', { name: 'Запросить отчёт' })).toHaveLength(1)
   })

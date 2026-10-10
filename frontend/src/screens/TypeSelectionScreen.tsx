@@ -68,11 +68,15 @@ function TypeRow({ type }: { type: CalculationType }) {
           aria-hidden="true"
           className="mt-1 flex flex-wrap gap-x-3 text-sm text-muted-foreground group-hover:text-primary-foreground group-has-[a:focus-visible]:text-primary-foreground"
         >
-          {type.outputs.map((output) => (
-            <span key={output.name} className="inline-flex items-baseline">
-              <Formula latex={output.symbol} />, {unitLabel(output.base_unit, language)}
-            </span>
-          ))}
+          {type.outputs.map((output) => {
+            const unit = unitLabel(output.base_unit, language)
+            return (
+              <span key={output.name} className="inline-flex items-baseline">
+                <Formula latex={output.symbol} />
+                {unit && <>, {unit}</>}
+              </span>
+            )
+          })}
         </span>
       </td>
       <td className="hidden px-3 py-4 text-right font-mono text-lg sm:table-cell sm:px-4 sm:py-5 group-hover:text-primary-foreground group-has-[a:focus-visible]:text-primary-foreground">

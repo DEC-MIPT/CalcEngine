@@ -1,7 +1,6 @@
 import type { Language } from './dictionary'
 
 const designations: Readonly<Record<string, string>> = {
-  '1': 'безразм.',
   m: 'м',
   cm: 'см',
   mm: 'мм',
@@ -18,6 +17,9 @@ const designations: Readonly<Record<string, string>> = {
   deg: '°',
 }
 
+export const DIMENSIONLESS = '1'
+
 export function unitLabel(code: string, language: Language): string {
+  if (code === DIMENSIONLESS) return ''
   return language === 'ru' ? (designations[code] ?? code) : code
 }

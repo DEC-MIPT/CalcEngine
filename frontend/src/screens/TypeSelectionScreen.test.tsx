@@ -35,6 +35,18 @@ describe('TypeSelectionScreen', () => {
     await expectNoA11yViolations(container)
   })
 
+  it('lists a dimensionless output by its symbol alone, with no trailing comma', async () => {
+    const ratio = { ...pilot, name: 'ratio_type', outputs: [{ ...pilot.outputs[0], symbol: 'k_z', base_unit: '1' }] }
+    server.use(http.get('*/calculation-types', () => HttpResponse.json([pilot, ratio])))
+    open()
+
+    const links = await within(await screen.findByRole('table')).findAllByRole('link')
+    const row = links.find((link) => link.getAttribute('href')!.includes('ratio_type'))!.closest('tr')!
+    const summary = row.querySelector('span[aria-hidden="true"]')!
+    expect(summary.textContent).not.toMatch(/,\s*$/)
+    expect(summary).not.toHaveTextContent('безразм.')
+  })
+
   it('opens the form of the chosen type with its name in the address', async () => {
     server.use(http.get('*/calculation-types', () => HttpResponse.json([pilot, second])))
     const router = createMemoryRouter(routes, { initialEntries: ['/'] })
