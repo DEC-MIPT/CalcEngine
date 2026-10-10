@@ -106,9 +106,11 @@ Akim's zone), created before task 2.1.
   blocker or major; m1, m2, n1, n4, n5 fixed in `95512e2`, 753 passed, coverage 100%)
 - [ ] 3.3 Merge the feature into `develop` (backend, with Akim's word); verify: `develop`
   passes `backend/check.sh`
-- [ ] 3.4 (spec) Tell the frontend: if `npm run gen:api` on `feature/frontend-app/frontend`
+- [x] 3.4 (spec) Tell the frontend: if `npm run gen:api` on `feature/frontend-app/frontend`
   shows a difference after the merge, regenerate `frontend/src/api/schema.d.ts` there;
-  verify: the note is in `frontend-app` `tasks.md`, "Dependencies"
+  verify: the note is in `frontend-app` `tasks.md`, "Dependencies" (done 2026-10-10, before
+  task 3.3: the difference is certain, since `gen-api.mjs` builds the schema from the backend
+  of the same checkout; the note also covers UTF-16 counting of an HTML `maxLength`)
 - [ ] 3.5 (spec) `spec-keeper` syncs the `report-generator` delta into `openspec/specs/` and
   archives this change; verify: `openspec validate --all --strict` passes after the archive
 

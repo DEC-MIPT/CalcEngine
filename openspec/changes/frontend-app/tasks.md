@@ -330,3 +330,13 @@ P0-P2 defects are not in this section. Each task is one commit and is shown to A
   Akim's word.
 - `user-accounts-auth` (planned, Akim) and a normative catalog interface (a future change): not
   dependencies; both are Non-goals here.
+- `report-title-block-limits` (Akim, report generator; its task 3.4): its feature
+  `feature/report-title-limits/backend` adds `maxLength` to five fields of the report request
+  (designation 123, document name 150, documentation kind 7, organization 130, surname 11).
+  Once it is merged into `develop` and `develop` is merged into this feature's branch,
+  `npm run gen:api:check` in `frontend/check.sh` fails until `npm run gen:api` regenerates
+  `frontend/src/api/schema.d.ts`; commit the regenerated file with that merge. No task of this
+  change reads `maxLength`: the report form shows the server's `422` next to its field (task
+  7.2). A later task that does should note that the server counts Unicode code points and an HTML
+  `maxLength` counts UTF-16 code units, so the browser limits characters outside the Basic
+  Multilingual Plane (emoji) more strictly than the server.
