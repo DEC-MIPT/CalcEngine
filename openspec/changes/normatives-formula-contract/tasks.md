@@ -1,6 +1,6 @@
 # Tasks
 
-Branch: `feature/normatives-pipeline/data` (Egor; all pipeline changes share this branch).
+Branch: `feature/normative-pipeline/data` (Egor; all pipeline changes share this branch).
 
 ## 1. Contract + config (Egor)
 
@@ -9,7 +9,7 @@ Branch: `feature/normatives-pipeline/data` (Egor; all pipeline changes share thi
 - [x] 1.3 [Egor] `search.query(query) -> dict` returning the payload; `--json` CLI mode
 - [x] 1.4 [Egor] `build_formula_payload` builds the five fixed `NormRef` fields (`document`, `edition`, `clause`, `status`, `provenance`) unconditionally; `norm_ref_keys` selects extra payload fields only (answer to finding 13)
 - [x] 1.5 [Egor] `coefficient` gains `document`/`edition`/`clause`/`status`/`provenance` and a `NormRef` builder per value; start with table 5.5 of СП 22.13330.2016 (answer to finding 11)
-- [x] 1.6 [Egor] Store `status`/`provenance` per formula and per coefficient; `formulas.toml` entries are `human-verified`, OCR output is `machine-extracted`/`unverified` (answer to finding 12)
+- [x] 1.6 [Egor] Store `status`/`provenance` per formula and per coefficient; every formula and coefficient is stored `unverified` / `machine-extracted`; WP3 raises a status (M1 of WP9 normative-catalog review)
 - [x] 1.7 [Egor] A formula or coefficient with no `document` fails ingestion; no payload is built from an empty string (answer to finding 15)
 
 ## 2. Symbol normalization (Egor)

@@ -134,3 +134,57 @@ gate for calculation changes» (его дельта `specs/development-process/s
 
 Согласен или что бы ты поменял? Правки вношу я одним коммитом в `develop` после твоего
 ответа, а архивация WP4 синхронизирует дельту.
+
+## Ответы (Эгор, 2026-10-11)
+
+### 1. Одна ветка для трёх изменений
+
+Вариант (а). `normatives-formula-contract` владеет фичей `normative-pipeline` и её
+веткой; `normatives-parser` и `normatives-collector` ссылаются на неё в Dependencies.
+Изменений правил не требуется.
+
+Опечатка в `tasks.md` исправлена (тот же коммит): `feature/normatives-pipeline/data` →
+`feature/normative-pipeline/data`.
+
+### 2. Задача 1.6 `normatives-formula-contract`
+
+Согласен. Задача 1.6 переформулирована в `tasks.md` (тот же коммит): каждая формула и
+коэффициент хранятся `unverified` / `machine-extracted`; статус поднимает WP3. M1
+сохраняется при слиянии `feature/normative-pipeline/data` после `fix/normative-catalog/data`.
+
+### 3. Покрытие в вердикте `tester`
+
+Согласен по обоим пунктам. Пароль заменён плейсхолдером в `tester-verdict.md` (тот же
+коммит). Полное покрытие ветвей всего пакета `normatives_pipeline` (включая функции
+каталога и тесты с базой) будет измерено и добавлено в вердикт после слияния
+`fix/normative-catalog/data` и чистого прогона DB-тестов.
+
+### 4. Корневые файлы на ветке пайплайна
+
+`.python-version` возвращён к `3.12.3` на `feature/normative-pipeline/data` (моя версия
+зафиксирована в неотслеживаемом `ml/.python-version`). `python-design-patterns` будет
+записан в изменении OpenSpec `record-installed-skills-egor`.
+
+### 5. `.claude/settings.json` в AGENTS.md, раздел 8
+
+Согласен с твоей предложенной формулировкой.
+
+### 6. `CLAUDE.local.md`
+
+Создан локально (неотслеживаемый). Логику старта сессии принимаю.
+
+### 7. Сводный текст СП 22.13330.2016
+
+Пришли в Telegram. Файл кладу в `docs/normative-base/` (неотслеживаемый). Переингестирую
+в день получения; `document.edition` обновлю с перечнем изменений и датой, статус
+остаётся `unverified` до WP3.
+
+### 8. Задача 8.1 WP9
+
+Согласен со всеми тремя заметками как написаны.
+
+### 9. Задача 4.1 WP4: correctness gate
+
+Согласен. Пайплайн хранит нормативы и ничего не вычисляет — correctness gate на мою зону
+не распространяется. Предложенные формулировки для `tester.md`, навыка `test-process` и
+дельты `development-process` принимаю как написаны.
