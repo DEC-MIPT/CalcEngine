@@ -36,7 +36,7 @@ Branch: `feature/normative-pipeline/data` (Egor; all pipeline changes share this
 - [x] 6.1 [Egor] `openspec validate normatives-formula-contract --strict`
 - [x] 6.2 [Agent: spec-reviewer] review; resolve blockers
 - [x] 6.3 [Agent: tester] GO/NO-GO
-- [ ] 6.4 [Egor] merge to `develop`
+- [x] 6.4 [Egor] merge to `develop`
 - [ ] 6.5 [Agent: spec-keeper] sync and archive
 
 ## Dependencies
