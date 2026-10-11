@@ -16,7 +16,7 @@ warn_unused_ignores = true
 testpaths = ["tests"]
 pythonpath = ["."]
 markers = [
-    "postgres: needs DEC_TEST_APP_DATABASE_URL (a hand-made dec_app) or DEC_TEST_NORMATIVES_DATABASE_URL (a hand-made *_test database for the catalog contract) on dec-postgres (skipped otherwise)",
+    "postgres: needs DEC_TEST_APP_DATABASE_URL (a hand-made dec_app) or DEC_TEST_NORMATIVES_DATABASE_URL (a hand-made *_test database for the catalog contract) or DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL (Egor's ingested catalog as dec_normatives_reader, read only) on dec-postgres (skipped otherwise)",
 ]
 
 [tool.coverage.run]
