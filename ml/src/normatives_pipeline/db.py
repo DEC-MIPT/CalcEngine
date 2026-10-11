@@ -533,13 +533,15 @@ def set_formula_catalog(
     result_symbol: str,
     tree: Any,
     units: Any,
+    commit: bool = True,
 ) -> None:
     with conn.cursor() as cur:
         cur.execute(
             "UPDATE formula SET result_symbol = %s, tree = %s, units = %s WHERE id = %s",
             (result_symbol, Json(tree), Json(units), formula_id),
         )
-    conn.commit()
+    if commit:
+        conn.commit()
 
 
 def replace_catalog_formula(
@@ -552,6 +554,7 @@ def replace_catalog_formula(
     result_symbol: str,
     tree: Any,
     units: Any,
+    commit: bool = True,
 ) -> None:
     with conn.cursor() as cur:
         cur.execute(
@@ -570,10 +573,11 @@ def replace_catalog_formula(
                 Json(tree), Json(units),
             ),
         )
-    conn.commit()
+    if commit:
+        conn.commit()
 
 
-def delete_catalog_rows(conn: Any, calculation_type: str) -> None:
+def delete_catalog_rows(conn: Any, calculation_type: str, commit: bool = True) -> None:
     with conn.cursor() as cur:
         for table in (
             "catalog_binding",
@@ -585,10 +589,13 @@ def delete_catalog_rows(conn: Any, calculation_type: str) -> None:
             cur.execute(
                 f"DELETE FROM {table} WHERE calculation_type = %s", (calculation_type,)
             )
-    conn.commit()
+    if commit:
+        conn.commit()
 
 
-def insert_catalog_bindings(conn: Any, doc_id: int, rows: list[tuple]) -> None:
+def insert_catalog_bindings(
+    conn: Any, doc_id: int, rows: list[tuple], commit: bool = True
+) -> None:
     with conn.cursor() as cur:
         execute_values(
             cur,
@@ -610,10 +617,13 @@ def insert_catalog_bindings(conn: Any, doc_id: int, rows: list[tuple]) -> None:
                 ) in rows
             ],
         )
-    conn.commit()
+    if commit:
+        conn.commit()
 
 
-def insert_table_values(conn: Any, doc_id: int, rows: list[tuple]) -> None:
+def insert_table_values(
+    conn: Any, doc_id: int, rows: list[tuple], commit: bool = True
+) -> None:
     with conn.cursor() as cur:
         execute_values(
             cur,
@@ -625,10 +635,13 @@ def insert_table_values(conn: Any, doc_id: int, rows: list[tuple]) -> None:
             """,
             [(doc_id, *row, "unverified", "machine-extracted") for row in rows],
         )
-    conn.commit()
+    if commit:
+        conn.commit()
 
 
-def insert_threshold_values(conn: Any, doc_id: int, rows: list[tuple]) -> None:
+def insert_threshold_values(
+    conn: Any, doc_id: int, rows: list[tuple], commit: bool = True
+) -> None:
     with conn.cursor() as cur:
         execute_values(
             cur,
@@ -640,10 +653,13 @@ def insert_threshold_values(conn: Any, doc_id: int, rows: list[tuple]) -> None:
             """,
             [(doc_id, *row, "unverified", "machine-extracted") for row in rows],
         )
-    conn.commit()
+    if commit:
+        conn.commit()
 
 
-def insert_check_refs(conn: Any, doc_id: int, rows: list[tuple]) -> None:
+def insert_check_refs(
+    conn: Any, doc_id: int, rows: list[tuple], commit: bool = True
+) -> None:
     with conn.cursor() as cur:
         execute_values(
             cur,
@@ -654,10 +670,13 @@ def insert_check_refs(conn: Any, doc_id: int, rows: list[tuple]) -> None:
             """,
             [(doc_id, *row, "unverified", "machine-extracted") for row in rows],
         )
-    conn.commit()
+    if commit:
+        conn.commit()
 
 
-def insert_method_bounds(conn: Any, doc_id: int, rows: list[tuple]) -> None:
+def insert_method_bounds(
+    conn: Any, doc_id: int, rows: list[tuple], commit: bool = True
+) -> None:
     with conn.cursor() as cur:
         execute_values(
             cur,
@@ -669,4 +688,5 @@ def insert_method_bounds(conn: Any, doc_id: int, rows: list[tuple]) -> None:
             """,
             [(doc_id, *row, "unverified", "machine-extracted") for row in rows],
         )
-    conn.commit()
+    if commit:
+        conn.commit()

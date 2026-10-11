@@ -155,14 +155,19 @@ def test_bind_registry_formula_with_unknown_unit_returns_false(monkeypatch) -> N
 
 
 def test_sync_skips_r_binding_when_formula_unconvertible(monkeypatch) -> None:
+    from types import SimpleNamespace
+
+    fake_conn = SimpleNamespace(commit=lambda: None, rollback=lambda: None)
     monkeypatch.setattr(pilot_catalog.db, "fetch_document_id", lambda *a, **k: 1)
     monkeypatch.setattr(pilot_catalog.db, "delete_catalog_rows", lambda *a, **k: None)
     monkeypatch.setattr(pilot_catalog.db, "fetch_coefficients", lambda *a, **k: [])
     monkeypatch.setattr(
-        pilot_catalog, "_write_synthetic_formulas", lambda conn, doc, manifest: set()
+        pilot_catalog, "_write_synthetic_formulas",
+        lambda conn, doc, manifest, commit=True: set(),
     )
     monkeypatch.setattr(
-        pilot_catalog, "_bind_registry_formula", lambda conn, doc, number: False
+        pilot_catalog, "_bind_registry_formula",
+        lambda conn, doc, number, commit=True: False,
     )
     for name in (
         "insert_table_values", "insert_threshold_values", "insert_check_refs",
@@ -172,9 +177,9 @@ def test_sync_skips_r_binding_when_formula_unconvertible(monkeypatch) -> None:
     captured: dict = {}
     monkeypatch.setattr(
         pilot_catalog.db, "insert_catalog_bindings",
-        lambda conn, doc, rows: captured.update(rows=rows),
+        lambda conn, doc, rows, commit=True: captured.update(rows=rows),
     )
-    assert pilot_catalog.sync_pilot_catalog(object()) is True
+    assert pilot_catalog.sync_pilot_catalog(fake_conn) is True
     assert all(row[1] != "r" for row in captured["rows"])
 
 
@@ -301,7 +306,7 @@ def test_bind_registry_formula_with_missing_notation_symbol_returns_false(monkey
         # только x есть в notation; y — символ дерева без записи
         lambda *_: [{"symbol": "x", "unit": "м", "kind": "output"}],
     )
-    monkeypatch.setattr(pilot_catalog.db, "set_formula_catalog", lambda *_: called.append(1))
+    monkeypatch.setattr(pilot_catalog.db, "set_formula_catalog", lambda *_, **k: called.append(1))
     assert pilot_catalog._bind_registry_formula(object(), 1, "9.9") is False
     assert not called
 
@@ -317,7 +322,7 @@ def test_bind_registry_formula_with_all_symbols_present_calls_set_formula_catalo
         pilot_catalog.db, "fetch_notation",
         lambda *_: [{"symbol": "x", "unit": "м", "kind": "output"}],
     )
-    monkeypatch.setattr(pilot_catalog.db, "set_formula_catalog", lambda *_: called.append(1))
+    monkeypatch.setattr(pilot_catalog.db, "set_formula_catalog", lambda *_, **k: called.append(1))
     assert pilot_catalog._bind_registry_formula(object(), 1, "9.9") is True
     assert called
 

@@ -200,7 +200,9 @@ def binding_rows(available_formulas: set[str]) -> list[tuple]:
     return rows
 
 
-def _write_synthetic_formulas(conn: Any, doc_id: int, manifest: dict) -> set[str]:
+def _write_synthetic_formulas(
+    conn: Any, doc_id: int, manifest: dict, commit: bool = True
+) -> set[str]:
     written: set[str] = set()
     for spec in manifest.get("formula", []):
         tree = expression_tree.build_tree(
@@ -217,12 +219,15 @@ def _write_synthetic_formulas(conn: Any, doc_id: int, manifest: dict) -> set[str
             spec["result_symbol"],
             tree,
             spec["units"],
+            commit=commit,
         )
         written.add(spec["number"])
     return written
 
 
-def _bind_registry_formula(conn: Any, doc_id: int, number: str) -> bool:
+def _bind_registry_formula(
+    conn: Any, doc_id: int, number: str, commit: bool = True
+) -> bool:
     """Строит дерево и единицы формулы реестра; не переводимая формула не привязывается."""
     row = db.fetch_formula_by_number(conn, doc_id, number)
     if row is None or not row["expression"]:
@@ -249,7 +254,7 @@ def _bind_registry_formula(conn: Any, doc_id: int, number: str) -> bool:
         }
     except PilotCatalogError:
         return False
-    db.set_formula_catalog(conn, row["id"], result_symbol, tree, units)
+    db.set_formula_catalog(conn, row["id"], result_symbol, tree, units, commit=commit)
     return True
 
 
@@ -262,7 +267,7 @@ def notation_result_symbol(notation: list[dict]) -> str | None:
 
 
 def sync_pilot_catalog(conn: Any) -> bool:
-    """Заполняет каталог данными пилота идемпотентно.
+    """Заполняет каталог данными пилота идемпотентно в одной транзакции.
 
     Returns:
         ``True``, если документ найден и данные записаны; иначе ``False``.
@@ -272,17 +277,21 @@ def sync_pilot_catalog(conn: Any) -> bool:
         return False
 
     manifest = config.pilot_manifest()
-
-    db.delete_catalog_rows(conn, CALCULATION_TYPE)
-    available = _write_synthetic_formulas(conn, doc_id, manifest)
-    if "5.7" not in available and _bind_registry_formula(conn, doc_id, "5.7"):
-        available.add("5.7")
-
-    db.insert_catalog_bindings(conn, doc_id, binding_rows(available))
-
-    cells = db.fetch_coefficients(conn, doc_id, TABLE_M)
-    db.insert_table_values(conn, doc_id, _constants_rows(manifest) + m_table_rows(cells))
-    db.insert_threshold_values(conn, doc_id, _threshold_rows(manifest))
-    db.insert_check_refs(conn, doc_id, _check_rows())
-    db.insert_method_bounds(conn, doc_id, _bound_rows(cells))
+    try:
+        db.delete_catalog_rows(conn, CALCULATION_TYPE, commit=False)
+        available = _write_synthetic_formulas(conn, doc_id, manifest, commit=False)
+        if "5.7" not in available and _bind_registry_formula(conn, doc_id, "5.7", commit=False):
+            available.add("5.7")
+        db.insert_catalog_bindings(conn, doc_id, binding_rows(available), commit=False)
+        cells = db.fetch_coefficients(conn, doc_id, TABLE_M)
+        db.insert_table_values(
+            conn, doc_id, _constants_rows(manifest) + m_table_rows(cells), commit=False
+        )
+        db.insert_threshold_values(conn, doc_id, _threshold_rows(manifest), commit=False)
+        db.insert_check_refs(conn, doc_id, _check_rows(), commit=False)
+        db.insert_method_bounds(conn, doc_id, _bound_rows(cells), commit=False)
+    except Exception:
+        conn.rollback()
+        raise
+    conn.commit()
     return True
