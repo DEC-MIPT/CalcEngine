@@ -35,6 +35,9 @@ extend-exclude = ["research"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "postgres: needs DEC_TEST_DATABASE_URL pointing at a _test database (skipped otherwise)",
+]
 
 [tool.coverage.run]
 source = ["src/normatives_pipeline"]

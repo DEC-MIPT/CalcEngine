@@ -154,6 +154,13 @@ carries the engine:
    | `DatabaseUnavailableError` | 503 | `database_unavailable` |
    | `ParameterValidationError`, `ExpressionError`, `CalculationError`, `AlreadyRegisteredError`, any other | 500 | `internal_error` |
 
+   Note (2026-10-05, `normative-catalog-backend` task 8.1): that change adds the row
+   `CatalogUnavailableError` | 503 | `catalog_unavailable` for its two catalog endpoints
+   (its `design.md` decisions 4 and 8), and `invalid_input` also covers a selecting input
+   inside the method's range that matches no row of the catalog's table, located at
+   `["body", "inputs", "<heading symbol>"]` with a fixed message (its decision 6). An
+   input outside the range stays a stored refusal (`201`).
+
    - `fields` is present in every `422` body. For `invalid_input`, the location of each
      offending input is `["body", "inputs", "<input name>"]`, the same prefix pydantic
      uses for the body. `CalculationRequest.check_against` changes to collect every

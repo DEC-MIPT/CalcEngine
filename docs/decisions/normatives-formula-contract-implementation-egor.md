@@ -7,6 +7,9 @@
 - Purpose: tell Akim's agents exactly what is stored, how it is built, and how to check
   it, so the WP9 backend (`normative-catalog-backend`) can consume it without guessing.
 
+Russian version: `normatives-formula-contract-implementation-egor-rus.md` (added by Akim,
+2026-10-05).
+
 ## 1. What changed (tasks 1.4–1.7)
 
 1.4 `build_formula_payload` builds the five fixed `NormRef` fields (`document`, `edition`,
@@ -67,12 +70,12 @@ builders; Akim's backend reads the `catalog_read` views that Egor creates in WP9
 
 ## 4. How to check it
 
-Tests (need the venv + Postgres on `5433`):
+Tests (need the venv + Postgres on `5433`; `DEC_DATABASE_URL` is the owner's URL of the
+database `dec`, kept out of the command; edited by Akim 2026-10-05, WP9 review m6):
 
 ```bash
 cd ml
-DEC_DATABASE_URL=postgresql://dec:dec@localhost:5433/dec \
-  ../.venv/bin/python -m pytest tests/ -q
+DEC_DATABASE_URL="$DEC_DATABASE_URL" ../.venv/bin/python -m pytest tests/ -q
 ```
 
 Direct SQL (table 5.5 of СП 22.13330.2016):
@@ -145,3 +148,14 @@ What this means for you, concretely:
   (`row_index` 0/1 of table 5.5) are stored as ordinary cells; separating them is WP9 2.4.
 - `expression` is still empty for OCR-extracted formulas (design decision 4); only
   `formulas.toml` entries carry an `expression`.
+
+## Answers (Akim, 2026-10-05)
+
+### 6a. Cyrillic symbol ids
+
+Acknowledged. The backend holds no mapping to symbol ids of its own: it reads ids only from
+the catalog, and the pilot's ids are all Latin (`formulas.toml`), so nothing changes on my
+side now. Until `parser.cyrillic --apply` runs on the live `dec`, old notation rows and new
+expressions can disagree on ids; with M2 of the WP9 review fixed
+(`normative-catalog-backend-readiness.md`), such a formula is refused instead of getting
+unit `1`.

@@ -67,10 +67,101 @@ See `proposal.md` (Non-goals).
 10. **Deviation is reported per quantity.** No aggregate percentage is computed, because
     quantities have different units and tolerances.
 11. **Property-test tool and runner** are decided in `bootstrap-dev-environment`. No
-    command is invented here.
+    command is invented here. (Superseded on 2026-10-05 by decision 16:
+    `bootstrap-dev-environment` was archived on 2026-10-04 without deciding them.)
 12. **Development-process delta** adds a requirement instead of rewriting "Test gate with
     >= 95% branch coverage", because the file is shared with Egor and another active
     change (`team-roles-update`) modifies a neighbouring requirement.
+
+13. **Code location** (added 2026-10-05, Akim, before tasks 2.1-2.4). The reference
+    suite runner and its models live in a new package `backend/app/verification/`, not
+    in `backend/tests/`: the runner is a tool of the GO gate with its own logic, so it
+    is covered by the 95% branch-coverage gate and tested itself. In the `import-linter`
+    layers contract of `backend-layered-architecture` decision 2 it is a top layer beside
+    `api | worker` (`"api | worker | verification"`), and a forbidden contract lets it
+    import from the application only `engine`, `schemas` and `core`; nothing imports
+    it.
+    - Alternative: the runner in `backend/tests/`. Rejected: it would be outside the
+      coverage gate, and untested code would decide GO.
+14. **Reference example model and the parameter source** (added 2026-10-05, Akim). A
+    reference example is a pydantic model with the fields of the requirement "Reference
+    examples"; a missing or empty field makes the example invalid (task 2.2). The runner
+    does not decide where the resolved parameters of an example come from: it receives a
+    function `resolve(example) -> (parameters, method_range)`. The framework is tested
+    with a synthetic calculation type and synthetic parameters. For the pilot
+    `foundations_shallow_r` the choice between the catalog, the example's own values, or
+    a mix (formulas from the catalog, coefficients from the example) stays open and is
+    decided before the first real example runs, together with the file format and the
+    place of the real examples.
+    - Why: the choice depends on the fixes of the catalog data (WP9 review, B1 and M1)
+      and on the pilot's scope (the soil row of `γc1`, `φII` in the cards), neither of
+      which the framework needs.
+15. **Comparison and the suite report** (added 2026-10-05, Akim). Each computed output
+    is converted to the unit of its expected value with `engine.boundary.convert`
+    before the tolerance applies, so an `absolute` tolerance stays in the unit the
+    engineer wrote it in. A refused result, or an expected output the result does not
+    hold, fails that example. The suite report holds the verdict (GO, NO-GO, or
+    "invalid suite" with its reasons) and, for every example and quantity, the computed
+    value, the expected value, the `tolerance` and its kind (scenario "A quantity
+    outside its tolerance"). The rule of at least 3 examples (decision 1) is checked
+    against the list of calculation types the suite is given (task 2.4).
+
+16. **Property-test tool and number of cases** (added 2026-10-05, Akim, before tasks
+    2.8-2.10; replaces decision 11). The tool is Hypothesis, a development dependency in
+    `backend/requirements-dev.txt`, so the generating tests live in `backend/tests/` and
+    `backend/app/verification/` never imports it. Each invariant runs on 100 generated
+    cases per calculation type (`max_examples=100`, the tool's default), without the
+    tool's per-case deadline, since the latency requirement is a separate test (task
+    3.7). The seed is recorded in the test report: Hypothesis itself prints only the
+    falsifying input, not the seed (checked 2026-10-05 with Hypothesis 6.168), so
+    `backend/tests/conftest.py` picks a seed when `--hypothesis-seed` is not given, hands
+    it to Hypothesis, and prints it in the pytest report header (`hypothesis seed: <n>`);
+    a run started with `--hypothesis-seed=<n>` repeats it. The example database is off
+    (`database=None`), so a run does not depend on earlier local runs.
+    - Alternative: a generator of our own on `random.Random(seed)`. Rejected: it would
+      add code of our own for generation and lose the shrinking of a failing input.
+17. **The two shared invariants and the valid range** (added 2026-10-05, Akim). For a
+    calculation type, `backend/app/verification/` holds the list of its invariants
+    (identifier, statement, quantities), the valid range of each input the generator may
+    use (a lower and an upper bound in a unit of the input, and whether only whole
+    values may be drawn, as for an input that selects a table row by whole degrees;
+    added 2026-10-06), and a check function per
+    shared invariant; the generating test draws inputs inside that range.
+    - Determinism (requirement "Pure calculation function"): two calls of the pure
+      function with the same inputs and resolved parameters give equal calculation
+      results.
+    - Unit-change consistency (requirement "Explicit units at the boundary"): an input
+      given in a unit other than its base unit gives the same calculation result, field
+      for field and without a tolerance, as that input converted to the base unit with
+      the engine's own `engine.boundary.convert` and given in the base unit. Both sides
+      then reach the formulas with the same floating-point values, so the comparison is
+      exact, and a difference can only mean that the unit acts somewhere other than the
+      boundary.
+    - The valid range is data of the type, like its reference examples: for a synthetic
+      type the tests declare it; for the pilot it is filled by the engineer with the
+      invariants specific to the type (task 2.11). It is not a norm value and not the
+      method's range of application, though it should lie inside it.
+
+18. **Regression corpus: comparison and declared differences** (added 2026-10-05,
+    Akim, with tasks 3.2-3.3).
+    - A corpus entry is frozen from the result of the pure function: entry identifier,
+      calculation type, inputs with their units, the envelope's `outputs` (quantity,
+      value, unit) and `verdict`, its `input_hash` and its `engine_version`.
+    - Recomputing an entry compares only the `outputs` (quantity, value and unit,
+      exactly) and the `verdict`. A changed `input_hash` with the same outputs and
+      verdict is not a difference. An output that disappeared or appeared is a
+      difference to or from nothing.
+    - The section "Declared result differences" of a change's `proposal.md` (decision 7)
+      is a table with the columns `Entry | Quantity | Old | New | Reason`, under a
+      heading of level 2 or deeper, up to the next heading. A value is written as
+      `<number> <unit>` (a unit of the vocabulary), as a verdict (`pass`, `fail`,
+      `refused`) for the quantity `verdict`, or as `—` when there is no output. A
+      declaration covers a difference only when the entry, the quantity, the old and the
+      new value all match; an unreadable row is an error that names its line. A
+      declaration that matches no difference is reported, and does not fail the check.
+    - Open, decided together with the parameter source of the pilot (decision 14): where
+      the real corpus is stored, how its entries get their parameters, and which
+      `proposal.md` files a build reads the declarations from.
 
 ## Swap boundary
 

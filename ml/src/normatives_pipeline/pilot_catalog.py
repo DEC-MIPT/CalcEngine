@@ -175,8 +175,8 @@ def _bound_rows(cells: list[dict]) -> list[tuple]:
     if not headings:
         return []
     return [
-        (CALCULATION_TYPE, "phi_II", CLAUSE, "min", min(headings), "deg", True),
-        (CALCULATION_TYPE, "phi_II", CLAUSE, "max", max(headings), "deg", True),
+        (CALCULATION_TYPE, "phi_II", f"табл. {TABLE_M}", "min", min(headings), "deg", True),
+        (CALCULATION_TYPE, "phi_II", f"табл. {TABLE_M}", "max", max(headings), "deg", True),
     ]
 
 
@@ -200,7 +200,7 @@ def binding_rows(available_formulas: set[str]) -> list[tuple]:
     return rows
 
 
-def _write_synthetic_formulas(conn: Any, doc_id: int, manifest: dict) -> set[str]:
+def _write_synthetic_formulas(conn: Any, doc_id: int, manifest: dict, commit: bool = True) -> set[str]:
     written: set[str] = set()
     for spec in manifest.get("formula", []):
         tree = expression_tree.build_tree(
@@ -217,13 +217,18 @@ def _write_synthetic_formulas(conn: Any, doc_id: int, manifest: dict) -> set[str
             spec["result_symbol"],
             tree,
             spec["units"],
+            commit=commit,
         )
         written.add(spec["number"])
     return written
 
 
-def _bind_registry_formula(conn: Any, doc_id: int, number: str) -> bool:
-    """Строит дерево и единицы формулы реестра; не переводимая формула не привязывается."""
+def _bind_registry_formula(conn: Any, doc_id: int, number: str, commit: bool = True) -> bool:
+    """Строит дерево и единицы формулы реестра; не переводимая формула не привязывается.
+
+    Отказывает привязку если символ дерева или символ-результат не имеет записи в нотации
+    (M2: символ без нотации недопустим — не записывается как безразмерный).
+    """
     row = db.fetch_formula_by_number(conn, doc_id, number)
     if row is None or not row["expression"]:
         return False
@@ -237,27 +242,32 @@ def _bind_registry_formula(conn: Any, doc_id: int, number: str) -> bool:
     except expression_tree.ExpressionTreeError:
         return False
     result_symbol = notation_result_symbol(notation)
+    if result_symbol is None:
+        return False
     try:
         units = {
-            symbol: unit_symbol(units_by_symbol.get(symbol, ""))
+            symbol: unit_symbol(units_by_symbol[symbol])
             for symbol in (*tree_symbols, result_symbol)
         }
-    except PilotCatalogError:
+    except (KeyError, PilotCatalogError):
         return False
-    db.set_formula_catalog(conn, row["id"], result_symbol, tree, units)
+    db.set_formula_catalog(conn, row["id"], result_symbol, tree, units, commit=commit)
     return True
 
 
-def notation_result_symbol(notation: list[dict]) -> str:
-    """Возвращает id символа-результата по виду `output` (иначе первый символ)."""
+def notation_result_symbol(notation: list[dict]) -> str | None:
+    """Возвращает id символа-результата по виду `output` (иначе первый символ).
+
+    Возвращает ``None`` когда нотация пуста — формула без нотации не привязывается (M2).
+    """
     for entry in notation:
         if entry.get("kind") == "output":
             return entry["symbol"]
-    return notation[0]["symbol"] if notation else "R"
+    return notation[0]["symbol"] if notation else None
 
 
 def sync_pilot_catalog(conn: Any, designation: str = DESIGNATION) -> bool:
-    """Заполняет каталог данными пилота идемпотентно.
+    """Заполняет каталог данными пилота идемпотентно в одной транзакции (m1).
 
     Returns:
         ``True``, если документ найден и данные записаны; иначе ``False``.
@@ -268,16 +278,20 @@ def sync_pilot_catalog(conn: Any, designation: str = DESIGNATION) -> bool:
 
     manifest = config.pilot_manifest()
 
-    db.delete_catalog_rows(conn, CALCULATION_TYPE)
-    available = _write_synthetic_formulas(conn, doc_id, manifest)
-    if _bind_registry_formula(conn, doc_id, "5.7"):
-        available.add("5.7")
+    try:
+        db.delete_catalog_rows(conn, CALCULATION_TYPE, commit=False)
+        available = _write_synthetic_formulas(conn, doc_id, manifest, commit=False)
+        if _bind_registry_formula(conn, doc_id, "5.7", commit=False):
+            available.add("5.7")
 
-    db.insert_catalog_bindings(conn, doc_id, binding_rows(available))
-
-    cells = db.fetch_coefficients(conn, doc_id, TABLE_M)
-    db.insert_table_values(conn, doc_id, _constants_rows(manifest) + m_table_rows(cells))
-    db.insert_threshold_values(conn, doc_id, _threshold_rows(manifest))
-    db.insert_check_refs(conn, doc_id, _check_rows())
-    db.insert_method_bounds(conn, doc_id, _bound_rows(cells))
+        cells = db.fetch_coefficients(conn, doc_id, TABLE_M)
+        db.insert_catalog_bindings(conn, doc_id, binding_rows(available), commit=False)
+        db.insert_table_values(conn, doc_id, _constants_rows(manifest) + m_table_rows(cells), commit=False)
+        db.insert_threshold_values(conn, doc_id, _threshold_rows(manifest), commit=False)
+        db.insert_check_refs(conn, doc_id, _check_rows(), commit=False)
+        db.insert_method_bounds(conn, doc_id, _bound_rows(cells), commit=False)
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
     return True

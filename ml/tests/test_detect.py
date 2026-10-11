@@ -1,10 +1,10 @@
-"""Юнит-тесты нормализации распознанного LaTeX (correct_latex)."""
+"""Юнит-тесты нормализации распознанного LaTeX (correct_latex, _pick_formula_line)."""
 
 from __future__ import annotations
 
 import pytest
 
-from normatives_pipeline.formulas.detect import correct_latex
+from normatives_pipeline.formulas.detect import _pick_formula_line, correct_latex
 
 
 @pytest.mark.parametrize(
@@ -33,3 +33,30 @@ def test_correct_latex_keeps_mathrm_semantics() -> None:
 
 def test_correct_latex_decimal_comma_in_subscript() -> None:
     assert correct_latex(r"P N \geq\frac{P + P}{1 , 4}") == r"P N \geq\frac{P + P}{1.4}"
+
+
+def test_correct_latex_array_block_picks_math_line() -> None:
+    latex = r"\begin{array}{c} x = 1 + 2 \\ просто текст \end{array}"
+    result = correct_latex(latex)
+    assert r"\begin{array}" not in result
+    assert r"\end{array}" not in result
+    assert "x = 1 + 2" in result
+
+
+def test_correct_latex_array_block_empty_lines_fallback() -> None:
+    latex = r"\begin{array}{c} \end{array}"
+    result = correct_latex(latex)
+    assert r"\begin{array}" not in result
+
+
+def test_pick_formula_line_selects_most_math_heavy() -> None:
+    lines = ["просто текст", "x = y + z / 2", "a + b"]
+    assert _pick_formula_line(lines) == "x = y + z / 2"
+
+
+def test_pick_formula_line_empty_returns_empty_string() -> None:
+    assert _pick_formula_line([]) == ""
+
+
+def test_pick_formula_line_single_element() -> None:
+    assert _pick_formula_line(["a = b"]) == "a = b"

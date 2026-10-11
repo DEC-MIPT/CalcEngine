@@ -81,7 +81,8 @@ a different unit (the requirement "Explicit units at the boundary" of
 `calculation-core-contract`, not restated here). Further invariants per calculation type
 are to be confirmed by the engineer; this requirement fixes the structure of the list
 (identifier, statement, quantities involved), not its content. The number of generated
-cases and the tooling are decided in the planned change `bootstrap-dev-environment`.
+cases and the tooling are decided in this change's `design.md` (decision 16), because
+`bootstrap-dev-environment` was archived without deciding them.
 
 #### Scenario: Invariants hold on random inputs
 - **WHEN** inputs are generated at random within the valid range declared for the

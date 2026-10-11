@@ -5,15 +5,18 @@
 - Change: `openspec/changes/calculation-verification/` (WP4), requirement "Reference examples"; `design.md` decisions 1, 2, 3, 5; tasks 2.1-2.4, 2.11, 3.7; section 5 "Follow-up".
 - Purpose: collect the source, the worked examples, and the engineer's inputs that WP4 needs. Nothing in this file is a norm value; every number comes from the guide or from the engineer, with its source.
 
+Russian version: `reference-examples-foundations-rus.md` (added 2026-10-05).
+
 ## Status
 
 | Item | State | Blocks |
 |---|---|---|
-| First calculation type(s) of `foundations-shallow` | **Agreed** 2026-09-27 (Egor and the PM, `first-calculation-type-egor-pm.md`, questions 1-2): R, formula 5.7 of СП 22.13330.2016. Egor still has to write it into `foundations-shallow`'s in-scope list (`retarget-mvp-domain` task 3.1; he named the end of 2026-10-04, `normative-catalog-backend-questions-akim.md`, "Answers", item 6). The pilot type is registered as `foundations_shallow_r`, the name Egor's binding uses (same file, item 3) | The pilot on catalog data (WP2 task 7.1c, moved to the planned `normative-catalog-backend`), until task 3.1 is done; WP2 tasks 7.1a and 7.1b use synthetic data and are done |
+| First calculation type(s) of `foundations-shallow` | **Agreed** 2026-09-27 (Egor and the PM, `first-calculation-type-egor-pm.md`, questions 1-2): R, formula 5.7 of СП 22.13330.2016. Egor wrote it into `foundations-shallow`'s in-scope list on 2026-10-05 (`retarget-mvp-domain` task 3.1: in-scope `foundations_shallow_r` only); the PM confirms that list in task 1.4, which is still open. The pilot type is registered as `foundations_shallow_r`, the name Egor's binding uses (`normative-catalog-backend-questions-akim.md`, "Answers", item 3) | The PM confirmation of the in-scope list (`retarget-mvp-domain` task 1.4); the pilot on catalog data (`normative-catalog-backend` task 7.1) waits for the fixes of B1 and M1 of Akim's WP9 review; WP2 tasks 7.1a and 7.1b use synthetic data and are done |
 | Coefficient table 5.5 of СП 22.13330.2016 (if the type is R) | **Open, agreed 2026-10-03**: Egor stores each value with its own `NormRef` (`normatives-formula-contract` tasks 1.4-1.7), with the row heading `φ_II` in degrees and the columns `M_γ`, `M_q`, `M_c`; the backend selects the row whose heading equals the input, and an input between rows is refused until the norm's own rule is recorded with its clause, no interpolation (`normative-catalog-backend-questions-akim.md`, "Answers", item 4). The other coefficients of the formula (`γc1`, `γc2`, `k`, `kz`) are re-verified by Egor against the primary text before he names their source (`calculation-core-contract-formula-execution-akim.md`, "Answers", item 2). Was: tables extracted but not stored (`normatives-formula-contract-review-egor.md`, question 7) | The pilot run of R on catalog data (WP2 task 7.1c, in the planned `normative-catalog-backend`) |
+| Pilot inputs the cards lack or the pilot cannot take (2026-10-05) | **Open**: the cards have no `φII` (the pilot selects `Mγ`, `Mq`, `Mc` from table 5.5 by it), and their `γc1` differs (1.1, 1.4, 1.25) while the pilot's catalog gives one row, `γc1 = 1.1`, with no input that selects the soil row of table 5.4 (section 3, "Pilot fit"; Akim's WP9 review, `normative-catalog-backend-readiness.md`, notes for the backend side) | Running `ex1-rz` and `ex2` through the pilot; WP4 tasks 2.1-2.4 on the pilot |
 | Bibliographic record of the guide | Filled (section 2) | Source citation of every example |
 | 3 worked examples per calculation type | Filled (section 3), 3 of 5 found; `tolerance`/`tolerance_kind`/`tolerance_source` still open | WP4 tasks 2.1-2.4; step 5 (first slice) |
-| Invariants specific to shallow foundations | Open | WP4 task 2.11 |
+| Invariants specific to shallow foundations | **Confirmed 2026-10-06** (section 4): 9 invariants and the valid input range; 3 have property tests, 6 wait for the formula from the catalog | WP4 task 2.11 (open until the 6 are tested) |
 | Definition of "typical calculation" | Open | WP4 task 3.7 (30-second latency test) |
 
 ## 1. First calculation type
@@ -76,6 +79,20 @@ Three examples filled below, all from the source in section 2 (Линовски�
 (`normatives_pipeline/formulas.toml`, `unverified`). `tolerance`, `tolerance_kind`, and
 `tolerance_source` are left for the engineer (Akim) to fill; nothing else here fixes a
 norm value beyond what the guide and the registry already state.
+
+**Pilot fit (2026-10-05).** The pilot `foundations_shallow_r` takes `φII` as an input
+and selects `Mγ`, `Mq`, `Mc` from table 5.5 by it, with an exact match on a whole degree
+(the table gives no interpolation rule, page 38 checked by Akim). It takes `γc1`, `γc2`
+and `k` from the catalog, which holds one row each: `γc1 = 1.1`, `γc2 = 1.0`, `k = 1.0`
+(`normative-catalog-pilot-coefficients-egor.md`). So:
+
+- each card needs the `φII` the guide used, from its page, and a check that it is a whole
+  degree whose row of table 5.5 gives the card's `Mγ`, `Mq`, `Mc`;
+- `ex1` (`γc1` = 1.1) fits; `ex1-rz` (1.4) and `ex2` (1.25) do not, until the pilot gets an
+  input that selects the soil row of table 5.4 or takes `γc1` as an input (Akim and the
+  PM, together with the layered-base scope);
+- `d_1` of `ex2` (0.53 m) is the reduced depth of formula (5.8), computed by the guide;
+  the pilot takes `d_1` as an input, so the card stays valid.
 
 Two more examples of the same type are available on pages 11-12, 14, 19, and 21 of
 `Metodrekomendacii_po_RGR_Osnovaniya_i_fundamenty.pdf` if a larger suite is wanted later
@@ -195,11 +212,51 @@ audit's "<= 0.1%" is not used (decision 3).
 - **Invariants** (task 2.11): statements that hold for every valid input of the type,
   beyond determinism and unit-change consistency, which are shared and already covered.
   For each: identifier, statement, quantities involved, and the valid input range the
-  property test may use. None is invented in the specs.
+  property test may use. None is invented in the specs. For `foundations_shallow_r`
+  see the subsection below.
 - **Typical calculation** (task 3.7): which calculation, with which inputs, counts as
   typical, and where the 30 seconds are measured. The calculation is asynchronous, so
   say whether the clock covers the engine call only or the whole job from request to
   result.
+
+### Invariants of `foundations_shallow_r`, confirmed 2026-10-06 (task 2.11)
+
+Confirmed by the engineer (Akim) on 2026-10-06. The formula is (5.7) of СП 22.13330.2016
+as Egor's registry gives it (`formulas.toml`, `unverified`):
+`R = (γc1·γc2/k)·[Mγ·kz·b·γII + Mq·d1·γ'II + (Mq − 1)·db·γ'II + Mc·cII]`, check `p ≤ R`.
+Conditions the engineer checked in table 5.5 (page 38): every coefficient is
+non-negative, and `Mq ≥ 1` in every row.
+
+| Identifier | Statement | Quantities | Condition | Property test |
+|---|---|---|---|---|
+| `p-does-not-change-R` | The pressure p does not change R; it changes only the verdict | p, R | none | done (`eefc660`) |
+| `verdict-is-p-le-R` | The verdict is pass exactly when p ≤ R, with R unrounded | p, R | none | done (`eefc660`) |
+| `verdict-monotone-in-p` | If the check passes at p, it passes at every smaller p | p, R | none | done (`eefc660`) |
+| `R-affine-in-c_II` | With the other inputs fixed, equal steps of cII give equal steps of R | cII, R | formula (5.7) | waits for the formula from the catalog |
+| `R-affine-in-d_1` | The same for d1 | d1, R | formula (5.7) | waits for the formula from the catalog |
+| `R-grows-with-c_II` | A larger cII gives an R not smaller | cII, R | `Mc ≥ 0` | waits for the formula from the catalog |
+| `R-grows-with-gamma_II` | A larger γII gives an R not smaller | γII, R | `Mγ ≥ 0` | waits for the formula from the catalog |
+| `R-grows-with-d_b` | A larger db gives an R not smaller | db, R | `Mq ≥ 1` | waits for the formula from the catalog |
+| `R-grows-with-b` | A larger b gives an R not smaller, across the kz threshold too | b, R | `Mγ ≥ 0`; `kz·b` grows above the threshold (clause 5.6.7) | waits for the formula from the catalog |
+
+The six formula-dependent invariants cannot be tested on the synthetic formula of the
+tests, and the tree of (5.7) may not be written into tests (WP2 task 7.1b,
+`agent-docs/domain-constraints.md`). They are tested once the pilot runs on the catalog's
+formula: after the fixes of B1 and M1 of Akim's WP9 review and `calculation-verification`
+design decision 14.
+
+Valid input range of the pilot, accepted by the engineer on 2026-10-06 (test data, not
+norm values; design decision 17):
+
+| Input | Range | Note |
+|---|---|---|
+| `b` | 0.5 … 20 m | crosses the kz threshold of 10 m |
+| `d_1` | 0.5 … 5 m | |
+| `d_b` | 0 … 2 m | |
+| `gamma_II`, `gamma_II_prime` | 14 … 22 kN/m³ | |
+| `c_II` | 0 … 50 kPa | |
+| `phi_II` | 0 … 45 deg, whole values only | rows of table 5.5 |
+| `p` | 50 … 600 kPa | gives both verdicts |
 
 ## 5. Completeness check
 

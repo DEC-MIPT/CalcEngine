@@ -50,7 +50,7 @@ units = { k_z = "1" }
 [[formula]]
 parameter = "k_z_from"
 number = "5.6.7#k_z_from"
-latex = "k_z = \\frac{z_0}{b} + 0.2"
+latex = "k_z = \\frac{8}{b} + 0.2"
 expression = "8/b + 0.2"
 result_symbol = "k_z"
 units = { b = "m", k_z = "1" }

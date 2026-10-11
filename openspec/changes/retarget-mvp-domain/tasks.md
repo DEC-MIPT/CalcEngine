@@ -3,10 +3,10 @@
 > Reviewed by Egor (2026-10-05). Egor leads this change and owns the data zone;
 > Akim drafted it and wrote the engine-facing scenarios.
 
-Branch: planning phase, so the work stays on the `Specs` line (`Specs-onboarding` now,
-merged into `Specs` after review). There is no application code, so no
-`feature/<task>/<zone>` sub-branch applies to the spec work. If a task below turns into
-code or data files, use `feature/retarget-mvp-domain/data` (Egor) or
+Branch: none. The change has no code, so its documents are committed directly to
+`develop` (branching model of 2026-09-28, AGENTS.md section 2; the `Specs` line is
+historical), and no `feature/<feature>/<zone>` branch applies to the spec work. If a
+task below turns into code or data files, use `feature/retarget-mvp-domain/data` (Egor) or
 `feature/retarget-mvp-domain/backend` (Akim).
 
 Executor tags: **[Akim]** engine/backend zone, **[Egor]** catalog/data zone, **[PM]**,
@@ -45,7 +45,7 @@ Found by the grep sweep on 2026-09-26. Not edited by this draft; the owner decid
 - [ ] 5.3 [Agent: norm-traceability-checker] Confirm no norm reference is unmarked
 - [x] 5.4 [Akim] Run the keyword grep over `openspec/` excluding `archive/`; expected hits only in files listed in section 4 (2026-09-27: nine hits, all in files of tasks 4.1-4.3; see `docs/decisions/retarget-mvp-domain-akim-review.md`)
 - [ ] 5.5 [Agent: tester] Issue the verdict (see DOD)
-- [ ] 5.6 [Egor] Merge to `Specs` after 5.1-5.5 pass
+- [ ] 5.6 [Egor] After 1.4 and 5.1-5.5, record the acknowledgement of the developer who did not lead the change, in a tracked commit or comment that names it (AGENTS.md section 4, GO for a change with no code); no merge: the documents are already on `develop` (branching model of 2026-09-28) (reworded 2026-10-05, Akim, from "Merge to `Specs`")
 - [ ] 5.7 [Agent: spec-keeper] Sync the deltas into `openspec/specs/` and archive the change
 
 ## Dependencies

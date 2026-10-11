@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-import os
 from urllib.parse import urlsplit
 
 import psycopg2  # type: ignore[import-untyped]
 import pytest
+from conftest import require_test_db_url
 
 from normatives_pipeline import catalog_contract, db
+
+pytestmark = pytest.mark.postgres
+
+URL = require_test_db_url()
 
 PASSWORD = "test-reader"  # pragma: allowlist secret
 
@@ -38,7 +42,7 @@ EXPECTED = {
 
 @pytest.fixture()
 def conn():
-    connection = db.connect()
+    connection = db.connect(URL)
     db.init_schema(connection)
     catalog_contract.ensure_catalog_read(connection, password=PASSWORD)
     yield connection
@@ -80,7 +84,7 @@ def test_reader_password_is_not_logged(conn, caplog, capsys) -> None:
 
 
 def _reader_url() -> str:
-    parts = urlsplit(os.environ["DEC_DATABASE_URL"])
+    parts = urlsplit(URL)
     host = parts.hostname or "localhost"
     port = parts.port or 5432
     dbname = (parts.path or "/dec").lstrip("/")
