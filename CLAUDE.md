@@ -159,12 +159,6 @@ what it does not say. Do not restate `AGENTS.md` here.
   `backend-layered-architecture` still names it. The MVP domains are shallow
   foundations, then internal water supply. Build on the active changes, not on the
   placeholder.
-- `dev-tooling-followups` (WP6 follow-ups) is archived (2026-10-04,
-  `openspec/changes/archive/2026-10-04-dev-tooling-followups/`): merged in `a505352`
-  after the `tester` GO and the `orchestrator` review; the baseline-refresh rule, the
-  notebook exclusion, the settings check that asks `pydantic-settings`, the exhaustive
-  layers contract and the coverage of `backend/scripts/` are in
-  `openspec/specs/development-process/spec.md` and `AGENTS.md` sections 2 and 4.
 - `bootstrap-dev-environment` (WP6) is archived (2026-10-04,
   `openspec/changes/archive/2026-10-04-bootstrap-dev-environment/`): merged in `bec3d43`
   after the `tester` GO and the `orchestrator` review; its four tooling requirements are
@@ -172,10 +166,6 @@ what it does not say. Do not restate `AGENTS.md` here.
   3-6, coverage of `backend/scripts/`, the baseline-refresh question to Egor) are listed
   in `docs/decisions/bootstrap-dev-environment-readiness.md`, sections 7-8, for a later
   tooling change.
-- `team-roles-update` (WP7) is archived (2026-09-27,
-  `openspec/changes/archive/2026-09-27-team-roles-update/`): the PM role and the
-  code-free GO path are in `openspec/specs/development-process/spec.md` and `AGENTS.md`
-  section 4, so spec-only changes can get their `tester` verdict.
 - Session state for continuing the work: `docs/akim/reports/session-state-2026-09-27.md`
   (untracked); WP code journals in `docs/akim/reports/WP<N>-code-journal.md`.
 - Norm editions for the MVP domain come from the team and are `unverified` until
