@@ -515,4 +515,11 @@ formulas go to the database as `unverified` / `machine-extracted` with no manife
 override. Formula 5.7 is a `[[formula]]` entry in `pilot.toml`, written by
 `_write_synthetic_formulas` (same mechanism as `k_z_below` and `k_z_from`).
 
-**Still open:** m1 (deferred), m7 (Akim to pass his PDF copy per this review's note).
+- **m7.** New PDF received (2026-10-11): "СП 22.13330.2016 с Изменениями N 1, 2, 3, 4, 5,
+  применяется с 17.06.2017" — matches Akim's copy. The old ingested text lacked change 5.
+  Fix: `text_layer.extract_edition_text(pages, designation)` extracts the change list from
+  the title page and returns `"2016 с Изм. N 1, 2, 3, 4, 5"`. `ingest.py` stores this in
+  `document.edition`; the year column is filled from `extract_edition_year` separately so
+  `int()` is never called on the full string. Two unit tests added to `test_text_layer.py`.
+
+**Still open:** m1 (deferred).
