@@ -522,4 +522,13 @@ passed, 26 skipped, 10 errors в `test_catalog_contract.py`; `ruff` и `mypy src
   колонки `year` берётся отдельно из `extract_edition_year`, чтобы `int()` не падал на
   полной строке. Добавлены два unit-теста в `test_text_layer.py`.
 
-**Остаётся открытым:** m1 (отложено).
+- **m1.** `sync_pilot_catalog` перестраивает каталог пилота в одной транзакции.
+  К 8 функциям каталога в `db.py` добавлен параметр `commit: bool = True`
+  (`set_formula_catalog`, `replace_catalog_formula`, `delete_catalog_rows`,
+  `insert_catalog_bindings`, `insert_table_values`, `insert_threshold_values`,
+  `insert_check_refs`, `insert_method_bounds`). `sync_pilot_catalog` передаёт им
+  `commit=False` и делает единственный `conn.commit()` в конце; при исключении вызывает
+  `conn.rollback()`. Тесты обновлены для нового kwarg; `fake_conn` с
+  `.commit()/.rollback()` заменяет `object()` там, где это нужно.
+
+**Все замечания закрыты.**

@@ -522,4 +522,13 @@ override. Formula 5.7 is a `[[formula]]` entry in `pilot.toml`, written by
   `document.edition`; the year column is filled from `extract_edition_year` separately so
   `int()` is never called on the full string. Two unit tests added to `test_text_layer.py`.
 
-**Still open:** m1 (deferred).
+- **m1.** `sync_pilot_catalog` now rebuilds the pilot catalog in a single transaction.
+  Added `commit: bool = True` to 8 catalog db functions (`set_formula_catalog`,
+  `replace_catalog_formula`, `delete_catalog_rows`, `insert_catalog_bindings`,
+  `insert_table_values`, `insert_threshold_values`, `insert_check_refs`,
+  `insert_method_bounds`). `sync_pilot_catalog` passes `commit=False` to all of them
+  and issues one `conn.commit()` at the end; `conn.rollback()` is called before
+  re-raising on any exception. Tests updated for the new kwarg; `fake_conn` with
+  `.commit()/.rollback()` replaces `object()` where needed.
+
+**All findings closed.**
