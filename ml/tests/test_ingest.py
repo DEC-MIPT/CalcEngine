@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from conftest import require_test_db_url
 
 from normatives_pipeline import db
 from normatives_pipeline.ingest import ingest
@@ -16,10 +17,8 @@ DESIGNATION = "СП 31.13330.2021"
 
 @pytest.fixture(scope="module")
 def conn():
-    try:
-        c = db.connect()
-    except Exception as exc:  # noqa: BLE001
-        pytest.skip(f"нет БД: {exc}")
+    url = require_test_db_url()
+    c = db.connect(url)
     db.init_schema(c)
     yield c
     c.close()
@@ -79,7 +78,7 @@ def test_ingest_idempotent(conn) -> None:
     assert not db.document_exists(conn, DESIGNATION)
 
 
-def test_ingest_manifest_formula_is_verified(conn) -> None:
+def test_ingest_manifest_formula_is_unverified_when_catalog_bound(conn) -> None:
     doc = REPO / "docs/normative-base" / "СП 22.13330.2016.pdf"
     if not doc.exists():
         pytest.skip(f"нет файла: {doc}")
@@ -95,6 +94,6 @@ def test_ingest_manifest_formula_is_verified(conn) -> None:
             (designation, "5.7"),
         )
         row = cur.fetchone()
-    assert row == {"status": "verified", "provenance": "human-verified"}
+    assert row == {"status": "unverified", "provenance": "machine-extracted"}
 
     db.delete_document(conn, designation)

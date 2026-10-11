@@ -8,7 +8,6 @@ from pathlib import Path
 from . import catalog_contract, db, pilot_catalog
 from .config import formula_manifest, output_config, parser_config
 from .formulas import source
-from .formulas.validation import canonical_latex
 from .parser import extractors, symbols, text_layer
 from .retrieval import normalize_text
 
@@ -24,10 +23,12 @@ def ingest(path: Path, force: bool = False) -> int:
     designation = text_layer.extract_designation(pages)
     if not designation:
         raise RuntimeError("не удалось извлечь обозначение документа с титульной страницы")
-    edition = text_layer.extract_edition_year(designation)
-    if not edition:
+    edition_year = text_layer.extract_edition_year(designation)
+    if not edition_year:
         raise RuntimeError(f"не удалось извлечь год издания из обозначения {designation!r}")
-    year = int(edition)
+    year = int(edition_year)
+    amendments = text_layer.extract_amendments(pages)
+    edition = f"{edition_year} с Изм. {', '.join(amendments)}" if amendments else edition_year
 
     conn = db.connect()
     try:
@@ -83,9 +84,7 @@ def ingest(path: Path, force: bool = False) -> int:
         for f in formulas:
             m = manifest.get((designation, f.number))
             f_latex = m["latex"] if m else f.latex
-            f_expression = m["expression"] if m else (
-                str(canonical_latex(f_latex)) if f_latex else ""
-            )
+            f_expression = m["expression"] if m else ""
             f_clause = m["clause"] if m and m.get("clause") else f.clause
 
             meanings = [n.meaning for n in formula_notation.get(f.number, [])]
@@ -148,7 +147,7 @@ def ingest(path: Path, force: bool = False) -> int:
             if value
         ]
         db.insert_coefficients(conn, doc_id, coeff_rows)
-        pilot_catalog.sync_pilot_catalog(conn, designation)
+        pilot_catalog.sync_pilot_catalog(conn)
 
         print(
             f"[ingested] {designation}: пунктов {len(clauses)}, формул {len(formulas)} "

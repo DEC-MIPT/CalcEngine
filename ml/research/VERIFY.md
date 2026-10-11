@@ -23,7 +23,7 @@ sudo apt-get install -y poppler-utils        # даёт pdftotext (тексто�
 
 # Postgres локально (порт 5433)
 docker compose -f infra/docker-compose.yml up -d
-export DEC_DATABASE_URL="postgresql://dec:dec@localhost:5433/dec"
+export DEC_DATABASE_URL="postgresql://dec:<password>@localhost:5433/dec"
 ```
 
 Проверка, что у PDF есть текстовый слой (иначе это скан, и нужен OCR — вне этого цикла):
@@ -73,7 +73,7 @@ python -m normatives_pipeline.search --json "условие успешного �
 
 ```bash
 cd ml
-export DEC_DATABASE_URL="postgresql://dec:dec@localhost:5433/dec"
+export DEC_DATABASE_URL="postgresql://dec:<password>@localhost:5433/dec"
 ../.venv/bin/python -m research.verify_end_to_end "../docs/normative-base/<файл>.pdf"
 ```
 
@@ -145,7 +145,7 @@ cd ml
 
 ```bash
 cd ml
-DEC_DATABASE_URL="postgresql://dec:dec@localhost:5433/dec" ../.venv/bin/python -m pytest tests/ -q
+DEC_DATABASE_URL="postgresql://dec:<password>@localhost:5433/dec" ../.venv/bin/python -m pytest tests/ -q
 ../.venv/bin/python -m ruff check src
 ../.venv/bin/python -m mypy src/normatives_pipeline
 # покрытие: pytest-cov / coverage (tests/ + coverage.run.source = src/normatives_pipeline)

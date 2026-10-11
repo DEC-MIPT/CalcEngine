@@ -11,7 +11,7 @@ r"""HTML для визуальной сверки: слева скриншот �
 
 Запуск (из каталога ml/):
 
-    DEC_DATABASE_URL=postgresql://dec:dec@localhost:5433/dec_e2e \
+    DEC_DATABASE_URL=postgresql://dec:dec@localhost:5433/dec_e2e \  # pragma: allowlist secret
       python -m research.make_review_html ../docs/normative-base/СП\ 22.13330.2016.pdf \
         --formula 5.7 --table 5.5 --out research/review/sp22.html
 """
