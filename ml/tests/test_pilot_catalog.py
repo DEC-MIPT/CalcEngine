@@ -361,7 +361,7 @@ def test_ingesting_second_document_leaves_pilot_catalog_on_sp22(pilot_conn) -> N
     """B1: инжестирование постороннего документа не перепривязывает каталог пилота."""
     before = _rows(
         pilot_conn,
-        "SELECT document_id FROM catalog_read.type_formulas WHERE calculation_type = %s",
+        "SELECT document_id FROM catalog_binding WHERE calculation_type = %s",
         (CT,),
     )
     assert before, "pilot catalog must be populated"
@@ -374,7 +374,7 @@ def test_ingesting_second_document_leaves_pilot_catalog_on_sp22(pilot_conn) -> N
 
     after = _rows(
         pilot_conn,
-        "SELECT document_id FROM catalog_read.type_formulas WHERE calculation_type = %s",
+        "SELECT document_id FROM catalog_binding WHERE calculation_type = %s",
         (CT,),
     )
     assert all(row["document_id"] == pilot_doc_id for row in after), (

@@ -46,14 +46,19 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, public AS $$
     FROM (
         SELECT 'clause'::text AS kind, d.id AS document_id, d.designation, d.edition,
                c.number AS number, NULLIF(c.title, '') AS title,
-               similarity(c.search_text, query) AS rank
+               greatest(similarity(c.search_text, query),
+                        word_similarity(query, c.search_text)) AS rank
         FROM clause c JOIN document d ON d.id = c.document_id
         WHERE similarity(c.search_text, query) > 0.1
+           OR word_similarity(query, c.search_text) > 0.3
         UNION ALL
         SELECT 'formula'::text, d.id, d.designation, d.edition,
-               f.number, NULL::text, similarity(f.search_text, query)
+               f.number, NULL::text,
+               greatest(similarity(f.search_text, query),
+                        word_similarity(query, f.search_text))
         FROM formula f JOIN document d ON d.id = f.document_id
         WHERE similarity(f.search_text, query) > 0.1
+           OR word_similarity(query, f.search_text) > 0.3
         UNION ALL
         SELECT 'document'::text, d.id, d.designation, d.edition,
                NULL::text, NULLIF(d.title, ''), similarity(d.designation, query)
