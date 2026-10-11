@@ -1,7 +1,8 @@
 # Pipeline branch and process questions (Akim to Egor, 2026-10-07)
 
 - From: Akim (backend zone). To: Egor (data zone).
-- Status: open; answers go into this file under `## Answers` (AGENTS.md section 7).
+- Status: answered by Egor on 2026-10-11 (`## Answers` below); follow-up questions go
+  into a new file (AGENTS.md section 7).
 - Russian version: `2026-10-07-pipeline-branch-and-process-to-egor-rus.md`.
 
 These come from reading your commits of 2026-10-07 (`2a95a8b`, `42c7a6d`,

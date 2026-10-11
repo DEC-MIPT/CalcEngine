@@ -244,7 +244,7 @@ Egor may split these tasks further on his branch; each one stays in his zone.
 
 ## 8. Close
 
-- [ ] 8.1 (spec) Record in `calculation-core-contract` that task 7.1c is done here and
+- [x] 8.1 (spec) Record in `calculation-core-contract` that task 7.1c is done here and
   that minor 6 of the engine review is fixed by tasks 5.1a-5.1b under the new
   `calculation-engine` requirement "Table value selectors"; record in
   `backend-layered-architecture` that item 9.3 is settled by this change and that the
@@ -253,7 +253,9 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   from this change and that `invalid_input` also covers an input that the catalog's
   table does not cover (both owners agree to the edits); verify: the notes are on
   `develop` (2026-10-05: notes written by Akim in WP2 `tasks.md` section 9 and task 7.2,
-  WP5 `design.md` decision 2, WP8 `design.md` error table; Egor's agreement pending)
+  WP5 `design.md` decision 2, WP8 `design.md` error table; 2026-10-11: Egor agreed to
+  all three as written, `docs/decisions/backend/2026-10-07-pipeline-branch-and-process-to-egor.md`,
+  answer 8)
 - [ ] 8.2 (spec) After both features are merged, `spec-keeper` syncs `normatives-catalog`
   and archives this change; verify: `openspec validate --all --strict` passes after the
   archive

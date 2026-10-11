@@ -26,8 +26,8 @@ not that the result is right:
   examples. The 30-second latency target becomes its own requirement, "Calculation
   latency".
 - `development-process`: one new requirement adds the correctness gate for calculation
-  changes to the GO rule. Existing requirements are not rewritten. **Needs Egor review**
-  (shared file).
+  changes to the GO rule. Existing requirements are not rewritten. Agreed by Egor on
+  2026-10-11 (shared file).
 
 ## Dependencies
 
@@ -68,7 +68,7 @@ requirement waits for a definition of "typical calculation". `tasks.md` marks it
 - `calculation-engine`: accuracy requirement replaced; latency requirement
   added.
 - `development-process`: correctness gate for calculation changes (new requirement;
-  needs Egor review).
+  agreed by Egor on 2026-10-11).
 
 ## Impact
 
