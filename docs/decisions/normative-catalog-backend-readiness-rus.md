@@ -459,3 +459,60 @@ passed, 26 skipped, 10 errors в `test_catalog_contract.py`; `ruff` и `mypy src
   отличаться от действующего текста («Измененная редакция, Изм. № 5»). Это не пункт ветки
   исправлений, но задачу 7.1 (сквозная проверка backend с каталогом) стоит проводить на
   сводном тексте с изменениями 1-5. Могу передать Егору свой экземпляр.
+
+## Раздел 2: статус исправлений (Егор, 2026-10-11)
+
+Ветка `fix/normative-catalog/data`, коммит `c6c17a5` (поверх `950a910`).
+145 тестов проходят; 24 пропускаются (нужен `DEC_TEST_NORMATIVES_DATABASE_URL`).
+
+**R1–R4 и m3–m5 сделаны; r2–r4 закрыты; r5 принято к сведению.**
+
+- **R1.** `test_ingest_manifest_formula_is_verified` переименован и инвертирован в
+  `test_ingest_all_formulas_are_unverified`. Новый запрос проверяет, что
+  `COUNT(*) WHERE status != 'unverified' = 0` и `COUNT(*) WHERE provenance !=
+  'machine-extracted' = 0` по всему документу. Падает при откате M1.
+- **R2.** Параметр `designation` у `sync_pilot_catalog` удалён полностью (не просто
+  игнорируется). Документ пилота `СП 22.13330.2016` жёстко задан как единственная цель;
+  структурно невозможно привязать каталог пилота к другому документу.
+  `test_sync_skips_r_binding_when_formula_unconvertible` и
+  `test_sync_without_document_is_noop` вызывают `sync_pilot_catalog(object())` без
+  обозначения; старый тест, передававший `"X"`, больше не компилируется.
+- **R3.** `test_bind_registry_formula_with_missing_notation_symbol_returns_false` теперь
+  даёт `x` единицу `"м"` (кириллица, есть в `UNIT_SYMBOLS`), монки-патчит
+  `db.set_formula_catalog` и проверяет, что он **не вызван**. Зеркальный тест
+  `test_bind_registry_formula_with_all_symbols_present_calls_set_formula_catalog`
+  подтверждает счастливый путь. Оба падают при удалении проверки
+  `all_symbols <= units_by_symbol.keys()`.
+- **R4.** `_sync_ingest_url` всегда перезаписывает `DEC_DATABASE_URL` тестовым URL
+  (сохраняет и восстанавливает прежнее значение). `require_test_db_url()` добавлен в
+  фикстуру `conn` `test_catalog_contract.py` и `test_db_payload.py`.
+- **m3.** LaTeX `k_z_from` в `pilot.toml`: `\frac{z_0}{b}+0.2` → `\frac{8}{b}+0.2`.
+- **m4.** Ссылка пункта в `_bound_rows`: жёстко заданный `5.6.7` → `f"табл. {TABLE_M}"`.
+- **m5.** В `ensure_catalog_read` добавлен `REVOKE TEMPORARY ON DATABASE ... FROM
+  dec_normatives_reader`.
+- **r2.** Docstring модуля `pilot_catalog.py` обновлён: «machine-extracted/unverified»
+  вместо «human-verified».
+- **r3 (canonical_latex).** Удаление из `ingest` намеренное. Манифест (`formulas.toml`)
+  был единственным путём через `canonical_latex`; теперь, когда `formulas.toml` удалён
+  (M1 полный, этот коммит), ни одна формула не попадает в `canonical_latex` через `ingest`.
+  Поле `expression` остаётся пустым для формул из PDF; формула 5.7 — синтетическая запись
+  в `pilot.toml` и никогда не идёт через текстовый слой. Влияние на `normatives-formula-contract`:
+  ключ `expression` присутствует, но пуст для не-манифестных формул; счёт Σ/∏ в
+  `formula-autoparse-limits-egor.md` не меняется (считалось до ingestion, на этапе парсинга).
+- **r4 (baseline / m6).** `pre-commit install` выполнен на машине Егора (2026-10-11).
+  Добавлены `# pragma: allowlist secret` к шести оставшимся строкам; baseline обновлён и
+  закоммичен. `tester-verdict.md:36` уже был `<password>` на `develop` (коммит `2d66c3e`),
+  поэтому pragma там лишь подтверждает намерение.
+- **r5 (конфликт с `feature/normative-pipeline/data`).** Принято к сведению. Ветка
+  исправлений меняет `pilot_catalog.py`, `conftest.py`, `test_pilot_catalog.py`, и вторая
+  ветка тоже. Тот, кто вливается вторым, разрешит конфликт вручную; предлагаю влить
+  `fix/normative-catalog/data` первым, как ты и рекомендуешь.
+
+**M1 полный (этот коммит).** `ml/configs/formulas.toml` удалён. `formula_manifest()` и
+`FORMULAS_TOML` убраны из `config.py`. `ingest.py` упрощён: все формулы из PDF идут в базу
+как `unverified` / `machine-extracted` без переопределения из манифеста. Формула 5.7 —
+запись `[[formula]]` в `pilot.toml`, записывается через `_write_synthetic_formulas` (тот же
+механизм, что для `k_z_below` и `k_z_from`).
+
+**Остаётся открытым:** m1 (отложено), m7 (Аким передаёт свой экземпляр PDF согласно
+примечанию этого ревью).

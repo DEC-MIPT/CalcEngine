@@ -459,3 +459,60 @@ stays open until R1-R4 are fixed and re-reviewed.
   may differ from the current text ("Измененная редакция, Изм. № 5"). Not a fix-branch
   item, but task 7.1 (backend end-to-end against the catalog) should run on the
   consolidated text with amendments 1-5. I can pass Egor my copy.
+
+## Section 2: Egor's fix status (2026-10-11)
+
+Branch `fix/normative-catalog/data`, commit `c6c17a5` (on top of `950a910`).
+145 tests pass; 24 skipped (need `DEC_TEST_NORMATIVES_DATABASE_URL`).
+
+**R1–R4 and m3–m5 are done; r2–r4 addressed; r5 noted.**
+
+- **R1.** `test_ingest_manifest_formula_is_verified` renamed and inverted to
+  `test_ingest_all_formulas_are_unverified`. New query asserts `COUNT(*) WHERE status !=
+  'unverified' = 0` and `COUNT(*) WHERE provenance != 'machine-extracted' = 0` across the
+  entire document. Passes only when M1 is in place.
+- **R2.** `sync_pilot_catalog` `designation` parameter removed entirely (not just ignored).
+  The pilot document `СП 22.13330.2016` is hard-coded as the only target; it is now
+  structurally impossible to bind the pilot catalog to a different document.
+  `test_sync_skips_r_binding_when_formula_unconvertible` and
+  `test_sync_without_document_is_noop` call `sync_pilot_catalog(object())` without a
+  designation; the old unit test that passed `"X"` no longer compiles.
+- **R3.** `test_bind_registry_formula_with_missing_notation_symbol_returns_false` now gives
+  `x` unit `"м"` (Cyrillic, in `UNIT_SYMBOLS`), monkeypatches `db.set_formula_catalog` and
+  asserts it is **not** called. Mirror test
+  `test_bind_registry_formula_with_all_symbols_present_calls_set_formula_catalog` confirms
+  the happy path. Both fail when the `all_symbols <= units_by_symbol.keys()` check is
+  removed.
+- **R4.** `_sync_ingest_url` always overwrites `DEC_DATABASE_URL` with the test URL
+  (saves and restores the previous value). `require_test_db_url()` added to the `conn`
+  fixture in `test_catalog_contract.py` and `test_db_payload.py`.
+- **m3.** `pilot.toml` `k_z_from` LaTeX: `\frac{z_0}{b}+0.2` → `\frac{8}{b}+0.2`.
+- **m4.** `_bound_rows` clause ref: hard-coded `5.6.7` → `f"табл. {TABLE_M}"`.
+- **m5.** `ensure_catalog_read` appends `REVOKE TEMPORARY ON DATABASE … FROM
+  dec_normatives_reader`.
+- **r2.** `pilot_catalog.py` module docstring updated: "machine-extracted/unverified"
+  replaces "human-verified".
+- **r3 (canonical_latex).** Removing it from `ingest` is intentional. The manifest
+  (`formulas.toml`) override was the only path through `canonical_latex` for formulas; now
+  that `formulas.toml` is deleted (M1 full, this commit), no formula reaches
+  `canonical_latex` through `ingest`. The `expression` field stays empty for
+  PDF-extracted formulas; formula 5.7 is a synthetic entry in `pilot.toml` and never
+  goes through the text-layer path. Impact on `normatives-formula-contract` payload counts:
+  the `expression` key is present but empty for non-manifest formulas; `formula-autoparse-limits-egor.md`
+  Σ/∏ counts are unaffected (those were counted before ingestion, at parse time).
+- **r4 (baseline / m6).** `pre-commit install` done on Egor's machine (2026-10-11).
+  `# pragma: allowlist secret` added to all six remaining lines; baseline refreshed and
+  committed. `tester-verdict.md:36` was already `<password>` on `develop` (commit
+  `2d66c3e`), so the pragma there only confirms the intent.
+- **r5 (conflict with `feature/normative-pipeline/data`).** Noted. The fix branch changes
+  `pilot_catalog.py`, `conftest.py`, `test_pilot_catalog.py` and the second branch does
+  too. Whichever merges second will resolve the conflict manually; I suggest merging
+  `fix/normative-catalog/data` first, as you recommend.
+
+**M1 full (this commit).** `ml/configs/formulas.toml` deleted. `formula_manifest()` and
+`FORMULAS_TOML` removed from `config.py`. `ingest.py` simplified: all PDF-extracted
+formulas go to the database as `unverified` / `machine-extracted` with no manifest
+override. Formula 5.7 is a `[[formula]]` entry in `pilot.toml`, written by
+`_write_synthetic_formulas` (same mechanism as `k_z_below` and `k_z_from`).
+
+**Still open:** m1 (deferred), m7 (Akim to pass his PDF copy per this review's note).
