@@ -123,20 +123,26 @@ def test_the_pilot_runs_end_to_end_on_the_catalog(reader: Connection, client: Te
     assert sources and sources <= catalog_editions(reader)
 
 
-def test_a_russian_word_of_a_clause_title_finds_the_clause(reader: Connection, client: TestClient) -> None:
+def found(client: TestClient, word: str) -> set[tuple[str, int, str | None]]:
+    """Совпадения поиска по слову: вид, документ и номер, не больше 50."""
+    response = client.get("/normatives/search", params={"q": word, "limit": 50})
+    assert response.status_code == 200
+    return {(hit["kind"], hit["document_id"], hit["number"]) for hit in response.json()["hits"]}
+
+
+def test_every_russian_word_of_a_clause_title_finds_its_clause(reader: Connection, client: TestClient) -> None:
     clauses = reader.execute(
         text("SELECT document_id, number, title FROM catalog_read.clauses WHERE title IS NOT NULL ORDER BY document_id, position")
     ).all()
     counts = Counter(word.lower() for _, _, title in clauses for word in set(WORD.findall(title)))
-    document_id, number, word = next(
+    words = [
         (document_id, number, word)
         for document_id, number, title in clauses
-        for word in WORD.findall(title)
+        for word in dict.fromkeys(WORD.findall(title))
         if counts[word.lower()] == 1
-    )
+    ]
 
-    response = client.get("/normatives/search", params={"q": word, "limit": 50})
+    misses = [(number, word) for document_id, number, word in words if ("clause", document_id, number) not in found(client, word)]
 
-    hits = response.json()["hits"]
-    assert response.status_code == 200
-    assert ("clause", document_id, number) in {(hit["kind"], hit["document_id"], hit["number"]) for hit in hits}
+    assert words
+    assert misses == [], f"{len(misses)} of {len(words)} words miss their clause, first: {misses[:10]}"
