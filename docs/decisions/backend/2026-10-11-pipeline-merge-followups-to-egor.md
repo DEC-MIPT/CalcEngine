@@ -74,24 +74,56 @@ tables, 2955 cells, and `catalog_read` holds the pilot's three formulas, the 46 
 each of `m_gamma`, `m_q`, `m_c` from table 5.5, the constants, the threshold, the check
 and the bounds of `phi_II`, all `unverified` / `machine-extracted`.
 
-On that data the test of task 7.1 passes (3 of 3). It is the new module
+On that data the first version of the test of task 7.1 passed (3 of 3). It is the new module
 `backend/tests/test_catalog_ingested.py` on `feature/normative-catalog/backend`
 (`70119ae`, pushed). It only reads the catalog, as `dec_normatives_reader`, through
 `DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL`, and is skipped without it. It checks that
 the columns of `catalog_read` match the contract, that `POST /calculations` for the pilot
 with `phi_II` taken from the headings of table 5.5 answers `201` with every step's
 references taken from the catalog and the stored result naming the catalog's document
-and edition, and that a Russian word of a clause title finds that clause. It asserts
+and edition, and that Russian words of clause titles find their clauses. It asserts
 structure and statuses, never a norm value. In the run: verdict `pass`, 9 steps (6
 table, 2 formula, 1 check), all unverified, every reference to СП 22.13330.2016 "2016 с
-Изм. 1, 2, 3, 4, 5". You can run it after an ingestion, from `backend/`:
+Изм. 1, 2, 3, 4, 5". Its search check took one word then; it now takes every word of a
+clause title and fails (item 4). You can run it after an ingestion, from `backend/`:
 
     DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL=postgresql://dec_normatives_reader:<password>@localhost:5433/dec \
         .venv/bin/pytest tests/test_catalog_ingested.py
 
 This is a rehearsal: task 7.1 stays open until I repeat the ingestion and the test after
-`fix/normative-catalog/data` (item 1) and the fix of this item are on `develop`.
+`fix/normative-catalog/data` (item 1) and the fixes of this item and item 4 are on
+`develop`.
 
 Please fix it in `extractors.py` (on `fix/normative-catalog/data`, so it reaches
 `develop` with item 1), with a test for a table whose top is above the page. And how did
 the ingestion pass on your machine with this file: a different file, version, or command?
+
+## 4. The catalog's search misses inflected Russian words
+
+The WP9 spec (`normative-catalog-backend`, `normatives-catalog` delta, "Normative search
+endpoint", scenario "Search in Russian") says: a Russian word that occurs in a clause
+title of the catalog finds that clause. On the ingested СП 22 it often does not. The
+backend passes the query to `catalog_read.search(query, max_rows)` as it is written (WP9
+design decision 2), and the function ranks by `similarity(c.search_text, query) > 0.1`
+over the whole text of a clause, while `search_text` holds lemmas (`normalize_text`) and
+the query is not normalized. For example, clause 5.5.6 has the title "Глубину заложения
+наружных и внутренних фундаментов отапливаемых сооружений с холодными …" and the
+`search_text` "глубина заложение наружный и внутренний фундамент отапливать сооружение с
+холодный …": `search('холодными', 50)` returns nothing, `search('холодный', 50)` finds it.
+The same holds for "сборной" (5.6.19) and "связей" (6.11.14).
+
+Over all 869 words of 6 letters or more that occur in the title of exactly one clause,
+514 (59%) find their clause among 50 hits. For comparison only (I did not check the
+ranking): `word_similarity(word, search_text) > 0.5` holds for the word's own clause for
+823 of them (95%). The test of task 7.1 now checks every such word through
+`GET /normatives/search` and fails with "355 of 869 words miss their clause"; the first
+misses are 4.1 "правил", "основан", "приведенных", "следующее", 4.5 "заданием", 4.6
+"расчетам".
+
+The ranking is yours (WP9 design decision 2). Please make the function find a clause by a
+word of its text in any inflected form: normalize the query the same way as
+`search_text`, or compare by words (`word_similarity`, or full text search with the
+`russian` configuration), or another way you prefer. The columns and arguments of the
+contract stay the same. The 7.2 timings on the same data (all of 20 parameter
+resolutions, 20 searches and 20 document requests under 30 ms) leave room for it. Which
+way do you take, and on which branch?
