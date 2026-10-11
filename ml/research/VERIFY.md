@@ -23,7 +23,7 @@ sudo apt-get install -y poppler-utils        # даёт pdftotext (тексто�
 
 # Postgres локально (порт 5433)
 docker compose -f infra/docker-compose.yml up -d
-export DEC_DATABASE_URL="postgresql://dec:dec@localhost:5433/dec"
+export DEC_DATABASE_URL="postgresql://dec:dec@localhost:5433/dec"  # pragma: allowlist secret
 ```
 
 Проверка, что у PDF есть текстовый слой (иначе это скан, и нужен OCR — вне этого цикла):
@@ -73,7 +73,7 @@ python -m normatives_pipeline.search --json "условие успешного �
 
 ```bash
 cd ml
-export DEC_DATABASE_URL="postgresql://dec:dec@localhost:5433/dec"
+export DEC_DATABASE_URL="postgresql://dec:dec@localhost:5433/dec"  # pragma: allowlist secret
 ../.venv/bin/python -m research.verify_end_to_end "../docs/normative-base/<файл>.pdf"
 ```
 
@@ -145,7 +145,7 @@ cd ml
 
 ```bash
 cd ml
-DEC_DATABASE_URL="postgresql://dec:dec@localhost:5433/dec" ../.venv/bin/python -m pytest tests/ -q
+DEC_DATABASE_URL="postgresql://dec:dec@localhost:5433/dec" ../.venv/bin/python -m pytest tests/ -q  # pragma: allowlist secret
 ../.venv/bin/python -m ruff check src
 ../.venv/bin/python -m mypy src/normatives_pipeline
 # покрытие: pytest-cov / coverage (tests/ + coverage.run.source = src/normatives_pipeline)
@@ -173,7 +173,69 @@ python -m normatives_pipeline.ingest "docs/normative-base/<файл>.pdf"   # 2-
 | pytest скипает корпусные тесты | не найден PDF по `docs/normative-base/` или не задан `DEC_DATABASE_URL` |
 | пустой `latex` в HTML формулы | формула распознана детектором и хранится как `machine-extracted`; OCR-путь отложен (см. `PIPELINE.md`) |
 
-## 9. Что здесь обобщено (почему нет хардкода)
+## 9. Журнал находок (автоматическая проверка)
+
+### 2026-10-11 — Аудит извлечения формул СП 22.13330.2016
+
+Скрипты: `ml/temp/check_formulas.py`, `ml/temp/check_false_positives.py`,
+`ml/temp/check_pilot_formulas.py`.
+
+**Итоги (до исправления):**
+
+| Метрика | Значение |
+|---|---|
+| Страниц | 223 |
+| Всего формул (после дедупликации) | 130 |
+| С LaTeX | 124 (95%) |
+| С нотацией | 98 (75%) |
+| Ложные позитивы (подписи к рисунку) | 3 |
+| Неправильные символы нотации | 11 записей |
+
+**Ложные позитивы — причина и исправление:**
+
+Паттерн `\((\d+)\)\s*$` матчил подписи к рисунку вида `d0(1)` в конце строки (страница 86,
+рисунок 6.5). Исправление: заменён на `(?<!\S)\((\d+)\)\s*$` — lookbehind исключает `(N)`,
+слитное с предыдущим нелатинским/нецифровым символом.
+
+Файл исправления: `ml/configs/parser.toml`, строка `formula_num_res`.
+Тест: `test_extractors_unit.py::test_extract_formulas_rejects_figure_label`.
+
+**После исправления:** 127 формул, 121 с LaTeX (95%). Ложные позитивы со стр. 86 — устранены.
+
+**Качество LaTeX из текстового слоя:**
+
+- Формулы без дробей (`\frac`) — читаемые, реконструктор справляется.
+- Формулы с дробями (например, 5.7 — `R = γc1γc2/k[...]`) — LaTeX деградирует: дробная
+  черта теряется, числитель/знаменатель склеиваются в подиндекс. Пример: фактически выданный
+  LaTeX `'_{M\gammakzb\gammaII+...}'` вместо ожидаемого `\frac{...}{k}\left[...\right]`.
+- **Вывод:** `latex_reconstruct` не строит `\frac`. Для пилота это не критично — formula
+  manifest (`ml/configs/formulas.toml`) перекрывает PDF-LaTeX для всех формул с выражениями.
+  Для остальных формул в БД LaTeX служит для полнотекстового поиска, а не для вычислений.
+
+**Пилотные формулы (WP9):**
+
+- Формула `5.7` (R): LaTeX из PDF плохой, manifest переопределяет → **ОК для пилота**.
+- Формулы `5.6.7#k_z_below`, `5.6.7#k_z_from`: создаются через `_write_synthetic_formulas` из
+  `pilot.toml` — независимо от качества PDF-реконструкции → **ОК**.
+
+**Оставшиеся проблемы (не критичны для WP9):**
+
+1. Ложный позитив `6.10.21#1`: строка `0,8 – при шаге более 5d` распознана как ненумерованная
+   формула. Фильтр по FORMULA_MAX_LEN (120 симв.) не отбрасывает. Требует отдельного анализа.
+2. Формулы приложений Б и В (`Б.2`, `В.2`, `В.3`) не матчатся как нумерованные (паттерны не
+   покрывают кирилличный префикс). Они попадают в unnumbered с синтетическим ID.
+3. Символы нотации: `split_symbols` иногда выдаёт целые фразы вместо идентификаторов
+   (например, `'песков мелких'`, `'здесь N'`, `'8 баллов'`). Это edge cases в NOTATION_RE.
+
+**Рекомендации для отчёта по гипотезам:**
+
+- Гипотеза H1 (пайплайн корректно извлекает формулы): **частично подтверждена** — 95% формул
+  с LaTeX, 3 ложных позитива устранены, пилот работает через manifest.
+- Гипотеза H2 (LaTeX reconstruct достаточен без OCR): **не подтверждена** для дробных формул.
+  Для MVP — приемлемо через manifest. Для полного каталога нужен улучшенный реконструктор или
+  OCR-шаг.
+
+## 10. Что здесь обобщено (почему нет хардкода)
 
 - Путь PDF — единственный вход; обозначение/год/номера извлекаются из документа.
 - Таблица для независимой сверки выбирается по данным (самая крупная нумерованная), не по номеру.
