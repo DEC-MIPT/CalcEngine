@@ -23,10 +23,11 @@ def ingest(path: Path, force: bool = False) -> int:
     designation = text_layer.extract_designation(pages)
     if not designation:
         raise RuntimeError("не удалось извлечь обозначение документа с титульной страницы")
-    edition = text_layer.extract_edition_year(designation)
-    if not edition:
+    edition_year = text_layer.extract_edition_year(designation)
+    if not edition_year:
         raise RuntimeError(f"не удалось извлечь год издания из обозначения {designation!r}")
-    year = int(edition)
+    year = int(edition_year)
+    edition = text_layer.extract_edition_text(pages, designation)
 
     conn = db.connect()
     try:
