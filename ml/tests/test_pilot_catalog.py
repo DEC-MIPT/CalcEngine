@@ -174,13 +174,13 @@ def test_sync_skips_r_binding_when_formula_unconvertible(monkeypatch) -> None:
         pilot_catalog.db, "insert_catalog_bindings",
         lambda conn, doc, rows: captured.update(rows=rows),
     )
-    assert pilot_catalog.sync_pilot_catalog(object(), "X") is True
+    assert pilot_catalog.sync_pilot_catalog(object()) is True
     assert all(row[1] != "r" for row in captured["rows"])
 
 
 def test_sync_without_document_is_noop(monkeypatch) -> None:
     monkeypatch.setattr(pilot_catalog.db, "fetch_document_id", lambda *_a, **_k: None)
-    assert pilot_catalog.sync_pilot_catalog(object(), "СП 00.00000.0000") is False
+    assert pilot_catalog.sync_pilot_catalog(object()) is False
 
 
 def test_binding_one_row_per_parameter_and_no_value_column(pilot_conn) -> None:
@@ -290,16 +290,36 @@ def test_coefficients_and_thresholds_are_stored(pilot_conn) -> None:
 
 
 def test_bind_registry_formula_with_missing_notation_symbol_returns_false(monkeypatch) -> None:
-    """M2: символ дерева без notation entry → отказ (не dimensionless 1)."""
+    """M2: символ дерева без notation entry → отказ, set_formula_catalog не вызывается."""
+    called: list = []
     monkeypatch.setattr(
         pilot_catalog.db, "fetch_formula_by_number",
-        lambda *a, **k: {"id": 1, "expression": "x + y"},
+        lambda *_: {"id": 1, "expression": "x + y"},
     )
     monkeypatch.setattr(
         pilot_catalog.db, "fetch_notation",
-        lambda *a, **k: [{"symbol": "x", "unit": "m", "kind": "output"}],
+        # только x есть в notation; y — символ дерева без записи
+        lambda *_: [{"symbol": "x", "unit": "м", "kind": "output"}],
     )
+    monkeypatch.setattr(pilot_catalog.db, "set_formula_catalog", lambda *_: called.append(1))
     assert pilot_catalog._bind_registry_formula(object(), 1, "9.9") is False
+    assert not called
+
+
+def test_bind_registry_formula_with_all_symbols_present_calls_set_formula_catalog(monkeypatch) -> None:
+    """M2 зеркало: все символы в notation → bind успешен, set_formula_catalog вызван."""
+    called: list = []
+    monkeypatch.setattr(
+        pilot_catalog.db, "fetch_formula_by_number",
+        lambda *_: {"id": 1, "expression": "x"},
+    )
+    monkeypatch.setattr(
+        pilot_catalog.db, "fetch_notation",
+        lambda *_: [{"symbol": "x", "unit": "м", "kind": "output"}],
+    )
+    monkeypatch.setattr(pilot_catalog.db, "set_formula_catalog", lambda *_: called.append(1))
+    assert pilot_catalog._bind_registry_formula(object(), 1, "9.9") is True
+    assert called
 
 
 def test_ingesting_second_document_leaves_pilot_catalog_on_sp22(pilot_conn) -> None:

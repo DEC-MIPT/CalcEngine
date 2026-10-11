@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from conftest import require_test_db_url
 
 from normatives_pipeline import db
 from normatives_pipeline.config import output_config
@@ -11,10 +12,8 @@ from normatives_pipeline.search import query
 
 @pytest.fixture(scope="module")
 def conn():
-    try:
-        c = db.connect()
-    except Exception as exc:  # noqa: BLE001
-        pytest.skip(f"нет БД: {exc}")
+    require_test_db_url()
+    c = db.connect()
     db.init_schema(c)
     yield c
     c.close()

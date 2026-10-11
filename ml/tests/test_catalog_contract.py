@@ -7,6 +7,7 @@ from urllib.parse import urlsplit
 
 import psycopg2  # type: ignore[import-untyped]
 import pytest
+from conftest import require_test_db_url
 
 from normatives_pipeline import catalog_contract, db
 
@@ -38,6 +39,7 @@ EXPECTED = {
 
 @pytest.fixture()
 def conn():
+    require_test_db_url()
     connection = db.connect()
     db.init_schema(connection)
     catalog_contract.ensure_catalog_read(connection, password=PASSWORD)

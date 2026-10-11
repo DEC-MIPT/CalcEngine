@@ -8,7 +8,7 @@
 
 Запуск:
 
-    DEC_DATABASE_URL=postgresql://dec:dec@localhost:5433/dec \
+    DEC_DATABASE_URL=postgresql://dec:dec@localhost:5433/dec \  # pragma: allowlist secret
       python -m normatives_pipeline.parser.cyrillic            # только отчёт
     ... python -m normatives_pipeline.parser.cyrillic --apply  # исправить id в БД
 """

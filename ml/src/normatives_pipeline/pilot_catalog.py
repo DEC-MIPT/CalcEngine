@@ -5,8 +5,7 @@
 метода, — но никогда значение: значения берутся из извлечённых данных (`coefficient`)
 или из текста пункта. Backend читает только представления `catalog_read`.
 
-Все записи ниже `machine-extracted`/`unverified`, кроме формулы R: она приходит из
-реестра формул (`formulas.toml`, human-verified), как и раньше.
+Все записи `machine-extracted`/`unverified`; статус поднимается через WP3.
 
 Единицы значений переводятся из единиц реестра/текста в символы словаря backend
 (`app/schemas/units.py`); единица вне словаря не даёт сохранить привязку.
@@ -174,9 +173,10 @@ def _bound_rows(cells: list[dict]) -> list[tuple]:
     headings = [heading for heading, _ in parse_heading_rows(cells)]
     if not headings:
         return []
+    table_ref = f"табл. {TABLE_M}"
     return [
-        (CALCULATION_TYPE, "phi_II", CLAUSE, "min", min(headings), "deg", True),
-        (CALCULATION_TYPE, "phi_II", CLAUSE, "max", max(headings), "deg", True),
+        (CALCULATION_TYPE, "phi_II", table_ref, "min", min(headings), "deg", True),
+        (CALCULATION_TYPE, "phi_II", table_ref, "max", max(headings), "deg", True),
     ]
 
 
@@ -261,13 +261,13 @@ def notation_result_symbol(notation: list[dict]) -> str | None:
     return notation[0]["symbol"] if notation else None
 
 
-def sync_pilot_catalog(conn: Any, designation: str = DESIGNATION) -> bool:
+def sync_pilot_catalog(conn: Any) -> bool:
     """Заполняет каталог данными пилота идемпотентно.
 
     Returns:
         ``True``, если документ найден и данные записаны; иначе ``False``.
     """
-    doc_id = db.fetch_document_id(conn, designation)
+    doc_id = db.fetch_document_id(conn, DESIGNATION)
     if doc_id is None:
         return False
 
@@ -275,7 +275,7 @@ def sync_pilot_catalog(conn: Any, designation: str = DESIGNATION) -> bool:
 
     db.delete_catalog_rows(conn, CALCULATION_TYPE)
     available = _write_synthetic_formulas(conn, doc_id, manifest)
-    if _bind_registry_formula(conn, doc_id, "5.7"):
+    if "5.7" not in available and _bind_registry_formula(conn, doc_id, "5.7"):
         available.add("5.7")
 
     db.insert_catalog_bindings(conn, doc_id, binding_rows(available))

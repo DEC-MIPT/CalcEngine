@@ -23,16 +23,19 @@ def require_test_db_url() -> str:
 
 @pytest.fixture(scope="session", autouse=True)
 def _sync_ingest_url() -> Generator[None, None, None]:
-    """Forward DEC_TEST_NORMATIVES_DATABASE_URL into DEC_DATABASE_URL when not set.
+    """Always point DEC_DATABASE_URL at the test database for the duration of the suite.
 
-    ingest() reads DEC_DATABASE_URL internally; tests connect via require_test_db_url()
-    (DEC_TEST_NORMATIVES_DATABASE_URL). Without this, ingest() writes to a different
-    database than the one the test fixtures query.
+    ingest() reads DEC_DATABASE_URL internally. Without overwriting it unconditionally,
+    a machine where DEC_DATABASE_URL points at the working 'dec' would let tests write
+    into the production database even when DEC_TEST_NORMATIVES_DATABASE_URL is set.
     """
     test_url = os.environ.get("DEC_TEST_NORMATIVES_DATABASE_URL")
-    already_set = "DEC_DATABASE_URL" in os.environ
-    if test_url and not already_set:
+    previous = os.environ.get("DEC_DATABASE_URL")
+    if test_url:
         os.environ["DEC_DATABASE_URL"] = test_url
     yield
-    if test_url and not already_set:
-        del os.environ["DEC_DATABASE_URL"]
+    if test_url:
+        if previous is None:
+            del os.environ["DEC_DATABASE_URL"]
+        else:
+            os.environ["DEC_DATABASE_URL"] = previous
