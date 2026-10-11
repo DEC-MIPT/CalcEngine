@@ -37,7 +37,7 @@ Branch: `feature/normative-pipeline/data` (Egor; all pipeline changes share this
 - [x] 6.2 [Agent: spec-reviewer] review; resolve blockers
 - [x] 6.3 [Agent: tester] GO/NO-GO
 - [x] 6.4 [Egor] merge to `develop`
-- [ ] 6.5 [Agent: spec-keeper] sync and archive
+- [x] 6.5 [Agent: spec-keeper] sync and archive
 
 ## Dependencies
 
