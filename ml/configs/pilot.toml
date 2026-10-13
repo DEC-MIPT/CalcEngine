@@ -40,6 +40,14 @@ unit = "m"
 clause = "5.6.7"
 
 [[formula]]
+parameter = "r"
+number = "5.7"
+latex = "R = \\frac{\\gamma_{c1}\\gamma_{c2}}{k}\\left[M_{\\gamma} k_z b \\gamma_{II} + M_q d_1 \\gamma'_{II} + (M_q - 1) d_b \\gamma'_{II} + M_c c_{II}\\right]"
+expression = "(gamma_c1*gamma_c2/k)*(M_gamma*k_z*b*gamma_II + M_q*d_1*gamma_II_prime + (M_q - 1)*d_b*gamma_II_prime + M_c*c_II)"
+result_symbol = "R"
+units = { R = "kPa", gamma_c1 = "1", gamma_c2 = "1", k = "1", M_gamma = "1", k_z = "1", b = "m", gamma_II = "kN/m3", M_q = "1", d_1 = "m", gamma_II_prime = "kN/m3", d_b = "m", M_c = "1", c_II = "kPa" }
+
+[[formula]]
 parameter = "k_z_below"
 number = "5.6.7#k_z_below"
 latex = "k_z = 1"

@@ -17,8 +17,8 @@ DESIGNATION = "СП 31.13330.2021"
 
 @pytest.fixture(scope="module")
 def conn():
-    url = require_test_db_url()
-    c = db.connect(url)
+    require_test_db_url()
+    c = db.connect()
     db.init_schema(c)
     yield c
     c.close()
@@ -78,7 +78,7 @@ def test_ingest_idempotent(conn) -> None:
     assert not db.document_exists(conn, DESIGNATION)
 
 
-def test_ingest_manifest_formula_is_unverified_when_catalog_bound(conn) -> None:
+def test_ingest_all_formulas_are_unverified(conn) -> None:
     doc = REPO / "docs/normative-base" / "СП 22.13330.2016.pdf"
     if not doc.exists():
         pytest.skip(f"нет файла: {doc}")
@@ -88,12 +88,15 @@ def test_ingest_manifest_formula_is_unverified_when_catalog_bound(conn) -> None:
 
     with conn.cursor() as cur:
         cur.execute(
-            "SELECT f.status, f.provenance FROM formula f "
-            "JOIN document d ON d.id = f.document_id "
-            "WHERE d.designation = %s AND f.number = %s",
-            (designation, "5.7"),
+            "SELECT COUNT(*) AS total, "
+            "SUM(CASE WHEN f.status != 'unverified' THEN 1 ELSE 0 END) AS not_unverified, "
+            "SUM(CASE WHEN f.provenance != 'machine-extracted' THEN 1 ELSE 0 END) AS not_machine "
+            "FROM formula f JOIN document d ON d.id = f.document_id "
+            "WHERE d.designation = %s",
+            (designation,),
         )
         row = cur.fetchone()
-    assert row == {"status": "unverified", "provenance": "machine-extracted"}
+    assert row["not_unverified"] == 0, "все формулы должны быть unverified"
+    assert row["not_machine"] == 0, "все формулы должны быть machine-extracted"
 
     db.delete_document(conn, designation)

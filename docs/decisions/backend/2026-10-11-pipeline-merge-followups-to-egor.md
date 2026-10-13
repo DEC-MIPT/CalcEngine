@@ -127,3 +127,61 @@ word of its text in any inflected form: normalize the query the same way as
 contract stay the same. The 7.2 timings on the same data (all of 20 parameter
 resolutions, 20 searches and 20 document requests under 30 ms) leave room for it. Which
 way do you take, and on which branch?
+
+## Answers
+
+_Egor, 2026-10-13._
+
+### Item 1 — `fix/normative-catalog/data` into `develop`
+
+Merged into `fix/normative-catalog/data` as commit `817f4a3` (2026-10-13).
+Conflicts in 14 files resolved preserving M1 (no `formulas.toml`, everything
+`unverified`/`machine-extracted`), M2 (dynamic database name), m7
+(`extract_edition_text`), m3-m5 (`commit=True`), B1 (`require_test_db_url`).
+Branch is ready for review.
+
+### Item 2 — Data for task WP9 7.1
+
+We run the ingest ourselves (data zone, as agreed). Option (a) is also fine:
+after `fix/normative-catalog/data` merges into `develop`, you can run the
+ingest yourself on your machine following `normatives-pilot-usage-akim.md`:
+
+    DEC_DATABASE_URL=postgresql://dec:<password>@localhost:5433/dec \
+    DEC_NORMATIVES_READER_PASSWORD=<reader-password> \
+        python -m normatives_pipeline.ingest --force \
+        "docs/normative-base/СП 22.13330.2016.pdf"
+
+PDF filename confirmed: `docs/normative-base/СП 22.13330.2016.pdf`.
+Reader password: the same value used for `DEC_NORMATIVES_READER_PASSWORD` on
+your machine. If you prefer a dump instead, let us know.
+
+### Item 3 — `_table_caption` bug in `extractors.py`
+
+Bug reproduced on our machine with the same file and the same behaviour (pages
+33 and 178, `ValueError: negative width or height`). Fixed in
+`fix/normative-catalog/data` commit `98e2e31`: added early guard
+`if top <= 0: return ""` in `_table_caption`, with test
+`test_table_caption_negative_top_returns_empty`.
+
+Ingest of the consolidated PDF completed successfully with the fix (confirmed
+2026-10-13 on `dec_normatives_test`): 1 document (СП 22.13330.2016, edition
+"2016 с Изм. N 1, 2, 3, 4, 5"), 622 clauses, 120 formulas, 2955 coefficient
+cells, 11 pilot catalog bindings. The two header pseudo-tables on pages 33 and
+178 are now skipped (empty caption), and the ingest completes without error.
+
+Also cherry-picked into `fix/normative-catalog/data` from `fix/formula-extractor/data`:
+commit `e78143d` — rejects figure labels as formula numbers (pattern
+`(?<!\S)\((\d+)\)` in `parser.toml`); before: 130 formulas (3 false positives
+from figure 6.5), after: 120 unique formulas stored, false positives eliminated.
+
+### Item 4 — Search misses inflected words
+
+Fixed in `fix/normative-catalog/data` by changing `VIEWS_SQL` in
+`catalog_contract.py`: added `OR word_similarity(query, search_text) > 0.3`
+to the WHERE clause for `clause` and `formula`, and replaced the rank with
+`GREATEST(similarity(...), word_similarity(...))`. The function is
+recreated idempotently on the next `ensure_catalog_read` call. Akim's
+measurements showed `word_similarity > 0.5` gives 95% coverage (823/869
+words); threshold 0.3 is broader. Test `test_search_finds_inflected_word` in
+`test_catalog_contract.py` inserts a clause with a lemma and searches by its
+inflected form (`холодными` → `холодный`).

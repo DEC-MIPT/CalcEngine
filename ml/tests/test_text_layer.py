@@ -34,6 +34,23 @@ def test_extract_edition_year_takes_last_of_several() -> None:
     assert text_layer.extract_edition_year("СП 22.13330.2016 (2019)") == "2019"
 
 
+def test_extract_edition_text_with_changes() -> None:
+    page = (
+        "СП 22.13330.2016 Основания зданий и сооружений. "
+        "Актуализированная редакция СНиП 2.02.01-83* "
+        "(с Изменениями N 1, 2, 3, 4, 5)\n"
+        "Применяется с 17.06.2017 взамен СП 22.13330.2011\n"
+    )
+    result = text_layer.extract_edition_text([page], "СП 22.13330.2016")
+    assert result == "2016 с Изм. N 1, 2, 3, 4, 5"
+
+
+def test_extract_edition_text_no_changes() -> None:
+    page = "СП 22.13330.2016 Основания зданий и сооружений.\n"
+    result = text_layer.extract_edition_text([page], "СП 22.13330.2016")
+    assert result == "2016"
+
+
 def test_classify_text_and_scan() -> None:
     assert text_layer.classify(["x" * text_layer.MIN_TEXT_CHARS]) == "text"
     assert text_layer.classify(["мало текста"]) == "scan"

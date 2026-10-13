@@ -595,7 +595,9 @@ def delete_catalog_rows(conn: Any, calculation_type: str, commit: bool = True) -
         conn.commit()
 
 
-def insert_catalog_bindings(conn: Any, doc_id: int, rows: list[tuple], commit: bool = True) -> None:
+def insert_catalog_bindings(
+    conn: Any, doc_id: int, rows: list[tuple], commit: bool = True
+) -> None:
     with conn.cursor() as cur:
         execute_values(
             cur,
@@ -621,7 +623,9 @@ def insert_catalog_bindings(conn: Any, doc_id: int, rows: list[tuple], commit: b
         conn.commit()
 
 
-def insert_table_values(conn: Any, doc_id: int, rows: list[tuple], commit: bool = True) -> None:
+def insert_table_values(
+    conn: Any, doc_id: int, rows: list[tuple], commit: bool = True
+) -> None:
     with conn.cursor() as cur:
         execute_values(
             cur,
@@ -637,7 +641,9 @@ def insert_table_values(conn: Any, doc_id: int, rows: list[tuple], commit: bool 
         conn.commit()
 
 
-def insert_threshold_values(conn: Any, doc_id: int, rows: list[tuple], commit: bool = True) -> None:
+def insert_threshold_values(
+    conn: Any, doc_id: int, rows: list[tuple], commit: bool = True
+) -> None:
     with conn.cursor() as cur:
         execute_values(
             cur,
@@ -653,7 +659,9 @@ def insert_threshold_values(conn: Any, doc_id: int, rows: list[tuple], commit: b
         conn.commit()
 
 
-def insert_check_refs(conn: Any, doc_id: int, rows: list[tuple], commit: bool = True) -> None:
+def insert_check_refs(
+    conn: Any, doc_id: int, rows: list[tuple], commit: bool = True
+) -> None:
     with conn.cursor() as cur:
         execute_values(
             cur,
@@ -668,7 +676,9 @@ def insert_check_refs(conn: Any, doc_id: int, rows: list[tuple], commit: bool = 
         conn.commit()
 
 
-def insert_method_bounds(conn: Any, doc_id: int, rows: list[tuple], commit: bool = True) -> None:
+def insert_method_bounds(
+    conn: Any, doc_id: int, rows: list[tuple], commit: bool = True
+) -> None:
     with conn.cursor() as cur:
         execute_values(
             cur,

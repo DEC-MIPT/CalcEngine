@@ -43,6 +43,31 @@ def test_extract_formulas_numbered() -> None:
     assert [f.number for f in formulas] == ["5.1"]
 
 
+def test_extract_formulas_rejects_figure_label() -> None:
+    # "d0(1)" at end of line is a figure label, not a formula number — must not match.
+    page = (
+        "6.3.12 Схема для расчета рассоления основания\n"
+        "                                       d0(1)\n"
+        "                                       d0(2)\n"
+        "                                       d0(3)\n"
+        "1 – граница слоёв; 2 – расчётный слой; 3 – расчётный слой\n"
+    )
+    formulas = extractors.extract_formulas([page])
+    assert formulas == [], f"ложные позитивы: {[f.number for f in formulas]}"
+
+
+def test_extract_formulas_accepts_standalone_integer_number() -> None:
+    # " (1)" preceded by whitespace is a real formula number.
+    page = (
+        "3.1 Определение\n"
+        "Величину вычисляют по формуле\n"
+        "    s = a + b                                        (1)\n"
+        "где a – первое слагаемое; b – второе слагаемое.\n"
+    )
+    formulas = extractors.extract_formulas([page])
+    assert any(f.number == "1" for f in formulas), f"номер не найден: {[f.number for f in formulas]}"
+
+
 def test_associate_formulas_to_clauses() -> None:
     clauses = extractors.extract_clauses(PAGES)
     formulas = extractors.associate_formulas_to_clauses(
