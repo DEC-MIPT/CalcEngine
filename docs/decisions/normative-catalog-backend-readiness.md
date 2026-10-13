@@ -587,3 +587,44 @@ The 23 skipped tests are the 12 corpus tests in `test_extractors_corpus.py` (ski
 **GO** for `normatives-parser` (tasks 4.1 and 5.3).
 
 Conditions: all 200 non-corpus non-postgres tests pass with exit 0; `retrieval.py` 100%; all `formulas/` modules 100%; `latex_reconstruct.py` coverage is ≥98% with PDF corpus (all 13 original missed branch pairs are now covered by unit tests in `test_latex_reconstruct_unit.py`); the `_table_caption` negative-top guard is covered; `openspec validate --strict` passes; all DOD criteria are met. The fix branch (`fix/normative-parser/ml`) is ready to merge after the remaining review step (AGENTS.md section 2, step 7).
+
+## Section 4: normatives-collector tester verdict (fix/normative-collector/data, 2026-10-13)
+
+- Branch: `fix/normative-collector/data`, latest commit `df7c9a6`
+- Change: `openspec/changes/normatives-collector/`
+- Tester: `tester` agent, run 2026-10-13
+
+### Test run
+
+Command: `/home/malkinte/.pyenv/versions/3.12.12/bin/pytest tests/test_collector.py --cov=src/normatives_pipeline/collector --cov-report=term-missing` from `/home/malkinte/CalcEngine/ml`.
+
+Result: **34 passed, 0 failed, 0 errors.** Exit code 0. All HTTP calls mocked; no database or network required.
+
+### Coverage
+
+| File | Stmts | Miss | Branch | BrPart | Cover |
+|---|---|---|---|---|---|
+| `collector/__init__.py` | 1 | 0 | 0 | 0 | 100% |
+| `collector/__main__.py` | 1 | 0 | 0 | 0 | 100% |
+| `collector/cli.py` | 32 | 0 | 8 | 0 | 100% |
+| `collector/models.py` | 11 | 0 | 0 | 0 | 100% |
+| `collector/repositories/__init__.py` | 4 | 0 | 0 | 0 | 100% |
+| `collector/repositories/faufcc.py` | 27 | 0 | 2 | 0 | 100% |
+| `collector/repositories/fgiscs.py` | 27 | 0 | 4 | 0 | 100% |
+| `collector/repositories/pravo.py` | 28 | 0 | 6 | 0 | 100% |
+| `collector/services.py` | 33 | 0 | 8 | 0 | 100% |
+| `collector/storage.py` | 19 | 0 | 4 | 0 | 100% |
+| **TOTAL** | **183** | **0** | **32** | **0** | **100%** |
+
+### Lint and types
+
+- `ruff check src/normatives_pipeline/collector/ tests/test_collector.py`: **All checks passed.**
+- `mypy src/normatives_pipeline/collector/ tests/test_collector.py --ignore-missing-imports`: **Success: no issues found in 11 source files.**
+
+### Verdict
+
+- tests: 34 pass / 0 fail
+- coverage: 100% branch (183 stmts, 32 branches, 0 missed)
+- UI/UX: N/A (no UI changes)
+- verdict: **GO**
+- date: 2026-10-13
