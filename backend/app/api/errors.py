@@ -10,6 +10,7 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from app.core.exceptions import (
     CalculationTypeNotRegisteredError,
+    CatalogUnavailableError,
     DatabaseUnavailableError,
     DECError,
     InputValidationError,
@@ -28,8 +29,9 @@ DEC_ERRORS: tuple[tuple[type[DECError], int, str], ...] = (
     (UnitError, 422, "invalid_input"),
     (ParameterSourceUnavailableError, 503, "parameter_source_unavailable"),
     (DatabaseUnavailableError, 503, "database_unavailable"),
+    (CatalogUnavailableError, 503, "catalog_unavailable"),
 )
-"""Таблица ``calculation-api`` "Error responses"; любая другая ошибка — ``500 internal_error``."""
+"""Таблица ``calculation-api`` "Error responses" и строка ``catalog_unavailable`` из ``normative-catalog-backend``; любая другая ошибка — ``500 internal_error``."""
 
 HTTP_CODES = {404: "not_found", 405: "method_not_allowed"}
 
@@ -39,6 +41,7 @@ MESSAGES = {
     "validation_error": "The request does not match its schema.",
     "invalid_input": "The inputs do not fit the calculation type.",
     "database_unavailable": "The application database is not available.",
+    "catalog_unavailable": "The normative catalog is not available.",
     "internal_error": "Internal server error.",
 }
 """Фиксированные тексты, чтобы ни одно сообщение не повторяло значение, присланное клиентом."""
@@ -55,8 +58,14 @@ STATIC_MESSAGE_TYPES = frozenset(
         "extra_forbidden",
         "string_type",
         "string_too_short",
+        "string_too_long",
         "float_type",
         "float_parsing",
+        "int_type",
+        "int_parsing",
+        "greater_than",
+        "greater_than_equal",
+        "less_than_equal",
         "finite_number",
         "dict_type",
         "model_type",

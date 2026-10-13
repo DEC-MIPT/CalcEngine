@@ -48,10 +48,12 @@ class Hit:
     score: float
 
 
-class EmbeddingIndex:
+class EmbeddingIndex:  # pragma: no cover
+    """Embedding-based index; requires optional `sentence_transformers` dep."""
+
     def __init__(self, model_name: str = "cointegrated/rubert-tiny2") -> None:
-        from sentence_transformers import (
-            SentenceTransformer,  # type: ignore[import-untyped]
+        from sentence_transformers import (  # type: ignore[import-untyped]
+            SentenceTransformer,
         )
 
         self._model = SentenceTransformer(model_name)

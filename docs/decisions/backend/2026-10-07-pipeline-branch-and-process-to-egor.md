@@ -1,7 +1,8 @@
 # Pipeline branch and process questions (Akim to Egor, 2026-10-07)
 
 - From: Akim (backend zone). To: Egor (data zone).
-- Status: open; answers go into this file under `## Answers` (AGENTS.md section 7).
+- Status: answered by Egor on 2026-10-11 (`## Answers` below); follow-up questions go
+  into a new file (AGENTS.md section 7).
 - Russian version: `2026-10-07-pipeline-branch-and-process-to-egor-rus.md`.
 
 These come from reading your commits of 2026-10-07 (`2a95a8b`, `42c7a6d`,
@@ -132,3 +133,57 @@ Task 4.1 asks you to agree before anything is applied, because the files are sha
 
 Do you agree, or what would you change? The edits are applied by me in one commit on
 `develop` after your answer, and the archive of WP4 syncs the delta.
+
+## Answers (Egor, 2026-10-11)
+
+### 1. One branch for three changes
+
+Option (a). `normatives-formula-contract` owns the feature `normative-pipeline` and its
+branch; `normatives-parser` and `normatives-collector` reference it in their Dependencies.
+No rule change needed.
+
+Branch name typo fixed in `tasks.md`: `feature/normatives-pipeline/data` →
+`feature/normative-pipeline/data`.
+
+### 2. Task 1.6 of `normatives-formula-contract`
+
+Agree. Task 1.6 reworded in `tasks.md` (same commit as this answer): every formula and
+coefficient is stored `unverified` / `machine-extracted`; WP3 raises a status. M1 is kept
+when `feature/normative-pipeline/data` merges after `fix/normative-catalog/data`.
+
+### 3. Coverage in the `tester` verdict
+
+Agree on both points. Password replaced with a placeholder in `tester-verdict.md`
+(same commit). Full branch coverage of the whole `normatives_pipeline` package (including
+catalog functions and database tests) will be measured and added to the verdict after
+`fix/normative-catalog/data` is merged and the DB tests run cleanly.
+
+### 4. Root files on the pipeline branch
+
+`.python-version` reverted to `3.12.3` on `feature/normative-pipeline/data` (my runtime
+is pinned in the untracked `ml/.python-version`). `python-design-patterns` will be
+recorded in a `record-installed-skills-egor` OpenSpec change.
+
+### 5. `.claude/settings.json` in AGENTS.md section 8
+
+Agree with your proposed wording.
+
+### 6. `CLAUDE.local.md`
+
+Created locally (untracked). Agree with the proposed session-start logic.
+
+### 7. The consolidated text of СП 22.13330.2016
+
+Send via Telegram. File goes to `docs/normative-base/` (untracked). Re-ingestion the
+same day I receive it; `document.edition` updated to name the consolidated text with its
+amendment list and date, stays `unverified` until WP3.
+
+### 8. WP9 task 8.1
+
+Agree with all three notes as written.
+
+### 9. WP4 task 4.1: correctness gate
+
+Agree. The pipeline stores normatives and computes nothing, so the correctness gate does
+not apply to any change in my zone. The proposed wording for `tester.md`,
+`test-process` skill, and `development-process` delta is accepted as written.

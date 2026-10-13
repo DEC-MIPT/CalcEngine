@@ -69,7 +69,7 @@ def table(step_id: str, *references: NormRef) -> TableStep:
     entry = TableValue(
         symbol=step_id, latex=step_id, value=QuantityValue(value=1.0, unit="1"), norm_refs=references
     )
-    return table_step(step_id, entry, {})
+    return table_step(step_id, entry)
 
 
 def check(step_id: str = "check", *references: NormRef) -> CheckStep:

@@ -50,6 +50,7 @@ class FaufccRepository:
             source="faufcc",
             designation=(entry.get("number") or "").strip(),
             title=(entry.get("name") or "").strip(),
+            edition=(entry.get("year") or "").strip() or None,
             download_url=(asset.get("links") or {}).get("download"),
             state=state.get("title"),
         )

@@ -12,6 +12,7 @@ from app.core.exceptions import DatabaseUnavailableError
 from app.db.session import get_engine, get_session_factory
 from app.engine.registry import CalculatorRegistry
 from app.services.calculation import CalculationService, calculation_service
+from app.services.normatives import NormativesService
 
 _FACTORY_LOCK = threading.Lock()
 
@@ -95,3 +96,17 @@ def get_service(
         sources=state.sources,
         validated_ranges=state.validated_ranges,
     )
+
+
+def get_normatives_service(request: Request) -> NormativesService:
+    """Сервис каталога норм на фабрике сессий каталога приложения.
+
+    Базу ``dec_app`` не открывает: эндпоинтам ``/normatives`` она не нужна.
+
+    Args:
+        request: текущий запрос; из него берётся фабрика сессий каталога.
+
+    Returns:
+        Сервис поиска и чтения документов каталога.
+    """
+    return NormativesService(request.app.state.catalog)

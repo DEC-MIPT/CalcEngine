@@ -263,8 +263,8 @@ Zone-to-agent mapping:
 
 - Claude Code: `.claude/agents/*.md` (canonical), `.claude/commands/`, `.claude/skills/`.
   Claude Code does not read `AGENTS.md`; `CLAUDE.md` imports it and adds nothing that
-  contradicts it. Claude-only settings live in `.claude/settings.json` (machine-specific,
-  not committed to the repository).
+  contradicts it. Shared project settings live in `.claude/settings.json` (committed);
+  machine-specific settings in `.claude/settings.local.json` (ignored).
 - Kilo Code: `.kilo/agent/*.md`, `.kilo/skills/*/SKILL.md`,
   `.kilocode/skills/*/SKILL.md`, `.kilocode/workflows/*.md`. Kilo reads `AGENTS.md`
   natively. Kept as a secondary mirror for fallback use.

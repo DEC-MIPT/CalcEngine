@@ -145,6 +145,64 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/normatives/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search Normatives
+         * @description Ищет документы, пункты и формулы каталога (``normatives-catalog`` "Normative search endpoint").
+         *
+         *     Текст уходит в базу связанным параметром как есть, без транслитерации; ни ответ, ни
+         *     строка лога его не повторяют.
+         *
+         *     Args:
+         *         q: текст поиска.
+         *         service: сервис каталога норм.
+         *         limit: наибольшее число совпадений, от 1 до 50.
+         *
+         *     Returns:
+         *         Совпадения в порядке ранга каталога; ``{"hits": []}``, если их нет.
+         */
+        get: operations["search_normatives_normatives_search_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/normatives/documents/{document_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read Normative Document
+         * @description Возвращает документ каталога с пунктами (``normatives-catalog`` "Normative document endpoint").
+         *
+         *     Args:
+         *         document_id: положительный идентификатор документа.
+         *         service: сервис каталога норм.
+         *
+         *     Returns:
+         *         Документ с пунктами в порядке документа.
+         */
+        get: operations["read_normative_document_normatives_documents__document_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -240,10 +298,42 @@ export interface components {
             passed: boolean;
         };
         /**
+         * ClauseView
+         * @description Пункт документа в ответе ``GET /normatives/documents/{document_id}``.
+         */
+        ClauseView: {
+            /** Number */
+            number: string;
+            /** Title */
+            title: string | null;
+            /** Page */
+            page: number | null;
+        };
+        /**
          * Dimension
          * @enum {string}
          */
         Dimension: "dimensionless" | "length" | "area" | "force" | "pressure" | "specific_weight" | "angle";
+        /**
+         * DocumentView
+         * @description Документ каталога со своими пунктами в порядке документа (спецификация "Normative document endpoint").
+         */
+        DocumentView: {
+            /** Document Id */
+            document_id: number;
+            /** Designation */
+            designation: string;
+            /** Title */
+            title: string;
+            /** Edition */
+            edition: string;
+            /** Year */
+            year: number | null;
+            /** Source Url */
+            source_url: string | null;
+            /** Clauses */
+            clauses: components["schemas"]["ClauseView"][];
+        };
         /**
          * EngineerRule
          * @description Правило, которое инженер-проектировщик задаёт там, где норма его не даёт.
@@ -499,6 +589,35 @@ export interface components {
              * @enum {string}
              */
             mode: "half_up" | "half_even";
+        };
+        /**
+         * SearchHit
+         * @description Одно совпадение поиска по каталогу (спецификация "Normative search endpoint").
+         */
+        SearchHit: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "document" | "clause" | "formula";
+            /** Document Id */
+            document_id: number;
+            /** Designation */
+            designation: string;
+            /** Edition */
+            edition: string;
+            /** Number */
+            number: string | null;
+            /** Title */
+            title: string | null;
+        };
+        /**
+         * SearchResults
+         * @description Ответ ``GET /normatives/search``: совпадения в порядке ранга, не больше ``limit``.
+         */
+        SearchResults: {
+            /** Hits */
+            hits: components["schemas"]["SearchHit"][];
         };
         /**
          * Signatory
@@ -806,6 +925,96 @@ export interface operations {
                 };
             };
             /** @description `parameter_source_unavailable` or `database_unavailable`. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    search_normatives_normatives_search_get: {
+        parameters: {
+            query: {
+                q: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchResults"];
+                };
+            };
+            /** @description `validation_error`: a query or path parameter is outside its limits. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description `catalog_unavailable`: the normative catalog is not configured or cannot be reached. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    read_normative_document_normatives_documents__document_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentView"];
+                };
+            };
+            /** @description `not_found`: the catalog holds no document with this id. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description `validation_error`: a query or path parameter is outside its limits. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description `catalog_unavailable`: the normative catalog is not configured or cannot be reached. */
             503: {
                 headers: {
                     [name: string]: unknown;

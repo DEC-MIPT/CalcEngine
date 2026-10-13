@@ -73,7 +73,7 @@ def normalize_symbol(raw: str) -> tuple[str, str] | None:
         return None
 
     chars = [ch for ch in s if ch != "´"]
-    if not chars:
+    if not chars:  # pragma: no cover
         return None
 
     base = _char_latex(chars[0])

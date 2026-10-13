@@ -10,6 +10,15 @@ PARAMS_ROOT = Path(__file__).resolve().parents[2] / "params"
 
 class Settings(BaseSettings):
     dec_app_database_url: SecretStr = Field(validation_alias="DEC_APP_DATABASE_URL")
+
+
+class NormativesSettings(BaseSettings):
+    """Подключение к каталогу норм; поле не обязательно (``normative-catalog-backend`` design.md, решение 4).
+
+    Единственный читатель ``DEC_NORMATIVES_DATABASE_URL``: каталог работает без
+    ``DEC_APP_DATABASE_URL``, а без этой переменной отвечает ``503 catalog_unavailable``.
+    """
+
     dec_normatives_database_url: SecretStr | None = Field(
         default=None, validation_alias="DEC_NORMATIVES_DATABASE_URL"
     )

@@ -7,7 +7,10 @@ value depends on no input. Before it uses a table value with a heading value, th
 SHALL convert the heading value to the base unit of the input named by the heading
 symbol, with the same conversion the parameter source uses for the selection, and SHALL
 confirm that it equals that input in its base unit. A heading symbol that names no input
-of the type SHALL make the engine raise a calculation error. The table value's trace
+of the type SHALL make the engine raise a calculation error. The calculator SHALL name
+the input by which its method selects each table value, or none; a table value whose
+headings differ from that, such as a value the method selects by an input that comes
+without its heading, SHALL make the engine raise a calculation error. The table value's trace
 step SHALL list the heading symbol with the heading value as its substitution. This
 keeps the engine pure: it looks nothing up and only confirms the selection that the
 parameter source made (`normatives-catalog` "Table value selection by heading").
@@ -38,6 +41,14 @@ parameter source made (`normatives-catalog` "Table value selection by heading").
 - **THEN** the engine's confirmation passes for the same input
 
 #### Scenario: A table value without a heading
-- **WHEN** the engine receives a table value with no heading value
+- **WHEN** the engine receives a table value with no heading value, and the method
+  selects that value by no input
 - **THEN** the engine uses the value without a comparison, and its step has no
   substitution
+
+#### Scenario: Headings other than the method's
+- **WHEN** the engine receives a table value that the method selects by an input but
+  that has no heading or the heading of another input, or a table value that the method
+  selects by no input but that has a heading
+- **THEN** the engine raises a calculation error before the step is written, the
+  response is `500` with code `internal_error`, and nothing is stored
