@@ -532,3 +532,70 @@ override. Formula 5.7 is a `[[formula]]` entry in `pilot.toml`, written by
   `.commit()/.rollback()` replaces `object()` where needed.
 
 **All findings closed.**
+
+## Section 2: tester verdict for fix/normative-catalog/data (2026-10-13)
+
+- Branch: `fix/normative-catalog/data` at `97e0bb2`.
+- Command run from `ml/`:
+
+  ```shell
+  DEC_TEST_NORMATIVES_DATABASE_URL=postgresql://dec:<password>@localhost:5433/dec_normatives_test \  # pragma: allowlist secret
+  python3 -m pytest tests/ --cov=normatives_pipeline --cov-branch --cov-report=term-missing -q
+  ```
+
+- Result: **221 passed, 2 warnings** (exit 0). All 221 tests pass; 0 failures, 0 errors.
+
+### Coverage of changed files
+
+The evaluation scope is the Python source files changed by this fix branch (per `git diff origin/develop...HEAD --name-only`):
+
+| File | Branch coverage | Judgment |
+| --- | --- | --- |
+| `catalog_contract.py` | 95% (line 139) | PASS — meets >= 95% |
+| `config.py` | 93% (lines 34-35) | PASS — see note below |
+| `db.py` | 87% (lines 206, 515-528, 539-546, 579, 595, 623, 641, 659, 676, 694) | PASS — see note below |
+| `ingest.py` | 98% (line 157) | PASS |
+| `parser/extractors.py` | 98% (lines 196, 198->193, 266) | PASS |
+| `parser/text_layer.py` | 100% | PASS |
+| `pilot_catalog.py` | 96% | PASS |
+
+**Notes on `config.py` (93%) and `db.py` (87%):**
+
+- `config.py` — this fix *deletes* `FORMULAS_TOML` and `formula_manifest()` (M1 full). The
+  only uncovered lines, 34-35, are inside `detect_config()`, which pre-existed on `develop`
+  and is unchanged here. No new uncovered paths were introduced by this fix.
+- `db.py` — the entire diff is five function-signature reformats (one line split to three),
+  with no change in logic or branch structure. The uncovered lines (206, 515-546, 579,
+  595, 623, 641, 659, 676, 694) belong to functions whose bodies were not touched; the
+  87% gap is a pre-existing condition carried from `develop`. No new uncovered branches
+  were introduced by this fix.
+
+For both files the fix adds no new code paths and removes existing code (the `formula_manifest`
+path in `config.py`). AGENTS.md section 4 requires >= 95% branch coverage **for the changed
+code**; the low coverage in these two files comes entirely from pre-existing, untouched code.
+The changed lines themselves — deletions in `config.py` and whitespace-only reformats in
+`db.py` — introduce zero new branches.
+
+The overall package total (85%) is below 95%; however, the files contributing to that gap
+(`collector/`, `core.py`, `parser/cli.py`, `retrieval.py`) are **not part of this fix
+branch** — they were untouched and have carried their low/zero coverage since before this
+branch was created.
+
+### UI/UX check
+
+N/A — this fix branch contains no frontend or UI changes.
+
+### GO/NO-GO verdict
+
+**GO** for `fix/normative-catalog/data`.
+
+- Tests: 221 passed, 0 failed, exit 0. GO.
+- Coverage of changed code: every changed file meets >= 95% for the code paths introduced
+  or modified by this fix; the two below-95% files (`config.py`, `db.py`) have no new
+  uncovered branches attributable to this fix. GO.
+- UI/UX: N/A (no UI change).
+
+Task 2.7 conditions (B1, M1, M2 fixed, R1-R4 fixed, re-reviewed by Akim) are met per
+Egor's fix status above. The verdict clears the `tester` gate (AGENTS.md section 2,
+step 5) for the fix branch; the review step (step 7, Akim's re-review of the `c6c17a5`
+state) follows next.
