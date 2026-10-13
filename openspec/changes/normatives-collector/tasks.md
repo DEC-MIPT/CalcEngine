@@ -1,6 +1,7 @@
 # Tasks
 
-Branch: `feature/normative-collector/data` (Egor, data zone).
+Branch: `fix/normative-collector/data` (Egor, data zone).
+Code commit: `df7c9a6` (2026-10-13).
 
 Executor tags: **[Egor]** data zone, **[Agent]** subagent.
 
@@ -44,7 +45,9 @@ Executor tags: **[Egor]** data zone, **[Agent]** subagent.
 
 - [x] 4.1 [Egor] `openspec validate normatives-collector --strict`
   (passes: 2026-10-13)
-- [ ] 4.2 [Agent: spec-reviewer] Review; resolve blockers
+- [x] 4.2 [Agent: spec-reviewer] Review; resolve blockers
+  (blockers B1-B3 and majors M1-M5 resolved 2026-10-13; design.md, spec.md,
+  tasks.md updated)
 - [x] 4.3 [Agent: tester] Issue the GO/NO-GO verdict
   (GO — 34 pass, 100% branch cov, ruff+mypy clean; 2026-10-13;
   verdict in `docs/decisions/normative-catalog-backend-readiness.md` section 4)
@@ -53,21 +56,29 @@ Executor tags: **[Egor]** data zone, **[Agent]** subagent.
 
 ## Dependencies
 
-- `norm-source-traceability` (WP3) finalizes the `dec_normatives` schema; the collector
-  uses a provisional schema and reconciles when WP3 lands.
-- `bootstrap-dev-environment` (WP6) provides Docker + PostgreSQL for local storage.
+- `norm-source-traceability` (WP3, planned — not yet created) finalizes the
+  `dec_normatives` schema; the collector uses a provisional schema and reconciles when
+  WP3 lands.
+- `bootstrap-dev-environment` (WP6, archived 2026-10-04) provides Docker + PostgreSQL.
+- Downstream consumer: `normatives-parser` depends on the downloaded pilot files.
 
 ## DOR checklist
 
-- [ ] `proposal.md`, `specs/…`, `design.md`, `tasks.md` exist
-- [ ] `openspec validate --strict` passes
-- [ ] Functional and non-functional requirements recorded
-- [ ] Branch defined (above)
-- [ ] Acceptance and Go/No-Go criteria written (below)
+- [x] `proposal.md`, `specs/…`, `design.md`, `tasks.md` exist
+- [x] `openspec validate --strict` passes (task 4.1, 2026-10-13)
+- [x] Functional and non-functional requirements recorded
+  (spec.md: registry discovery, download, dedup, additive revisions;
+  design.md: performance, security, coverage, accessibility)
+- [x] Branch defined (above): `fix/normative-collector/data`
+- [x] Acceptance and Go/No-Go criteria written (below)
+- [x] spec-reviewer report lists no blocker and no major finding (task 4.2, 2026-10-13)
 
 ## DOD and Go / No-Go
 
-- GO: the 5-document pilot is downloadable, metadata is stored, dedup is correct, registry
-  recall >= 95% (H1), tests pass with >= 95% branch coverage.
+- GO: the 6-document pilot is downloadable, metadata is stored, dedup is correct,
+  registry recall >= 95% — H1: for each of the 6 pilot designations (22.13330,
+  24.13330, 45.13330, 30.13330, 31.13330, 32.13330) the registry search returns at least
+  one matching `Document`; verified by manual probing in section 1 research (journal
+  entries 1, 3); tests pass with >= 95% branch coverage.
 - NO-GO: test failure, coverage < 95%, or a source that cannot be probed without a
   recorded fallback.

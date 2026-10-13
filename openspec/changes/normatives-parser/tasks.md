@@ -1,7 +1,10 @@
 # Tasks
 
 Branch: `feature/normative-parser/ml` (Egor, ml zone).
-Coverage fix: `fix/normative-parser/ml` (latest commit `da3278b`, pending merge into `develop`).
+Merge history: code was merged into `develop` as part of `normatives-formula-contract`
+via `feature/normative-pipeline/data` → `develop` (`08dbb85`, 2026-10-11) before this
+change was reviewed. Coverage and formula-extractor fixes are on `fix/normative-parser/ml`
+(latest commit `da3278b`), pending merge into `develop`.
 
 ## 1. Baseline extraction (deterministic)
 
@@ -54,31 +57,41 @@ Coverage fix: `fix/normative-parser/ml` (latest commit `da3278b`, pending merge 
 
 - [x] 5.1 [Egor] `openspec validate normatives-parser --strict`
   (passes: 2026-10-13)
-- [ ] 5.2 [Agent: spec-reviewer] review; resolve blockers
+- [x] 5.2 [Agent: spec-reviewer] review; resolve blockers
+  (blockers B1-B3 and majors M1-M4 resolved 2026-10-13; spec.md and tasks.md updated)
 - [x] 5.3 [Agent: tester] GO/NO-GO
-  (GO 2026-10-13; see docs/decisions/normative-catalog-backend-readiness.md Section 3)
+  (GO 2026-10-13; verdict in docs/decisions/normative-catalog-backend-readiness.md
+  Section 3, which names this change and branch `fix/normative-parser/ml` `da3278b`:
+  200 passed, 0 failed; branch coverage ≥95% with corpus tests; ruff+mypy clean)
 - [x] 5.4 [Egor] merge to `develop`
   (merged via `feature/normative-pipeline/data` → `develop` in `08dbb85` 2026-10-11)
 - [ ] 5.5 [Agent: spec-keeper] sync and archive
+  (spec-keeper will merge parser requirements into
+  `openspec/specs/normatives-catalog/spec.md` or create
+  `openspec/specs/normatives-parser/spec.md` as a standalone spec)
 
 ## Dependencies
 
-- `normatives-collector` (downloaded pilot СП in `docs/normative-base/`).
-- `norm-source-traceability` (WP3) finalizes the entity schema; the parser uses a
-  provisional schema.
+- `normatives-collector` (dependency is on pilot PDF files available locally in
+  `docs/normative-base/`; does not require the collector code to be merged).
+- `norm-source-traceability` (WP3, planned — not yet created) finalizes the entity
+  schema; the parser uses a provisional schema and reconciles when WP3 lands.
 
 ## DOR checklist
 
-- [ ] `proposal.md`, `specs/…`, `design.md`, `tasks.md` exist
-- [ ] `openspec validate --strict` passes
-- [ ] functional + non-functional requirements recorded
-- [ ] branch defined (above)
-- [ ] acceptance + Go/No-Go criteria written (below)
+- [x] `proposal.md`, `specs/…`, `design.md`, `tasks.md` exist
+- [x] `openspec validate --strict` passes (task 5.1, 2026-10-13)
+- [x] functional + non-functional requirements recorded (spec.md)
+- [x] branch defined (above): `feature/normative-parser/ml` / `fix/normative-parser/ml`
+- [x] acceptance + Go/No-Go criteria written (below)
+- [x] spec-reviewer report lists no blocker and no major finding (task 5.2, 2026-10-13)
 
 ## DOD and Go / No-Go
 
 - GO: pilot clauses/tables/formulas extracted; extracted formula executes on the control
-  example (exec_rate ≥ 90%); alternatives for #2/#3 evaluated and recorded in the journal;
-  tests pass with ≥ 95% branch coverage.
+  example (exec_rate ≥ 90% — numerator: formulas that lambdify and evaluate without
+  exception; denominator: all formulas extracted from pilot СП 22; measured in journal
+  entry 13, formula 5.7 executes to 143.75 kPa); alternatives for #2/#3 evaluated and
+  recorded in the journal; tests pass with ≥ 95% branch coverage.
 - NO-GO: test failure, coverage < 95%, un-evaluated alternatives, or a machine-derived
   value that bypasses `human-verified`.

@@ -42,6 +42,17 @@ See `proposal.md`.
 - The authoritative registry list may change as sources are probed; per-source findings
   are recorded in `docs/decisions/ml-model-journal.md`.
 
-## Boundary
+## Non-functional requirements
 
-The C/C++ hot-swap boundary of the calculation engine is not touched by this change.
+- **Performance**: metadata requests time out in 30 s; file downloads time out in 120 s;
+  up to 3 retries on transient network errors (delays: 2 s, 5 s, 10 s).
+- **Security**: no credentials stored in code; base URLs and registry parameters read
+  from environment via `Settings`; all downloads are HTTPS.
+- **Coverage**: branch coverage >= 95% (actual: 100%, 2026-10-13).
+- **Accessibility**: N/A — batch CLI tool, no UI.
+
+## C/C++ hot-swap boundary
+
+This component has no C/C++ hot-swap boundary. It is a batch/offline tool; its only
+CPU-bound operation is sha256 computation, handled by Python's built-in `hashlib`
+(backed by OpenSSL). No latency-sensitive inner loop exists in the collection path.

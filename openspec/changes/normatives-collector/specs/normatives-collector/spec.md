@@ -12,16 +12,26 @@ The system SHALL discover and list the editions and releases of a normative docu
 from at least one authoritative registry without manual lookup.
 
 #### Scenario: List editions
-- **WHEN** the collector is pointed at a document designation
-- **THEN** it lists the available editions and their status from the registry
+- **GIVEN** a base designation string (e.g. `"22.13330"`) and a registry source name
+  (`"faufcc"` or `"pravo"`)
+- **WHEN** `repository.search(designation)` is called
+- **THEN** it returns a non-empty list of `Document` objects whose `.designation` matches
+  the input pattern, each with `.edition` (year string or `None`) and `.state`
 
 ### Requirement: Download with integrity
 The system SHALL download a document file and record its `sha256` and source URL.
 
-#### Scenario: Download and hash
-- **WHEN** a document is downloaded
-- **THEN** the file is stored with its `sha256` and source URL, and a re-download of an
-  unchanged file is skipped
+#### Scenario: Download and store
+- **GIVEN** a `Document` with a valid `download_url`
+- **WHEN** `repository.download(document)` is called
+- **THEN** the raw bytes are returned and `FileStorage.save()` persists them, returning
+  `(path, sha256_hex, is_new=True)`
+
+#### Scenario: Skip re-download (dedup)
+- **GIVEN** a file with sha256 `H` already stored in `FileStorage`
+- **WHEN** `FileStorage.save()` is called again with content whose sha256 is also `H`
+- **THEN** the existing file path is returned with `is_new=False` and no new file is
+  written to disk
 
 ### Requirement: Metadata and dedup
 The system SHALL store metadata (designation, title, edition, amendment, status, validity
