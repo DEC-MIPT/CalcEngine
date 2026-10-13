@@ -195,6 +195,20 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   another unit, each raising `ParameterSourceUnavailableError` with one
   `code=catalog_data_invalid` line naming the parameter; the pilot's synthetic rows still
   resolve; `check.sh` passes with branch coverage of 100%
+- [x] 5.7 Check table headings against the method's selectors (design decisions 6 and 7;
+  `orchestrator` review of 2026-10-13, M1 and m1) (backend); verify: `SELECTORS` of the
+  pilot names `m_gamma`, `m_q`, `m_c` by `phi_II`; the breach tests of task 5.4 gain a
+  selected parameter without a heading, one headed by another input, an unselected
+  parameter with a heading, and a row with a heading value or a heading unit but no
+  heading symbol, each failing on the code before this task; `confirm_selectors` refuses
+  a table value whose selectors differ from the method's; the ingested catalog of task
+  7.1 still passes; `check.sh` passes with branch coverage of 100%
+- [x] 5.8 Answer a catalog row of the wrong shape as a data breach, not a `500` (design
+  decision 7; `orchestrator` review, m4) (backend); verify: a row without a parameter
+  gives `503 parameter_source_unavailable` with one `code=catalog_data_invalid` line; a
+  document without an edition, a clause without a number and a search hit of an unknown
+  kind give `503 catalog_unavailable` with one `code=catalog_data_invalid endpoint=...`
+  line; each test fails on the code before this task
 
 ## 6. Endpoints and wiring (backend, Akim)
 

@@ -938,3 +938,62 @@ Tasks 3.1-6.5 are done, each held by its tests. Tasks 7.1 and 7.2 are done (tick
 No blocker or major finding is open against this feature. R5 and r6-r10 are findings
 against Egor's data feature. Next: the review by the `orchestrator`, then the merge into
 `develop`.
+
+## Section 7: orchestrator review (2026-10-13)
+
+Reviewed by the `orchestrator` agent, run by Akim: `feature/normative-catalog/backend` at
+`403b8a6`, `git diff develop...feature/normative-catalog/backend` (40 files, all under
+`backend/`), against `proposal.md`, `design.md` decisions 1-11, both spec deltas, the
+verify clauses of tasks 3.1-7.2, `AGENTS.md`, `agent-docs/domain-constraints.md`, the
+import-linter contracts and the docstring rule. It read the source, repository, schemas,
+services and engine changes in full, ran `check.sh` (882 passed, 100%) and probed three
+edge cases on the synthetic SQLite catalog.
+
+**Verdict: changes requested** (one major finding). What matches: layers and zones; the
+lazy read-only catalog engine with the options of decision 4 and no URL in any message;
+bound parameters only; the selection of decision 6 (the source and `confirm_selectors`
+compare the same floats); the 503/422 mapping of decision 7 and `check_bounds` before
+`check_applicability`; the base-unit rule of task 5.6; tests without norm values; Russian
+Google-style docstrings.
+
+- **M1 (major).** A table parameter that the pilot selects by `phi_II` was accepted
+  without a heading (`catalog_source.py:179-183`), and `confirm_selectors` checked only
+  the selectors an entry had. With `m_q` given as one cell with no heading, the pilot
+  answered `201` with R = 135.0 instead of 172.5 on the synthetic catalog, with no trace
+  or log sign. The code matched the spec; the gap was in the spec and the design.
+- **m1.** A row without `heading_symbol` but with a `heading_value` was accepted;
+  reachable, as Egor's view applies no `NULLIF` to `heading_value`.
+- **m2.** Uvicorn's access log writes `GET /normatives/search?q=…`, against the spec's "no
+  log line SHALL repeat it" (the application's own logs are clean).
+- **m3.** The five reads of one resolution run at READ COMMITTED, so a re-ingestion
+  committed between them could mix two catalog states (inferred, not reproduced).
+- **m4.** A row with a NULL `parameter` gave a `500` (`TypeError` in `sorted`), and a
+  search or document row that breaks `SearchHit`, `DocumentView` or `ClauseView` gave a
+  `500`; not reachable today, every such column is `NOT NULL` in Egor's tables.
+- Notes: no `connect_timeout` or `statement_timeout` on the catalog engine; `ORDER BY
+  parameter` and `quantity, kind` use the database collation, which enters `input_hash`
+  through the row order.
+
+### Akim's response (2026-10-13)
+
+- **M1 and m1: fixed** on the branch in `c0eab31` (task 5.7). The pilot declares
+  `SELECTORS` (`m_gamma`, `m_q`, `m_c` by `phi_II`), `Registration` carries it, and the
+  source refuses a selected parameter without a heading or with another input's heading,
+  an unselected parameter with a heading, and a row with a heading value or unit but no
+  symbol. `confirm_selectors(entry, inputs, selected_by)` requires exactly the method's
+  selector. Spec and design: requirement "Table value selection by heading", scenario
+  "Rows that break the table rules", engine scenario "Headings other than the method's",
+  decisions 6 and 7. Egor is told in
+  `backend/2026-10-13-table-selector-rule-to-egor.md`.
+- **m4: fixed** in the same commit (task 5.8): a row without a parameter is a data
+  breach (`503 parameter_source_unavailable`), and a search or document row of the wrong
+  shape gives `503 catalog_unavailable` with one line
+  `code=catalog_data_invalid endpoint=<search|document>`.
+- Each new test fails on `403b8a6`'s code (12 breach cases and 3 endpoint cases checked
+  by reverting the source files). `check.sh`: 904 passed, branch coverage 100%;
+  `pytest -m postgres` with the test databases and the ingested catalog: 31 passed.
+- **m2, m3 and the notes: deferred** to a follow-up after the merge. m2 needs a choice
+  (`--no-access-log` in the documented run command, or narrowing the spec to the
+  application's logs); m3 is `isolation_level="REPEATABLE READ"` on the catalog engine.
+
+Next: the `tester` re-run and the `orchestrator` re-review of the fix.
