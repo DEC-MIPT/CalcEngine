@@ -121,6 +121,12 @@ def test_table_caption_from_page_and_previous_page() -> None:
     )
 
 
+def test_table_caption_negative_top_returns_empty() -> None:
+    page = _Page("Таблица 5.5")
+    assert extractors._table_caption(page, (0, -30.6, 595, 200)) == ""
+    assert extractors._table_caption(page, (0, 0.0, 595, 200)) == ""
+
+
 def test_unnumbered_skips_non_formula_lines() -> None:
     pages = ["где X – значение\n", ("а" * 200) + "\nгде Y – значение\n"]
     clauses = extractors.extract_clauses(pages)
