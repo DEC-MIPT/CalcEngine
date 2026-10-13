@@ -48,7 +48,8 @@ class NormativesService:
             Совпадения в порядке ранга каталога.
 
         Raises:
-            CatalogUnavailableError: если каталог не настроен или не отвечает.
+            CatalogUnavailableError: если каталог не настроен, не отвечает или отдал строку,
+                которая не проходит модель ответа.
         """
         return SearchResults(hits=self._read("search", lambda repository: repository.search(query, limit)))
 
@@ -62,7 +63,8 @@ class NormativesService:
             Документ с пунктами в порядке документа.
 
         Raises:
-            CatalogUnavailableError: если каталог не настроен или не отвечает.
+            CatalogUnavailableError: если каталог не настроен, не отвечает или отдал строку,
+                которая не проходит модель ответа.
             NotFoundError: если каталог не содержит документа.
         """
         found = self._read("document", lambda repository: repository.document(document_id))
