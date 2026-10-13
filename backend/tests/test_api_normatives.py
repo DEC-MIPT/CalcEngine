@@ -11,7 +11,7 @@ from catalog_fixture import (
     load_sqlite,
 )
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import Engine, create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from test_engine_foundations_shallow_r import inputs
@@ -226,6 +226,42 @@ def test_an_unusable_catalog_answers_503_without_the_url(
     assert "code=catalog_unavailable" in logged
     for secret in ("hunter2", "127.0.0.1", "dec_normatives_reader"):
         assert secret not in response.text and secret not in logged
+
+
+@pytest.mark.parametrize(
+    ("spoil", "path", "endpoint"),
+    [
+        ("UPDATE catalog_read.documents SET edition = NULL WHERE document_id = 1", "/normatives/documents/1", "document"),
+        ("UPDATE catalog_read.clauses SET number = NULL WHERE document_id = 1", "/normatives/documents/1", "document"),
+        (None, "/normatives/search?q=грунт", "search"),
+    ],
+    ids=["document-without-edition", "clause-without-number", "search-hit-of-unknown-kind"],
+)
+def test_a_catalog_row_of_the_wrong_shape_answers_503_with_one_log_line(
+    catalog_sqlite: Engine,
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    spoil: str | None,
+    path: str,
+    endpoint: str,
+) -> None:
+    if spoil is None:
+        monkeypatch.setattr(
+            NormativesRepository,
+            "search",
+            lambda self, query, max_rows: (SearchHit(**{**HITS[0].model_dump(), "kind": "table"}),),
+        )
+    else:
+        with catalog_sqlite.begin() as connection:
+            connection.execute(text(spoil))
+
+    with caplog.at_level(logging.INFO):
+        response = client.get(path)
+
+    assert (response.status_code, response.json()) == (503, UNAVAILABLE)
+    assert f"code=catalog_data_invalid endpoint={endpoint}" in app_lines(caplog)
+    assert "грунт" not in app_lines(caplog) and "table" not in app_lines(caplog)
 
 
 def test_the_application_starts_without_the_catalog_and_serves_it_once_it_is_back() -> None:

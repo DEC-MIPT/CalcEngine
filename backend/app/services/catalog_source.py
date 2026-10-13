@@ -35,7 +35,7 @@ from app.schemas.normatives import (
     parse_norm_refs,
 )
 from app.schemas.resolved import Formula, Selector, TableValue, Threshold
-from app.services.catalog import PARAMETER_MODELS
+from app.services.catalog import PARAMETER_MODELS, TABLE_SELECTORS
 from app.services.parameter_source import ParameterSource, ResolvedParameters
 
 logger = logging.getLogger("app.services.catalog_source")
@@ -153,19 +153,25 @@ def _table_row(row: TableValueRow) -> CatalogTableRow:
 
 
 def _selected(
-    parameter: str, rows: Sequence[TableValueRow], inputs: Mapping[str, QuantityValue]
+    parameter: str,
+    rows: Sequence[TableValueRow],
+    inputs: Mapping[str, QuantityValue],
+    selected_by: str | None,
 ) -> TableValue | None:
     """Проверяет строки одного табличного параметра и выбирает строку по заголовку.
 
-    У параметра либо одна строка без заголовка, либо у всех строк заголовок с одним
-    символом входа. Заголовок переводится в базовую единицу входа тем же ``convert``, что
-    и в ``confirm_selectors`` движка, и выбирается строка, чей заголовок равен входу
-    точно; ни интерполяции, ни ближайшей строки нет (design.md, решения 6 и 7).
+    Параметр, который метод выбирает по входу, приходит строками, у каждой из которых
+    заголовок этого входа; параметр, который метод не выбирает, — одной строкой без
+    заголовка: без символа, значения и единицы. Заголовок переводится в базовую единицу
+    входа тем же ``convert``, что и в ``confirm_selectors`` движка, и выбирается строка,
+    чей заголовок равен входу точно; ни интерполяции, ни ближайшей строки нет (design.md,
+    решения 6 и 7).
 
     Args:
         parameter: имя параметра.
         rows: его строки.
         inputs: входы в базовых единицах.
+        selected_by: вход, по которому метод выбирает этот параметр, или ``None``.
 
     Returns:
         Табличное значение (у выбранного по заголовку — с его ``Selector``) или ``None``,
@@ -173,16 +179,20 @@ def _selected(
 
     Raises:
         CatalogDataError: если строки смешаны с заголовком и без, строк без заголовка
-            несколько, символов заголовка два, символ не вход, заголовок не переводится
-            в единицу входа или два заголовка равны после перевода.
+            несколько, у строки без символа заголовка есть его значение или единица,
+            заголовка нет у параметра, выбираемого по входу, или он есть у параметра,
+            который по входу не выбирается, символов заголовка два, символ не тот вход,
+            по которому метод выбирает параметр, заголовок не переводится в единицу входа
+            или два заголовка равны после перевода.
     """
     symbols = {row.heading_symbol for row in rows}
     if None in symbols:
-        if len(rows) != 1:
+        (row, *more) = rows
+        if more or selected_by is not None or row.heading_value is not None or row.heading_unit is not None:
             raise CatalogDataError(parameter)
-        return _table_value(rows[0])
+        return _table_value(row)
     (symbol, *others) = symbols
-    if others or symbol is None or symbol not in inputs:
+    if others or symbol is None or symbol != selected_by or symbol not in inputs:
         raise CatalogDataError(parameter)
     given = inputs[symbol]
     headings = [convert(_heading(row), given.unit).value for row in rows]
@@ -219,10 +229,13 @@ def _check_binding(
     """Проверяет, что каждый параметр модели пришёл ровно один раз и из своего представления.
 
     Raises:
-        CatalogDataError: без параметра, если у типа нет ни одной строки; с параметром,
-            если он не объявлен в модели, его нет, он в двух представлениях или не в
-            том, что соответствует виду его поля, или дважды в представлении без таблиц.
+        CatalogDataError: без параметра, если у типа нет ни одной строки или у строки нет
+            имени параметра; с параметром, если он не объявлен в модели, его нет, он в двух
+            представлениях или не в том, что соответствует виду его поля, или дважды в
+            представлении без таблиц.
     """
+    if any(row.parameter is None for group in (formulas, table_values, thresholds, checks) for row in group):
+        raise CatalogDataError()
     found: dict[str, list[str]] = {}
     for view, rows in (
         ("type_formulas", formulas),
@@ -255,6 +268,7 @@ class CatalogParameterSource:
         sessions: фабрика сессий каталога.
         registry: реестр типов расчёта; из него берутся контракты.
         models: модель разрешённых параметров каждого типа.
+        selectors: для каждого типа табличный параметр, выбираемый по входу, → этот вход.
     """
 
     def __init__(
@@ -262,10 +276,12 @@ class CatalogParameterSource:
         sessions: CatalogSessions,
         registry: CalculatorRegistry,
         models: Mapping[str, type[BaseModel]] = PARAMETER_MODELS,
+        selectors: Mapping[str, Mapping[str, str]] = TABLE_SELECTORS,
     ) -> None:
         self._sessions = sessions
         self._registry = registry
         self._models = models
+        self._selectors = selectors
 
     def resolve(self, calculation_type: str, inputs: Mapping[str, QuantityValue]) -> ResolvedParameters:
         """Собирает параметры и диапазон метода типа расчёта из каталога.
@@ -309,6 +325,7 @@ class CatalogParameterSource:
         try:
             return self._resolved(
                 self._models[calculation_type],
+                self._selectors.get(calculation_type, {}),
                 base_inputs,
                 base_units,
                 (*contract.inputs, *contract.outputs),
@@ -328,6 +345,7 @@ class CatalogParameterSource:
     @staticmethod
     def _resolved(
         model: type[BaseModel],
+        selectors: Mapping[str, str],
         inputs: Mapping[str, QuantityValue],
         base_units: Mapping[str, str],
         quantities: Sequence[QuantityDeclaration],
@@ -354,7 +372,7 @@ class CatalogParameterSource:
             rows = tuple(group)
             with _guard(parameter):
                 table_rows.extend(_table_row(row) for row in rows)
-                entry = _selected(parameter, rows, inputs)
+                entry = _selected(parameter, rows, inputs, selectors.get(parameter))
             if entry is None:
                 unmatched.append(str(rows[0].heading_symbol))
             fields[parameter] = entry
@@ -387,6 +405,7 @@ def catalog_sources(
     registry: CalculatorRegistry,
     sessions: CatalogSessions,
     models: Mapping[str, type[BaseModel]] = PARAMETER_MODELS,
+    selectors: Mapping[str, Mapping[str, str]] = TABLE_SELECTORS,
 ) -> dict[str, ParameterSource]:
     """Источник каталога для каждого зарегистрированного типа расчёта (design.md, решение 5).
 
@@ -398,9 +417,10 @@ def catalog_sources(
         registry: реестр типов расчёта.
         sessions: фабрика сессий каталога приложения.
         models: модель разрешённых параметров каждого типа.
+        selectors: для каждого типа табличный параметр, выбираемый по входу, → этот вход.
 
     Returns:
         Источник для каждого типа реестра, у которого есть модель параметров.
     """
-    source = CatalogParameterSource(sessions, registry, models)
+    source = CatalogParameterSource(sessions, registry, models, selectors)
     return {contract.name: source for contract in registry.contracts() if contract.name in models}

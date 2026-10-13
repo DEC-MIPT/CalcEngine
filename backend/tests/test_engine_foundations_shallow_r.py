@@ -251,12 +251,28 @@ def test_a_heading_that_differs_from_phi_ii_stops_the_pilot() -> None:
         run(resolved=parameters(m_q=entry("M_q", 5.0, 30.0)))
 
 
-def test_a_heading_on_a_symbol_that_is_not_an_input_stops_the_pilot() -> None:
+def test_a_heading_on_a_value_the_method_does_not_select_stops_the_pilot() -> None:
     soil = Selector(symbol="soil", value=QuantityValue(value=1.0, unit="1"))
     gamma_c1 = parameters().gamma_c1.model_copy(update={"selectors": (soil,)})
 
-    with pytest.raises(CalculationError, match="'gamma_c1': selector 'soil' is not an input"):
+    with pytest.raises(CalculationError, match="'gamma_c1': selectors differ from the method's"):
         run(resolved=parameters(gamma_c1=gamma_c1))
+
+
+@pytest.mark.parametrize("name", ["m_gamma", "m_q", "m_c"])
+def test_a_coefficient_without_its_phi_ii_heading_stops_the_pilot(name: str) -> None:
+    unselected = getattr(parameters(), name).model_copy(update={"selectors": ()})
+
+    with pytest.raises(CalculationError, match="selectors differ from the method's"):
+        run(resolved=parameters(**{name: unselected}))
+
+
+def test_the_pilot_selects_by_phi_ii_exactly_the_table_coefficients() -> None:
+    tables = [name for name, field in pilot.Parameters.model_fields.items() if field.annotation is TableValue]
+
+    assert set(pilot.SELECTORS) <= set(tables)
+    assert set(pilot.SELECTORS.values()) <= {quantity.name for quantity in pilot.INPUTS}
+    assert pilot.SELECTORS == {"m_gamma": "phi_II", "m_q": "phi_II", "m_c": "phi_II"}
 
 
 def test_headings_in_radians_are_confirmed_for_phi_ii_given_in_radians() -> None:

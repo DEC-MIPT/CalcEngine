@@ -171,29 +171,43 @@ def test_a_table_value_has_one_selector_per_symbol() -> None:
 
 
 def test_a_heading_equal_to_the_input_is_confirmed() -> None:
-    confirm_selectors(table_entry(PHI), {"phi": QuantityValue(value=20.0, unit="deg")})
+    confirm_selectors(table_entry(PHI), {"phi": QuantityValue(value=20.0, unit="deg")}, "phi")
 
 
 def test_a_table_value_without_selectors_needs_no_input() -> None:
-    confirm_selectors(table_entry(), {})
+    confirm_selectors(table_entry(), {}, None)
+
+
+@pytest.mark.parametrize(
+    ("selectors", "selected_by"),
+    [((), "phi"), ((PHI,), None), ((PHI,), "b")],
+    ids=["heading missing", "heading not expected", "heading of another input"],
+)
+def test_headings_other_than_the_method_selects_by_are_refused(
+    selectors: tuple[Selector, ...], selected_by: str | None
+) -> None:
+    given = {"phi": QuantityValue(value=20.0, unit="deg"), "b": QuantityValue(value=20.0, unit="m")}
+
+    with pytest.raises(CalculationError, match="'k': selectors differ from the method's"):
+        confirm_selectors(table_entry(*selectors), given, selected_by)
 
 
 @pytest.mark.parametrize("given", [20.000000000000004, 21.0])
 def test_a_heading_that_differs_from_the_input_is_refused(given: float) -> None:
     with pytest.raises(CalculationError, match="'phi' differs from the input"):
-        confirm_selectors(table_entry(PHI), {"phi": QuantityValue(value=given, unit="deg")})
+        confirm_selectors(table_entry(PHI), {"phi": QuantityValue(value=given, unit="deg")}, "phi")
 
 
 def test_a_heading_on_a_symbol_that_is_not_an_input_is_refused() -> None:
     with pytest.raises(CalculationError, match="'phi' is not an input"):
-        confirm_selectors(table_entry(PHI), {"b": QuantityValue(value=20.0, unit="m")})
+        confirm_selectors(table_entry(PHI), {"b": QuantityValue(value=20.0, unit="m")}, "phi")
 
 
 def test_a_heading_of_another_dimension_is_refused() -> None:
     heading = Selector(symbol="phi", value=QuantityValue(value=20.0, unit="m"))
 
     with pytest.raises(CalculationError, match="cannot be expressed in 'deg'") as exc_info:
-        confirm_selectors(table_entry(heading), {"phi": QuantityValue(value=20.0, unit="deg")})
+        confirm_selectors(table_entry(heading), {"phi": QuantityValue(value=20.0, unit="deg")}, "phi")
 
     assert exc_info.value.__cause__ is None
 
@@ -202,7 +216,7 @@ def test_a_heading_in_another_unit_is_confirmed_for_an_input_in_that_unit() -> N
     heading = Selector(symbol="phi", value=QuantityValue(value=0.3, unit="rad"))
     base_unit_input = convert(QuantityValue(value=0.3, unit="rad"), "deg")
 
-    confirm_selectors(table_entry(heading), {"phi": base_unit_input})
+    confirm_selectors(table_entry(heading), {"phi": base_unit_input}, "phi")
     step = table_step("k", table_entry(heading))
 
     assert base_unit_input.value != 0.3

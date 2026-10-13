@@ -39,6 +39,16 @@ INPUTS = (
 )
 
 
+SELECTORS: Mapping[str, str] = {"m_gamma": "phi_II", "m_q": "phi_II", "m_c": "phi_II"}
+"""Табличные параметры, которые метод выбирает по входу, и этот вход.
+
+Коэффициенты M_γ, M_q, M_c принимаются по таблице 5.5 по φII (СП 22.13330.2016,
+п. 5.6.7, unverified); остальные табличные параметры пилота ни по какому входу не
+выбираются. Это строение метода, а не нормативное значение (``normative-catalog-backend``
+design.md, решение 6).
+"""
+
+
 class Parameters(BaseModel):
     """Разрешённые параметры расчётного сопротивления грунта R (СП 22.13330.2016, п. 5.6.7, unverified).
 
@@ -75,16 +85,16 @@ class FoundationsShallowR(Calculator[Mapping[str, QuantityValue], Parameters, Ca
     def calculate(self, inputs: Mapping[str, QuantityValue], parameters: Parameters) -> CalculatorOutput:
         values = dict(inputs)
         entries = (
-            parameters.gamma_c1,
-            parameters.gamma_c2,
-            parameters.k,
-            parameters.m_gamma,
-            parameters.m_q,
-            parameters.m_c,
+            ("gamma_c1", parameters.gamma_c1),
+            ("gamma_c2", parameters.gamma_c2),
+            ("k", parameters.k),
+            ("m_gamma", parameters.m_gamma),
+            ("m_q", parameters.m_q),
+            ("m_c", parameters.m_c),
         )
-        for entry in entries:
-            confirm_selectors(entry, inputs)
-        tables = tuple(table_step(entry.symbol, entry) for entry in entries)
+        for name, entry in entries:
+            confirm_selectors(entry, inputs, SELECTORS.get(name))
+        tables = tuple(table_step(entry.symbol, entry) for _, entry in entries)
         for step in tables:
             _bind(values, step.step_id, step.result)
         below = compare("k_z", inputs["b"], "lt", parameters.k_z_threshold.value)

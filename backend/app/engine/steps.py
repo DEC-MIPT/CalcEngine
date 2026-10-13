@@ -62,22 +62,28 @@ def formula_step(
     )
 
 
-def confirm_selectors(entry: TableValue, inputs: Mapping[str, QuantityValue]) -> None:
+def confirm_selectors(entry: TableValue, inputs: Mapping[str, QuantityValue], selected_by: str | None) -> None:
     """Подтверждает, что табличное значение выбрано по тем входам, которые получил движок.
 
-    Заголовок переводится в базовую единицу входа тем же ``convert``, что и при выборе
-    строки в источнике параметров, и сравнивается со входом точно
-    (``calculation-engine`` "Table value selectors"). Движок ничего не ищет — только
-    подтверждает выбор.
+    Значение, которое метод выбирает по входу, обязано нести заголовок именно этого
+    входа, а значение, которое метод по входу не выбирает, — не нести ни одного
+    (``normative-catalog-backend`` design.md, решение 6). Заголовок переводится в базовую
+    единицу входа тем же ``convert``, что и при выборе строки в источнике параметров, и
+    сравнивается со входом точно (``calculation-engine`` "Table value selectors"). Движок
+    ничего не ищет — только подтверждает выбор.
 
     Args:
         entry: табличное значение со своими ``selectors``.
         inputs: входы в базовых единицах.
+        selected_by: вход, по которому метод выбирает это значение, или ``None``.
 
     Raises:
-        CalculationError: если символ заголовка не вход, заголовок не переводится в
-            единицу входа или не равен ему.
+        CalculationError: если заголовки значения не те, что требует метод, символ
+            заголовка не вход, заголовок не переводится в единицу входа или не равен ему.
     """
+    expected = () if selected_by is None else (selected_by,)
+    if tuple(selector.symbol for selector in entry.selectors) != expected:
+        raise CalculationError(f"table value {entry.symbol!r}: selectors differ from the method's")
     for selector in entry.selectors:
         if selector.symbol not in inputs:
             raise CalculationError(f"table value {entry.symbol!r}: selector {selector.symbol!r} is not an input")

@@ -149,6 +149,43 @@ BREACHES: list[tuple[str, list[str], str | None]] = [
         "m_q",
     ),
     (
+        "coefficient selected by an input without a heading",
+        [
+            f"DELETE FROM catalog_read.type_table_values WHERE {TYPE} AND parameter = 'm_q' AND heading_value <> 10",
+            f"UPDATE catalog_read.type_table_values SET heading_symbol = NULL, heading_value = NULL, heading_unit = NULL WHERE {TYPE} AND parameter = 'm_q'",
+        ],
+        "m_q",
+    ),
+    (
+        "coefficient headed by another input",
+        [
+            f"UPDATE catalog_read.type_table_values SET heading_symbol = 'b', heading_unit = 'm' WHERE {TYPE} AND parameter = 'm_c'"
+        ],
+        "m_c",
+    ),
+    (
+        "heading on a value no input selects",
+        [
+            f"UPDATE catalog_read.type_table_values SET heading_symbol = 'phi_II', heading_value = 20, heading_unit = 'deg' WHERE {TYPE} AND parameter = 'gamma_c1'"
+        ],
+        "gamma_c1",
+    ),
+    (
+        "heading value without a heading symbol",
+        [f"UPDATE catalog_read.type_table_values SET heading_value = 20 WHERE {TYPE} AND parameter = 'gamma_c1'"],
+        "gamma_c1",
+    ),
+    (
+        "heading unit without a heading symbol",
+        [f"UPDATE catalog_read.type_table_values SET heading_unit = 'deg' WHERE {TYPE} AND parameter = 'gamma_c1'"],
+        "gamma_c1",
+    ),
+    (
+        "row without a parameter",
+        [f"UPDATE catalog_read.type_checks SET parameter = NULL WHERE {TYPE}"],
+        None,
+    ),
+    (
         "bound whose quantity is not an input",
         [f"UPDATE catalog_read.type_method_bounds SET quantity = 'psi' WHERE {TYPE} AND quantity = 'b' AND kind = 'min'"],
         None,
@@ -219,8 +256,8 @@ def test_a_breach_makes_the_type_unavailable_with_one_log_line(
     assert lines(caplog) == [expected_line(parameter)]
 
 
-def test_every_breach_listed_in_tasks_5_4_and_5_6_has_a_case() -> None:
-    assert len(BREACHES) == len({name for name, _, _ in BREACHES}) == 27
+def test_every_breach_listed_in_tasks_5_4_5_6_5_7_and_5_8_has_a_case() -> None:
+    assert len(BREACHES) == len({name for name, _, _ in BREACHES}) == 33
 
 
 @pytest.fixture

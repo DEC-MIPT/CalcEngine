@@ -27,18 +27,21 @@ def _register_foundations_shallow_r(registry: CalculatorRegistry, params_root: P
 class Registration:
     """Известный тип расчёта: как его зарегистрировать и какой моделью проверять его параметры.
 
-    Модель нужна источнику параметров каталога (``normative-catalog-backend`` design.md,
-    решение 5): он собирает из строк каталога поля и проверяет их ею.
+    Модель и карта выбора нужны источнику параметров каталога (``normative-catalog-backend``
+    design.md, решения 5 и 6): он собирает из строк каталога поля, проверяет их моделью и
+    сверяет заголовки таблиц со входами, по которым метод выбирает значения.
 
     Attributes:
         name: имя типа расчёта в реестре.
         register: регистрация со значениями из файла параметров.
         parameters: модель разрешённых параметров калькулятора.
+        selectors: табличный параметр, который метод выбирает по входу, → этот вход.
     """
 
     name: str
     register: Callable[[CalculatorRegistry, Path], None]
     parameters: type[BaseModel]
+    selectors: Mapping[str, str]
 
 
 REGISTRATIONS = (
@@ -46,6 +49,7 @@ REGISTRATIONS = (
         name=foundations_shallow_r.NAME,
         register=_register_foundations_shallow_r,
         parameters=foundations_shallow_r.Parameters,
+        selectors=foundations_shallow_r.SELECTORS,
     ),
 )
 
@@ -53,6 +57,11 @@ PARAMETER_MODELS: Mapping[str, type[BaseModel]] = {
     registration.name: registration.parameters for registration in REGISTRATIONS
 }
 """Модель разрешённых параметров каждого известного типа расчёта."""
+
+TABLE_SELECTORS: Mapping[str, Mapping[str, str]] = {
+    registration.name: registration.selectors for registration in REGISTRATIONS
+}
+"""Для каждого известного типа: табличный параметр, выбираемый по входу, → этот вход."""
 
 
 def build_registry(params_root: Path) -> CalculatorRegistry:
