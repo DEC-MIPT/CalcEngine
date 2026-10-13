@@ -19,15 +19,27 @@ Branch: `feature/normative-parser/ml` (Egor, ml zone).
   pix2text (deferred). MinerU evaluated and rejected as a pipeline (research `nb09`; see
   design §4). Unified entry point: `formulas/source.py` (PDF-type-based selection).
 - [x] 2.2 [Egor] Output format: structured JSON (LaTeX + SymPy + notation) — reliable
-- [ ] 2.3 [Egor] Alternatives eval: LaTeX-only, raw model string, direct codegen
-- [ ] 2.4 [Egor] SymPy `parse_latex` → `lambdify` executor (validation, H6)
-- [ ] 2.5 [Egor] Manual manifest binding on 1–2 control examples
-- [ ] 2.6 [Egor] Alternatives eval for binding: notation-name match, table-header match
+- [x] 2.3 [Egor] Alternatives eval: LaTeX-only, raw model string, direct codegen
+  (LaTeX-only: naive `parse_latex` fails on domain shift; codegen via `lambdify` chosen;
+  Nougat/pix2tex evaluated in journal entries 15-26, research `nb09`; MinerU rejected)
+- [x] 2.4 [Egor] SymPy `parse_latex` → `lambdify` executor (validation, H6)
+  (`BoundFormula` in `formulas/formula_code.py`; formula 5.7 executes to 143.75 kPa,
+  journal entry 13)
+- [x] 2.5 [Egor] Manual manifest binding on 1–2 control examples
+  (formula 5.7 + k_z_below, k_z_from bound via `pilot.toml`; `_write_synthetic_formulas`
+  in `db.py`; confirmed in journal entry 13)
+- [x] 2.6 [Egor] Alternatives eval for binding: notation-name match, table-header match
+  (notation-name matching in `formulas/notation_restore.py`; manual manifest chosen as
+  reliable baseline; alternatives recorded in journal entry 13)
 
 ## 3. RAG retrieval (search a normative by formula)
 
-- [ ] 3.1 [Egor] `rubert-tiny2` → ONNX embeddings of clauses/formulas
-- [ ] 3.2 [Egor] Vector search vs `pg_trgm` baseline; recall@k
+- [x] 3.1 [Egor] `rubert-tiny2` → ONNX embeddings of clauses/formulas
+  (evaluated in journal entry 14: 20% recall@1 vs TF-IDF 60%; ONNX not required for
+  MVP; `EmbeddingIndex` in `retrieval.py` is a research artifact with optional dep)
+- [x] 3.2 [Egor] Vector search vs `pg_trgm` baseline; recall@k
+  (journal entry 14: multilingual-e5-small=60%, TF-IDF=60%, rubert-tiny2=20%;
+  MVP decision: lexical search via `pg_trgm`; `TfidfIndex` is the production class)
 
 ## 4. Tests and quality
 
@@ -40,7 +52,8 @@ Branch: `feature/normative-parser/ml` (Egor, ml zone).
 - [ ] 5.1 [Egor] `openspec validate normatives-parser --strict`
 - [ ] 5.2 [Agent: spec-reviewer] review; resolve blockers
 - [ ] 5.3 [Agent: tester] GO/NO-GO
-- [ ] 5.4 [Egor] merge to `develop`
+- [x] 5.4 [Egor] merge to `develop`
+  (merged via `feature/normative-pipeline/data` → `develop` in `08dbb85` 2026-10-11)
 - [ ] 5.5 [Agent: spec-keeper] sync and archive
 
 ## Dependencies

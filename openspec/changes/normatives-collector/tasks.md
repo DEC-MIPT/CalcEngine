@@ -6,15 +6,22 @@ Executor tags: **[Egor]** data zone, **[Agent]** subagent.
 
 ## 1. Probe sources (research)
 
-- [ ] 1.1 [Egor] Probe each registry (`faufcc.ru`, `fgiscs.minstroyrf.ru`,
+- [x] 1.1 [Egor] Probe each registry (`faufcc.ru`, `fgiscs.minstroyrf.ru`,
   `minstroyrf.gov.ru`, `gost.ru`, `pravo.gov.ru`) and record the access mode (API vs SPA
   vs static HTML) in `docs/decisions/ml-model-journal.md`
-- [ ] 1.2 [Egor] Assemble a 5-document pilot list (designation + edition) across document
+  (journal entries 1-4: faufcc=JSON API, fgiscs=JSON API, pravo=REST; Playwright NOT
+  needed for faufcc; minstroyrf=HTML scraping; results in journal entries 1, 3, 4, 6)
+- [x] 1.2 [Egor] Assemble a 5-document pilot list (designation + edition) across document
   formats
+  (6-document pilot list in `SP_TARGETS` dict in `collector/cli.py`: СП 22, 24, 45, 30,
+  31, 32; journal entry 12)
 
 ## 2. Collector implementation
 
-- [ ] 2.1 [Egor] Registry client for the first source (discovery + listing editions)
+- [x] 2.1 [Egor] Registry client for the first source (discovery + listing editions)
+  (`FaufccRepository` in `collector/repositories/faufcc.py`: JSON API search + download;
+  `PravoRepository` in `collector/repositories/pravo.py`; `FgiscsRepository` in
+  `collector/repositories/fgiscs.py`)
 - [ ] 2.2 [Egor] Downloader (HTTP + Playwright) with retry, timeout, and sha256
 - [ ] 2.3 [Egor] Metadata model + dedup by `(document, edition, sha256)`
 - [ ] 2.4 [Egor] Storage: `dec_normatives` migration + local file store
