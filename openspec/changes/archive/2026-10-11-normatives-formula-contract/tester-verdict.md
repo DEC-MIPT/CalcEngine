@@ -33,8 +33,8 @@ Result: PASS.
 Command:
 
 ```shell
-DEC_TEST_NORMATIVES_DATABASE_URL=postgresql://dec:dec@localhost:5433/dec_normatives_test \
-DEC_TEST_APP_DATABASE_URL=postgresql://dec:dec@localhost:5433/dec_app_wp8_test \
+DEC_TEST_NORMATIVES_DATABASE_URL=postgresql://dec:<password>@localhost:5433/dec_normatives_test \  # pragma: allowlist secret
+DEC_TEST_APP_DATABASE_URL=postgresql://dec:<password>@localhost:5433/dec_app_wp8_test \  # pragma: allowlist secret
 python -m pytest tests/ --tb=short -q
 ```
 

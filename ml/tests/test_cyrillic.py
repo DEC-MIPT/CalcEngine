@@ -15,8 +15,8 @@ class _Cur:
     def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, *args: object) -> bool:
-        return False
+    def __exit__(self, *args: object) -> None:
+        return None
 
     def execute(self, sql: str, params: tuple | None = None) -> None:
         if sql.strip().upper().startswith("SELECT"):

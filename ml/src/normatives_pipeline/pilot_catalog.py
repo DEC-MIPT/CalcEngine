@@ -252,7 +252,7 @@ def _bind_registry_formula(
             symbol: unit_symbol(units_by_symbol[symbol])
             for symbol in all_symbols
         }
-    except PilotCatalogError:
+    except (KeyError, PilotCatalogError):
         return False
     db.set_formula_catalog(conn, row["id"], result_symbol, tree, units, commit=commit)
     return True

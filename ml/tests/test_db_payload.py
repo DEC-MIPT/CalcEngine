@@ -9,6 +9,10 @@ from normatives_pipeline import db
 from normatives_pipeline.config import output_config
 from normatives_pipeline.search import query
 
+pytestmark = pytest.mark.postgres
+
+URL = require_test_db_url()
+
 
 @pytest.fixture(scope="module")
 def conn():
@@ -90,7 +94,8 @@ def test_build_formula_payload_missing_document_raises(conn) -> None:
         db.build_formula_payload(conn, formula)
 
 
-def test_query_returns_structure(conn) -> None:
+def test_query_returns_structure(conn, monkeypatch) -> None:
+    monkeypatch.setenv("DEC_DATABASE_URL", URL)
     result = query("нагрузка")
     assert set(result) == {"query", "lemmas", "formulas", "clauses"}
     assert isinstance(result["formulas"], list)
@@ -164,4 +169,29 @@ def test_update_formula_latex_expression(conn) -> None:
     assert row is not None
     assert row["latex"] == "x = y"
     assert row["expression"] == "x*y"
+    db.delete_document(conn, designation)
+
+
+def test_formula_locator_hash_in_number_uses_clause(conn) -> None:
+    """_formula_locator: число с '#' → clause-prefix + clause_number (строка 442 db.py)."""
+    designation = "TEST-ЛОКАТОР"
+    db.delete_document(conn, designation)
+    doc_id = db.upsert_document(conn, designation, title="test", edition="2016")
+    db.insert_formulas(
+        conn,
+        doc_id,
+        [("5.6.7#k_z_below", "5.6.7", "x = y", "x*y", "raw", 1, "s", "unverified", "machine-extracted")],
+    )
+    formula = {
+        "document_id": doc_id,
+        "designation": designation,
+        "number": "5.6.7#k_z_below",
+        "clause_number": "5.6.7",
+        "edition": "2016",
+        "status": "unverified",
+        "provenance": "machine-extracted",
+    }
+    payload = db.build_formula_payload(conn, formula)
+    assert payload["norm_ref"]["clause"].startswith(output_config()["clause_prefix"])
+    assert "5.6.7" in payload["norm_ref"]["clause"]
     db.delete_document(conn, designation)

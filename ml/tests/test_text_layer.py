@@ -54,3 +54,28 @@ def test_extract_edition_text_no_changes() -> None:
 def test_classify_text_and_scan() -> None:
     assert text_layer.classify(["x" * text_layer.MIN_TEXT_CHARS]) == "text"
     assert text_layer.classify(["мало текста"]) == "scan"
+
+
+def test_extract_amendments_plural() -> None:
+    page = "СП 22.13330.2016\nс Изменениями N 1, 2, 3, 4, 5\nМосква 2016\n"
+    assert text_layer.extract_amendments([page]) == ["1", "2", "3", "4", "5"]
+
+
+def test_extract_amendments_singular() -> None:
+    page = "с Изменением N 1\n"
+    assert text_layer.extract_amendments([page]) == ["1"]
+
+
+def test_extract_amendments_none() -> None:
+    page = "СВОД ПРАВИЛ  СП 22.13330.2016\nМосква 2016\n"
+    assert text_layer.extract_amendments([page]) == []
+
+
+def test_extract_amendments_searches_up_to_page_5() -> None:
+    pages = ["", "", "", "", "с Изменениями N 2, 3\n"]
+    assert text_layer.extract_amendments(pages) == ["2", "3"]
+
+
+def test_extract_amendments_ignores_page_6_and_beyond() -> None:
+    pages = [""] * 5 + ["с Изменениями N 1, 2\n"]
+    assert text_layer.extract_amendments(pages) == []

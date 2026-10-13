@@ -351,3 +351,184 @@ Minor (один заголовок на параметр, новые ошибк�
 таблицу 5.5 — привязка типа лишь называет таблицу и её колонки, а backend берёт то, что
 нужно его типу. Нынешний разбор таблицы 5.5 в `pilot_catalog.py` переедет в этот общий
 документный слой.
+
+## Раздел 2: второе ревью Акима (2026-10-07)
+
+Проверено: `fix/normative-catalog/data` на `950a910` (один коммит поверх `develop`
+`42c7a6d`) против находок моего первого ревью и плана исправлений из ответа Егора выше.
+Тесты пайплайна я запустил без базы данных (отдельный worktree и venv: `pytest` 130
+passed, 26 skipped, 10 errors в `test_catalog_contract.py`; `ruff` и `mypy src` чистые) и
+проверил каждый новый тест, откатывая его исправление в worktree. Тесты с базой не
+запускал: они загрузили бы данные в мою `dec_normatives_test` и сменили бы пароль
+кластерной роли `dec_normatives_reader` (см. R4). Вердикта `tester` для ветки исправлений
+пока нет (AGENTS.md, раздел 2: шаг 5 идёт до ревью).
+
+**Вердикт: нужны исправления.** Сами три исправления в коде верны: `ingest.py:145`
+вызывает `sync_pilot_catalog(conn)` без обозначения (B1), `ingest.py:94` записывает каждую
+формулу как `unverified` / `machine-extracted` (M1), а `_bind_registry_formula` отклоняет
+формулу, у символа дерева или результата которой нет записи в нотации, и
+`notation_result_symbol` возвращает `None` вместо `"R"` (M2). Тесты их не держат: ни один
+из трёх новых или изменённых тестов не падает при откате своего исправления, а один
+старый тест противоречит M1. Задача 2.7 остаётся открытой, пока R1-R4 не исправлены и не
+прошли повторное ревью.
+
+### Серьёзные
+
+- **R1. `test_ingest.py` по-прежнему ждёт, что формула 5.7 `verified`.**
+  `test_ingest_manifest_formula_is_verified` (`test_ingest.py:82-100`) загружает
+  СП 22.13330.2016 и проверяет `{"status": "verified", "provenance": "human-verified"}`
+  для `5.7` (строка 98). После исправления M1 `ingest` пишет `unverified` /
+  `machine-extracted` для каждой формулы, поэтому тест падает всегда, когда есть база и
+  PDF. Значит, тесты с базой на этом коммите не запускались. Исправление: обратить тест
+  (ни одна формула манифеста не `verified` и не `human-verified`) и прогнать весь набор с
+  базой до вердикта `tester`.
+- **R2. Ни один тест не покрывает B1.**
+  `test_ingesting_second_document_leaves_pilot_catalog_on_sp22` вставляет фиктивный
+  документ и вызывает `sync_pilot_catalog(pilot_conn)` с обозначением по умолчанию, то
+  есть не проходит через `ingest`; с откатом `ingest.py:145` к
+  `sync_pilot_catalog(conn, designation)` он по-прежнему проходит, как и все остальные
+  тесты (проверено без базы; с базой фикстура загружает только СП 22, чьё обозначение и
+  есть значение по умолчанию). Старый модульный тест
+  `test_sync_skips_r_binding_when_formula_unconvertible` всё ещё передаёт `"X"` как
+  обозначение и ждёт `True`. Исправление, одно из двух: убрать параметр `designation` у
+  `sync_pilot_catalog`, чтобы пилот вообще нельзя было привязать к другому документу
+  (предпочтительно, именно этого и просил B1); или модульный тест, который вызывает
+  `ingest` на непилотном документе с подменёнными `db` и `sync_pilot_catalog` и проверяет
+  обозначение, полученное `sync_pilot_catalog`.
+- **R3. Тест на M2 проходит не по той причине.**
+  `test_bind_registry_formula_with_missing_notation_symbol_returns_false` даёт `x` единицу
+  `"m"` (латиница). В `UNIT_SYMBOLS` есть `"м"` (кириллица), поэтому `unit_symbol("m")`
+  бросает `PilotCatalogError`, и функция возвращает `False` и до, и после исправления: с
+  откатом новой проверки (возврат `units_by_symbol.get(symbol, "")`) тест всё равно
+  проходит. Исправление: дать `x` единицу из словаря (`"м"`), подменить
+  `db.set_formula_catalog` и проверить, что он не вызван; добавить зеркальный случай (все
+  символы есть в нотации), где он вызывается, чтобы тест падал при удалении проверки.
+- **R4. Защита тестовой базы обходится (m2 не сделан).** `require_test_db_url()`
+  проверяет суффикс `_test` у `DEC_TEST_NORMATIVES_DATABASE_URL`, но `pilot_conn`
+  отбрасывает его результат и подключается через `db.connect()`, который читает
+  `DEC_DATABASE_URL` (`test_pilot_catalog.py:44-45`). `_sync_ingest_url` копирует тестовый
+  URL в `DEC_DATABASE_URL`, только если эта переменная не задана (`conftest.py:33-35`). На
+  машине, где `DEC_DATABASE_URL` указывает на рабочую `dec` (так настроено по `README.md`
+  и `CLAUDE.md`), набор проходит проверку, а затем выполняет
+  `ingest(PILOT_PDF, force=True)`, переписывает каталог пилота, вставляет и удаляет
+  фиктивный документ в `dec`. У `test_ingest.py`, `test_db_payload.py` и
+  `test_catalog_contract.py` защиты нет вовсе: они подключаются через
+  `DEC_DATABASE_URL`, `test_ingest.py` удаляет документы СП 31.13330.2021 и
+  СП 22.13330.2016 (строки 68-100), а `test_catalog_contract.py` ставит кластерной роли
+  `dec_normatives_reader` пароль `test-reader`: вторая половина m2 (отдельная тестовая
+  роль) не сделана. Исправление: каждый тест с базой подключается по URL, который вернул
+  `require_test_db_url()` (или `DEC_DATABASE_URL` перезаписывается им, а не только
+  задаётся при отсутствии), все четыре модуля используют защиту, а тесты контракта —
+  свою роль.
+
+### Мелкие
+
+- **r1. `test_catalog_contract.py` без базы падает с ошибками, а не пропускается.**
+  Удалённый `setdefault` в `conftest.py` был его единственным URL; фикстура `conn` теперь
+  бросает `RuntimeError: DEC_DATABASE_URL не задан` (10 ошибок). Закрывается R4, если
+  модуль получит защиту.
+- **r2. Docstring модуля `pilot_catalog.py` всё ещё говорит, что формула R
+  `human-verified`** (строки 8-9), что M1 убрал.
+- **r3. Удаление `canonical_latex` из `ingest` выходит за рамки этого исправления.**
+  Формулы, найденные в тексте, а не в манифесте, теперь получают пустой `expression`
+  (`ingest.py:85`); раньше их LaTeX преобразовывался. Пилота это не касается (5.7 берётся
+  из манифеста), но вместе с этим меняются данные поиска `normatives-formula-contract` и
+  счёт в `formula-autoparse-limits-egor.md` (разобрано 5 из 10 формул с Σ/∏ в СП 24).
+  Скажи, пожалуйста, задумано ли это и к какому изменению относится; та же правка есть в
+  `2f92bad` на `feature/normative-pipeline/data`.
+- **r4. `.secrets.baseline` на ветке устарел.** Коммит удаляет строку с `dec:dec` из
+  `ml/tests/conftest.py`, а baseline всё ещё её перечисляет (строка 8): хук на этом коммите
+  не запускался (m6, `pre-commit install`). Шесть находок m6 на ветке остаются:
+  `normatives-pipeline-end-to-end-verification-egor.md:4` исправлена, но её место заняла
+  `openspec/changes/normatives-formula-contract/tester-verdict.md:36`, новая в `42c7a6d`.
+- **r5. Конфликты с `feature/normative-pipeline/data`.** Обе ветки начинаются с `42c7a6d`
+  и меняют `pilot_catalog.py`, `conftest.py` и `test_pilot_catalog.py`; `git merge-tree`
+  даёт конфликт содержимого во всех трёх. В `2f92bad` к тому же осталось правило, которое
+  убрал M1 («записи `formulas.toml`: human-verified», задача 1.6
+  `normatives-formula-contract`). Кто вливается вторым, должен сохранить M1; предлагаю
+  влить это исправление первым.
+
+### Что ещё открыто из первого ревью
+
+- m1 (одна транзакция на тип): отложено до второго типа, как договорились.
+- m3 (LaTeX `k_z_from` показывает `z_0`), m4 (границы метода ссылаются на `5.6.7` вместо
+  `табл. 5.5`), m5 (`REVOKE TEMP`): на ветке пока нет.
+- m6: см. r4.
+- m7: ответ в `normative-catalog-pilot-coefficients-egor.md` (2026-10-07): загружен
+  базовый текст 2016 года без изменений, поэтому формула (5.7) в каталоге может
+  отличаться от действующего текста («Измененная редакция, Изм. № 5»). Это не пункт ветки
+  исправлений, но задачу 7.1 (сквозная проверка backend с каталогом) стоит проводить на
+  сводном тексте с изменениями 1-5. Могу передать Егору свой экземпляр.
+
+## Раздел 2: статус исправлений (Егор, 2026-10-11)
+
+Ветка `fix/normative-catalog/data`, коммит `c6c17a5` (поверх `950a910`).
+145 тестов проходят; 24 пропускаются (нужен `DEC_TEST_NORMATIVES_DATABASE_URL`).
+
+**R1–R4 и m3–m5 сделаны; r2–r4 закрыты; r5 принято к сведению.**
+
+- **R1.** `test_ingest_manifest_formula_is_verified` переименован и инвертирован в
+  `test_ingest_all_formulas_are_unverified`. Новый запрос проверяет, что
+  `COUNT(*) WHERE status != 'unverified' = 0` и `COUNT(*) WHERE provenance !=
+  'machine-extracted' = 0` по всему документу. Падает при откате M1.
+- **R2.** Параметр `designation` у `sync_pilot_catalog` удалён полностью (не просто
+  игнорируется). Документ пилота `СП 22.13330.2016` жёстко задан как единственная цель;
+  структурно невозможно привязать каталог пилота к другому документу.
+  `test_sync_skips_r_binding_when_formula_unconvertible` и
+  `test_sync_without_document_is_noop` вызывают `sync_pilot_catalog(object())` без
+  обозначения; старый тест, передававший `"X"`, больше не компилируется.
+- **R3.** `test_bind_registry_formula_with_missing_notation_symbol_returns_false` теперь
+  даёт `x` единицу `"м"` (кириллица, есть в `UNIT_SYMBOLS`), монки-патчит
+  `db.set_formula_catalog` и проверяет, что он **не вызван**. Зеркальный тест
+  `test_bind_registry_formula_with_all_symbols_present_calls_set_formula_catalog`
+  подтверждает счастливый путь. Оба падают при удалении проверки
+  `all_symbols <= units_by_symbol.keys()`.
+- **R4.** `_sync_ingest_url` всегда перезаписывает `DEC_DATABASE_URL` тестовым URL
+  (сохраняет и восстанавливает прежнее значение). `require_test_db_url()` добавлен в
+  фикстуру `conn` `test_catalog_contract.py` и `test_db_payload.py`.
+- **m3.** LaTeX `k_z_from` в `pilot.toml`: `\frac{z_0}{b}+0.2` → `\frac{8}{b}+0.2`.
+- **m4.** Ссылка пункта в `_bound_rows`: жёстко заданный `5.6.7` → `f"табл. {TABLE_M}"`.
+- **m5.** В `ensure_catalog_read` добавлен `REVOKE TEMPORARY ON DATABASE ... FROM
+  dec_normatives_reader`.
+- **r2.** Docstring модуля `pilot_catalog.py` обновлён: «machine-extracted/unverified»
+  вместо «human-verified».
+- **r3 (canonical_latex).** Удаление из `ingest` намеренное. Манифест (`formulas.toml`)
+  был единственным путём через `canonical_latex`; теперь, когда `formulas.toml` удалён
+  (M1 полный, этот коммит), ни одна формула не попадает в `canonical_latex` через `ingest`.
+  Поле `expression` остаётся пустым для формул из PDF; формула 5.7 — синтетическая запись
+  в `pilot.toml` и никогда не идёт через текстовый слой. Влияние на `normatives-formula-contract`:
+  ключ `expression` присутствует, но пуст для не-манифестных формул; счёт Σ/∏ в
+  `formula-autoparse-limits-egor.md` не меняется (считалось до ingestion, на этапе парсинга).
+- **r4 (baseline / m6).** `pre-commit install` выполнен на машине Егора (2026-10-11).
+  Добавлены `# pragma: allowlist secret` к шести оставшимся строкам; baseline обновлён и
+  закоммичен. `tester-verdict.md:36` уже был `<password>` на `develop` (коммит `2d66c3e`),
+  поэтому pragma там лишь подтверждает намерение.
+- **r5 (конфликт с `feature/normative-pipeline/data`).** Принято к сведению. Ветка
+  исправлений меняет `pilot_catalog.py`, `conftest.py`, `test_pilot_catalog.py`, и вторая
+  ветка тоже. Тот, кто вливается вторым, разрешит конфликт вручную; предлагаю влить
+  `fix/normative-catalog/data` первым, как ты и рекомендуешь.
+
+**M1 полный (этот коммит).** `ml/configs/formulas.toml` удалён. `formula_manifest()` и
+`FORMULAS_TOML` убраны из `config.py`. `ingest.py` упрощён: все формулы из PDF идут в базу
+как `unverified` / `machine-extracted` без переопределения из манифеста. Формула 5.7 —
+запись `[[formula]]` в `pilot.toml`, записывается через `_write_synthetic_formulas` (тот же
+механизм, что для `k_z_below` и `k_z_from`).
+
+- **m7.** Получен обновлённый PDF (2026-10-11): «СП 22.13330.2016 с Изменениями N 1, 2, 3,
+  4, 5, применяется с 17.06.2017» — совпадает с экземпляром Акима. Ранее загруженный
+  текст не содержал Изм. № 5. Исправление: `text_layer.extract_edition_text(pages,
+  designation)` извлекает список изменений с титульной страницы и возвращает `"2016 с Изм.
+  N 1, 2, 3, 4, 5"`. `ingest.py` записывает это значение в `document.edition`; год для
+  колонки `year` берётся отдельно из `extract_edition_year`, чтобы `int()` не падал на
+  полной строке. Добавлены два unit-теста в `test_text_layer.py`.
+
+- **m1.** `sync_pilot_catalog` перестраивает каталог пилота в одной транзакции.
+  К 8 функциям каталога в `db.py` добавлен параметр `commit: bool = True`
+  (`set_formula_catalog`, `replace_catalog_formula`, `delete_catalog_rows`,
+  `insert_catalog_bindings`, `insert_table_values`, `insert_threshold_values`,
+  `insert_check_refs`, `insert_method_bounds`). `sync_pilot_catalog` передаёт им
+  `commit=False` и делает единственный `conn.commit()` в конце; при исключении вызывает
+  `conn.rollback()`. Тесты обновлены для нового kwarg; `fake_conn` с
+  `.commit()/.rollback()` заменяет `object()` там, где это нужно.
+
+**Все замечания закрыты.**

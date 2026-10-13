@@ -7,7 +7,7 @@ Branches: two features (`AGENTS.md`, Branching rules).
 
 - `feature/frontend-app/backend` (Akim, from `develop`): section 2, the metadata of the
   contract. It does not depend on the frontend and can merge into `develop` first.
-- `feature/frontend-app/frontend` (Akim): sections 3-7 and the frontend part of 8. It branches
+- `feature/frontend-app/frontend` (Akim): sections 3-7, 9 and the frontend part of 8. It branches
   from `feature/frontend-app/backend` once section 2 is done there (its `openapi.json` carries the
   metadata) and merges into `develop` after it, and only when every code task is checked off, the
   `tester` has declared GO for the feature and the review has passed.
@@ -217,10 +217,63 @@ before task 2.1.
 - [ ] 8.11 (spec) Archive this change after both features are merged and after `calculation-api`
   and `calculation-core-contract` are archived
 
+## 9. UX iteration (feature `frontend-app/frontend`)
+
+From the heuristic review of 2026-10-08 and the decisions of
+`docs/decisions/frontend/2026-10-08-frontend-ux-improvements-kickoff.md` (direction kept, hybrid
+type, four micro-interactions, one expressive moment). Points 4, 6, 7, 8 of the review and its
+P0-P2 defects are not in this section. Each task is one commit and is shown to Akim before the next.
+
+- [ ] 9.1 Scale the page heading (1.875-2.25 rem) and the verdict line (1.5-1.875 rem) with
+  `clamp()` and keep the body text, labels, fields and table columns on whole-pixel steps
+  (frontend); verify: a Playwright run at 1440, 1280, 1024, 768, 390 and 320 px finds no horizontal
+  scroll, the right edges of the value fields and of the output values equal row by row, an integer
+  computed font size in those columns, the heading at 30 px (320) and 36 px (1440), and the verdict
+  line at 24 px (320) and 30 px (1440)
+- [ ] 9.2a Keep the form draft per type in memory and restore it on return and on the back action
+  (frontend); verify: tests that the values and units survive leaving and returning and the back
+  action, and that no value reaches the console, the browser storage, the address or a screen other
+  than the form's fields (the test of task 4.5 stays green, and a test reads `localStorage`,
+  `sessionStorage` and the address after a send)
+- [ ] 9.2b Add "edit inputs" to the result, as the main action of a refusal, with focus and the bound
+  at the input the bound names (frontend); verify: tests that the action is present after a send and
+  absent for a result opened by its address and for an earlier result reached by the history after a
+  newer calculation, and the refusal variant with focus in the named field, the bound in text, and
+  the report link as the second action
+- [ ] 9.3 Echo the value in the base unit next to a field whose chosen unit is not the base unit,
+  from a display-only table of the unit vocabulary, with a one-time flash of the field under
+  `no-preference` (frontend); verify: a test that reads `backend/app/schemas/units.py` and fails
+  when a factor of the table differs from the backend's or a unit of the vocabulary has none,
+  tests for every unit of the mock types, no echo on the base unit, an empty field, a non-number or a
+  unit with no factor, the sent request unchanged, both languages (`= 0,02 м`, `= 0.02 m`), the
+  flash present under `no-preference` and absent under `reduce`, and axe
+- [ ] 9.4 Move focus to the verdict once on arrival (not to a warning) and draw its frame in 120 ms
+  under `prefers-reduced-motion: no-preference` (frontend); verify: tests for focus on a `pass`, a
+  `fail` and a refusal and not on a warning, and a Playwright check that the animation name is set
+  with `no-preference` and `none` with `reduce`
+- [ ] 9.5 Show the in-progress state of the form: text fields read-only and unit choices locked at
+  the same text contrast, a stepped progress rule, a status message, the text after 3 and after 10
+  seconds from the submit, no second request, and the fields changeable again after an error
+  (frontend); verify: tests with fake timers for both messages, locked fields during the request,
+  one request after two submits (the second by Enter in a field), the fields unlocked with their
+  values after a `503`, a static rule under `reduce`, and axe
+- [ ] 9.6 Check the changed elements (frontend); verify: a Playwright pass with the keyboard shows a
+  visible focus indicator of at least 3:1 on the verdict region, the "edit inputs" link, the unit
+  select and value field of a form with an echo, the bound note of a refusal's field, and a
+  read-only field during a request; the text pairs of the echo, the bound note, the in-progress
+  message and the read-only field reach 4.5:1; and `frontend/check.sh` passes with branch coverage
+  >= 95%
+
 ## Requirement coverage
 
 | Requirement | Verified by |
 |---|---|
+| `web-platform` Responsive type | tasks 9.1, 9.6 |
+| `web-platform` Form draft and the edit-inputs action | tasks 9.2a, 9.2b, 9.6 |
+| `web-platform` Unit echo in the base unit | tasks 9.3, 9.6 |
+| `web-platform` Verdict focus on arrival | tasks 9.4, 9.6 |
+| `web-platform` Calculation in progress | tasks 9.5, 9.6 |
+| `web-platform` Motion follows the user's setting | tasks 9.3, 9.4, 9.5, 9.6 |
 | `web-platform` User journey and screens | tasks 3.4, 4.1-4.4, 6.4b, 7.2, 8.3 |
 | `web-platform` Input form built from the type's contract | tasks 5.1a, 5.1b, 5.2-5.4, 6.4b, 6.4c |
 | `web-platform` Report request screen | tasks 7.1a, 7.1b, 7.2, 8.3 |
@@ -252,7 +305,7 @@ before task 2.1.
   blocker and no major finding; `norm-traceability-checker` confirms that no norm value is fixed.
 - Backend feature: every verify clause of section 2 passes, `backend/check.sh` passes, branch
   coverage 100% on `app`.
-- Frontend feature: every task of sections 3-7 is checked off, `frontend/check.sh` passes with
+- Frontend feature: every task of sections 3-7 and 9, and the frontend tasks of section 8, are checked off, `frontend/check.sh` passes with
   branch coverage >= 95%, the axe checks and the Playwright scenario pass.
 - NO-GO: any of: a failed validation; an open blocker or major finding; a failed verify clause;
   coverage below the target; an accessibility violation that axe or the `ui-ux-tester` finds; the
@@ -277,3 +330,13 @@ before task 2.1.
   Akim's word.
 - `user-accounts-auth` (planned, Akim) and a normative catalog interface (a future change): not
   dependencies; both are Non-goals here.
+- `report-title-block-limits` (Akim, report generator; its task 3.4): its feature
+  `feature/report-title-limits/backend` adds `maxLength` to five fields of the report request
+  (designation 123, document name 150, documentation kind 7, organization 130, surname 11).
+  Once it is merged into `develop` and `develop` is merged into this feature's branch,
+  `npm run gen:api:check` in `frontend/check.sh` fails until `npm run gen:api` regenerates
+  `frontend/src/api/schema.d.ts`; commit the regenerated file with that merge. No task of this
+  change reads `maxLength`: the report form shows the server's `422` next to its field (task
+  7.2). A later task that does should note that the server counts Unicode code points and an HTML
+  `maxLength` counts UTF-16 code units, so the browser limits characters outside the Basic
+  Multilingual Plane (emoji) more strictly than the server.

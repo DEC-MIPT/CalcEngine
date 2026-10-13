@@ -52,7 +52,8 @@ The frontend SHALL build the input form of a calculation type only from the entr
 to the input's listed `units`, preset to its `base_unit`; for an input with `whole_values_only` the
 unit choice is fixed to its `base_unit`, so the value is whole in the unit in which the type
 selects its table row. No field, label, unit or limit of a type
-SHALL be written in the frontend code. Before submission the form SHALL check that every field is
+SHALL be written in the frontend code (the display-only factors of "Unit echo in the base unit" are
+the unit vocabulary shared by all types, not a unit of a type). Before submission the form SHALL check that every field is
 filled, that the value is a finite number, and, for an input with `whole_values_only`, that the
 value is a whole number (a number equal to its integer part, so `30`, `30.0` and `30e0` are
 accepted and `30.5` is not); the form SHALL NOT round, interpolate or otherwise change an entered
@@ -124,6 +125,162 @@ The screen SHALL download the `.docx` that `POST /calculations/{result_id}/repor
 - **THEN** the screen shows the error's `message` in text, marks the report field that the `location` of
   each entry in `fields` names, shows an entry that names no field above the form
   (`design.md` decision 7), and downloads no file
+
+### Requirement: Form draft and the edit-inputs action
+The frontend SHALL keep the values and unit choices of an input form, for each calculation type, in
+the memory of the open page for as long as the page is open, and SHALL restore them when the form of
+that type is opened again, also by the browser's back action. The draft (the values and units typed into a form, not the inputs that a stored result itself
+shows in its steps) SHALL NOT be written to browser storage, to the address, to the console or to
+any screen other than the form's own fields.
+The result screen SHALL offer an "edit inputs" action that opens the form of the type just
+calculated with that draft, only for the result that the draft was last sent for; any other result
+(opened by its address alone, or reached again by the browser's history after another calculation)
+offers no such action. The input named by a refusal's bound is always an input of the calculated
+type (`bound.quantity`, as `calculation-core-contract` fixes it). For a refusal the action SHALL be the
+screen's main action and the link to the report request its second action, and the form it opens SHALL move focus to the input that the violated bound
+names and show the bound next to that input.
+
+#### Scenario: Back keeps the values
+- **WHEN** a user fills the form, submits, and returns to the form with the browser's back action
+- **THEN** every field shows the value and the unit that was entered
+
+#### Scenario: Edit inputs after a result
+- **WHEN** a user opens "edit inputs" on the result just calculated
+- **THEN** the form of that type opens with the entered values and units, and they can be changed
+  and sent again
+
+#### Scenario: Edit inputs after a refusal
+- **WHEN** a user opens "edit inputs" on a refusal whose bound is on the input `b`
+- **THEN** the form opens with the entered values, focus is in the field of `b`, and the violated
+  bound is shown next to that field in text
+
+#### Scenario: Result opened by its address
+- **WHEN** a user opens a result by its address in a new page, or after a reload
+- **THEN** the screen shows the result and no "edit inputs" action, and no draft value of an
+  earlier calculation is present on the page
+
+#### Scenario: Earlier result after a newer calculation
+- **WHEN** a user calculates twice in one page session and returns by the browser's history to the
+  first result
+- **THEN** the screen shows that result and no "edit inputs" action
+
+### Requirement: Unit echo in the base unit
+When a user chooses, for an input, a unit other than its base unit and the field holds a number,
+the form SHALL show next to that field the value in the base unit, with its unit and in text, in the
+interface language's number format with at most six significant digits. "Holds a number" is the
+form's own rule of "Input form built from the type's contract" (a finite number as that check
+reads it). The echo is shown for information only: the value and the unit that
+are sent are the ones the user entered, and the conversion in the calculation stays with the
+backend. The factors of the echo come from one display-only table of the unit vocabulary
+(`backend/app/schemas/units.py`, `UNITS`), not from any type: this is a deliberate exception to
+"no unit of a type in the frontend code", because the vocabulary is shared by all types and the
+backend's own test of its table is mirrored by a frontend test that reads that table and fails when
+a factor differs or a unit of the vocabulary has none. A unit with no factor shows no echo. The unit's label in the echo is the one the interface
+already uses for that unit in the interface language (`м` in Russian, `m` in English), not a second
+table. On a unit change the field flashes once with the accent colour for 120 ms, and under
+reduced motion it does not.
+
+#### Scenario: Another unit chosen
+- **WHEN** a user enters `2` in the width and chooses `cm`
+- **THEN** the form shows `= 0,02 м` next to the field, and the request carries `2` with the unit `cm`
+
+#### Scenario: Echo in English
+- **WHEN** the interface language is English and a user enters `2` in the width and chooses `cm`
+- **THEN** the form shows `= 0.02 m` next to the field
+
+#### Scenario: Flash of the field
+- **WHEN** a user changes the unit of a field
+- **THEN** the field flashes once with the accent colour for 120 ms, and under reduced motion it
+  does not flash
+
+#### Scenario: Base unit or no number
+- **WHEN** the chosen unit is the base unit, or the field is empty or not a number
+- **THEN** no echo is shown
+
+### Requirement: Verdict focus on arrival
+When a stored result is shown after it was loaded or after the form was sent, the frontend SHALL
+move keyboard focus once to the verdict region (the stamp for a `pass` or a `fail`, whether or not
+the check step is found, and the refusal for a refusal), so that a screen reader announces it and a
+keyboard user starts from it. A warning SHALL NOT take focus.
+
+#### Scenario: Result arrives
+- **WHEN** a result with the verdict `pass` or `fail`, or a refusal, is shown
+- **THEN** focus is on the verdict region, and the focus indicator meets the contrast of
+  "Non-functional — language, accessibility, browsers"
+
+#### Scenario: Focus is taken once
+- **WHEN** the verdict is shown, the user moves focus elsewhere, and the screen is drawn again (a
+  step is expanded, or the language is changed)
+- **THEN** focus stays where the user put it
+
+#### Scenario: Result with a warning
+- **WHEN** a result with a warning is shown
+- **THEN** focus is on the verdict stamp of that result, not on the warning
+
+### Requirement: Calculation in progress
+While a calculation request is sent, the form SHALL show that it is in progress (a progress rule and
+a text message announced to assistive technology as a status), SHALL leave the entered values
+readable at the contrast of "Non-functional — language, accessibility, browsers" and unchanged
+(text fields read-only, unit choices not changeable), and SHALL send no second request, however
+the form is submitted. Counted from the submit, after 3 seconds the message SHALL say that the
+server is calculating, and after 10 seconds that it takes longer than usual and that the entered
+data is kept. When the request ends with an error, the fields SHALL be changeable again with their
+values kept, and the error is shown as without this requirement.
+
+#### Scenario: Request in progress
+- **WHEN** a user submits a valid form and the response has not arrived
+- **THEN** the fields cannot be changed, a message in text says that the calculation is in
+  progress, and the submit control cannot send again
+
+#### Scenario: Submitted twice
+- **WHEN** a user presses Enter in a field twice while the first request is in progress
+- **THEN** exactly one request is sent
+
+#### Scenario: Response after 3 seconds
+- **WHEN** the response has not arrived 3 seconds after the submit
+- **THEN** the message says that the server is calculating
+
+#### Scenario: Request fails
+- **WHEN** the request ends with a `503` while in progress
+- **THEN** the fields are changeable again with the values kept, and the error is shown
+
+#### Scenario: Slow response
+- **WHEN** the response takes more than 10 seconds
+- **THEN** the message says that it takes longer than usual and that the entered data is kept
+
+### Requirement: Responsive type
+The page heading SHALL scale with the viewport between 1.875 rem and 2.25 rem, and the verdict line
+(the verdict word and the reading of the check in the stamp) between 1.5 rem and 1.875 rem; both
+bounds are in rem so that browser text zoom still scales them. All other text, the value fields
+and the columns of figures SHALL stay on fixed whole-pixel sizes. At every viewport width from
+320 px to 1440 px no screen SHALL scroll horizontally, and the figures of a column (the value
+fields of the form, the output values of a result) SHALL stay aligned on their right edge.
+
+#### Scenario: No horizontal scroll
+- **WHEN** any of the four screens is shown at a width of 1440, 1280, 1024, 768, 390 or 320 px
+- **THEN** the page does not scroll horizontally
+
+#### Scenario: Figures stay aligned
+- **WHEN** the form or a result is shown at those widths
+- **THEN** the right edges of the value fields, and of the output values, are the same on every
+  row, and the computed font size of a figure in a column is a whole number of pixels
+
+#### Scenario: Bounded scaling
+- **WHEN** the browser text size is the default of 16 px and the viewport is 320 px wide and when
+  it is 1440 px wide
+- **THEN** the page heading is 30 px at 320 px and 36 px at 1440 px, and the verdict line is 24 px
+  at 320 px and 30 px at 1440 px
+
+### Requirement: Motion follows the user's setting
+Every animation or transition the interface adds (the frame of the verdict, the flash of a field
+after a unit change, the progress rule) SHALL run only when the user's
+system does not ask for reduced motion. With `prefers-reduced-motion: reduce`, each such change
+SHALL happen at once, without movement, and no information SHALL depend on the movement.
+
+#### Scenario: Reduced motion requested
+- **WHEN** the system asks for reduced motion and a user opens a result or sends the form
+- **THEN** no animation runs on the verdict, the field or the progress rule, and the state they
+  show is the same as without reduced motion
 
 ### Requirement: Non-functional — language, accessibility, browsers
 The interface SHALL be available in Russian and in English, with Russian complete and a missing

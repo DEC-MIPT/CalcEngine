@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-
 import pytest
 from conftest import require_test_db_url
 
@@ -154,6 +153,25 @@ def test_bind_registry_formula_with_unknown_unit_returns_false(monkeypatch) -> N
     assert pilot_catalog._bind_registry_formula(object(), 1, "9.9") is False
 
 
+def test_bind_registry_formula_with_missing_notation_symbol_returns_false(monkeypatch) -> None:
+    monkeypatch.setattr(
+        pilot_catalog.db, "fetch_formula_by_number",
+        lambda *a, **k: {"id": 1, "expression": "x"},
+    )
+    monkeypatch.setattr(pilot_catalog.db, "fetch_notation", lambda *a, **k: [])
+    assert pilot_catalog._bind_registry_formula(object(), 1, "9.9") is False
+
+
+def test_sync_uses_pilot_designation_by_default(monkeypatch) -> None:
+    called_with: dict = {}
+    monkeypatch.setattr(
+        pilot_catalog.db, "fetch_document_id",
+        lambda conn, desig: called_with.update(designation=desig) or None,
+    )
+    pilot_catalog.sync_pilot_catalog(object())
+    assert called_with["designation"] == pilot_catalog.DESIGNATION
+
+
 def test_sync_skips_r_binding_when_formula_unconvertible(monkeypatch) -> None:
     from types import SimpleNamespace
 
@@ -272,6 +290,18 @@ def test_table_headings_unique_and_bounds_name_inputs(pilot_conn) -> None:
     all_headings = sorted({h for hs in headings_by_param.values() for h in hs})
     assert by_kind["min"] == all_headings[0]
     assert by_kind["max"] == all_headings[-1]
+
+
+def test_method_bounds_clause_names_table(pilot_conn) -> None:
+    rows = _rows(
+        pilot_conn,
+        "SELECT norm_refs FROM catalog_read.type_method_bounds WHERE calculation_type = %s",
+        (CT,),
+    )
+    assert rows
+    for row in rows:
+        refs = _load(row["norm_refs"])
+        assert refs[0]["clause"] == f"табл. {pilot_catalog.TABLE_M}"
 
 
 def test_coefficients_and_thresholds_are_stored(pilot_conn) -> None:
