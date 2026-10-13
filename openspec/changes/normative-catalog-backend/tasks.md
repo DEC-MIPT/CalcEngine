@@ -195,6 +195,20 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   another unit, each raising `ParameterSourceUnavailableError` with one
   `code=catalog_data_invalid` line naming the parameter; the pilot's synthetic rows still
   resolve; `check.sh` passes with branch coverage of 100%
+- [x] 5.7 Check table headings against the method's selectors (design decisions 6 and 7;
+  `orchestrator` review of 2026-10-13, M1 and m1) (backend); verify: `SELECTORS` of the
+  pilot names `m_gamma`, `m_q`, `m_c` by `phi_II`; the breach tests of task 5.4 gain a
+  selected parameter without a heading, one headed by another input, an unselected
+  parameter with a heading, and a row with a heading value or a heading unit but no
+  heading symbol, each failing on the code before this task; `confirm_selectors` refuses
+  a table value whose selectors differ from the method's; the ingested catalog of task
+  7.1 still passes; `check.sh` passes with branch coverage of 100%
+- [x] 5.8 Answer a catalog row of the wrong shape as a data breach, not a `500` (design
+  decision 7; `orchestrator` review, m4) (backend); verify: a row without a parameter
+  gives `503 parameter_source_unavailable` with one `code=catalog_data_invalid` line; a
+  document without an edition, a clause without a number and a search hit of an unknown
+  kind give `503 catalog_unavailable` with one `code=catalog_data_invalid endpoint=...`
+  line; each test fails on the code before this task
 
 ## 6. Endpoints and wiring (backend, Akim)
 
@@ -225,7 +239,7 @@ Egor may split these tasks further on his branch; each one stays in his zone.
 
 ## 7. Pilot on catalog data (backend, Akim; waits for section 2 on `develop`)
 
-- [ ] 7.1 Run the pilot `foundations_shallow_r` end to end on Egor's ingested
+- [x] 7.1 Run the pilot `foundations_shallow_r` end to end on Egor's ingested
   `dec_normatives`, the former WP2 task 7.1c (backend); verify: with
   `DEC_NORMATIVES_DATABASE_URL` as `dec_normatives_reader`, the contract test of task 4.3
   passes on his database, `POST /calculations` for a request whose `phi_II` is a heading
@@ -234,17 +248,26 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   catalog's documents and editions; a Russian search for a word of a clause title of
   the ingested pilot document has that clause among its hits; the tests assert
   structure and statuses, never a norm value
-- [ ] 7.2 Measure the read path on the ingested data (spec "Non-functional — catalog
+- [x] 7.2 Measure the read path on the ingested data (spec "Non-functional — catalog
   read path") (backend); verify: 20 parameter resolutions, 20 searches and 20 document
   requests each take under 2 seconds on a developer machine as the spec defines it,
   recorded with the machine and the times in the code journal
-- [ ] 7.3 `tester` GO for `feature/normative-catalog/backend`, the review by Egor or the
+- [x] 7.3 `tester` GO for `feature/normative-catalog/backend`, the review by Egor or the
   orchestrator, and the merge into `develop` (backend); verify: the GO and the review are
   recorded in `docs/decisions/normative-catalog-backend-readiness.md`
+- [ ] 7.4 Close the deferred findings m2 and m3 of the `orchestrator` review of 2026-10-13
+  (`normative-catalog-backend-readiness.md`, Section 7) on `fix/normative-catalog/backend`
+  (backend); verify: m2 — either the documented run command (`CLAUDE.md`, `README.md`)
+  runs uvicorn with `--no-access-log` or an access log that drops the query string, or the
+  requirement "Normative search endpoint" is narrowed to the application's own logs, the
+  choice recorded in the readiness record; m3 — the catalog engine runs at
+  `isolation_level="REPEATABLE READ"`, asserted next to
+  `test_the_engine_reads_only_and_hides_parameters`; `check.sh` passes with branch
+  coverage of 100%
 
 ## 8. Close
 
-- [ ] 8.1 (spec) Record in `calculation-core-contract` that task 7.1c is done here and
+- [x] 8.1 (spec) Record in `calculation-core-contract` that task 7.1c is done here and
   that minor 6 of the engine review is fixed by tasks 5.1a-5.1b under the new
   `calculation-engine` requirement "Table value selectors"; record in
   `backend-layered-architecture` that item 9.3 is settled by this change and that the
@@ -253,9 +276,11 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   from this change and that `invalid_input` also covers an input that the catalog's
   table does not cover (both owners agree to the edits); verify: the notes are on
   `develop` (2026-10-05: notes written by Akim in WP2 `tasks.md` section 9 and task 7.2,
-  WP5 `design.md` decision 2, WP8 `design.md` error table; Egor's agreement pending)
-- [ ] 8.2 (spec) After both features are merged, `spec-keeper` syncs `normatives-catalog`
-  and archives this change; verify: `openspec validate --all --strict` passes after the
+  WP5 `design.md` decision 2, WP8 `design.md` error table; 2026-10-11: Egor agreed to
+  all three as written, `docs/decisions/backend/2026-10-07-pipeline-branch-and-process-to-egor.md`,
+  answer 8)
+- [ ] 8.2 (spec) After both features are merged and task 7.4 is done, `spec-keeper` syncs
+  `normatives-catalog` and archives this change; verify: `openspec validate --all --strict` passes after the
   archive
 
 ## Dependencies
@@ -283,12 +308,12 @@ Egor may split these tasks further on his branch; each one stays in his zone.
 - [x] A `spec-reviewer` report on the current version lists no blocker and no major
   finding (task 1.2), and `norm-traceability-checker` passes (task 1.3)
 - [x] Egor has confirmed the read contract and his section 2 (task 1.4)
-- [ ] Functional requirements are recorded as requirements with scenarios; the
+- [x] Functional requirements are recorded as requirements with scenarios; the
   non-functional ones (performance, security, coverage) are in "Non-functional — catalog
   read path"
-- [ ] Each task fits one session and names how it is verified; each task with code
+- [x] Each task fits one session and names how it is verified; each task with code
   belongs to exactly one of the two features above
-- [ ] Dependencies are listed: `normatives-formula-contract` tasks 1.4-1.7 and the move
+- [x] Dependencies are listed: `normatives-formula-contract` tasks 1.4-1.7 and the move
   to `ml/` (Egor, for section 2; the move is done); `retarget-mvp-domain` task 3.1
   (Egor, for task 7.1); `calculation-api` merged on `develop` (done). Egor's planned
   infrastructure change (a separate `dec_normatives` database) is not a dependency: until

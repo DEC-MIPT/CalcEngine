@@ -53,3 +53,7 @@ class CalculationTypeNotRegisteredError(DECError):
 
 class DatabaseUnavailableError(DECError):
     """База приложения не настроена или не отвечает."""
+
+
+class CatalogUnavailableError(DECError):
+    """Каталог норм не настроен или не отвечает."""

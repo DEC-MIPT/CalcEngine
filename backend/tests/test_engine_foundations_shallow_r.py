@@ -11,6 +11,7 @@ from app.core.exceptions import CalculationError, ExpressionError, UnitError
 from app.engine import foundations_shallow_r as pilot
 from app.engine.pipeline import calculate
 from app.engine.registry import CalculatorRegistry
+from app.models.calculation_result import CalculationResultRow
 from app.parameters.loader import load_parameters
 from app.repositories.calculation_result import CalculationResultRepository
 from app.schemas.calculation import (
@@ -22,7 +23,7 @@ from app.schemas.calculation import (
 )
 from app.schemas.expression import parse_expression
 from app.schemas.parameters import EngineerRule
-from app.schemas.resolved import Formula, TableValue, Threshold
+from app.schemas.resolved import Formula, Selector, TableValue, Threshold
 from app.services.calculation import CalculationService
 from app.services.parameter_source import ResolvedParameters
 
@@ -59,8 +60,11 @@ def formula(latex: str, tree: dict[str, Any], result: str, units: dict[str, str]
     return Formula(latex=latex, tree=parse_expression(tree), result_symbol=result, units=units, norm_refs=(REF,))
 
 
-def entry(symbol: str, value: float) -> TableValue:
-    return TableValue(symbol=symbol, latex=symbol, value=QuantityValue(value=value, unit="1"), norm_refs=(REF,))
+def entry(symbol: str, value: float, phi_ii: float | None = None) -> TableValue:
+    selectors = () if phi_ii is None else (Selector(symbol="phi_II", value=QuantityValue(value=phi_ii, unit="deg")),)
+    return TableValue(
+        symbol=symbol, latex=symbol, value=QuantityValue(value=value, unit="1"), norm_refs=(REF,), selectors=selectors
+    )
 
 
 R_UNITS = {
@@ -94,9 +98,9 @@ def parameters(**changes: Any) -> pilot.Parameters:
         "gamma_c1": entry("gamma_c1", 2.0),
         "gamma_c2": entry("gamma_c2", 3.0),
         "k": entry("k", 4.0),
-        "m_gamma": entry("M_gamma", 0.5),
-        "m_q": entry("M_q", 5.0),
-        "m_c": entry("M_c", 10.0),
+        "m_gamma": entry("M_gamma", 0.5, 20.0),
+        "m_q": entry("M_q", 5.0, 20.0),
+        "m_c": entry("M_c", 10.0, 20.0),
         "k_z_threshold": Threshold(latex="b_0", value=QuantityValue(value=5.0, unit="m"), norm_refs=(REF,)),
         "k_z_below": formula(r"k_z = \kappa", num(3.0), "k_z", {"k_z": "1"}),
         "k_z_from": formula(r"k_z = b / 4", op("div", sym("b"), num(4.0)), "k_z", {"b": "m", "k_z": "1"}),
@@ -241,6 +245,68 @@ def test_the_service_runs_the_registered_pilot(sqlite_session: Session) -> None:
 
     assert envelope.verdict == "pass"
     assert envelope.outputs[0].value == 172.5
+
+
+def test_a_heading_that_differs_from_phi_ii_stops_the_pilot() -> None:
+    with pytest.raises(CalculationError, match="'M_q': selector 'phi_II' differs from the input"):
+        run(resolved=parameters(m_q=entry("M_q", 5.0, 30.0)))
+
+
+def test_a_heading_on_a_value_the_method_does_not_select_stops_the_pilot() -> None:
+    soil = Selector(symbol="soil", value=QuantityValue(value=1.0, unit="1"))
+    gamma_c1 = parameters().gamma_c1.model_copy(update={"selectors": (soil,)})
+
+    with pytest.raises(CalculationError, match="'gamma_c1': selectors differ from the method's"):
+        run(resolved=parameters(gamma_c1=gamma_c1))
+
+
+@pytest.mark.parametrize("name", ["m_gamma", "m_q", "m_c"])
+def test_a_coefficient_without_its_phi_ii_heading_stops_the_pilot(name: str) -> None:
+    unselected = getattr(parameters(), name).model_copy(update={"selectors": ()})
+
+    with pytest.raises(CalculationError, match="selectors differ from the method's"):
+        run(resolved=parameters(**{name: unselected}))
+
+
+def test_the_pilot_selects_by_phi_ii_exactly_the_table_coefficients() -> None:
+    tables = [name for name, field in pilot.Parameters.model_fields.items() if field.annotation is TableValue]
+
+    assert set(pilot.SELECTORS) <= set(tables)
+    assert set(pilot.SELECTORS.values()) <= {quantity.name for quantity in pilot.INPUTS}
+    assert pilot.SELECTORS == {"m_gamma": "phi_II", "m_q": "phi_II", "m_c": "phi_II"}
+
+
+def test_headings_in_radians_are_confirmed_for_phi_ii_given_in_radians() -> None:
+    in_radians = Selector(symbol="phi_II", value=QuantityValue(value=0.3, unit="rad"))
+    selected = {
+        name: getattr(parameters(), name).model_copy(update={"selectors": (in_radians,)})
+        for name in ("m_gamma", "m_q", "m_c")
+    }
+    given = inputs() | {"phi_II": QuantityValue(value=0.3, unit="rad")}
+
+    result = run(given, parameters(**selected))
+
+    assert [(s.symbol, s.value, s.unit) for s in result.trace[4].substitutions] == [("phi_II", 0.3, "rad")]
+
+
+class MismatchedSource:
+    def resolve(self, calculation_type: str, given: Mapping[str, QuantityValue]) -> ResolvedParameters:
+        return ResolvedParameters(parameters=parameters(m_c=entry("M_c", 10.0, 10.0)), method_range=())
+
+
+def test_a_mismatched_heading_stores_nothing(sqlite_session: Session) -> None:
+    registry = CalculatorRegistry()
+    pilot.register(registry, ROUNDING, RULE)
+    service = CalculationService(
+        registry,
+        sources={pilot.NAME: MismatchedSource()},
+        results=CalculationResultRepository(sqlite_session),
+    )
+
+    with pytest.raises(CalculationError, match="'M_c'"):
+        service.submit(CalculationRequest(calculation_type=pilot.NAME, inputs=inputs()))
+
+    assert sqlite_session.query(CalculationResultRow).count() == 0
 
 
 def numeric_literals(source: str) -> list[object]:

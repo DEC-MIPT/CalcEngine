@@ -28,7 +28,7 @@ from app.schemas.calculation import (
 )
 from app.schemas.expression import parse_expression
 from app.schemas.parameters import EngineerRule
-from app.schemas.resolved import Formula, TableValue
+from app.schemas.resolved import Formula, Selector, TableValue
 from app.schemas.text import LocalizedText
 
 REF = NormRef(
@@ -77,7 +77,13 @@ PARAMETERS = Parameters(
         units={"k": "1", "b": "m", "y": "m"},
         norm_refs=(REF,),
     ),
-    coefficient=TableValue(symbol="k", latex="k", value=QuantityValue(value=2.0, unit="1"), norm_refs=(REF,)),
+    coefficient=TableValue(
+        symbol="k",
+        latex="k",
+        value=QuantityValue(value=2.0, unit="1"),
+        norm_refs=(REF,),
+        selectors=(Selector(symbol="phi", value=QuantityValue(value=20.0, unit="deg")),),
+    ),
     limit=QuantityValue(value=10.0, unit="m"),
 )
 
@@ -87,7 +93,7 @@ VALIDATED = (ValidatedBound(quantity="b", kind="max", value=5.0, inclusive=True,
 
 class SyntheticCalculator(Calculator[Mapping[str, QuantityValue], Parameters, CalculatorOutput]):
     def calculate(self, inputs: Mapping[str, QuantityValue], parameters: Parameters) -> CalculatorOutput:
-        k = table_step("k", parameters.coefficient, {"phi": inputs["phi"]})
+        k = table_step("k", parameters.coefficient)
         y = formula_step("y", parameters.formula, {"k": k.result, "b": inputs["b"]})
         check = check_step("check", ("y", y.result), "le", ("y_{max}", parameters.limit), (REF,))
         return CalculatorOutput(trace=(k, y, check), outputs={"y": y.result})

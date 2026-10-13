@@ -7,7 +7,7 @@ Branches: two features (`AGENTS.md`, Branching rules).
 
 - `feature/frontend-app/backend` (Akim, from `develop`): section 2, the metadata of the
   contract. It does not depend on the frontend and can merge into `develop` first.
-- `feature/frontend-app/frontend` (Akim): sections 3-7 and the frontend part of 8. It branches
+- `feature/frontend-app/frontend` (Akim): sections 3-7, 9 and the frontend part of 8. It branches
   from `feature/frontend-app/backend` once section 2 is done there (its `openapi.json` carries the
   metadata) and merges into `develop` after it, and only when every code task is checked off, the
   `tester` has declared GO for the feature and the review has passed.
@@ -39,56 +39,57 @@ before task 2.1.
 
 ## 2. Backend: input and output metadata (feature `frontend-app/backend`)
 
-- [ ] 2.1 Add `label`, `symbol`, `hint` and `whole_values_only` to the quantity declaration
+- [x] 2.1 Add `label`, `symbol`, `hint` and `whole_values_only` to the quantity declaration
   (`QuantityDeclaration`, `backend/app/schemas/calculation.py`) with the shape of `design.md`
   decision 6, and reject at registration a type whose input or output has no `label.ru` or no
   `symbol` (backend); verify: tests that a declaration with a missing or empty `label.ru`, or with a
   missing or empty `symbol`, fails and names the quantity, and that `hint` and `label.en` are
-  optional
-- [ ] 2.2 Declare the metadata for the inputs and outputs of `foundations_shallow_r`
+  optional (done 2026-10-06 on `feature/frontend-app/backend`, `bab155f`)
+- [x] 2.2 Declare the metadata for the inputs and outputs of `foundations_shallow_r`
   (`backend/app/engine/foundations_shallow_r.py`), with `whole_values_only` true for `phi_II` and
   false for the others (backend); verify: a test reads every quantity of the pilot and finds
-  `label.ru` and `symbol`; no value, formula, `NormRef` or parameter of the pilot changes
-- [ ] 2.3 Carry the metadata to `GET /calculation-types` through `InputView` and `OutputView`
+  `label.ru` and `symbol`; no value, formula, `NormRef` or parameter of the pilot changes (done 2026-10-06 on `feature/frontend-app/backend`, `bab155f`)
+- [x] 2.3 Carry the metadata to `GET /calculation-types` through `InputView` and `OutputView`
   (`backend/app/schemas/api.py`) and the OpenAPI schema (backend); verify: a test of the endpoint
   finds the fields in the declared order, `phi_II` with `whole_values_only` true; `/openapi.json`
-  documents them
-- [ ] 2.4 Prove that the metadata changes no calculation (backend); verify: a test that the result
+  documents them (done 2026-10-06 on `feature/frontend-app/backend`, `bab155f`)
+- [x] 2.4 Prove that the metadata changes no calculation (backend); verify: a test that the result
   envelope, the trace, the `NormRef` list and `input_hash` of a fixed request equal the values
   in a fixture `backend/tests/fixtures/pilot_envelope_before_metadata.json`, generated on `develop`
   and committed as the first commit of the branch, before task 2.1; no file under `ml/` or `infra/` and no query to `dec_normatives`
-  is added
-- [ ] 2.5 Run `backend/check.sh` and the `postgres` module (backend); verify: `ruff`, `mypy`,
-  `lint-imports` pass, branch coverage of `app` stays 100%, and the `pre-commit` hooks pass
+  is added (done 2026-10-06 on `feature/frontend-app/backend`: the fixture in `b8f14c4`, the test in
+  `bab155f`; the baseline got three entries for the fixture's hashes by hand, not a full regeneration)
+- [x] 2.5 Run `backend/check.sh` and the `postgres` module (backend); verify: `ruff`, `mypy`,
+  `lint-imports` pass, branch coverage of `app` stays 100%, and the `pre-commit` hooks pass (done 2026-10-06 on `feature/frontend-app/backend`, `bab155f`)
 
 ## 3. Technical foundations (feature `frontend-app/frontend`)
 
-- [ ] 3.1 Add `openapi-typescript`, the script `npm run gen:api`, the committed
+- [x] 3.1 Add `openapi-typescript`, the script `npm run gen:api`, the committed
   `frontend/src/api/schema.d.ts`, and a check in `check.sh` that the committed file is current
   (frontend); verify: regenerating from the backend of section 2 leaves no diff; a hand edit of the
-  file makes the check fail
-- [ ] 3.2 Add the API client over `openapi-fetch` with the base address from
+  file makes the check fail (done 2026-10-06 on `feature/frontend-app/frontend`, `b0ce766`)
+- [x] 3.2 Add the API client over `openapi-fetch` with the base address from
   `VITE_API_BASE_URL`, and a helper that turns an error body (`code`, `message`, `fields`) into a
   typed value (frontend); verify: Vitest tests for a `422` body with `fields`, a `404`, a `503`, and a
-  network failure
-- [ ] 3.3a Add MSW with one set of handlers shared by the browser and Vitest, and the script
+  network failure (done 2026-10-06 on `feature/frontend-app/frontend`, `8e1c690`)
+- [x] 3.3a Add MSW with one set of handlers shared by the browser and Vitest, and the script
   `npm run dev:mock` (frontend); verify: `npm run dev:mock` answers `GET /calculation-types`
-  from the handlers, and the Vitest setup uses the same handler module
+  from the handlers, and the Vitest setup uses the same handler module (done 2026-10-06 on `feature/frontend-app/frontend`, `69c7b8a`)
 - [ ] 3.3b Add the scenario handlers of `design.md` decision 4: pass, fail, refused, warning,
   `422`, `503`, typed by the generated schema (frontend); verify: one test per scenario reads
-  the response through the client of 3.2 and gets the expected typed value
-- [ ] 3.4 Add React Router with the four addresses of "User journey and screens" and empty screens
+  the response through the client of 3.2 and gets the expected typed value (in part on `feature/frontend-app/frontend`, `69c7b8a`: pass, fail, `422` and `503` are mocked; refused and warning are left for tasks 6.4b and 6.4c)
+- [x] 3.4 Add React Router with the four addresses of "User journey and screens" and empty screens
   (frontend); verify: a test per address renders its screen; an unknown address renders a "not
-  found" screen
+  found" screen (done 2026-10-06 on `feature/frontend-app/frontend`, `fa41aa0`)
 - [ ] 3.5 Add the typed `ru`/`en` dictionary with the fallback to `ru`, the language switch, and
   number formatting through `Intl.NumberFormat` (frontend); verify: tests that a missing `en` key
   shows the `ru` text, and that `172.5` shows as `172,5` in Russian and `172.5` in English
 - [ ] 3.6 Add `eslint-plugin-jsx-a11y` and an axe helper for component tests (frontend); verify:
   `check.sh` runs both; a test component with an unlabelled input fails the axe helper
-- [ ] 3.7 Add the `Formula` component on MathJax with the raw-text fallback and the restricted
+- [x] 3.7 Add the `Formula` component on MathJax with the raw-text fallback and the restricted
   extensions of `design.md` decision 1 (frontend); verify: tests that a valid LaTeX string is
   typeset, that an invalid one shows its raw text, that neither throws, and that
-  `\href{javascript:alert(1)}{x}` and a `\require` string create no link and run no script
+  `\href{javascript:alert(1)}{x}` and a `\require` string create no link and run no script (done 2026-10-06 on `feature/frontend-app/frontend`, `08a5c4f`)
 - [ ] 3.8 Add Playwright with Chromium, Firefox and WebKit, used by the cross-browser scenario here and by tasks 8.6, 8.7, 8.9
   (frontend); verify: one test opens a mocked result with a trace and finds every step's formula
   typeset in each of the three engines
@@ -216,10 +217,63 @@ before task 2.1.
 - [ ] 8.11 (spec) Archive this change after both features are merged and after `calculation-api`
   and `calculation-core-contract` are archived
 
+## 9. UX iteration (feature `frontend-app/frontend`)
+
+From the heuristic review of 2026-10-08 and the decisions of
+`docs/decisions/frontend/2026-10-08-frontend-ux-improvements-kickoff.md` (direction kept, hybrid
+type, four micro-interactions, one expressive moment). Points 4, 6, 7, 8 of the review and its
+P0-P2 defects are not in this section. Each task is one commit and is shown to Akim before the next.
+
+- [ ] 9.1 Scale the page heading (1.875-2.25 rem) and the verdict line (1.5-1.875 rem) with
+  `clamp()` and keep the body text, labels, fields and table columns on whole-pixel steps
+  (frontend); verify: a Playwright run at 1440, 1280, 1024, 768, 390 and 320 px finds no horizontal
+  scroll, the right edges of the value fields and of the output values equal row by row, an integer
+  computed font size in those columns, the heading at 30 px (320) and 36 px (1440), and the verdict
+  line at 24 px (320) and 30 px (1440)
+- [ ] 9.2a Keep the form draft per type in memory and restore it on return and on the back action
+  (frontend); verify: tests that the values and units survive leaving and returning and the back
+  action, and that no value reaches the console, the browser storage, the address or a screen other
+  than the form's fields (the test of task 4.5 stays green, and a test reads `localStorage`,
+  `sessionStorage` and the address after a send)
+- [ ] 9.2b Add "edit inputs" to the result, as the main action of a refusal, with focus and the bound
+  at the input the bound names (frontend); verify: tests that the action is present after a send and
+  absent for a result opened by its address and for an earlier result reached by the history after a
+  newer calculation, and the refusal variant with focus in the named field, the bound in text, and
+  the report link as the second action
+- [ ] 9.3 Echo the value in the base unit next to a field whose chosen unit is not the base unit,
+  from a display-only table of the unit vocabulary, with a one-time flash of the field under
+  `no-preference` (frontend); verify: a test that reads `backend/app/schemas/units.py` and fails
+  when a factor of the table differs from the backend's or a unit of the vocabulary has none,
+  tests for every unit of the mock types, no echo on the base unit, an empty field, a non-number or a
+  unit with no factor, the sent request unchanged, both languages (`= 0,02 м`, `= 0.02 m`), the
+  flash present under `no-preference` and absent under `reduce`, and axe
+- [ ] 9.4 Move focus to the verdict once on arrival (not to a warning) and draw its frame in 120 ms
+  under `prefers-reduced-motion: no-preference` (frontend); verify: tests for focus on a `pass`, a
+  `fail` and a refusal and not on a warning, and a Playwright check that the animation name is set
+  with `no-preference` and `none` with `reduce`
+- [ ] 9.5 Show the in-progress state of the form: text fields read-only and unit choices locked at
+  the same text contrast, a stepped progress rule, a status message, the text after 3 and after 10
+  seconds from the submit, no second request, and the fields changeable again after an error
+  (frontend); verify: tests with fake timers for both messages, locked fields during the request,
+  one request after two submits (the second by Enter in a field), the fields unlocked with their
+  values after a `503`, a static rule under `reduce`, and axe
+- [ ] 9.6 Check the changed elements (frontend); verify: a Playwright pass with the keyboard shows a
+  visible focus indicator of at least 3:1 on the verdict region, the "edit inputs" link, the unit
+  select and value field of a form with an echo, the bound note of a refusal's field, and a
+  read-only field during a request; the text pairs of the echo, the bound note, the in-progress
+  message and the read-only field reach 4.5:1; and `frontend/check.sh` passes with branch coverage
+  >= 95%
+
 ## Requirement coverage
 
 | Requirement | Verified by |
 |---|---|
+| `web-platform` Responsive type | tasks 9.1, 9.6 |
+| `web-platform` Form draft and the edit-inputs action | tasks 9.2a, 9.2b, 9.6 |
+| `web-platform` Unit echo in the base unit | tasks 9.3, 9.6 |
+| `web-platform` Verdict focus on arrival | tasks 9.4, 9.6 |
+| `web-platform` Calculation in progress | tasks 9.5, 9.6 |
+| `web-platform` Motion follows the user's setting | tasks 9.3, 9.4, 9.5, 9.6 |
 | `web-platform` User journey and screens | tasks 3.4, 4.1-4.4, 6.4b, 7.2, 8.3 |
 | `web-platform` Input form built from the type's contract | tasks 5.1a, 5.1b, 5.2-5.4, 6.4b, 6.4c |
 | `web-platform` Report request screen | tasks 7.1a, 7.1b, 7.2, 8.3 |
@@ -251,7 +305,7 @@ before task 2.1.
   blocker and no major finding; `norm-traceability-checker` confirms that no norm value is fixed.
 - Backend feature: every verify clause of section 2 passes, `backend/check.sh` passes, branch
   coverage 100% on `app`.
-- Frontend feature: every task of sections 3-7 is checked off, `frontend/check.sh` passes with
+- Frontend feature: every task of sections 3-7 and 9, and the frontend tasks of section 8, are checked off, `frontend/check.sh` passes with
   branch coverage >= 95%, the axe checks and the Playwright scenario pass.
 - NO-GO: any of: a failed validation; an open blocker or major finding; a failed verify clause;
   coverage below the target; an accessibility violation that axe or the `ui-ux-tester` finds; the
@@ -276,3 +330,13 @@ before task 2.1.
   Akim's word.
 - `user-accounts-auth` (planned, Akim) and a normative catalog interface (a future change): not
   dependencies; both are Non-goals here.
+- `report-title-block-limits` (Akim, report generator; its task 3.4): its feature
+  `feature/report-title-limits/backend` adds `maxLength` to five fields of the report request
+  (designation 123, document name 150, documentation kind 7, organization 130, surname 11).
+  Once it is merged into `develop` and `develop` is merged into this feature's branch,
+  `npm run gen:api:check` in `frontend/check.sh` fails until `npm run gen:api` regenerates
+  `frontend/src/api/schema.d.ts`; commit the regenerated file with that merge. No task of this
+  change reads `maxLength`: the report form shows the server's `422` next to its field (task
+  7.2). A later task that does should note that the server counts Unicode code points and an HTML
+  `maxLength` counts UTF-16 code units, so the browser limits characters outside the Basic
+  Multilingual Plane (emoji) more strictly than the server.

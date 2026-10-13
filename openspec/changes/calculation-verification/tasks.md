@@ -58,9 +58,9 @@ Depends on `retarget-mvp-domain` for the list of calculation types of `foundatio
 - [x] 3.6 (spec) Remove the DRAFT markers from the requirement "Regression corpus", the metric, and the `development-process` delta; re-run `openspec validate --strict`
 - [ ] 3.7 [blocked: typical calculation] Test that a typical calculation completes in under 30 seconds (backend)
 
-## 4. Shared files: needs Egor review (not applied)
+## 4. Shared files: agreed with Egor (not applied)
 
-- [ ] 4.1 (spec) Agree with Egor the changes to `.claude/agents/tester.md` (its GO rule, lines 16-19) and its Kilo mirror, the `test-process` skill, and the `development-process` delta in this change. Both agent files stay identical. Do not apply before Egor agrees
+- [x] 4.1 (spec) Agree with Egor the changes to `.claude/agents/tester.md` (its GO rule, lines 16-19) and its Kilo mirror, the `test-process` skill, and the `development-process` delta in this change. Both agent files stay identical. Do not apply before Egor agrees (2026-10-11: Egor agreed to the delta and to the proposed GO and NO-GO lines and the step "attach the correctness metrics" as written; the pipeline computes nothing, so the gate does not apply to his zone; `docs/decisions/backend/2026-10-07-pipeline-branch-and-process-to-egor.md`, answer 9)
 - [x] 4.2 (spec) Check that the `development-process` delta of this change and the `team-roles-update` delta do not contradict each other (2026-09-27: no contradiction. This change ADDS "Correctness gate for calculation changes"; `team-roles-update` MODIFIES "Non-overlapping developer responsibility zones", "Planning before implementation", "Review before merge", and "Go/No-Go verdict and archive" and ADDS "Shared decisions are tracked", so no requirement is touched by both. The correctness gate applies only to a change with calculation code, so it never meets the code-free GO path of `team-roles-update`; for a change with code it is an extra GO condition next to the coverage gate. The GO wording in `tester.md` must still list both gates when task 4.1 and `team-roles-update` Part B are applied)
 
 ## 5. Follow-up, not in this change
@@ -88,7 +88,7 @@ Depends on `retarget-mvp-domain` for the list of calculation types of `foundatio
 - [x] Each task is small enough for one session
 - [x] Acceptance and Go/No-Go criteria written (below)
 - [x] Branches defined (above)
-- [ ] Dependencies satisfied: `calculation-core-contract` DOR (blocks section 3 only); Egor review (section 4)
+- [ ] Dependencies satisfied: `calculation-core-contract` DOR (blocks section 3 only); Egor review (section 4, done 2026-10-11)
 
 ## DOD and Go / No-Go
 

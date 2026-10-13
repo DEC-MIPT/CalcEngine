@@ -43,8 +43,25 @@ class Threshold(BaseModel):
     norm_refs: NormRefs
 
 
+class Selector(BaseModel):
+    """Значение заголовка строки таблицы, по которому выбрано табличное значение.
+
+    ``symbol`` — имя входа типа расчёта, ``value`` — заголовок в его собственной
+    единице (``calculation-engine`` "Table value selectors").
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    symbol: str = Field(min_length=1)
+    value: QuantityValue
+
+
 class TableValue(BaseModel):
-    """Одно значение из таблицы нормы как разрешённый параметр."""
+    """Одно значение из таблицы нормы как разрешённый параметр.
+
+    ``selectors`` — заголовки, по которым выбрана строка; пусто, если значение не
+    зависит от входа. Движок сверяет их со входами в ``confirm_selectors``.
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -52,3 +69,11 @@ class TableValue(BaseModel):
     latex: str = Field(min_length=1)
     value: QuantityValue
     norm_refs: NormRefs
+    selectors: tuple[Selector, ...] = ()
+
+    @model_validator(mode="after")
+    def _one_selector_per_symbol(self) -> "TableValue":
+        names = [selector.symbol for selector in self.selectors]
+        if len(names) != len(set(names)):
+            raise ValueError("a table value has at most one selector per symbol")
+        return self

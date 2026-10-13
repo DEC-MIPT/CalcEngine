@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-import os
 from urllib.parse import urlsplit
 
 import psycopg2  # type: ignore[import-untyped]
 import pytest
+from conftest import require_test_db_url
 
 from normatives_pipeline import catalog_contract, db
+
+pytestmark = pytest.mark.postgres
+
+URL = require_test_db_url()
 
 PASSWORD = "test-reader"  # pragma: allowlist secret
 
@@ -38,6 +42,7 @@ EXPECTED = {
 
 @pytest.fixture()
 def conn():
+    require_test_db_url()
     connection = db.connect()
     db.init_schema(connection)
     catalog_contract.ensure_catalog_read(connection, password=PASSWORD)
@@ -80,11 +85,36 @@ def test_reader_password_is_not_logged(conn, caplog, capsys) -> None:
 
 
 def _reader_url() -> str:
-    parts = urlsplit(os.environ["DEC_DATABASE_URL"])
+    parts = urlsplit(URL)
     host = parts.hostname or "localhost"
     port = parts.port or 5432
     dbname = (parts.path or "/dec").lstrip("/")
     return f"postgresql://dec_normatives_reader:{PASSWORD}@{host}:{port}/{dbname}"
+
+
+def test_search_finds_inflected_word(conn) -> None:
+    with conn.cursor() as cur:
+        cur.execute("DELETE FROM document WHERE designation = 'TEST-SEARCH-INFLECT'")
+        cur.execute(
+            "INSERT INTO document (designation, title, edition, year) "
+            "VALUES ('TEST-SEARCH-INFLECT', 'test', '2024', 2024) RETURNING id"
+        )
+        doc_id = cur.fetchone()["id"]
+        cur.execute(
+            "INSERT INTO clause (document_id, number, title, page, search_text) "
+            "VALUES (%s, '5.1', 'холодный фундамент', 1, 'холодный фундамент')",
+            (doc_id,),
+        )
+    conn.commit()
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT number FROM catalog_read.search(%s, %s)", ("холодными", 50)
+        )
+        numbers = [r["number"] for r in cur.fetchall()]
+    with conn.cursor() as cur:
+        cur.execute("DELETE FROM document WHERE designation = 'TEST-SEARCH-INFLECT'")
+    conn.commit()
+    assert "5.1" in numbers, "inflected query must find clause whose search_text has the lemma"
 
 
 def test_reader_role_refusals(conn) -> None:

@@ -164,3 +164,49 @@ DocLayout-YOLO + DPI 400) читает формулы хорошо — пило�
 
 Зачем: долгоживущий сервис вызывает `warm_up()` при старте — первый запрос уже тёплый; батч-CLI
 (`enrich.py`) амортизирует ту же разовую загрузку на весь документ.
+
+## Запись 13 — Полный прогон цикла: скачать → инжест → sync → прочитать (2026-10-06)
+
+Ветка `feature/normative-pipeline/data`. Цель: убедиться, что сквозной цикл проходит и
+воспроизвести известные баги перед fix-веткой.
+
+**Окружение:** контейнер `dec-postgres` запущен (порт 5433, БД `dec`), пакет установлен через
+`pip install -e "./ml[ml]"`, `DEC_DATABASE_URL=postgresql://dec:<password>@localhost:5433/dec`.
+
+**Э1 — PDF в `docs/normative-base/`:** 5 СП-документов извлекают designation корректно
+(СП 22/24/30/31/45); 7 файлов (приказы `_пр.pdf`, СНиП) дают пустое designation и правомерно
+отклоняются инжестом.
+
+**Э2 — ingest:**
+
++ `СП 22.13330.2016 --force`: 647 пунктов, 130 формул (127 нумерованных + 6 синтетических),
+  203 обозначения, 56 ссылок, 19 условий, 121 таблица, 2959 ячеек. Чисто.
++ `СП 24.13330.2021 --force`: 292 пункта, 91 формула, 134 обозначения. Чисто.
++ **B1 подтверждён:** после инжекта СП 24 `catalog_binding.document_id` для всех 11 параметров
+  пилота стал `СП 24.13330.2021` вместо `СП 22.13330.2016`. Причина: `ingest.py:151` вызывает
+  `pilot_catalog.sync_pilot_catalog(conn, designation)` с designation текущего документа.
+
+**Э3 — sync:** `pilot_catalog.sync_pilot_catalog(conn)` вызван без аргумента `designation`
+(по умолчанию `СП 22.13330.2016`). Возвращает `True`. Все 11 привязок корректно ссылаются
+на `СП 22.13330.2016`.
+
+**Э4 — чтение (от роли `dec_normatives_reader`):**
+
+| Представление | Результат |
+| --- | --- |
+| `catalog_read.documents` | 5 строк (СП 22/24/30/31/45); СП 30 и СП 45 имеют `edition=''`, `year=None` — старые данные, вставленные до появления проверки edition в ingest |
+| `catalog_read.type_formulas` | 3 строки для `foundations_shallow_r`: `k_z_below`, `k_z_from` (`unverified`), `r` (`verified`) |
+| `catalog_read.type_table_values` | 141 строка: по 1 для `gamma_c1/c2/k`, по 46 для `m_c/m_gamma/m_q` |
+| `catalog_read.type_thresholds` | `k_z_threshold = 10.0 m` |
+| `catalog_read.type_method_bounds` | `phi_II min=0.0 deg`, `phi_II max=45.0 deg` |
+| `catalog_read.search(…)` | Правильно ранжированные результаты на русский запрос |
+
+Проверка запретов: INSERT отклонён (`FeatureNotSupported`), SELECT на `public.document` отклонён
+(`InsufficientPrivilege`), CREATE TABLE отклонён сессией readonly (привилегия TEMP вне readonly
+не проверялась — фикс m5 ещё открыт).
+
+**M1 подтверждён в чтении:** `type_formulas` показывает формулу `r` с
+`norm_refs[0].status = "verified"` — после фикса M1 должно быть `"unverified"`.
+
+**Итог:** цикл проходит сквозняком без ошибок. Баги B1 и M1 воспроизведены и подтверждены.
+Ветка `fix/normative-catalog/data` должна закрыть оба до второго ревью Акима.

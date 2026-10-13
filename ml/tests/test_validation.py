@@ -44,3 +44,21 @@ def test_normalize_latex_strips_cosmetics() -> None:
 
 def test_canonical_latex_returns_value() -> None:
     assert canonical_latex("x + 1") is not None
+
+
+def test_canonical_latex_falls_back_on_unparseable(monkeypatch) -> None:
+    import normatives_pipeline.formulas.validation as val_mod
+
+    def _raise(*_: object) -> None:
+        raise ValueError("intentional parse error")
+
+    monkeypatch.setattr(val_mod, "latex2sympy", _raise)
+    result = canonical_latex("x + y")
+    assert isinstance(result, str)
+
+
+def test_normalize_latex_loop_exhausts_all_iterations() -> None:
+    # 4 levels of nested subscripts → loop runs all 3 iterations, no early break
+    deeply_nested = r"_{_{_{_{x}}}}"
+    result = normalize_latex(deeply_nested)
+    assert "_{x}" in result

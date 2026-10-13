@@ -1,4 +1,8 @@
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 from pathlib import Path
+
+from pydantic import BaseModel
 
 from app.core.exceptions import ParameterValidationError
 from app.engine import foundations_shallow_r
@@ -23,7 +27,45 @@ def _register_foundations_shallow_r(registry: CalculatorRegistry, params_root: P
     foundations_shallow_r.register(registry, entry.rule, entry.source)
 
 
-REGISTRATIONS = (_register_foundations_shallow_r,)
+@dataclass(frozen=True)
+class Registration:
+    """Известный тип расчёта: как его зарегистрировать и какой моделью проверять его параметры.
+
+    Модель и карта выбора нужны источнику параметров каталога (``normative-catalog-backend``
+    design.md, решения 5 и 6): он собирает из строк каталога поля, проверяет их моделью и
+    сверяет заголовки таблиц со входами, по которым метод выбирает значения.
+
+    Attributes:
+        name: имя типа расчёта в реестре.
+        register: регистрация со значениями из файла параметров.
+        parameters: модель разрешённых параметров калькулятора.
+        selectors: табличный параметр, который метод выбирает по входу, → этот вход.
+    """
+
+    name: str
+    register: Callable[[CalculatorRegistry, Path], None]
+    parameters: type[BaseModel]
+    selectors: Mapping[str, str]
+
+
+REGISTRATIONS = (
+    Registration(
+        name=foundations_shallow_r.NAME,
+        register=_register_foundations_shallow_r,
+        parameters=foundations_shallow_r.Parameters,
+        selectors=foundations_shallow_r.SELECTORS,
+    ),
+)
+
+PARAMETER_MODELS: Mapping[str, type[BaseModel]] = {
+    registration.name: registration.parameters for registration in REGISTRATIONS
+}
+"""Модель разрешённых параметров каждого известного типа расчёта."""
+
+TABLE_SELECTORS: Mapping[str, Mapping[str, str]] = {
+    registration.name: registration.selectors for registration in REGISTRATIONS
+}
+"""Для каждого известного типа: табличный параметр, выбираемый по входу, → этот вход."""
 
 
 def build_registry(params_root: Path) -> CalculatorRegistry:
@@ -44,8 +86,8 @@ def build_registry(params_root: Path) -> CalculatorRegistry:
             правила округления выхода.
     """
     registry = CalculatorRegistry()
-    for register in REGISTRATIONS:
-        register(registry, params_root)
+    for registration in REGISTRATIONS:
+        registration.register(registry, params_root)
     return registry
 
 

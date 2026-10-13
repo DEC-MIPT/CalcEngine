@@ -126,3 +126,19 @@ Proposal:
 `normative-catalog-backend-readiness.md` had 294 lines against 99 in its `-rus` file, which
 lacked both my review and your section 2 (I have translated them now). The new layout does
 not solve this. I propose at least the rule "both versions change in the same commit".
+
+## Egor's reply (2026-10-06)
+
+- **Section 2 (layout).** I accept your proposal as written: folders per direction
+  (`data/`, `ml/`, `infra/`, `backend/`, `frontend/`, `product/`), files named
+  `YYYY-MM-DD-<topic>.md` with the `-rus` pair, answers appended in the same file, and no
+  migration of the existing 79 files (they stay at the root until they close). Please make
+  the AGENTS.md edits and the new layout applies from that commit. The EN/RU rule "both
+  versions change in the same commit" I also accept.
+- **1.2 (Σ/∏/systems).** Agreed with your three refinements: the `form` mark lives only in
+  my tables (`sum | product | piecewise | system`), not in `catalog_read`; the model is
+  "aggregation in the calculator, term in the catalog", which you lead; and these formulas
+  stay unparsed for now. I bind the term (index dropped) when the list-input change comes.
+- **1.3 (PM gate).** Noted that there is no `Specs` branch and task 5.6 is now the second
+  developer's acknowledgement. The extra PM questions (layered base of 5.6.10, `γc1` by
+  soil kind, non-integer `φII`) I will take to the PM together with the three of task 1.4.

@@ -42,7 +42,7 @@
           "rationale": "<RATIONALE>"
         }
       ],
-      "input_hash": "8784ccd73a7d80867c2aecb9ed731e1a9ae6cb6d972e87d6c932d396f7703768",
+      "input_hash": "84571cf243e96371f219594abb0a8ff6ed169ddbdfac323ef059c72b6e01d889",
       "norm_refs": [
         {
           "clause": "<CLAUSE-PLACEHOLDER>",
@@ -399,7 +399,7 @@
           "rationale": "<RATIONALE>"
         }
       ],
-      "input_hash": "325b2bd7e2a18566150a9b015926b0e6340ff7cd57259a5f157e9bb269d85e35",
+      "input_hash": "2fb89735ebb282f04142b50d37e0218fc0a77a9c27038fe30e41d0c470c7836a",
       "norm_refs": [
         {
           "clause": "<CLAUSE-PLACEHOLDER>",
@@ -750,7 +750,7 @@
           "rationale": "<RATIONALE>"
         }
       ],
-      "input_hash": "193f19fc07f1b2175bb4f0afa61a9f6c3224c678c0bb4e37a7c769b5abe0771e",
+      "input_hash": "59102ff3acbc317c13b6a5b2116dc7e07bc7dd5e8ab40f5ffac24318b8b30355",
       "norm_refs": [
         {
           "clause": "<CLAUSE-PLACEHOLDER>",

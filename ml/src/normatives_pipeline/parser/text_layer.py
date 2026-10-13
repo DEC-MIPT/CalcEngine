@@ -10,6 +10,11 @@ MIN_TEXT_CHARS = 500
 
 DESIGNATION_RE = re.compile(r"\bСП\s*\d{2}\.\d{5}(?:\.\d+)?\b")
 EDITION_YEAR_RE = re.compile(r"(?:^|[^0-9])((?:19|20)\d{2})(?:$|[^0-9])")
+_CHANGES_RE = re.compile(r"с\s+Изменениями\s+N\s+([0-9][0-9,\s]*)", re.IGNORECASE)
+_AMENDMENTS_RE = re.compile(
+    r"с\s+Изменени(?:ями|ем)\s+N\s+([\d,\s]+)",
+    re.IGNORECASE,
+)
 
 
 def read_pages(path: Path) -> list[str]:
@@ -34,6 +39,26 @@ def extract_designation(pages: list[str]) -> str:
 def extract_edition_year(designation: str) -> str:
     years = [m.group(1) for m in EDITION_YEAR_RE.finditer(designation)]
     return years[-1] if years else ""
+
+
+def extract_edition_text(pages: list[str], designation: str) -> str:
+    """Return edition string with change numbers if the title page lists them."""
+    year = extract_edition_year(designation)
+    for page in pages[:3]:
+        m = _CHANGES_RE.search(page)
+        if m:
+            changes = re.sub(r"\s+", " ", m.group(1)).strip().rstrip(",")
+            return f"{year} с Изм. N {changes}"
+    return year
+
+
+def extract_amendments(pages: list[str]) -> list[str]:
+    """Return amendment numbers found in the front matter (pages 1-5), e.g. ['1','2','3']."""
+    for page in pages[:5]:
+        m = _AMENDMENTS_RE.search(page)
+        if m:
+            return [n.strip() for n in m.group(1).split(",") if n.strip().isdigit()]
+    return []
 
 
 def classify(pages: list[str]) -> str:
