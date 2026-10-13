@@ -51,8 +51,12 @@ Executor tags: **[Egor]** data zone, **[Agent]** subagent.
 - [x] 4.3 [Agent: tester] Issue the GO/NO-GO verdict
   (GO — 34 pass, 100% branch cov, ruff+mypy clean; 2026-10-13;
   verdict in `docs/decisions/normative-catalog-backend-readiness.md` section 4)
-- [ ] 4.4 [Egor] Merge to `develop`
-- [ ] 4.5 [Agent: spec-keeper] Sync and archive
+- [x] 4.4 [Egor] Merge to `develop`
+  (code commit `df7c9a6` merged; 2026-10-13)
+- [x] 4.5 [Agent: spec-keeper] Sync and archive
+  (requirements merged into `openspec/specs/normatives-catalog/spec.md`; change archived
+  to `openspec/changes/archive/2026-10-13-normatives-collector/`; `openspec validate --all
+  --strict` 20 passed, 0 failed; 2026-10-13)
 
 ## Dependencies
 
