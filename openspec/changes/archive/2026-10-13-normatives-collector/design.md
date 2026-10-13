@@ -32,7 +32,7 @@ See `proposal.md`.
    is never rewritten in place (matches the `NormRef` immutability in
    `norm-source-traceability`).
 4. **Dedup.** Key by `(document, edition, sha256)`; re-fetch only when the source
-   changed. Registry recall is measured against a manually verified 5-document pilot
+   changed. Registry recall is measured against a manually verified 6-document pilot
    list.
 5. **Boundary.** The collector writes `dec_normatives` and the local file store only; it
    has no public API and does not serve search (Akim's backend does).
