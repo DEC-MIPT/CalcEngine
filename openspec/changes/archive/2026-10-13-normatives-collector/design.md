@@ -32,7 +32,7 @@ See `proposal.md`.
    is never rewritten in place (matches the `NormRef` immutability in
    `norm-source-traceability`).
 4. **Dedup.** Key by `(document, edition, sha256)`; re-fetch only when the source
-   changed. Registry recall is measured against a manually verified 5-document pilot
+   changed. Registry recall is measured against a manually verified 6-document pilot
    list.
 5. **Boundary.** The collector writes `dec_normatives` and the local file store only; it
    has no public API and does not serve search (Akim's backend does).
@@ -42,6 +42,17 @@ See `proposal.md`.
 - The authoritative registry list may change as sources are probed; per-source findings
   are recorded in `docs/decisions/ml-model-journal.md`.
 
-## Boundary
+## Non-functional requirements
 
-The C/C++ hot-swap boundary of the calculation engine is not touched by this change.
+- **Performance**: metadata requests time out in 30 s; file downloads time out in 120 s;
+  up to 3 retries on transient network errors (delays: 2 s, 5 s, 10 s).
+- **Security**: no credentials stored in code; base URLs and registry parameters read
+  from environment via `Settings`; all downloads are HTTPS.
+- **Coverage**: branch coverage >= 95% (actual: 100%, 2026-10-13).
+- **Accessibility**: N/A — batch CLI tool, no UI.
+
+## C/C++ hot-swap boundary
+
+This component has no C/C++ hot-swap boundary. It is a batch/offline tool; its only
+CPU-bound operation is sha256 computation, handled by Python's built-in `hashlib`
+(backed by OpenSSL). No latency-sensitive inner loop exists in the collection path.

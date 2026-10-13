@@ -16,7 +16,8 @@ URL = require_test_db_url()
 
 @pytest.fixture(scope="module")
 def conn():
-    c = db.connect(URL)
+    require_test_db_url()
+    c = db.connect()
     db.init_schema(c)
     yield c
     c.close()

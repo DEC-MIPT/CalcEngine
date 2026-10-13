@@ -10,6 +10,7 @@ class Document:
     source: str
     designation: str
     title: str
+    edition: str | None = None
     download_url: str | None = None
     state: str | None = None
     extra: dict[str, str] = field(default_factory=dict)

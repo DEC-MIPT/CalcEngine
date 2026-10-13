@@ -11,8 +11,11 @@ The system SHALL extract a formula as structured data — its LaTeX source, a pa
 expression, and the attached notation and units.
 
 #### Scenario: Executable formula
-- **WHEN** a formula is extracted from a pilot document
-- **THEN** its parsed expression evaluates on a control example with the documented units
+- **GIVEN** a formula extracted from a pilot document and a set of documented-unit values
+- **WHEN** the parsed expression is lambdified and evaluated on those values
+- **THEN** the result matches the documented reference value without raising an exception
+  (exec_rate = executions without exception / total extracted formulas from the pilot ≥ 90%;
+  measured on pilot СП 22.13330.2016; pilot formula 5.7 executes to 143.75 kPa)
 
 #### Scenario: Source selected by PDF type
 - **WHEN** a document is ingested
@@ -58,6 +61,7 @@ The system SHALL extract applicability bounds with their normative references.
 - **THEN** it is stored with a `NormRef` and usable for an applicability check
 
 #### Scenario: Condition phrase
-- **WHEN** a line states a condition («при условии что», «при соблюдении», «соблюдены
-  следующие условия» and similar)
+- **WHEN** a line states a condition using a phrase enumerated in the `condition`
+  extractor config (`extract_conditions` in `parser/extractors.py`,
+  e.g. «при условии что», «при соблюдении», «соблюдены следующие условия»)
 - **THEN** it is extracted as a condition linked to its preceding clause

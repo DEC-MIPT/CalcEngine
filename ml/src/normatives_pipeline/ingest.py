@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from . import catalog_contract, db, pilot_catalog
-from .config import formula_manifest, output_config, parser_config
+from .config import output_config, parser_config
 from .formulas import source
 from .parser import extractors, symbols, text_layer
 from .retrieval import normalize_text
@@ -27,8 +27,7 @@ def ingest(path: Path, force: bool = False) -> int:
     if not edition_year:
         raise RuntimeError(f"не удалось извлечь год издания из обозначения {designation!r}")
     year = int(edition_year)
-    amendments = text_layer.extract_amendments(pages)
-    edition = f"{edition_year} с Изм. {', '.join(amendments)}" if amendments else edition_year
+    edition = text_layer.extract_edition_text(pages, designation)
 
     conn = db.connect()
     try:
@@ -75,50 +74,34 @@ def ingest(path: Path, force: bool = False) -> int:
         ]
         db.insert_clauses(conn, doc_id, clause_rows)
 
-        manifest = {
-            (m["designation"], m["number"]): m for m in formula_manifest()
-        }
-
         formula_rows = []
         notation_rows = []
         for f in formulas:
-            m = manifest.get((designation, f.number))
-            f_latex = m["latex"] if m else f.latex
-            f_expression = m["expression"] if m else ""
-            f_clause = m["clause"] if m and m.get("clause") else f.clause
-
+            f_latex = f.latex
+            f_expression = ""
+            f_clause = f.clause
             meanings = [n.meaning for n in formula_notation.get(f.number, [])]
             search = normalize_text(
                 f"{label} {f.number} {heading.get(f_clause, '')} "
                 + " ".join(meanings)
                 + f" {f_latex}"
             )
-            if m:
-                status, provenance = "verified", "human-verified"
-            else:
-                status, provenance = "unverified", "machine-extracted"
+            status, provenance = "unverified", "machine-extracted"
             formula_rows.append(
                 (
                     f.number, f_clause, f_latex, f_expression, f.raw_text, f.page,
                     search, status, provenance,
                 )
             )
-
-            if m:
-                for s in m["symbols"]:
+            for n in formula_notation.get(f.number, []):
+                for sym in symbols.split_symbols(n.symbol):
+                    norm = symbols.normalize_symbol(sym)
+                    if norm is None:
+                        continue
+                    ident, sym_latex = norm
                     notation_rows.append(
-                        (f.number, s["id"], s["latex"], s["meaning"], s["unit"], s["kind"])
+                        (f.number, ident, sym_latex, n.meaning, n.unit, "input")
                     )
-            else:
-                for n in formula_notation.get(f.number, []):
-                    for sym in symbols.split_symbols(n.symbol):
-                        norm = symbols.normalize_symbol(sym)
-                        if norm is None:
-                            continue
-                        ident, sym_latex = norm
-                        notation_rows.append(
-                            (f.number, ident, sym_latex, n.meaning, n.unit, "input")
-                        )
         db.insert_formulas(conn, doc_id, formula_rows)
         db.insert_notation(conn, doc_id, notation_rows)
 
