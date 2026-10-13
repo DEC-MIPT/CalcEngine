@@ -125,3 +125,59 @@ WP9), а функция ранжирует по `similarity(c.search_text, query
 прежними. Замеры 7.2 на тех же данных (все 20 разрешений параметров, 20 поисков и 20
 запросов документа быстрее 30 мс) оставляют на это запас. Какой путь выберешь и на какой
 ветке?
+
+## Answers
+
+_Егор, 2026-10-13._
+
+### П. 1 — `fix/normative-catalog/data` в `develop`
+
+Влито в `fix/normative-catalog/data` коммитом `817f4a3` (2026-10-13).
+Конфликты в 14 файлах разрешены с сохранением M1 (нет `formulas.toml`,
+всё `unverified`/`machine-extracted`), M2 (динамическое имя БД), m7
+(`extract_edition_text`), m3-m5 (`commit=True`), B1 (`require_test_db_url`).
+Ветка готова к ревью.
+
+### П. 2 — Данные для задачи WP9 7.1
+
+Вариант (а) тоже подходит: после того как `fix/normative-catalog/data` вольётся
+в `develop`, ты можешь запустить ингест у себя по `normatives-pilot-usage-akim.md`:
+
+    DEC_DATABASE_URL=postgresql://dec:<password>@localhost:5433/dec \
+    DEC_NORMATIVES_READER_PASSWORD=<reader-password> \
+        python -m normatives_pipeline.ingest --force \
+        "docs/normative-base/СП 22.13330.2016.pdf"
+
+Имя PDF подтверждаем: `docs/normative-base/СП 22.13330.2016.pdf`.
+Пароль читателя — то значение `DEC_NORMATIVES_READER_PASSWORD`, которое
+используешь у себя. Если предпочтёшь дамп — скажи.
+
+### П. 3 — Баг `_table_caption` в `extractors.py`
+
+Баг воспроизвёлся у нас на том же файле с тем же поведением (стр. 33 и 178,
+`ValueError: negative width or height`). Зафиксировали в `fix/normative-catalog/data`
+коммитом `98e2e31`: в `_table_caption` добавлена ранняя проверка `if top <= 0: return ""`
+с тестом `test_table_caption_negative_top_returns_empty`.
+
+Ингест сводного PDF с исправлением завершился успешно (проверено 2026-10-13 на
+`dec_normatives_test`): 1 документ (СП 22.13330.2016, редакция «2016 с Изм. N 1, 2, 3,
+4, 5»), 622 пункта, 120 формул, 2955 ячеек коэффициентов, 11 биндингов пилота. Два
+псевдо-таблицы-колонтитула на стр. 33 и 178 пропускаются (пустой caption), ингест
+завершается без ошибки.
+
+Также перенесли в `fix/normative-catalog/data` из `fix/formula-extractor/data`
+коммит `e78143d` — отклонение подписей к рисунку как номеров формул (паттерн
+`(?<!\S)\((\d+)\)` в `parser.toml`): было 130 формул (3 ложных позитива с рис. 6.5),
+стало 120 уникальных формул в хранилище, ложные позитивы устранены.
+
+### П. 4 — Поиск не находит слова в другой форме
+
+Зафиксировали в `fix/normative-catalog/data` изменением `VIEWS_SQL` в
+`catalog_contract.py`: в WHERE для `clause` и `formula` добавлено
+`OR word_similarity(query, search_text) > 0.3`, ранк заменён на
+`GREATEST(similarity(...), word_similarity(...))`. Функция пересоздаётся
+идемпотентно при следующем `ensure_catalog_read`. По замерам Акима
+`word_similarity > 0.5` давал 95% (823/869 слов), порог 0.3 берёт больше.
+Тест `test_search_finds_inflected_word` в `test_catalog_contract.py` —
+вставляет клоз с леммой, ищет по инфлектированной форме (`холодными` →
+`холодный`).
