@@ -252,7 +252,7 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   read path") (backend); verify: 20 parameter resolutions, 20 searches and 20 document
   requests each take under 2 seconds on a developer machine as the spec defines it,
   recorded with the machine and the times in the code journal
-- [ ] 7.3 `tester` GO for `feature/normative-catalog/backend`, the review by Egor or the
+- [x] 7.3 `tester` GO for `feature/normative-catalog/backend`, the review by Egor or the
   orchestrator, and the merge into `develop` (backend); verify: the GO and the review are
   recorded in `docs/decisions/normative-catalog-backend-readiness.md`
 - [ ] 7.4 Close the deferred findings m2 and m3 of the `orchestrator` review of 2026-10-13
