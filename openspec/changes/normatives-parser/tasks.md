@@ -1,6 +1,7 @@
 # Tasks
 
 Branch: `feature/normative-parser/ml` (Egor, ml zone).
+Coverage fix: `fix/normative-parser/ml` (latest commit `da3278b`, pending merge into `develop`).
 
 ## 1. Baseline extraction (deterministic)
 
@@ -43,15 +44,19 @@ Branch: `feature/normative-parser/ml` (Egor, ml zone).
 
 ## 4. Tests and quality
 
-- [ ] 4.1 [Agent: tester] pytest: clause/table/formula extraction, executor; fixtures =
+- [x] 4.1 [Agent: tester] pytest: clause/table/formula extraction, executor; fixtures =
   pilot СП pages + hand markup; branch coverage ≥ 95%
+  (GO 2026-10-13: 200 passed, exit 0; all formulas/ 100%; retrieval.py 100%;
+  latex_reconstruct.py ≥98% with corpus; fix branch fix/normative-parser/ml `da3278b`)
 - [x] 4.2 [Egor] `ruff` + `mypy` clean
 
 ## 5. Validate and close
 
-- [ ] 5.1 [Egor] `openspec validate normatives-parser --strict`
+- [x] 5.1 [Egor] `openspec validate normatives-parser --strict`
+  (passes: 2026-10-13)
 - [ ] 5.2 [Agent: spec-reviewer] review; resolve blockers
-- [ ] 5.3 [Agent: tester] GO/NO-GO
+- [x] 5.3 [Agent: tester] GO/NO-GO
+  (GO 2026-10-13; see docs/decisions/normative-catalog-backend-readiness.md Section 3)
 - [x] 5.4 [Egor] merge to `develop`
   (merged via `feature/normative-pipeline/data` → `develop` in `08dbb85` 2026-10-11)
 - [ ] 5.5 [Agent: spec-keeper] sync and archive

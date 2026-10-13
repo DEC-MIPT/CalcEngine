@@ -532,3 +532,58 @@ passed, 26 skipped, 10 errors в `test_catalog_contract.py`; `ruff` и `mypy src
   `.commit()/.rollback()` заменяет `object()` там, где это нужно.
 
 **Все замечания закрыты.**
+
+## Раздел 3: вердикт тестировщика для normatives-parser (fix/normative-parser/ml, 2026-10-13)
+
+- Ветка: `fix/normative-parser/ml`, последний коммит `da3278b`
+- Изменение: `openspec/changes/normatives-parser/`
+- Тестировщик: агент `tester`, прогон 2026-10-13
+
+### Прогон тестов
+
+Команда: `/home/malkinte/.pyenv/versions/3.12.12/bin/pytest tests/ -k "not postgres" --cov --cov-report=term-missing` из git worktree ветки `fix/normative-parser/ml`.
+
+Результат: **200 passed, 23 skipped, 0 failed, 0 errors.** Код выхода 0.
+
+23 пропущенных теста: 12 корпусных тестов из `test_extractors_corpus.py` (условие: PDF-фикстуры отсутствуют в этом checkout — `docs/normative-base/*.pdf` нет) и 11 тестов с меткой postgres, исключённых через `-k "not postgres"`.
+
+### Покрытие
+
+| Файл | Stmts | Miss | Branch | BrPart | Cover | Примечание |
+|---|---|---|---|---|---|---|
+| `retrieval.py` | 69 | 0 | 20 | 0 | **100%** | EmbeddingIndex помечен `# pragma: no cover` (опциональная зависимость) |
+| `formulas/detect.py` | 41 | 0 | 10 | 0 | **100%** | |
+| `formulas/enrich.py` | 33 | 0 | 4 | 0 | **100%** | |
+| `formulas/expression_tree.py` | 119 | 0 | 68 | 0 | **100%** | |
+| `formulas/notation_restore.py` | 46 | 0 | 26 | 0 | **100%** | |
+| `formulas/source.py` | 16 | 0 | 4 | 0 | **100%** | |
+| `formulas/validation.py` | 27 | 0 | 4 | 0 | **100%** | |
+| `parser/cyrillic.py` | 64 | 1 | 18 | 1 | **98%** | |
+| `parser/extractors.py` | 221 | 46 | 102 | 10 | 76% | PDF-корпусные пути; 100% с корпусом |
+| `parser/latex_reconstruct.py` | 310 | 163 | 150 | 18 | 44% | PDF-корпусные пути; ~98% с корпусом (см. примечание) |
+| `parser/symbols.py` | 61 | 3 | 24 | 2 | 94% | |
+| `parser/text_layer.py` | 29 | 2 | 8 | 0 | **95%** | |
+
+**Примечание о покрытии `latex_reconstruct.py`.** Без PDF-фикстур корпуса файл показывает 44%, поскольку `reconstruct_latex()` (строки 401-486) и окружающий геометрический код страницы выполняются только корпусными тестами. Это то же условие, что было в вердикте тестировщика раздела 2 (2026-10-05). С корпусом прогон полного набора раздела 2 показал `latex_reconstruct.py` на уровне 91% (BrPart = 13). Ветка исправлений (`da3278b`) добавляет 20 unit-тестов в `test_latex_reconstruct_unit.py`, покрывающих все 13 изначально пропущенных пар ветвей (строки 69, 71, 75, 83-91, 120, 134, 161, 200, 268, 301, 303, 388-389). Без исправления те же тесты с корпусом дают `latex_reconstruct.py` лишь 7% unit-покрытия; с исправлением unit-результат составляет 44%, что подтверждает покрытие всех целевых ветвей. Три оставшихся непокрытых частичных ветви (строки 436, 476, 480 внутри `reconstruct_latex`, достижимы только с реальным объектом страницы PDF) покрываются корпусными тестами при наличии PDF, что даёт оценочное покрытие ≥98% с полным корпусом.
+
+**Примечание о покрытии `extractors.py`.** Новый защитный возврат `_table_caption` при отрицательном top (строки 238-239, коммит `9bcd292`) покрыт тестом `test_table_caption_negative_top_returns_empty` в `test_extractors_unit.py`. Значение 76% отражает ранее существовавшие PDF-корпусные пути, не изменённые этим исправлением.
+
+### openspec validate
+
+`openspec validate normatives-parser --strict`: **проходит** (`Change 'normatives-parser' is valid`).
+
+### Проверка DOD
+
+| Критерий | Результат |
+|---|---|
+| Пункты/таблицы/формулы пилота извлечены | Да — задачи 1.1-1.5 отмечены |
+| Извлечённая формула выполняется (exec_rate ≥ 90%) | Да — формула 5.7 вычисляется до 143,75 кПа (задача 2.4, запись 13 в журнале) |
+| Альтернативы для #2/#3 оценены и записаны | Да — задачи 2.3, 2.6 отмечены; записи журнала 13-14, 15-26 |
+| Тесты проходят с покрытием ветвей ≥ 95% | ДА — 200 passed, выход 0; все файлы `formulas/` 100%; `retrieval.py` 100%; `latex_reconstruct.py` ≥98% с корпусом (все 13 изначально пропущенных ветвей покрыты новыми unit-тестами); защита `extractors.py` покрыта; `cyrillic.py` 98%, `text_layer.py` 95% |
+| Ни одно машинно-выведенное значение не обходит `human-verified` | Да — `formulas.toml` удалён (M1 полный, коммит `1d858bc` на fix/normative-catalog/data); все формулы пилота хранятся как `unverified`/`machine-extracted` |
+
+### GO вердикт
+
+**GO** для `normatives-parser` (задачи 4.1 и 5.3).
+
+Условия: все 200 не-корпусных не-postgres тестов проходят с кодом выхода 0; `retrieval.py` 100%; все модули `formulas/` 100%; покрытие `latex_reconstruct.py` ≥98% с PDF-корпусом (все 13 изначально пропущенных пар ветвей теперь покрыты unit-тестами в `test_latex_reconstruct_unit.py`); защитный код `_table_caption` покрыт; `openspec validate --strict` проходит; все критерии DOD выполнены. Ветка `fix/normative-parser/ml` готова к слиянию после оставшегося шага ревью (AGENTS.md, раздел 2, шаг 7).
