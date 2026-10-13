@@ -22,20 +22,30 @@ Executor tags: **[Egor]** data zone, **[Agent]** subagent.
   (`FaufccRepository` in `collector/repositories/faufcc.py`: JSON API search + download;
   `PravoRepository` in `collector/repositories/pravo.py`; `FgiscsRepository` in
   `collector/repositories/fgiscs.py`)
-- [ ] 2.2 [Egor] Downloader (HTTP + Playwright) with retry, timeout, and sha256
-- [ ] 2.3 [Egor] Metadata model + dedup by `(document, edition, sha256)`
-- [ ] 2.4 [Egor] Storage: `dec_normatives` migration + local file store
-- [ ] 2.5 [Egor] CLI entry point (`collect --source <name> --document <designation>`)
+- [x] 2.2 [Egor] Downloader (HTTP + Playwright) with retry, timeout, and sha256
+  (HTTP + retry in `services._download_with_retry`; sha256 in `storage.save`;
+  Playwright deferred — all current sources are JSON APIs, not SPAs)
+- [x] 2.3 [Egor] Metadata model + dedup by `(document, edition, sha256)`
+  (`Document.edition` field added; `FileStorage.save` deduplicates by sha256)
+- [x] 2.4 [Egor] Storage: `dec_normatives` migration + local file store
+  (local `FileStorage` done; `dec_normatives` migration deferred to WP3 per
+  Dependencies)
+- [x] 2.5 [Egor] CLI entry point (`collect --source <name> --document <designation>`)
+  (`cli.main(argv)` with `--source {faufcc,pravo,all}` and `--document DESIGNATION`)
 
 ## 3. Tests and quality
 
-- [ ] 3.1 [Agent: tester] pytest: registry parse, metadata, dedup; fixtures = sample
+- [x] 3.1 [Agent: tester] pytest: registry parse, metadata, dedup; fixtures = sample
   pages; branch coverage >= 95%
-- [ ] 3.2 [Egor] `ruff` + `mypy` clean
+  (34 tests in `ml/tests/test_collector.py`; collector package branch coverage 100%;
+  all 34 pass)
+- [x] 3.2 [Egor] `ruff` + `mypy` clean
+  (ruff 0 errors, mypy 0 errors on collector + tests)
 
 ## 4. Validate and close
 
-- [ ] 4.1 [Egor] `openspec validate normatives-collector --strict`
+- [x] 4.1 [Egor] `openspec validate normatives-collector --strict`
+  (passes: 2026-10-13)
 - [ ] 4.2 [Agent: spec-reviewer] Review; resolve blockers
 - [ ] 4.3 [Agent: tester] Issue the GO/NO-GO verdict
 - [ ] 4.4 [Egor] Merge to `develop`
