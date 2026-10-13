@@ -997,3 +997,65 @@ Google-style docstrings.
   application's logs); m3 is `isolation_level="REPEATABLE READ"` on the catalog engine.
 
 Next: the `tester` re-run and the `orchestrator` re-review of the fix.
+
+## Section 7: `tester` re-verdict after the fix (2026-10-13)
+
+- Branch: `feature/normative-catalog/backend` at `c0eab31`. The fix changes 9 files (5 in
+  `app`, 4 in `tests`); the feature is still only under `backend/`, with no UI change.
+- `check.sh`: `ruff`, `mypy` clean; `lint-imports` 4 contracts kept; 904 passed, 4
+  skipped; branch coverage 100.00% (2146 statements, 412 branches), every changed module
+  at 100%. `pytest -m postgres` with the test databases and the ingested catalog: 31
+  passed (7.1: 3 passed). `openspec validate --all --strict` 20/20 on the branch and on
+  `develop` `5564dba`; `pre-commit run --all-files` passes.
+- The new tests fail on the old code: `403b8a6`'s `backend/` exported with the new tests
+  gives 12 breach cases failing for the intended reason (9 not raised, 2 `TypeError` in
+  `sorted`, 1 `InputValidationError` instead of a breach), 3 endpoint cases answering
+  `500`, and 8 engine tests failing on the old behavior.
+- On the ingested catalog `gamma_c1`, `gamma_c2`, `k` have one row each without any
+  heading part, `m_gamma`, `m_q`, `m_c` 46 rows each headed by (`phi_II`, `deg`), and no
+  row lacks a parameter, so tasks 5.7 and 5.8 change nothing for these data.
+  `POST /calculations` answers `201` for all 46 headings (414 references, all
+  `unverified` / `machine-extracted`; median 9.5 ms, max 31.5 ms).
+- Tasks 5.7 and 5.8 are done; nothing earlier regressed.
+- Notes, none blocking: the "row without a parameter" case spoils only `type_checks`,
+  while the guard covers all four views in one expression; no end-to-end test has the
+  new reason "selectors differ from the method's", whose `500` and "nothing stored" are
+  held by the generic tests. N2-N4 of the first verdict stand.
+
+**GO** for `feature/normative-catalog/backend` at `c0eab31`. Tests: GO. Coverage: GO.
+UI/UX: N/A.
+
+## Section 7: orchestrator re-review (2026-10-14)
+
+Reviewed `git show c0eab31` in full against the documents on `develop` `5564dba`, with
+static checks (`ruff`, `mypy`, `lint-imports`, `openspec validate`) and an in-memory HTTP
+probe against both `c0eab31` and `403b8a6`, plus one read-only query on the ingested
+catalog.
+
+| Scenario | `c0eab31` | `403b8a6` |
+|---|---|---|
+| clean catalog | unchanged (201, 422, 201 refused) | same |
+| M1: `m_q` as one cell, `phi_II` 20 | 503, one line `parameter=m_q`, nothing stored | 201, R = 135.0 |
+| `m_c` headed by `b` | 503, `parameter=m_c` | 422 |
+| `gamma_c1` with a `phi_II` heading | 503, `parameter=gamma_c1` | 201 |
+| m1: heading value and unit, no symbol | 503, `parameter=gamma_c1` | 201 |
+| m4: NULL parameter | 503, line without `parameter=` | 500 `TypeError` |
+| m4: document or clause row of the wrong shape | 503 `catalog_unavailable`, `endpoint=document` | 500 |
+
+M1, m1 and m4 are closed in the code and by tests that fail without the fix. The engine
+stays pure, no new layer edge appears, log formats and docstrings follow the rules, and
+the spec deltas match the code. Deferring m2 and m3 is acceptable for the merge if a
+tracked task gates task 8.2.
+
+- **m-a.** `design.md` decision 6 still introduced `confirm_selectors(entry, inputs)`.
+  Fixed with this record: the three-argument form.
+- **m-b.** The `Raises` of `NormativesService.search` and `document` missed the new `503`
+  case. Fixed on the branch in `b2a1cc4`.
+- **m-c.** m2 and m3 were not tracked in `tasks.md`. Fixed with this record: task 7.4,
+  and task 8.2 waits for it.
+- Notes (no action): an unreachable `symbol is None` operand in `_selected`; the row
+  `parameter` fields typed `str` though the guard checks `None`; `SELECTORS` could be a
+  `MappingProxyType`.
+
+**Verdict: approved with minor follow-ups** (m-a, m-b, m-c, all fixed above). Task 7.3:
+the `tester` GO and the review are recorded; next, the merge into `develop`.

@@ -255,6 +255,15 @@ Egor may split these tasks further on his branch; each one stays in his zone.
 - [ ] 7.3 `tester` GO for `feature/normative-catalog/backend`, the review by Egor or the
   orchestrator, and the merge into `develop` (backend); verify: the GO and the review are
   recorded in `docs/decisions/normative-catalog-backend-readiness.md`
+- [ ] 7.4 Close the deferred findings m2 and m3 of the `orchestrator` review of 2026-10-13
+  (`normative-catalog-backend-readiness.md`, Section 7) on `fix/normative-catalog/backend`
+  (backend); verify: m2 — either the documented run command (`CLAUDE.md`, `README.md`)
+  runs uvicorn with `--no-access-log` or an access log that drops the query string, or the
+  requirement "Normative search endpoint" is narrowed to the application's own logs, the
+  choice recorded in the readiness record; m3 — the catalog engine runs at
+  `isolation_level="REPEATABLE READ"`, asserted next to
+  `test_the_engine_reads_only_and_hides_parameters`; `check.sh` passes with branch
+  coverage of 100%
 
 ## 8. Close
 
@@ -270,8 +279,8 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   WP5 `design.md` decision 2, WP8 `design.md` error table; 2026-10-11: Egor agreed to
   all three as written, `docs/decisions/backend/2026-10-07-pipeline-branch-and-process-to-egor.md`,
   answer 8)
-- [ ] 8.2 (spec) After both features are merged, `spec-keeper` syncs `normatives-catalog`
-  and archives this change; verify: `openspec validate --all --strict` passes after the
+- [ ] 8.2 (spec) After both features are merged and task 7.4 is done, `spec-keeper` syncs
+  `normatives-catalog` and archives this change; verify: `openspec validate --all --strict` passes after the
   archive
 
 ## Dependencies

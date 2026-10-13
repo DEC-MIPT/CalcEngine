@@ -289,9 +289,11 @@ unit. It holds at most one selector under decision 2, and is empty for an unsele
 entry; the tuple keeps the engine side open for a later two-key table. A selector whose
 symbol is not an input of the type makes `confirm_selectors` raise `CalculationError`.
 `table_step` takes its substitutions from `entry.selectors`. A new engine helper,
-`confirm_selectors(entry, inputs)`, converts each selector's value to the base unit of
-the base-unit input named by the selector's symbol with `engine.boundary.convert`, and
-raises `CalculationError` if the result differs from that input. The pilot calls it
+`confirm_selectors(entry, inputs, selected_by)`, first requires the entry's selector
+symbols to be exactly the method's (next paragraph), then converts each selector's value
+to the base unit of the base-unit input named by the selector's symbol with
+`engine.boundary.convert`, and raises `CalculationError` if the result differs from that
+input. The pilot calls it
 before `table_step`.
 
 Which input selects which table parameter is the method's structure, so the backend
