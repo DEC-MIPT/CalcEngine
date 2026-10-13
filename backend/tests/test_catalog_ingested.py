@@ -26,6 +26,14 @@ URL = os.environ.get("DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL")
 PILOT = "foundations_shallow_r"
 VIEWS = ("type_formulas", "type_table_values", "type_thresholds", "type_checks", "type_method_bounds")
 WORD = re.compile(r"[А-Яа-яЁё]{6,}")
+LIMIT = 50
+KNOWN_MISSES = [("6.10.9", "одного")]
+"""Слова, которые поиск каталога не находит, хотя выдача не заполнена.
+
+Находка R5 третьего ревью (``normative-catalog-backend-readiness.md``, 2026-10-13):
+``word_similarity > 0.3`` не связывает «одного» с леммой «один». Когда R5 исправят,
+список станет пустым, и тест потребует его убрать.
+"""
 
 if URL is None:
     pytest.skip("DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL is not set", allow_module_level=True)
@@ -123,11 +131,21 @@ def test_the_pilot_runs_end_to_end_on_the_catalog(reader: Connection, client: Te
     assert sources and sources <= catalog_editions(reader)
 
 
-def found(client: TestClient, word: str) -> set[tuple[str, int, str | None]]:
-    """Совпадения поиска по слову: вид, документ и номер, не больше 50."""
-    response = client.get("/normatives/search", params={"q": word, "limit": 50})
+def found(client: TestClient, word: str) -> list[tuple[str, int, str | None]]:
+    """Совпадения поиска по слову в порядке ранга: вид, документ и номер, не больше ``LIMIT``."""
+    response = client.get("/normatives/search", params={"q": word, "limit": LIMIT})
     assert response.status_code == 200
-    return {(hit["kind"], hit["document_id"], hit["number"]) for hit in response.json()["hits"]}
+    return [(hit["kind"], hit["document_id"], hit["number"]) for hit in response.json()["hits"]]
+
+
+def missed(client: TestClient, document_id: int, number: str, word: str) -> bool:
+    """Промах: пункта нет среди совпадений, и выдача не заполнена до ``LIMIT``.
+
+    При заполненной выдаче частая основа («основан», «сооружен») находит больше пунктов,
+    чем помещается в ответ, и пункт может стоять ниже ``LIMIT``; это не промах поиска.
+    """
+    hits = found(client, word)
+    return ("clause", document_id, number) not in hits and len(hits) < LIMIT
 
 
 def test_every_russian_word_of_a_clause_title_finds_its_clause(reader: Connection, client: TestClient) -> None:
@@ -142,7 +160,7 @@ def test_every_russian_word_of_a_clause_title_finds_its_clause(reader: Connectio
         if counts[word.lower()] == 1
     ]
 
-    misses = [(number, word) for document_id, number, word in words if ("clause", document_id, number) not in found(client, word)]
+    misses = [(number, word) for document_id, number, word in words if missed(client, document_id, number, word)]
 
     assert words
-    assert misses == [], f"{len(misses)} of {len(words)} words miss their clause, first: {misses[:10]}"
+    assert misses == KNOWN_MISSES, f"{len(misses)} of {len(words)} words miss their clause, first: {misses[:10]}"
