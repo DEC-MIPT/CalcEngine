@@ -1,9 +1,12 @@
+import ast
 from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
 
-from app.core.config import PARAMS_ROOT, ApiSettings, Settings
+from app.core.config import PARAMS_ROOT, ApiSettings, NormativesSettings, Settings
+
+APP_DIR = Path(__file__).resolve().parents[1] / "app"
 
 
 def test_settings_read_from_environment(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -23,22 +26,50 @@ def test_settings_read_from_environment(monkeypatch: pytest.MonkeyPatch) -> None
         settings.dec_app_database_url.get_secret_value()
         == "postgresql://app_user:apppass@localhost/dec_app"  # pragma: allowlist secret
     )
+    assert not hasattr(settings, "dec_normatives_database_url")
+
+
+def test_normatives_url_is_unset_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("DEC_APP_DATABASE_URL", raising=False)
+    monkeypatch.delenv("DEC_NORMATIVES_DATABASE_URL", raising=False)
+
+    assert NormativesSettings().dec_normatives_database_url is None
+
+
+def test_normatives_url_is_read_without_the_app_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("DEC_APP_DATABASE_URL", raising=False)
+    monkeypatch.setenv(
+        "DEC_NORMATIVES_DATABASE_URL",
+        "postgresql://dec_normatives_reader:normpass@localhost/dec",  # pragma: allowlist secret
+    )
+
+    settings = NormativesSettings()
+
     assert settings.dec_normatives_database_url is not None
     assert (
         settings.dec_normatives_database_url.get_secret_value()
-        == "postgresql://norm_user:normpass@localhost/dec_normatives"  # pragma: allowlist secret
+        == "postgresql://dec_normatives_reader:normpass@localhost/dec"  # pragma: allowlist secret
+    )
+    assert "normpass" not in repr(settings) and "normpass" not in str(settings)
+
+
+def _variable_literals(path: Path) -> int:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    return sum(
+        isinstance(node, ast.Constant) and node.value == "DEC_NORMATIVES_DATABASE_URL"
+        for node in ast.walk(tree)
     )
 
 
-def test_normatives_url_is_optional(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv(
-        "DEC_APP_DATABASE_URL", "postgresql://app_user:apppass@localhost/dec_app"  # pragma: allowlist secret
-    )
-    monkeypatch.delenv("DEC_NORMATIVES_DATABASE_URL", raising=False)
+def test_only_the_normatives_settings_read_the_normatives_variable() -> None:
+    readers = {
+        path.relative_to(APP_DIR).as_posix(): count
+        for path in sorted(APP_DIR.rglob("*.py"))
+        if (count := _variable_literals(path))
+    }
 
-    settings = Settings()  # type: ignore[call-arg]
-
-    assert settings.dec_normatives_database_url is None
+    assert readers == {"core/config.py": 1}
+    assert 'validation_alias="DEC_NORMATIVES_DATABASE_URL"' in (APP_DIR / "core" / "config.py").read_text(encoding="utf-8")
 
 
 def test_missing_app_url_raises_validation_error(monkeypatch: pytest.MonkeyPatch) -> None:

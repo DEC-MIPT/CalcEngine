@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import Annotated, Any
 from uuid import UUID
 
@@ -24,7 +25,9 @@ ERROR_DESCRIPTIONS = {
 }
 
 
-def error_responses(*statuses: int) -> dict[int | str, dict[str, Any]]:
+def error_responses(
+    *statuses: int, descriptions: Mapping[int, str] = ERROR_DESCRIPTIONS
+) -> dict[int | str, dict[str, Any]]:
     """Описывает ответы об ошибках маршрута для OpenAPI.
 
     Свой ``422`` заменяет ответ, который FastAPI добавляет сам, так что у всех
@@ -32,11 +35,12 @@ def error_responses(*statuses: int) -> dict[int | str, dict[str, Any]]:
 
     Args:
         statuses: коды ошибок, которые маршрут может вернуть по спеке.
+        descriptions: описание каждого кода; по умолчанию — для маршрутов расчётов.
 
     Returns:
         Значение аргумента ``responses`` декоратора маршрута.
     """
-    return {status: {"model": ErrorBody, "description": ERROR_DESCRIPTIONS[status]} for status in statuses}
+    return {status: {"model": ErrorBody, "description": descriptions[status]} for status in statuses}
 
 
 @router.get("/calculation-types", response_model=list[CalculationTypeView])

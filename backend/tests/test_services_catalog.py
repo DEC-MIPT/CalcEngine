@@ -17,6 +17,8 @@ from app.schemas.calculation import (
 from app.schemas.parameters import EngineerRule
 from app.schemas.units import Dimension
 from app.services.catalog import (
+    PARAMETER_MODELS,
+    REGISTRATIONS,
     build_registry,
     calculation_types,
     load_validated_ranges,
@@ -214,3 +216,8 @@ def test_a_blank_engineer_rule_field_in_the_parameter_file_stops_the_start_up(
     assert FILE_NAME in message
     assert f"rounding_rules.R.source.{field}" in message
     assert f"input_value={value.replace(chr(34), chr(39))}" in message
+
+
+def test_each_registration_names_its_parameters_model() -> None:
+    assert PARAMETER_MODELS == {foundations_shallow_r.NAME: foundations_shallow_r.Parameters}
+    assert [registration.name for registration in REGISTRATIONS] == list(PARAMETER_MODELS)
