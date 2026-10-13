@@ -18,8 +18,10 @@ No separate branch merge required: the fix reaches `develop` with `fix/normative
 
 ## 2. Tester and close
 
-- [ ] 2.1 [Agent: tester] GO/NO-GO — covered by `normative-catalog-backend` task 2.7
-  tester run (the fix is part of that branch's test sweep)
+- [x] 2.1 [Agent: tester] GO/NO-GO — covered by `normative-catalog-backend` task 2.7
+  tester run (the fix is part of that branch's test sweep); GO declared 2026-10-13,
+  221 tests passed, `test_extract_formulas_rejects_figure_label` and
+  `test_extract_formulas_accepts_standalone_integer_number` passed
 
 ## DOD
 
