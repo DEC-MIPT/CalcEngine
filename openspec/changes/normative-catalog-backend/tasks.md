@@ -225,7 +225,7 @@ Egor may split these tasks further on his branch; each one stays in his zone.
 
 ## 7. Pilot on catalog data (backend, Akim; waits for section 2 on `develop`)
 
-- [ ] 7.1 Run the pilot `foundations_shallow_r` end to end on Egor's ingested
+- [x] 7.1 Run the pilot `foundations_shallow_r` end to end on Egor's ingested
   `dec_normatives`, the former WP2 task 7.1c (backend); verify: with
   `DEC_NORMATIVES_DATABASE_URL` as `dec_normatives_reader`, the contract test of task 4.3
   passes on his database, `POST /calculations` for a request whose `phi_II` is a heading
@@ -234,7 +234,7 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   catalog's documents and editions; a Russian search for a word of a clause title of
   the ingested pilot document has that clause among its hits; the tests assert
   structure and statuses, never a norm value
-- [ ] 7.2 Measure the read path on the ingested data (spec "Non-functional — catalog
+- [x] 7.2 Measure the read path on the ingested data (spec "Non-functional — catalog
   read path") (backend); verify: 20 parameter resolutions, 20 searches and 20 document
   requests each take under 2 seconds on a developer machine as the spec defines it,
   recorded with the machine and the times in the code journal
@@ -285,12 +285,12 @@ Egor may split these tasks further on his branch; each one stays in his zone.
 - [x] A `spec-reviewer` report on the current version lists no blocker and no major
   finding (task 1.2), and `norm-traceability-checker` passes (task 1.3)
 - [x] Egor has confirmed the read contract and his section 2 (task 1.4)
-- [ ] Functional requirements are recorded as requirements with scenarios; the
+- [x] Functional requirements are recorded as requirements with scenarios; the
   non-functional ones (performance, security, coverage) are in "Non-functional — catalog
   read path"
-- [ ] Each task fits one session and names how it is verified; each task with code
+- [x] Each task fits one session and names how it is verified; each task with code
   belongs to exactly one of the two features above
-- [ ] Dependencies are listed: `normatives-formula-contract` tasks 1.4-1.7 and the move
+- [x] Dependencies are listed: `normatives-formula-contract` tasks 1.4-1.7 and the move
   to `ml/` (Egor, for section 2; the move is done); `retarget-mvp-domain` task 3.1
   (Egor, for task 7.1); `calculation-api` merged on `develop` (done). Egor's planned
   infrastructure change (a separate `dec_normatives` database) is not a dependency: until

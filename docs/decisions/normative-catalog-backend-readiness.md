@@ -862,3 +862,79 @@ r6-r10 and p5, with R5 closed before the search is shown to users.
 - Formulas typed into `pilot.toml` are stored with provenance `machine-extracted`,
   although nobody extracted them. Their status is `unverified` either way (answer 2b), so
   the report is right; the provenance values belong to WP3.
+
+## Section 7: `tester` verdict for feature/normative-catalog/backend (task 7.3, 2026-10-13)
+
+- Branch: `feature/normative-catalog/backend` at `403b8a6` (`develop` `fdb0702` merged in,
+  pushed). The feature touches only `backend/` (40 files) and has no UI change.
+- Tester: the `tester` agent, run by Akim on 2026-10-13. It edited no tracked file.
+
+### Runs
+
+- `backend/check.sh`:
+  - `ruff` and `mypy` are clean (132 source files).
+  - `lint-imports`: 4 contracts kept, among them "the backend does not import the
+    normative pipeline".
+  - `pytest`: 882 passed, 4 skipped, 0 failed. Branch coverage of `app` and `scripts` is
+    100.00% (2128 statements, 408 branches), and every changed backend module is at 100%.
+- `pytest -m postgres` on `dec_app_wp8_test` and `dec_normatives_test`: 28 passed and 1
+  skipped (task 7.1's module, run below). The synthetic contract uses its own role
+  `dec_catalog_test_reader`, so this run cannot reset the password of
+  `dec_normatives_reader`.
+- Task 7.1, `tests/test_catalog_ingested.py`, on the ingested `dec` as
+  `dec_normatives_reader`: 3 passed (contract, pilot end to end, Russian search).
+- `openspec validate --all --strict`: 20/20. `pre-commit run --all-files`: passes.
+
+### Independent checks on the ingested catalog (read only)
+
+- `POST /calculations` answers `201` for each of the 46 `phi_II` headings of table 5.5.
+  A result has 9 steps (6 table, 2 formula, 1 check), and every reference is
+  `unverified` / `machine-extracted`.
+- A `phi_II` between two headings gets `422 invalid_input`, and an unknown document gets
+  `404 not_found`.
+- Task 7.2 re-measured on `403b8a6`. Each of 20 calls stayed far under 2 s:
+
+  | Call | Median | Max |
+  |---|---|---|
+  | `POST /calculations` | 9.6 ms | 31.8 ms |
+  | Search | 16.4 ms | 19.5 ms |
+  | Document | 5.4 ms | 6.9 ms |
+
+  Akim's journal record (max 27 ms) was taken at `bc1a954`. Since then only
+  `tests/test_catalog_ingested.py` changed under `backend/`.
+- The tests hold no norm value. The fixture uses placeholders, and the 7.1 module
+  asserts structure, step kinds, status and provenance; `phi_II` is taken from the
+  catalog's own headings.
+
+### Tasks
+
+Tasks 3.1-6.5 are done, each held by its tests. Tasks 7.1 and 7.2 are done (ticked on
+`develop` with this record). Task 7.3 is this verdict, then the review and the merge.
+
+### Notes (none blocking)
+
+- **N1.** `tasks.md` ticks lagged the code. Tasks 7.1 and 7.2 and three DOR boxes ("DOR
+  met 2026-10-04") are ticked with this record. Task 2.7 is Egor's to tick: its `tester`
+  GO and Akim's review are now recorded above.
+- **N2.** The search check skips a word whose hits fill the list of 50, so a frequent
+  stem is not checked. Accepted for 7.1: the verify clause asks that a word of a clause
+  title finds its clause, the test checks 869 words, and ranking belongs to the
+  catalog's search function.
+- **N3.** The known miss `("6.10.9", "одного")` is acceptable. It comes from
+  `catalog_read.search` (R5, data zone), not from this feature, and the test compares the
+  list exactly, so it fails as soon as R5 changes the misses. R5 still has to be closed
+  before users see the search.
+- **N4.** Task 7.1 stores results in in-memory SQLite, not `dec_app`: a recorded
+  deviation. The PostgreSQL path of results is held by `test_calculation_result_postgres.py`.
+
+### GO/NO-GO verdict
+
+**GO** for `feature/normative-catalog/backend` at `403b8a6`.
+
+- Tests: GO (above; no failure).
+- Coverage: GO (100.00% branch coverage, every changed module at 100%).
+- UI/UX: N/A (no UI change).
+
+No blocker or major finding is open against this feature. R5 and r6-r10 are findings
+against Egor's data feature. Next: the review by the `orchestrator`, then the merge into
+`develop`.
