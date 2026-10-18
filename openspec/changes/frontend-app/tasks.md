@@ -192,7 +192,9 @@ before task 2.1.
 
 - [ ] 8.1 Run `frontend/check.sh` (frontend); verify: `eslint`, `tsc -b` and `vitest run --coverage`
   pass with branch coverage >= 95%, and a run with the threshold of `vite.config.ts` raised above
-  the measured coverage fails
+  the measured coverage fails (done 2026-10-18 on `feature/frontend-app/frontend` at `b538708`:
+  462 tests, branch coverage 100%; the branch threshold cannot be raised above 100%, so the gate was
+  shown with the statements threshold raised above the measured 99.87%, which fails the run)
 - [ ] 8.2 `tester` GO for each feature; `ui-ux-tester` confirms the screens, keyboard operation,
   contrast, no colour-only meaning and the visual brief of `design.md` decision 5 (tester)
 - [ ] 8.3 Run the journey end to end against the real backend and, once WP9 is merged, a real
@@ -203,22 +205,30 @@ before task 2.1.
 - [x] 8.4 (spec) After 6.1a, 6.1b, 6.2 and 6.4a-6.4c are done, tick tasks 3.4, 3.5 and 5.4 in
   `calculation-core-contract` `tasks.md` and name this change there (spec; needs Akim's word
   to edit that change) (done 2026-10-18 on `develop`, with Akim's word)
-- [ ] 8.5 Run the axe helper of task 3.6 over the four screens (type selection, form, result,
+- [x] 8.5 Run the axe helper of task 3.6 over the four screens (type selection, form, result,
   report) in their states: loading, error, `422`, `503`, warning and refusal (frontend); verify:
-  every run reports no violation that axe can detect in jsdom
-- [ ] 8.6 Run the keyboard journey from type selection to the downloaded report in Playwright
+  every run reports no violation that axe can detect in jsdom (done 2026-10-18 on
+  `feature/frontend-app/frontend`, `b538708`: `frontend/src/test/screens.axe.test.tsx`, 14 tests)
+- [x] 8.6 Run the keyboard journey from type selection to the downloaded report in Playwright
   (frontend); verify: the test completes it with the keyboard alone against the mocks and checks
-  after each key press that the focused control has a visible indicator of at least 3:1
-- [ ] 8.7 Run an axe contrast check of every screen in Chromium (frontend); verify: no text
+  after each key press that the focused control has a visible indicator of at least 3:1 (done
+  2026-10-18 on `feature/frontend-app/frontend`, `b538708`: `frontend/e2e/accessibility.spec.ts`;
+  it found that Tab reaches the date field's own calendar button with no ring, fixed in
+  `index.css` by a ring on `input[type='date']:focus-within`)
+- [x] 8.7 Run an axe contrast check of every screen in Chromium (frontend); verify: no text
   below 4.5:1 (3:1 for large text), with the warning and refusal states and each interface state
-  (light and dark, if both exist) in the run
+  (light and dark, if both exist) in the run (done 2026-10-18 on `feature/frontend-app/frontend`,
+  `b538708`: 11 screens and states, light only because the interface has no dark state; the
+  `503` states are checked by 8.5, since the browser mocks cannot be overridden per test)
 - [ ] 8.8 Check once by hand in branded Edge and Safari that a result with a trace shows every
   formula typeset and that the journey completes (frontend); verify: a recorded manual run with the
   browser versions
-- [ ] 8.9 Measure the transition time of "Non-functional — language, accessibility, browsers"
+- [x] 8.9 Measure the transition time of "Non-functional — language, accessibility, browsers"
   once all four screens exist (frontend); verify: a Playwright test in Chromium against the mocks
   takes 20 runs of response-to-first-render for each screen change and fails when the 95th
-  percentile is 1000 ms or more
+  percentile is 1000 ms or more (done 2026-10-18 on `feature/frontend-app/frontend`, `b538708`:
+  `frontend/e2e/transition-time.spec.ts`; p95: type selection to form 11 ms, form to result 762 ms
+  with the 700 ms computation trace, result by address 54 ms, report to stamp 578 ms)
 - [ ] 8.10 (spec) After the merge of the frontend feature, update the command lists of `AGENTS.md`
   and `CLAUDE.md` with `npm run gen:api`, `npm run dev:mock` and the Playwright command (documents,
   on `develop`; needs Akim's word to edit them)
@@ -344,12 +354,13 @@ Work Akim chose after section 9, done before its spec text; recorded here on 202
   the statement is printed exactly once in both states of the setting and that the body ends with
   the conclusion while the section is off (done 2026-10-18 on `feature/frontend-app/backend`,
   `c79fe6d`)
-- [ ] 10.13 Put the language switch and the rounding-source column behind the settings
+- [x] 10.13 Put the language switch and the rounding-source column behind the settings
   `SHOW_LANGUAGE_SWITCH` and `SHOW_ROUNDING_SOURCE`, both off in the pilot's first iteration
   (frontend; `design.md` decision 12); verify: tests that the shell shows the switch only with the
   setting on and switching changes the texts, that the outputs table shows the source column only
   with the setting on (an engineer-set rule with engineer and rationale, a norm rule with its
-  reference), that the result screen shows neither, and axe in both states
+  reference), that the result screen shows neither, and axe in both states (done 2026-10-18 on
+  `feature/frontend-app/frontend`, `b538708`)
 
 ## Requirement coverage
 
