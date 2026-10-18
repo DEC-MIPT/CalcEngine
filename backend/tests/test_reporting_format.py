@@ -57,7 +57,7 @@ def test_a_latex_number_keeps_its_comma_in_braces(value: float, text: str) -> No
         (172.5, "kPa", r"172{,}5\ \text{кПа}"),
         (1e-07, "m", r"0{,}0000001\ \text{м}"),
         (2.0, "1", "2"),
-        (20.0, "deg", r"20^{\circ}"),
+        (20.0, "deg", r"20\text{°}"),
     ],
 )
 def test_a_latex_quantity_prints_with_the_russian_designation_of_its_unit(value: float, unit: str, text: str) -> None:

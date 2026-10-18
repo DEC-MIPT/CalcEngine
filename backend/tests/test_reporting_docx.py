@@ -97,7 +97,7 @@ def test_the_trace_prints_each_step_with_the_model_text() -> None:
     assert paragraphs[start : start + len(expected)] == expected
     assert "Результат: 172,5 кПа" in paragraphs
     assert "Сравнение: 100 кПа≤172,5 кПа — выполнено" in paragraphs
-    assert "Подстановка: φII=20∘" in paragraphs
+    assert "Подстановка: φII=20°" in paragraphs
 
 
 def test_a_step_prints_its_symbol_expression_and_values_as_latex() -> None:
@@ -112,7 +112,7 @@ def test_a_step_prints_its_symbol_expression_and_values_as_latex() -> None:
     assert table[:4] == [
         "4. Табличное значение $M_gamma$",
         r"Выражение: $M_gamma = M_gamma\left(\varphi_{II}\right)$",
-        r"Подстановка: $\varphi_{II} = 20^{\circ}$",
+        r"Подстановка: $\varphi_{II} = 20\text{°}$",
         "Результат: $0{,}5$",
     ]
     assert check[:4] == [
@@ -251,4 +251,23 @@ def test_a_report_of_200_trace_steps_renders_in_under_a_minute() -> None:
 
     assert elapsed < 60
     assert "200. Формула s199" in paragraphs
+    assert "3 Заключение" in paragraphs
+
+
+def test_a_report_whose_step_latex_cannot_be_converted_still_renders() -> None:
+    model = report()
+    trace = model.body[1]
+    assert isinstance(trace, TraceSection)
+    broken = r"R = \frac{\gamma_{c1}}{"
+    steps = tuple(step.model_copy(update={"expression": broken}) if step.step_id == "R" else step for step in trace.steps)
+    damaged = Report(
+        request=model.request,
+        body=(model.body[0], trace.model_copy(update={"steps": steps}), *model.body[2:]),
+        symbols=model.symbols,
+        rounding=model.rounding,
+    )
+
+    paragraphs, _ = read_back(render_docx(damaged))
+
+    assert f"Выражение: {broken}" in paragraphs
     assert "3 Заключение" in paragraphs

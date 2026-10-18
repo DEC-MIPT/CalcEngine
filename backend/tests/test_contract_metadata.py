@@ -114,9 +114,9 @@ def test_an_english_text_may_not_be_empty() -> None:
 
 
 def test_an_output_has_no_hint_and_no_whole_values_flag() -> None:
-    with pytest.raises(ValidationError, match="no hint"):
+    with pytest.raises(ValidationError, match="may not have a hint or whole_values_only"):
         contract(output_changes={"hint": LocalizedText(ru="y")})
-    with pytest.raises(ValidationError, match="no hint"):
+    with pytest.raises(ValidationError, match="may not have a hint or whole_values_only"):
         contract(output_changes={"whole_values_only": True})
 
 

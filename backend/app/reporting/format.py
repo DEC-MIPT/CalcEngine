@@ -37,8 +37,12 @@ UNIT_DESIGNATIONS: MappingProxyType[str, str] = MappingProxyType(
 )
 """Русские обозначения единиц словаря в том виде, в каком они печатаются в отчёте (source: unverified)."""
 
-LATEX_ATTACHED: MappingProxyType[str, str] = MappingProxyType({"°": r"^{\circ}"})
-"""Обозначения, которые пишутся вплотную к числу, и их запись в LaTeX."""
+LATEX_ATTACHED: MappingProxyType[str, str] = MappingProxyType({"°": r"\text{°}"})
+r"""Обозначения, которые пишутся вплотную к числу, и их запись в LaTeX.
+
+Знак градуса идёт текстом, а не ``^{\circ}``: иначе в формуле Word оказывается символ U+2218, и
+копирование и поиск дают ``30∘`` вместо ``30°``.
+"""
 
 LATEX_OPERATORS: MappingProxyType[str, str] = MappingProxyType(
     {"le": r"\le", "lt": "<", "ge": r"\ge", "gt": ">"}
