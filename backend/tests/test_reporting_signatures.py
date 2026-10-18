@@ -79,7 +79,6 @@ def test_the_body_section_order_is_the_same_with_the_block_enabled_and_disabled(
         "1 Исходные данные",
         "2 Расчёт",
         "3 Заключение",
-        "4 Подотчётность результата",
     ]
 
 

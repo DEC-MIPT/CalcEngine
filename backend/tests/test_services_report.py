@@ -33,7 +33,7 @@ REPORT_REQUEST = ReportRequest(
     developer=Signatory(surname="<DEVELOPER>", date=DAY),
     normative_control=Signatory(surname="<NORM-CONTROL>", date=DAY),
 )
-HEADINGS = ["1 Исходные данные", "2 Расчёт", "3 Заключение", "4 Подотчётность результата"]
+HEADINGS = ["1 Исходные данные", "2 Расчёт", "3 Заключение"]
 
 
 @pytest.fixture
@@ -41,7 +41,7 @@ def results(sqlite_session: Session) -> SpyRepository:
     return SpyRepository(sqlite_session)
 
 
-def test_the_report_holds_the_stored_inputs_trace_conclusion_and_accountability(
+def test_the_report_holds_the_stored_inputs_trace_and_conclusion(
     results: SpyRepository, engine_calls: list[str]
 ) -> None:
     service = make_service(results, FixedSource())
@@ -53,7 +53,6 @@ def test_the_report_holds_the_stored_inputs_trace_conclusion_and_accountability(
     assert ["b", "1500 мм"] in rows
     assert [row[0] for row in rows if row[0] in ("b", "d", "p")] == ["b", "d", "p"]
     assert "Выражение: y=2b" in paragraphs
-    assert any(str(envelope.result_id) in text for text in paragraphs)
     assert engine_calls == ["synthetic"]
 
 

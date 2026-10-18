@@ -1,3 +1,4 @@
+import pytest
 from test_engine_foundations_shallow_r import (
     ROUNDING,
     RULE,
@@ -8,12 +9,19 @@ from test_reporting_docx import hundredths_report, latex, plain, read_back
 from test_reporting_model import REQUEST, report, service
 
 from app.engine import foundations_shallow_r as pilot
+from app.reporting import docx_writer
 from app.reporting.accountability import RESPONSIBILITY, accountability_lines
-from app.reporting.docx_writer import render_docx
-from app.reporting.model import AccountabilitySection, build_report
+from app.reporting.docx_writer import conclusion_lines, render_docx
+from app.reporting.model import AccountabilitySection, ConclusionSection, build_report
 from app.schemas.calculation import ValidatedBound
 
 WARNING_BOUND = ValidatedBound(quantity="b", kind="max", value=1.0, inclusive=True, source=RULE)
+
+
+@pytest.fixture
+def printed(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Включает печать раздела подотчётности, выключенную в первой итерации пилота."""
+    monkeypatch.setattr(docx_writer, "ACCOUNTABILITY_SECTION", True)
 
 
 def block(section: object) -> AccountabilitySection:
@@ -53,6 +61,7 @@ def test_an_output_prints_with_exactly_the_decimals_of_its_rule() -> None:
     assert any(line.startswith(r"— $R = 172{,}50\ \text{кПа}$; округление: 2 знак(а)") for line in lines)
 
 
+@pytest.mark.usefixtures("printed")
 def test_the_report_states_that_the_engineer_is_responsible() -> None:
     paragraphs, _ = read_back(render_docx(report()))
 
@@ -60,6 +69,7 @@ def test_the_report_states_that_the_engineer_is_responsible() -> None:
     assert "инженер-проектировщик, а не система" in RESPONSIBILITY
 
 
+@pytest.mark.usefixtures("printed")
 def test_the_block_is_the_last_body_section_of_the_docx() -> None:
     model = report()
     paragraphs, _ = read_back(render_docx(model))
@@ -67,6 +77,27 @@ def test_the_block_is_the_last_body_section_of_the_docx() -> None:
     start = paragraphs.index("4 Подотчётность результата")
     lines = accountability_lines(block(model.body[-1]), model.symbols)
     assert paragraphs[start + 1 :] == [*(plain(line) for line in lines), RESPONSIBILITY]
+    assert paragraphs.count(RESPONSIBILITY) == 1
+
+
+def test_the_block_is_not_printed_in_the_first_pilot_iteration() -> None:
+    paragraphs, _ = read_back(render_docx(report()))
+
+    assert not docx_writer.ACCOUNTABILITY_SECTION
+    assert "4 Подотчётность результата" not in paragraphs
+    assert not any(text.startswith("Идентификатор результата") for text in paragraphs)
+
+
+def test_without_the_block_the_conclusion_ends_with_the_responsibility_statement() -> None:
+    model = report()
+    conclusion = model.body[2]
+    assert isinstance(conclusion, ConclusionSection)
+    paragraphs, _ = read_back(render_docx(model))
+
+    start = paragraphs.index("3 Заключение")
+    lines = conclusion_lines(conclusion, model.symbols, model.rounding)
+    assert paragraphs[start + 1 :] == [*(plain(line) for line in lines), RESPONSIBILITY]
+    assert paragraphs.count(RESPONSIBILITY) == 1
 
 
 def test_a_warning_prints_with_the_input_the_bound_and_its_source() -> None:
