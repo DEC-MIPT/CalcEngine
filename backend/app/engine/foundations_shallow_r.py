@@ -98,6 +98,9 @@ SELECTORS: Mapping[str, str] = {"m_gamma": "phi_II", "m_q": "phi_II", "m_c": "ph
 design.md, решение 6).
 """
 
+INPUT_SYMBOLS: Mapping[str, str] = {quantity.name: quantity.symbol for quantity in INPUTS if quantity.symbol}
+"""Обозначение каждого входа пилота в LaTeX для выражений табличных шагов."""
+
 
 class Parameters(BaseModel):
     """Разрешённые параметры расчётного сопротивления грунта R (СП 22.13330.2016, п. 5.6.7, unverified).
@@ -144,7 +147,7 @@ class FoundationsShallowR(Calculator[Mapping[str, QuantityValue], Parameters, Ca
         )
         for name, entry in entries:
             confirm_selectors(entry, inputs, SELECTORS.get(name))
-        tables = tuple(table_step(entry.symbol, entry) for _, entry in entries)
+        tables = tuple(table_step(entry.symbol, entry, INPUT_SYMBOLS) for _, entry in entries)
         for step in tables:
             _bind(values, step.step_id, step.result)
         below = compare("k_z", inputs["b"], "lt", parameters.k_z_threshold.value)

@@ -135,6 +135,7 @@ def test_a_formula_binds_every_symbol_to_a_unit(units: dict[str, str]) -> None:
 
 
 PHI = Selector(symbol="phi", value=QuantityValue(value=20.0, unit="deg"))
+SYMBOLS = {"phi": r"\varphi", "b": "b"}
 
 
 def table_entry(*selectors: Selector) -> TableValue:
@@ -148,9 +149,9 @@ def table_entry(*selectors: Selector) -> TableValue:
 
 
 def test_table_step_records_the_entry_and_its_selectors() -> None:
-    step = table_step("k", table_entry(PHI))
+    step = table_step("k", table_entry(PHI), SYMBOLS)
 
-    assert step.expression == r"k_{t} = k_{t}\left(phi\right)"
+    assert step.expression == r"k_{t} = k_{t}\left(\varphi\right)"
     assert [(s.symbol, s.value, s.unit) for s in step.substitutions] == [("phi", 20.0, "deg")]
     assert step.result == QuantityValue(value=0.5, unit="1")
     assert step.norm_refs == (TABLE_REF,)
@@ -159,9 +160,9 @@ def test_table_step_records_the_entry_and_its_selectors() -> None:
 def test_table_step_lists_every_selector_in_order() -> None:
     b = Selector(symbol="b", value=QuantityValue(value=2.0, unit="m"))
 
-    step = table_step("k", table_entry(PHI, b))
+    step = table_step("k", table_entry(PHI, b), SYMBOLS)
 
-    assert step.expression == r"k_{t} = k_{t}\left(phi, b\right)"
+    assert step.expression == r"k_{t} = k_{t}\left(\varphi, b\right)"
     assert [(s.symbol, s.value, s.unit) for s in step.substitutions] == [("phi", 20.0, "deg"), ("b", 2.0, "m")]
 
 
@@ -217,14 +218,19 @@ def test_a_heading_in_another_unit_is_confirmed_for_an_input_in_that_unit() -> N
     base_unit_input = convert(QuantityValue(value=0.3, unit="rad"), "deg")
 
     confirm_selectors(table_entry(heading), {"phi": base_unit_input}, "phi")
-    step = table_step("k", table_entry(heading))
+    step = table_step("k", table_entry(heading), SYMBOLS)
 
     assert base_unit_input.value != 0.3
     assert [(s.symbol, s.value, s.unit) for s in step.substitutions] == [("phi", 0.3, "rad")]
 
 
+def test_table_step_names_a_selector_without_a_latex_symbol() -> None:
+    with pytest.raises(CalculationError, match="table value 'k': selector 'phi' has no LaTeX symbol"):
+        table_step("k", table_entry(PHI), {"b": "b"})
+
+
 def test_table_step_without_selectors() -> None:
-    step = table_step("k", table_entry())
+    step = table_step("k", table_entry(), {})
 
     assert step.expression == r"k_{t}"
     assert step.substitutions == ()
@@ -265,7 +271,7 @@ def test_check_step_rejects_two_units() -> None:
 
 
 def completed_calculation() -> CalculationResult:
-    k = table_step("k", table_entry(PHI))
+    k = table_step("k", table_entry(PHI), SYMBOLS)
     y = formula_step("y", synthetic_formula(), VALUES)
     check = check_step("check", ("y", y.result), "le", ("y_{max}", kpa(20.0)), (CHECK_REF,))
     return CalculationResult(
