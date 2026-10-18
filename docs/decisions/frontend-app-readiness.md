@@ -142,3 +142,22 @@ journal).
 
 The frontend feature stays NO-GO until task 8.8 (branded Edge and Safari by hand). Next for the
 backend feature: the review (AGENTS.md section 2, step 7).
+
+## `orchestrator` review of the backend feature (2026-10-18)
+
+Three rounds on `feature/frontend-app/backend`; the fixes are task 10.14, commit `dd3870f`.
+
+- Round 1 at `4a04cca`: CHANGES REQUESTED, blocker 0, major 1, minor 7. M1: a step whose LaTeX
+  could not be converted to a Word equation made every report of that stored result fail with
+  `500`; the impact is denial of the report, not injection (`mathml2omml` escapes what it writes,
+  `parse_xml` resolves no entities). Minor: `mathml2omml` unmaintained and printing to stdout;
+  rounding looked up by the substitution's symbol; degrees printed as U+2218; a validator message;
+  a missing `Args:`; the `paragraph._p` dependency; unpushed branches.
+- Round 2: CHANGES REQUESTED. M1 and m3-m6 closed, m2 accepted as an assumption recorded in design
+  decision 13. New N1 (major): the `redirect_stdout` fix of m1 swapped the process-wide `sys.stdout`
+  and raced across request threads. N2: the plain-text fallback failed on characters XML 1.0 does
+  not allow. N3: a wording slip.
+- Round 3: **APPROVED.** N1 closed by replacing the module `print` of `mathml2omml` once at import;
+  N2 by replacing such characters with U+FFFD; N3 reworded. `backend/check.sh`: 971 passed, coverage
+  100%; `openspec validate --all --strict` 20/20. Left to Akim: pushing the branch and the local
+  `develop` commits before the merge (m7), and a short `tester` confirmation of GO on `dd3870f`.

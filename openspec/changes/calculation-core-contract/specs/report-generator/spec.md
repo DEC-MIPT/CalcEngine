@@ -152,7 +152,8 @@ its LaTeX in the normative catalog, unchanged. Every value and every formula of 
 symbols and values of the input table, the symbol that names each trace step, the step's
 expression, substitutions, result and comparison, the conclusion, and the accountability block)
 SHALL be printed as a Word equation (Office Math) built from LaTeX, left-aligned; only the
-expression of a step may be broken across lines by Word. A date in the title block SHALL be printed as two-digit day, month and year
+expression of a step may be broken across lines by Word. A formula whose LaTeX cannot be
+converted SHALL be printed as its LaTeX in plain text, and the report SHALL still be produced. A date in the title block SHALL be printed as two-digit day, month and year
 separated by dots, as note 2 of Annex E of GOST R 21.101-2026 (edition unverified) gives
 for dates on paper.
 
@@ -177,3 +178,7 @@ for dates on paper.
 - **WHEN** a trace step's `expression` is a LaTeX string
 - **THEN** the report prints, as the step's formula, a Word equation converted from that string
   unchanged
+
+#### Scenario: A formula that cannot be converted
+- **WHEN** a trace step's `expression` is `R = \frac{a}{`, LaTeX that has no denominator
+- **THEN** the report is produced, and the step's formula is printed as that string in plain text

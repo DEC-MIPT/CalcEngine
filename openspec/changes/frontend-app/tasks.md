@@ -374,6 +374,19 @@ Work Akim chose after section 9, done before its spec text; recorded here on 202
   with the setting on (an engineer-set rule with engineer and rationale, a norm rule with its
   reference), that the result screen shows neither, and axe in both states (done 2026-10-18 on
   `feature/frontend-app/frontend`, `b538708`)
+- [x] 10.14 Close the `orchestrator` review of the backend feature (2026-10-18): print a formula
+  whose LaTeX cannot be converted as its LaTeX in plain text instead of failing the report; keep
+  the converter's stray output out of stdout; write the degree sign as `\text{°}`; fix the output
+  validator's message and the `_unbox` docstring; note the `paragraph._p` dependency (backend;
+  `calculation-core-contract` `report-generator` "Report values, formulas and dates", `design.md`
+  decisions 13 and 14); verify: tests that five unconvertible strings (`\frac{a}{`, `\text{a & b}`,
+  `\text{x<y}`, `\text{<script>}`, 300 nested braces) raise `FormulaError`, that a single-formula
+  line and a mixed line print the raw LaTeX with no equation, with characters XML 1.0 does not
+  allow replaced by U+FFFD, that the pilot's report with a broken `R` expression still renders with
+  that text, that MathML which makes `mathml2omml` print leaves stdout empty (its module `print`
+  replaced at import, no `sys.stdout` swap), and that degrees read `20°`; `backend/check.sh` with
+  100% branch coverage (done 2026-10-18 on `feature/frontend-app/backend`, `dd3870f`: 971 passed,
+  coverage 100%; `orchestrator` APPROVED in its third round)
 
 ## Requirement coverage
 
@@ -398,7 +411,7 @@ Work Akim chose after section 9, done before its spec text; recorded here on 202
 | `transparent-output` Result screen reading aids | task 10.4 |
 | `transparent-output` Trace display consumes typed steps and warnings (`calculation-core-contract`) | tasks 6.1a, 6.1b, 6.2, 6.4a-6.4c, 10.10, 10.13 |
 | `transparent-output` Normative clause references (`calculation-core-contract`, first-iteration clause) | task 10.10 |
-| `report-generator` Report values, formulas and dates; Automatic normative references in report (`calculation-core-contract`, first-iteration clauses) | task 10.11 |
+| `report-generator` Report values, formulas and dates; Automatic normative references in report (`calculation-core-contract`, first-iteration clauses) | tasks 10.11, 10.14 |
 | `report-generator` GOST report structure; Result accountability block (`calculation-core-contract`, first-iteration clauses) | task 10.12 |
 | `calculation-api` Report download, scenario "Download the report of a stored result" (`calculation-api`, first-iteration clause) | task 10.12 |
 
@@ -425,7 +438,7 @@ Work Akim chose after section 9, done before its spec text; recorded here on 202
 - Spec phase: `openspec validate --all --strict` passes; the `spec-reviewer` report lists no
   blocker and no major finding; `norm-traceability-checker` confirms that no norm value is fixed.
 - Backend feature: every verify clause of section 2 and of the backend tasks of section 10
-  (10.7, 10.8, 10.11, 10.12) passes, `backend/check.sh` passes, branch coverage 100% on `app`.
+  (10.7, 10.8, 10.11, 10.12, 10.14) passes, `backend/check.sh` passes, branch coverage 100% on `app`.
 - Frontend feature: every task of sections 3-7 and 9, and the frontend tasks of sections 8 and 10,
   are checked off, `frontend/check.sh` passes with branch coverage >= 95%, the axe checks and the
   Playwright scenarios pass.

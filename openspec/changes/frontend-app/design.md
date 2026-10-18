@@ -217,6 +217,13 @@ are unchanged, and the report conversion runs after the calculation, outside the
       rule chosen by Akim, not a norm rounding: it keeps the comparison on the screen and in the
       report consistent with the engine's verdict, as the engine itself decides a check on
       unrounded values (`calculation-core-contract` design.md, decision 14).
+    - the screen and the report find an output's rule by the substitution's `symbol` and read a
+      check's two substitutions as its left and right sides. This holds for the pilot: its output
+      `R` and the sides of its check, `p` and `R`, are named by their symbols, and its checks come
+      from `check_step`; an
+      output whose name and LaTeX symbol differ (for example `s_max`, `s_{max}`) would print
+      unrounded. Looking the rule up by the quantity's name is a task of the change that adds
+      such an output (`foundations-sls2-settlement` in Akim's plan).
 14. **Report values and formulas as Word equations** (Akim, 2026-10-18; on the backend feature).
     LaTeX goes to MathML with `latex2mathml` and to Office Math with `mathml2omml` (pinned
     `0.0.2`, no type stubs, a mypy override), both pure Python and listed in
@@ -224,6 +231,26 @@ are unchanged, and the report conversion runs after the calculation, outside the
     `m:oMathPara`, otherwise Word centres it; the top box that `mathml2omml` wraps around a
     formula is kept so that Word does not break an equation, and removed only for a step's
     expression so that a long formula can wrap at its operators.
+    - LaTeX that cannot be converted (catalog LaTeX is machine-extracted) raises `FormulaError`
+      in `omml()`, and `write_line` prints that formula as its LaTeX in plain text, as the result
+      screen does; the report is still produced (`orchestrator` review of 2026-10-18, M1). Any
+      failure of the two converters or of `parse_xml` counts, because both libraries raise
+      plain exceptions with no common base. Markup inside `\text{}` reaches MathML unescaped, but
+      `mathml2omml` escapes what it writes, so the worst case is a formula printed as text, not
+      content injected into the document; `parse_xml` resolves no entities.
+    - Risk of `mathml2omml`: two releases, both of November 2019, licence MIT only by classifier,
+      no maintainer activity. It prints text it cannot place to stdout; the backend replaces the
+      `print` of that module once at import with a function that discards it, so catalog text
+      does not reach the server log. A `redirect_stdout` around the call was tried and rejected:
+      it swaps the process-wide `sys.stdout` and races across the request threads that build
+      reports (`orchestrator` re-review of 2026-10-18, N1). The plain-text fallback replaces
+      characters XML 1.0 does not allow by U+FFFD, so it cannot fail itself (N2). Exit plan: vendor its
+      single module under `backend/app/reporting/` with its licence, or replace it, when a
+      formula it cannot convert matters or Python drops something it uses.
+    - The degree sign is written as `\text{°}`, not `^{\circ}`, so the document holds U+00B0 and
+      copying or searching it gives `30°`.
+    - Equations go into the paragraph through `paragraph._p`, the element behind the python-docx
+      paragraph: python-docx has no public API for Office Math.
 
 ## Non-functional requirements
 
