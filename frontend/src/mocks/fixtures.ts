@@ -258,7 +258,7 @@ export const passEnvelope = {
       "substitutions": []
     },
     {
-      "expression": "M_gamma = M_gamma\\left(phi_II\\right)",
+      "expression": "M_gamma = M_gamma\\left(\\varphi_{II}\\right)",
       "kind": "table",
       "norm_refs": [
         {
@@ -283,7 +283,7 @@ export const passEnvelope = {
       ]
     },
     {
-      "expression": "M_q = M_q\\left(phi_II\\right)",
+      "expression": "M_q = M_q\\left(\\varphi_{II}\\right)",
       "kind": "table",
       "norm_refs": [
         {
@@ -308,7 +308,7 @@ export const passEnvelope = {
       ]
     },
     {
-      "expression": "M_c = M_c\\left(phi_II\\right)",
+      "expression": "M_c = M_c\\left(\\varphi_{II}\\right)",
       "kind": "table",
       "norm_refs": [
         {
@@ -575,7 +575,7 @@ export const failEnvelope = {
       "substitutions": []
     },
     {
-      "expression": "M_gamma = M_gamma\\left(phi_II\\right)",
+      "expression": "M_gamma = M_gamma\\left(\\varphi_{II}\\right)",
       "kind": "table",
       "norm_refs": [
         {
@@ -600,7 +600,7 @@ export const failEnvelope = {
       ]
     },
     {
-      "expression": "M_q = M_q\\left(phi_II\\right)",
+      "expression": "M_q = M_q\\left(\\varphi_{II}\\right)",
       "kind": "table",
       "norm_refs": [
         {
@@ -625,7 +625,7 @@ export const failEnvelope = {
       ]
     },
     {
-      "expression": "M_c = M_c\\left(phi_II\\right)",
+      "expression": "M_c = M_c\\left(\\varphi_{II}\\right)",
       "kind": "table",
       "norm_refs": [
         {
@@ -959,7 +959,7 @@ export const warningEnvelope = {
     },
     {
       "step_id": "M_gamma",
-      "expression": "M_gamma = M_gamma\\left(phi_II\\right)",
+      "expression": "M_gamma = M_gamma\\left(\\varphi_{II}\\right)",
       "substitutions": [
         {
           "value": 20.0,
@@ -984,7 +984,7 @@ export const warningEnvelope = {
     },
     {
       "step_id": "M_q",
-      "expression": "M_q = M_q\\left(phi_II\\right)",
+      "expression": "M_q = M_q\\left(\\varphi_{II}\\right)",
       "substitutions": [
         {
           "value": 20.0,
@@ -1009,7 +1009,7 @@ export const warningEnvelope = {
     },
     {
       "step_id": "M_c",
-      "expression": "M_c = M_c\\left(phi_II\\right)",
+      "expression": "M_c = M_c\\left(\\varphi_{II}\\right)",
       "substitutions": [
         {
           "value": 20.0,

@@ -389,7 +389,7 @@ describe('Trace: steps and substitutions named by their symbols', () => {
       ...base,
       step_id: 'M_gamma',
       kind: 'table',
-      expression: 'M_{\\gamma} = M_{\\gamma}\\left(phi_II\\right)',
+      expression: 'M_{\\gamma} = M_{\\gamma}\\left(\\varphi_{II}\\right)',
       substitutions: [{ symbol: 'phi_II', value: 20, unit: 'deg' }],
     },
     {
