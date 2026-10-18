@@ -4,10 +4,10 @@
 rounding_rules:
   R:
     rule:
-      decimals: 1
+      decimals: 2
       mode: half_up
     source:
       engineer: "Аким"
-      rationale: "Решение инженера для пилотного типа WP2 (2026-09-30): округление до десятых кПа; до проверки по эталонным примерам WP4"
+      rationale: "Решение инженера для пилотного типа (2026-10-18, вместо решения WP2 от 2026-09-30 о десятых): округление до сотых кПа; до проверки по эталонным примерам WP4"
 # Empty until the verification of calculation-verification (WP4) sets it (design.md, decision 8).
 validated_range: []
