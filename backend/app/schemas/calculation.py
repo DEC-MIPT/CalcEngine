@@ -273,7 +273,7 @@ class CalculationTypeContract(BaseModel):
         if len(self.checks) != len(set(self.checks)):
             raise ValueError("check names must be unique")
         if any(output.hint is not None or output.whole_values_only for output in self.outputs):
-            raise ValueError("an output has no hint and no whole_values_only")
+            raise ValueError("an output may not have a hint or whole_values_only")
         return self
 
     def metadata_problems(self) -> tuple[str, ...]:

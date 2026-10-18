@@ -1,3 +1,4 @@
+import re
 from collections.abc import Mapping
 from io import BytesIO
 
@@ -14,7 +15,7 @@ from app.reporting.format import (
     format_norm_ref,
     latex_quantity,
 )
-from app.reporting.formula import Line, Math, omml, omml_paragraph
+from app.reporting.formula import FormulaError, Line, Math, omml, omml_paragraph
 from app.reporting.layout import apply_sheet, fit_table
 from app.reporting.model import (
     AccountabilitySection,
@@ -56,6 +57,9 @@ ACCOUNTABILITY_SECTION = False
 фраза об ответственности инженера печатается последним абзацем заключения. Модель отчёта
 по-прежнему собирает этот раздел, так что вернуть его можно, включив флаг.
 """
+
+NOT_XML = re.compile("[^\t\n\r\u0020-\ud7ff\ue000-\ufffd\U00010000-\U0010ffff]")
+"""Символы, которых нет в XML 1.0: в запасном тексте формулы они заменяются на U+FFFD."""
 
 
 def _passed(passed: bool) -> str:
@@ -153,20 +157,29 @@ def conclusion_lines(
 def write_line(paragraph: Paragraph, line: Line) -> None:
     """Дописывает в абзац строку отчёта: текст — прогонами, формулы — формулами Word.
 
-    Строка из одной формулы становится выключенной формулой, прижатой влево.
+    Строка из одной формулы становится выключенной формулой, прижатой влево. Формула,
+    LaTeX которой не переводится, печатается своим LaTeX как обычный текст, как её
+    показывает экран результата.
 
     Args:
         paragraph: абзац документа или ячейки таблицы.
         line: строка из текста и формул.
     """
+    # python-docx has no public API for Office Math, so equations go into the paragraph's element.
     if len(line) == 1 and isinstance(line[0], Math):
-        paragraph._p.append(omml_paragraph(line[0]))
-        return
+        try:
+            paragraph._p.append(omml_paragraph(line[0]))
+            return
+        except FormulaError:
+            pass
     for segment in line:
-        if isinstance(segment, Math):
-            paragraph._p.append(omml(segment))
-        else:
+        if not isinstance(segment, Math):
             paragraph.add_run(segment)
+            continue
+        try:
+            paragraph._p.append(omml(segment))
+        except FormulaError:
+            paragraph.add_run(NOT_XML.sub("\ufffd", segment.latex))
 
 
 def _write_lines(document: DocumentObject, lines: list[Line]) -> None:
