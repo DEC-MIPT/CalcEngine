@@ -54,6 +54,7 @@ describe('I18nProvider and LanguageSwitch', () => {
     )
     expect(screen.getByText('Язык интерфейса 172,5')).toBeInTheDocument()
     expect(document.documentElement.lang).toBe('ru')
+    expect(document.title).toBe('Калькулятор инженера-проектировщика')
   })
 
   it('switches the texts, the numbers and the document language', () => {
@@ -66,6 +67,7 @@ describe('I18nProvider and LanguageSwitch', () => {
     fireEvent.click(screen.getByRole('button', { name: 'English' }))
     expect(screen.getByText('Interface language 172.5')).toBeInTheDocument()
     expect(document.documentElement.lang).toBe('en')
+    expect(document.title).toBe("Design Engineer's Calculator")
     expect(screen.getByRole('button', { name: 'English' })).toHaveAttribute(
       'aria-pressed',
       'true',

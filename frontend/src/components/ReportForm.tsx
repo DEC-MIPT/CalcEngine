@@ -62,6 +62,7 @@ function FieldMessage({ id, children }: { id: string; children: string }) {
 function TextField({
   fieldKey,
   label,
+  caption,
   type = 'text',
   value,
   error,
@@ -69,6 +70,7 @@ function TextField({
 }: {
   fieldKey: string
   label?: string
+  caption?: string
   type?: 'text' | 'date'
   value: string
   error: string | undefined
@@ -76,6 +78,11 @@ function TextField({
 }) {
   return (
     <div className="grid gap-1">
+      {caption && (
+        <span aria-hidden="true" className="text-sm text-muted-foreground sm:hidden" data-caption>
+          {caption}
+        </span>
+      )}
       <input
         id={fieldId(fieldKey)}
         type={type}
@@ -329,6 +336,7 @@ export function ReportForm({ resultId }: { resultId: string }) {
                       fieldKey={key}
                       type={part === 'date' ? 'date' : 'text'}
                       label={`${t(`report.role.${role}`)}: ${t(`report.${part}`)}`}
+                      caption={t(`report.${part}`)}
                       value={people[role][part]}
                       error={errors[key]}
                       onChange={(value) => {

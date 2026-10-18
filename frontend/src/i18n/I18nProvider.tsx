@@ -14,6 +14,7 @@ export function I18nProvider({
 
   useEffect(() => {
     document.documentElement.lang = language
+    document.title = translate(dictionaries, language, 'app.title')
   }, [language])
 
   const value = useMemo<I18n>(

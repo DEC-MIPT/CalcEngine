@@ -120,6 +120,17 @@ describe('report form: title block and switch (7.1a)', () => {
 })
 
 describe('report form: signatories (7.1b)', () => {
+  it('gives every signatory field a visible caption on narrow screens, where the column heads are hidden', () => {
+    open()
+
+    for (const role of ['developer', 'checker', 'normative_control']) {
+      const row = document.querySelector(`[data-role="${role}"]`)!
+      const captions = [...row.querySelectorAll('[data-caption]')]
+      expect(captions.map((caption) => caption.textContent)).toEqual(['Фамилия', 'Дата'])
+      for (const caption of captions) expect(caption).toHaveClass('sm:hidden')
+    }
+  })
+
   it.each([
     ['Разработал: Дата', 'Заполните поле.'],
     ['Нормоконтроль: Фамилия', 'Заполните поле.'],
