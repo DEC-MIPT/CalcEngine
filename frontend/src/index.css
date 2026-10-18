@@ -81,6 +81,11 @@
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
+  /* Chromium moves Tab focus onto the date field's own calendar button, inside the field. */
+  input[type='date']:focus-within {
+    outline: 2px solid var(--ring);
+    outline-offset: -1px;
+  }
   mjx-container > svg {
     display: inline-block;
   }

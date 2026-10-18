@@ -3,10 +3,12 @@ import { Link, NavLink, Outlet, useMatches } from 'react-router'
 import { DraftProvider } from '@/form/DraftProvider'
 import { I18nProvider } from '@/i18n/I18nProvider'
 import { useI18n } from '@/i18n/context'
+import { LanguageSwitch } from './LanguageSwitch'
 
 export type Crumb = 'form' | 'result' | 'report' | 'notFound'
 
 const SHORT_ID = 8
+const SHOW_LANGUAGE_SWITCH = false
 
 function useTrail(): { crumbs: readonly Crumb[]; id?: string } {
   const match = useMatches().at(-1)
@@ -74,7 +76,7 @@ function DemoBadge() {
   )
 }
 
-function Shell() {
+function Shell({ languageSwitch }: { languageSwitch: boolean }) {
   const { t } = useI18n()
   const bleed = (useMatches().at(-1)?.handle as { bleed?: boolean } | undefined)?.bleed === true
   return (
@@ -90,6 +92,7 @@ function Shell() {
           <span aria-hidden="true" className="h-5 w-px bg-border max-sm:hidden" />
           <Trail />
           <DemoBadge />
+          {languageSwitch && <LanguageSwitch />}
         </div>
       </header>
       <main className={bleed ? undefined : 'mx-auto max-w-5xl px-4 py-8'}>
@@ -99,11 +102,11 @@ function Shell() {
   )
 }
 
-export function AppShell() {
+export function AppShell({ languageSwitch = SHOW_LANGUAGE_SWITCH }: { languageSwitch?: boolean }) {
   return (
     <I18nProvider>
       <DraftProvider>
-        <Shell />
+        <Shell languageSwitch={languageSwitch} />
       </DraftProvider>
     </I18nProvider>
   )

@@ -1,7 +1,8 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { routes } from '@/routes'
+import { AppShell } from './AppShell'
 import { expectNoA11yViolations } from '@/test/axe'
 
 function open(address: string) {
@@ -24,6 +25,21 @@ describe('AppShell', () => {
       expect(screen.getByRole('main')).toBeInTheDocument()
       unmount()
     }
+  })
+
+  it('shows the language switch when it is turned on, and switching changes the texts', () => {
+    render(
+      <RouterProvider
+        router={createMemoryRouter([{ element: <AppShell languageSwitch />, children: [{ path: '/', element: null }] }], {
+          initialEntries: ['/'],
+        })}
+      />,
+    )
+    const group = screen.getByRole('group', { name: 'Язык интерфейса' })
+
+    fireEvent.click(within(group).getByRole('button', { name: 'English' }))
+
+    expect(screen.getByText("Design Engineer's Calculator")).toBeInTheDocument()
   })
 
   it('marks the type selection link as the current page only on type selection', () => {

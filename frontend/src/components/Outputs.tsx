@@ -2,6 +2,7 @@ import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
 import { Checking } from './Checking'
 import { UnitText } from './Quantity'
+import { Source } from './Source'
 import type { StampReveal } from './VerdictStamp'
 
 type Output = components['schemas']['OutputValue']
@@ -10,7 +11,7 @@ const headCell = 'px-3 py-2 text-left text-sm font-medium text-muted-foreground'
 const detailCell = 'px-3 py-3 text-sm max-sm:col-span-full max-sm:p-0'
 const mobileLabel = 'text-sm font-medium sm:hidden'
 
-function OutputRow({ output }: { output: Output }) {
+function OutputRow({ output, source }: { output: Output; source: boolean }) {
   const { t, formatNumber } = useI18n()
   const { rounding_rule: rule } = output
   return (
@@ -29,6 +30,12 @@ function OutputRow({ output }: { output: Output }) {
         <span className={mobileLabel}>{t('outputs.rounding')}: </span>
         {t(`outputs.mode.${rule.mode}`)}; {t('outputs.decimals')}: <span className="font-mono">{rule.decimals}</span>
       </td>
+      {source && (
+        <td className={detailCell} data-source>
+          <span className={mobileLabel}>{t('outputs.source')}</span>
+          <Source source={output.rounding_source} />
+        </td>
+      )}
     </tr>
   )
 }
@@ -40,7 +47,15 @@ const REVEAL_CLASS: Record<StampReveal, string> = {
   none: '',
 }
 
-export function Outputs({ outputs, reveal = 'none' }: { outputs: readonly Output[]; reveal?: StampReveal }) {
+export function Outputs({
+  outputs,
+  reveal = 'none',
+  source = true,
+}: {
+  outputs: readonly Output[]
+  reveal?: StampReveal
+  source?: boolean
+}) {
   const { t } = useI18n()
   return (
     <section aria-labelledby="outputs-title" className={`mt-8 grid gap-3${REVEAL_CLASS[reveal]}`} data-reveal={reveal}>
@@ -59,14 +74,19 @@ export function Outputs({ outputs, reveal = 'none' }: { outputs: readonly Output
               <th scope="col" className={`${headCell} w-20`}>
                 {t('outputs.column.unit')}
               </th>
-              <th scope="col" className={headCell}>
+              <th scope="col" className={source ? `${headCell} w-64` : headCell}>
                 {t('outputs.rounding')}
               </th>
+              {source && (
+                <th scope="col" className={headCell}>
+                  {t('outputs.source')}
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="max-sm:block" inert={reveal === 'pending'}>
             {outputs.map((output) => (
-              <OutputRow key={output.quantity} output={output} />
+              <OutputRow key={output.quantity} output={output} source={source} />
             ))}
           </tbody>
         </table>

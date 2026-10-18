@@ -12,10 +12,18 @@ type Output = components['schemas']['OutputValue']
 
 const outputs = passEnvelope.outputs as unknown as Output[]
 const [engineerSet] = outputs
-function show(list: Output[], language: Language = 'ru', reveal: StampReveal = 'none') {
+const normRef = {
+  document: 'SP Test',
+  edition: '2020',
+  clause: '5.6',
+  status: 'verified',
+  provenance: 'human-verified',
+} as const
+
+function show(list: Output[], language: Language = 'ru', reveal: StampReveal = 'none', source = false) {
   return render(
     <I18nProvider initialLanguage={language}>
-      <Outputs outputs={list} reveal={reveal} />
+      <Outputs outputs={list} reveal={reveal} source={source} />
     </I18nProvider>,
   )
 }
@@ -93,6 +101,44 @@ describe('Outputs (6.2)', () => {
 
   it('has no accessibility violations', async () => {
     const { container } = show(outputs)
+
+    await expectNoA11yViolations(container)
+  })
+})
+
+describe('Outputs: the rounding source, off in the pilot first iteration', () => {
+  it('shows the source column by default, with the engineer and the rationale of an engineer-set rule', () => {
+    render(
+      <I18nProvider initialLanguage="ru">
+        <Outputs outputs={outputs} />
+      </I18nProvider>,
+    )
+    const item = itemOf('R')
+
+    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+      'Величина',
+      'Значение',
+      'Единица',
+      'Округление',
+      'Источник правила',
+    ])
+    expect(item.getByText('Задано инженером')).toBeInTheDocument()
+    expect(item.getByText('Инженер: <ENGINEER>')).toBeInTheDocument()
+    expect(item.getByText('Обоснование: <RATIONALE>')).toBeInTheDocument()
+  })
+
+  it('shows a rule taken from a norm with its reference and no engineer', () => {
+    show([{ ...engineerSet, rounding_source: [normRef] } as Output], 'ru', 'none', true)
+    const item = itemOf('R')
+
+    expect(item.getByText('SP Test')).toBeInTheDocument()
+    expect(item.getByText('редакция: 2020')).toBeInTheDocument()
+    expect(item.getByText('пункт: 5.6')).toBeInTheDocument()
+    expect(item.queryByText('Задано инженером')).not.toBeInTheDocument()
+  })
+
+  it('has no accessibility violations with the source shown', async () => {
+    const { container } = show(outputs, 'ru', 'none', true)
 
     await expectNoA11yViolations(container)
   })
