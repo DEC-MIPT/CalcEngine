@@ -4,12 +4,14 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.exceptions import InputValidationError
+from app.reporting.symbols import symbol_table
 from app.schemas.calculation import (
     BoundViolation,
     CalculationTypeContract,
     CheckStep,
     QuantityValue,
     ResultEnvelope,
+    RoundingRule,
     TraceStep,
 )
 from app.schemas.report import ReportRequest
@@ -62,10 +64,17 @@ BodySection = Annotated[
 
 
 class Report(_Section):
-    """Что записывает модуль вывода: запрос (основная надпись, подписи) и разделы тела."""
+    """Что записывает модуль вывода: запрос (основная надпись, подписи) и разделы тела.
+
+    ``symbols`` — обозначения в LaTeX, которыми печатаются имена шагов и величин;
+    ``rounding`` — правила округления выходов по имени, по которым печатаются их
+    значения в трассе и в заключении.
+    """
 
     request: ReportRequest
     body: tuple[BodySection, ...]
+    symbols: Mapping[str, str]
+    rounding: Mapping[str, RoundingRule]
 
 
 def _input_rows(
@@ -102,6 +111,8 @@ def build_report(
     Тело содержит таблицу исходных данных в порядке входов контракта, трассу,
     заключение и блок подотчётности результата. У отказного расчёта остаются все
     разделы: в разделе трассы нет шагов, а заключение называет нарушенную границу.
+    Обозначения шагов и величин берутся из выражений трассы и из контракта, правила
+    округления — из выходов конверта.
 
     Args:
         contract: контракт типа расчёта.
@@ -120,4 +131,6 @@ def build_report(
             _conclusion(envelope),
             AccountabilitySection(envelope=envelope),
         ),
+        symbols=symbol_table(contract, envelope.trace),
+        rounding={output.quantity: output.rounding_rule for output in envelope.outputs},
     )

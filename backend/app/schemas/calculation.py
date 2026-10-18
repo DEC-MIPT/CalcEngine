@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from decimal import ROUND_HALF_EVEN, ROUND_HALF_UP, Decimal, localcontext
 from typing import Annotated, Literal
 from uuid import UUID
 
@@ -208,6 +209,9 @@ MAX_DECIMALS = 15
 держит float; это ограничение реализации, а не значение нормы."""
 
 
+_ROUNDING_MODES = {"half_up": ROUND_HALF_UP, "half_even": ROUND_HALF_EVEN}
+
+
 class RoundingRule(BaseModel):
     """Как округляется значение выхода; правило и его режим берутся из его источника."""
 
@@ -215,6 +219,26 @@ class RoundingRule(BaseModel):
 
     decimals: int = Field(ge=0, le=MAX_DECIMALS)
     mode: Literal["half_up", "half_even"]
+
+    def apply(self, value: float) -> float:
+        """Округляет значение выхода по этому правилу (``calculation-core-contract`` design.md, решение 14).
+
+        Число с плавающей точкой превращается в самую короткую десятичную запись, которая
+        читается обратно в то же значение, поэтому ``2.675`` округляется как ``2.675``, а
+        не как его двоичный сосед. ``half_up`` округляет половину от нуля. Точность
+        вычисления берётся по порядку значения и числу знаков, поэтому любое конечное
+        значение округляется без ``decimal.InvalidOperation``.
+
+        Args:
+            value: неокруглённое значение.
+
+        Returns:
+            Округлённое значение.
+        """
+        exact = Decimal(repr(value))
+        with localcontext() as context:
+            context.prec = max(context.prec, exact.adjusted() + self.decimals + 2)
+            return float(exact.quantize(Decimal(1).scaleb(-self.decimals), rounding=_ROUNDING_MODES[self.mode]))
 
 
 class OutputDeclaration(QuantityDeclaration):
