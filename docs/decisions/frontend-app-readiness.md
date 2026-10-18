@@ -161,3 +161,14 @@ Three rounds on `feature/frontend-app/backend`; the fixes are task 10.14, commit
   N2 by replacing such characters with U+FFFD; N3 reworded. `backend/check.sh`: 971 passed, coverage
   100%; `openspec validate --all --strict` 20/20. Left to Akim: pushing the branch and the local
   `develop` commits before the merge (m7), and a short `tester` confirmation of GO on `dd3870f`.
+
+## Task 8.2, backend GO confirmed at `dd3870f` (2026-10-18)
+
+**`tester`: GO for the backend feature** at `dd3870f`, the only commit after the second-round GO at
+`4a04cca` (task 10.14, the `orchestrator` fixes). `backend/check.sh` exit 0: ruff clean, mypy "no
+issues found in 137 source files", lint-imports "4 kept, 0 broken", 971 passed, 4 skipped (the
+`postgres` tests), coverage 100% (2325 statements, 454 branches; every changed module at 100%);
+`pre-commit run --all-files` passed. Each item of task 10.14's verify clause and the scenario "A
+formula that cannot be converted" are backed by tests; the stdout test fails if the builtin
+`print` of `mathml2omml` is restored. UI/UX: N/A for the backend feature. With the `orchestrator`
+approval, the backend feature is ready to merge into `develop`.
