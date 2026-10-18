@@ -98,3 +98,31 @@ ticked with their commits, section 10 records the work done outside the earlier 
   (decision 13); the example values of the rounding scenarios are marked illustrative. Unchanged
   and already marked `unverified`: GOST R 21.101-2026 for the report layout and dates, the unit
   designations; the XML 1.0 character rule is a format rule, not a norm.
+
+## Task 8.2, first round (2026-10-18)
+
+**`ui-ux-tester`: CONFIRMED** on `feature/frontend-app/frontend` at `b538708`, mock server, Chromium,
+1280, 375 and 320 px, reduced motion on and off. axe (WCAG 2.0-2.2 A/AA and best practice,
+including contrast and target size): 0 violations on every screen and state. The keyboard journey
+to the downloaded report works at both widths with a visible 2 px focus ring on all 38 stops;
+meaning is never carried by colour alone; the visual brief of design decision 5 and the
+first-iteration state of decision 12 hold. Two moderate defects, both WCAG level A, fixed in
+`74a1ee4`: the page title was "frontend" (2.4.2; now the app title, following the interface
+language, and `index.html` says `lang="ru"`), and the signatory fields had no visible caption below
+the `sm` breakpoint (3.3.2; now «Фамилия» and «Дата» above each field). Cosmetic, left as they are:
+an empty trace ruler on a refusal, a taller header on the report screen in mock mode (the demo badge
+wraps), and the signature-block checkbox announced as a switch.
+
+**`tester`: NO-GO for both features.** All automated runs passed: `backend/check.sh` on both tips
+(959 passed, coverage 100%), `pre-commit run --all-files`, `frontend/check.sh` (462 passed, branches
+100%), the coverage gate of 8.1, Playwright in Chromium (34 passed) and `formulas.spec.ts` in Firefox
+and WebKit. Blocking: no test of task 10.11 set `TRACE_NORM_STATUS` on (added in `4a04cca`:
+`backend/check.sh` 960 passed, coverage 100%); tasks 8.1 and 8.3 were not ticked (8.1 had its note
+but no tick; both ticked now); task 8.8 (branded Edge and Safari by hand) is open and needs a person.
+Not blocking: the 2.4 note now records that `9f18cf4` re-recorded the fixture's `input_hash`
+values; `npm audit --omit=dev` reports `@xmldom/xmldom` (high) through `mathjax-full`, not reachable
+from the app's imports, and `source-map-js` (build time, already on `develop`); `vite.config.ts` has
+no `coverage.include`; the `postgres`-marked tests were not run.
+
+Next: a second `tester` round for the backend feature at `4a04cca`; the frontend feature gets its
+GO after task 8.8.

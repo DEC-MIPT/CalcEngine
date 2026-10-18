@@ -63,8 +63,10 @@ before task 2.1.
   and committed as the first commit of the branch, before task 2.1; no file under `ml/` or `infra/` and no query to `dec_normatives`
   is added (done 2026-10-06 on `feature/frontend-app/backend`: the fixture in `b8f14c4`, the test in
   `bab155f`; the baseline got three entries for the fixture's hashes by hand, not a full regeneration;
-  task 10.7 regenerated the fixture's table-step expression strings in `ed6f672`, with no value,
-  `NormRef` or `input_hash` changed)
+  the merge of `develop` in `9f18cf4` re-recorded the fixture's `input_hash` values, because the
+  WP9 table selectors entered the resolved parameters, and the `tester` confirmed on 2026-10-18 that
+  the code of `develop` at `380e42d` gives the same hashes; task 10.7 regenerated the fixture's
+  table-step expression strings in `ed6f672`, with no value, `NormRef` or `input_hash` changed)
 - [x] 2.5 Run `backend/check.sh` and the `postgres` module (backend); verify: `ruff`, `mypy`,
   `lint-imports` pass, branch coverage of `app` stays 100%, and the `pre-commit` hooks pass (done 2026-10-06 on `feature/frontend-app/backend`, `bab155f`)
 
@@ -190,18 +192,29 @@ before task 2.1.
 
 ## 8. Verify and close
 
-- [ ] 8.1 Run `frontend/check.sh` (frontend); verify: `eslint`, `tsc -b` and `vitest run --coverage`
+- [x] 8.1 Run `frontend/check.sh` (frontend); verify: `eslint`, `tsc -b` and `vitest run --coverage`
   pass with branch coverage >= 95%, and a run with the threshold of `vite.config.ts` raised above
   the measured coverage fails (done 2026-10-18 on `feature/frontend-app/frontend` at `b538708`:
   462 tests, branch coverage 100%; the branch threshold cannot be raised above 100%, so the gate was
   shown with the statements threshold raised above the measured 99.87%, which fails the run)
 - [ ] 8.2 `tester` GO for each feature; `ui-ux-tester` confirms the screens, keyboard operation,
   contrast, no colour-only meaning and the visual brief of `design.md` decision 5 (tester)
-- [ ] 8.3 Run the journey end to end against the real backend and, once WP9 is merged, a real
+  (2026-10-18, first round: `ui-ux-tester` CONFIRMED, its two moderate defects fixed in `74a1ee4`;
+  `tester` NO-GO for both features, for the missing test of task 10.11 (added in `4a04cca`) and the
+  open tasks 8.1, 8.3 and 8.8; `docs/decisions/frontend-app-readiness.md`)
+- [x] 8.3 Run the journey end to end against the real backend and, once WP9 is merged, a real
   catalog source: type selection, form, result, report download, with the frontend and the backend
   on different origins and `DEC_CORS_ORIGINS` set (frontend); verify: a recorded manual run in which
   the downloaded file has the name the backend gave (the `Content-Disposition` is readable
   cross-origin); until WP9 is merged the pilot's `503` is shown as in "Backend not available"
+  (done 2026-10-18T19:38Z on `feature/frontend-app/frontend` at `b538708`, Chromium 153 driven by
+  Playwright: frontend on `127.0.0.1:5173`, backend on `127.0.0.1:8000` with the catalog in `dec`;
+  result `fc9a5f2f-9748-4fb4-a420-21e7be8e580a`, verdict `pass`, 9 steps referring to
+  СП 22.13330.2016 "2016 с Изм. N 1, 2, 3, 4, 5"; the file saved as
+  `dec-report-fc9a5f2f-9748-4fb4-a420-21e7be8e580a.docx`, the name of `Content-Disposition`; every
+  response carried `access-control-allow-origin: http://127.0.0.1:5173` and
+  `access-control-expose-headers: Location, Content-Disposition`; no console error; recorded in
+  the code journal)
 - [x] 8.4 (spec) After 6.1a, 6.1b, 6.2 and 6.4a-6.4c are done, tick tasks 3.4, 3.5 and 5.4 in
   `calculation-core-contract` `tasks.md` and name this change there (spec; needs Akim's word
   to edit that change) (done 2026-10-18 on `develop`, with Akim's word)
