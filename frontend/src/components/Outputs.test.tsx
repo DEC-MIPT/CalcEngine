@@ -6,23 +6,16 @@ import type { Language } from '@/i18n/dictionary'
 import { passEnvelope } from '@/mocks/fixtures'
 import { expectNoA11yViolations } from '@/test/axe'
 import { Outputs } from './Outputs'
+import type { StampReveal } from './VerdictStamp'
 
 type Output = components['schemas']['OutputValue']
 
 const outputs = passEnvelope.outputs as unknown as Output[]
 const [engineerSet] = outputs
-const normRef = {
-  document: 'SP Test',
-  edition: '2020',
-  clause: '5.6',
-  status: 'verified',
-  provenance: 'human-verified',
-} as const
-
-function show(list: Output[], language: Language = 'ru') {
+function show(list: Output[], language: Language = 'ru', reveal: StampReveal = 'none') {
   return render(
     <I18nProvider initialLanguage={language}>
-      <Outputs outputs={list} />
+      <Outputs outputs={list} reveal={reveal} />
     </I18nProvider>,
   )
 }
@@ -33,7 +26,7 @@ const reading = (quantity: string) =>
   `${rowOf(quantity).querySelector('[data-value]')!.textContent} ${rowOf(quantity).querySelector('[data-value]')!.nextElementSibling!.textContent}`
 
 describe('Outputs (6.2)', () => {
-  it('shows the value, the unit, the rounding rule and the source of an engineer-set rule', () => {
+  it('shows the value, the unit and the rounding rule, and no source of the rule', () => {
     show(outputs)
     const item = itemOf('R')
 
@@ -43,20 +36,14 @@ describe('Outputs (6.2)', () => {
     expect(item.getByText(/Округление:/).parentElement).toHaveTextContent(
       'Округление: до ближайшего, половина вверх; знаков после запятой: 1',
     )
-    expect(item.getByText('Задано инженером')).toBeInTheDocument()
-    expect(item.getByText('Инженер: <ENGINEER>')).toBeInTheDocument()
-    expect(item.getByText('Обоснование: <RATIONALE>')).toBeInTheDocument()
-  })
-
-  it('shows a rule taken from a norm with its reference and no engineer', () => {
-    show([{ ...engineerSet, rounding_source: [normRef] } as Output])
-    const item = itemOf('R')
-
-    expect(item.getByText('SP Test')).toBeInTheDocument()
-    expect(item.getByText('редакция: 2020')).toBeInTheDocument()
-    expect(item.getByText('пункт: 5.6')).toBeInTheDocument()
-    expect(item.getByText('проверено')).toBeInTheDocument()
-    expect(item.queryByText('Задано инженером')).not.toBeInTheDocument()
+    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+      'Величина',
+      'Значение',
+      'Единица',
+      'Округление',
+    ])
+    expect(screen.queryByText('Задано инженером')).not.toBeInTheDocument()
+    expect(screen.queryByText('Источник правила')).not.toBeInTheDocument()
   })
 
   it('names the mode of the rule in words for both modes', () => {
@@ -92,7 +79,6 @@ describe('Outputs (6.2)', () => {
 
     expect(screen.getByRole('heading', { name: 'Outputs' })).toBeInTheDocument()
     expect(reading('R')).toBe('172.5 kPa')
-    expect(item.getByText('Set by the engineer')).toBeInTheDocument()
     expect(item.getByText('Rounding:').parentElement).toHaveTextContent('to nearest, ties up; decimal places: 1')
   })
 
@@ -107,6 +93,40 @@ describe('Outputs (6.2)', () => {
 
   it('has no accessibility violations', async () => {
     const { container } = show(outputs)
+
+    await expectNoA11yViolations(container)
+  })
+})
+
+describe('Outputs: held until the trace has played', () => {
+  it('keeps the table in place with the values hidden from sight, focus and assistive technology', () => {
+    show(outputs, 'ru', 'pending')
+    const section = screen.getByRole('heading', { name: 'Выходные величины' }).closest('section')!
+
+    expect(section).toHaveAttribute('data-reveal', 'pending')
+    expect(section.className).toContain('outputs-pending')
+    expect(section.querySelector('tbody')).toHaveAttribute('inert')
+    expect(section.querySelector('[data-outputs-status]')).toHaveTextContent('ВЫПОЛНЕНИЕ РАСЧЁТА')
+    expect(section.querySelector('[data-outputs-status]')).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  it.each([
+    ['celebrate', 'outputs-celebrate'],
+    ['plain', ''],
+    ['none', ''],
+  ] as const)('shows the values once the reveal is %s', (reveal, className) => {
+    show(outputs, 'ru', reveal)
+    const section = screen.getByRole('heading', { name: 'Выходные величины' }).closest('section')!
+
+    expect(section).toHaveAttribute('data-reveal', reveal)
+    expect(section.querySelector('tbody')).not.toHaveAttribute('inert')
+    expect(section.querySelector('[data-outputs-status]')).toBeNull()
+    expect(section.className.includes('outputs-celebrate')).toBe(className !== '')
+    expect(reading('R')).toBe('172,5 кПа')
+  })
+
+  it('has no accessibility violations while held', async () => {
+    const { container } = show(outputs, 'ru', 'pending')
 
     await expectNoA11yViolations(container)
   })

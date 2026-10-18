@@ -7,6 +7,7 @@ import type { TextKey } from '@/i18n/dictionary'
 import { jumpTo } from '@/lib/jumpTo'
 import { checkRounding, outputRounding } from '@/lib/rounding'
 import { useFocusOnMount } from '@/lib/useFocusOnMount'
+import { Checking } from './Checking'
 import { EditInputsLink } from './EditInputsLink'
 import { Formula } from './Formula'
 import { QuantityText } from './Quantity'
@@ -47,16 +48,6 @@ function StampMark() {
   )
 }
 
-function Checking() {
-  const { t } = useI18n()
-  return (
-    <p aria-hidden="true" className="stamp-status font-mono" data-stamp-status>
-      <span>{t('stamp.checking')}</span>
-      <span className="trace-caret">▮</span>
-    </p>
-  )
-}
-
 export function VerdictStamp({
   envelope,
   reason,
@@ -90,7 +81,7 @@ export function VerdictStamp({
       data-reveal={reveal}
       className={`stamp-frame relative grid border-2 bg-card sm:grid-cols-[1fr_auto] ${tone}${entersShown ? ' stamp-enter' : ''}${REVEAL_CLASS[reveal]}`}
     >
-      {reveal === 'pending' && <Checking />}
+      {reveal === 'pending' && <Checking marker="stamp" />}
       <div className="relative grid gap-2 p-4">
         {reveal === 'celebrate' && <StampMark />}
         <h2 id={headingId} className={`flex items-center gap-2 text-verdict font-bold ${passed ? 'text-primary' : 'text-destructive'}`}>

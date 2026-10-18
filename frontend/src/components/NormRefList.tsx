@@ -32,7 +32,7 @@ function Part({ label, value, unconfirmed }: { label: string; value: string; unc
   )
 }
 
-export function NormRefList({ refs }: { refs: readonly NormRef[] }) {
+export function NormRefList({ refs, showStatus = true }: { refs: readonly NormRef[]; showStatus?: boolean }) {
   const { t } = useI18n()
   return (
     <ul className="grid gap-1">
@@ -41,7 +41,7 @@ export function NormRefList({ refs }: { refs: readonly NormRef[] }) {
           <span className="font-medium">{ref.document}</span>{' '}
           <Part label={t('norm.edition')} value={ref.edition} unconfirmed={t('norm.editionUnconfirmed')} />{' '}
           <Part label={t('norm.clause')} value={ref.clause} unconfirmed={t('norm.clauseUnconfirmed')} />{' '}
-          <NormStatus status={ref.status} />
+          {showStatus && <NormStatus status={ref.status} />}
         </li>
       ))}
     </ul>

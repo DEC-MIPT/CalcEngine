@@ -1,7 +1,8 @@
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
+import { Checking } from './Checking'
 import { UnitText } from './Quantity'
-import { Source } from './Source'
+import type { StampReveal } from './VerdictStamp'
 
 type Output = components['schemas']['OutputValue']
 
@@ -28,45 +29,48 @@ function OutputRow({ output }: { output: Output }) {
         <span className={mobileLabel}>{t('outputs.rounding')}: </span>
         {t(`outputs.mode.${rule.mode}`)}; {t('outputs.decimals')}: <span className="font-mono">{rule.decimals}</span>
       </td>
-      <td className={detailCell} data-source>
-        <span className={mobileLabel}>{t('outputs.source')}</span>
-        <Source source={output.rounding_source} />
-      </td>
     </tr>
   )
 }
 
-export function Outputs({ outputs }: { outputs: readonly Output[] }) {
+const REVEAL_CLASS: Record<StampReveal, string> = {
+  pending: ' outputs-pending',
+  celebrate: ' outputs-celebrate',
+  plain: '',
+  none: '',
+}
+
+export function Outputs({ outputs, reveal = 'none' }: { outputs: readonly Output[]; reveal?: StampReveal }) {
   const { t } = useI18n()
   return (
-    <section aria-labelledby="outputs-title" className="mt-8 grid gap-3">
+    <section aria-labelledby="outputs-title" className={`mt-8 grid gap-3${REVEAL_CLASS[reveal]}`} data-reveal={reveal}>
       <h2 id="outputs-title">{t('outputs.title')}</h2>
-      <table className="w-full border-collapse border border-border bg-card max-sm:block">
-        <thead className="border-b border-foreground max-sm:hidden">
-          <tr>
-            <th scope="col" className={`${headCell} w-24`}>
-              {t('outputs.column.quantity')}
-            </th>
-            <th scope="col" className={`${headCell} w-36 text-right`}>
-              {t('outputs.column.value')}
-            </th>
-            <th scope="col" className={`${headCell} w-20`}>
-              {t('outputs.column.unit')}
-            </th>
-            <th scope="col" className={`${headCell} w-64`}>
-              {t('outputs.rounding')}
-            </th>
-            <th scope="col" className={headCell}>
-              {t('outputs.source')}
-            </th>
-          </tr>
-        </thead>
-        <tbody className="max-sm:block">
-          {outputs.map((output) => (
-            <OutputRow key={output.quantity} output={output} />
-          ))}
-        </tbody>
-      </table>
+      <div className="relative">
+        {reveal === 'pending' && <Checking marker="outputs" />}
+        <table className="w-full border-collapse border border-border bg-card max-sm:block">
+          <thead className="border-b border-foreground max-sm:hidden">
+            <tr>
+              <th scope="col" className={`${headCell} w-24`}>
+                {t('outputs.column.quantity')}
+              </th>
+              <th scope="col" className={`${headCell} w-36 text-right`}>
+                {t('outputs.column.value')}
+              </th>
+              <th scope="col" className={`${headCell} w-20`}>
+                {t('outputs.column.unit')}
+              </th>
+              <th scope="col" className={headCell}>
+                {t('outputs.rounding')}
+              </th>
+            </tr>
+          </thead>
+          <tbody className="max-sm:block" inert={reveal === 'pending'}>
+            {outputs.map((output) => (
+              <OutputRow key={output.quantity} output={output} />
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   )
 }

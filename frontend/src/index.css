@@ -364,6 +364,14 @@
   opacity: 0;
 }
 
+.outputs-pending table > * {
+  opacity: 0;
+}
+
+.outputs-pending thead {
+  border-color: transparent;
+}
+
 .stamp-status {
   position: absolute;
   inset: 0;
@@ -501,7 +509,8 @@
     opacity: 0;
     animation: stamp-scan 320ms steps(12, end) 200ms;
   }
-  .stamp-celebrate > * {
+  .stamp-celebrate > *,
+  .outputs-celebrate table > * {
     animation: stamp-reveal 1ms linear 520ms backwards;
   }
   .stamp-celebrate .stamp-mark {

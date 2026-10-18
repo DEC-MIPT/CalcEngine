@@ -76,6 +76,7 @@ function TraceStep({
   arrival,
   symbols,
   rounding,
+  normStatus,
 }: {
   step: Step
   index: number
@@ -84,6 +85,7 @@ function TraceStep({
   arrival: Arrival
   symbols: ReadonlyMap<string, string>
   rounding: OutputRounding
+  normStatus: boolean
 }) {
   const { t } = useI18n()
   const detailsId = useId()
@@ -143,7 +145,7 @@ function TraceStep({
         {step.norm_refs.length > 0 && (
           <div>
             <h4 className="text-sm font-medium">{t('trace.norms')}</h4>
-            <NormRefList refs={step.norm_refs} />
+            <NormRefList refs={step.norm_refs} showStatus={normStatus} />
           </div>
         )}
       </div>
@@ -166,12 +168,14 @@ export function Trace({
   playback,
   symbols,
   rounding = NO_ROUNDING,
+  normStatus = true,
 }: {
   steps: readonly Step[]
   unverifiedStepCount: number
   playback?: TracePlayback
   symbols?: ReadonlyMap<string, string>
   rounding?: OutputRounding
+  normStatus?: boolean
 }) {
   const { t, formatNumber } = useI18n()
   const table = useMemo(() => symbols ?? symbolTable(steps), [symbols, steps])
@@ -196,7 +200,7 @@ export function Trace({
       <h2 id="trace-title" tabIndex={-1} className="scroll-mt-4">
         {t('trace.title')}
       </h2>
-      {unverifiedStepCount > 0 && (
+      {normStatus && unverifiedStepCount > 0 && (
         <p className="flex w-fit items-center gap-2 border border-warning bg-warning-surface px-3 py-2 text-warning-foreground">
           <WarningCircle aria-hidden="true" weight="fill" size={20} />
           <span>
@@ -234,6 +238,7 @@ export function Trace({
             arrival={arrivalOf(index, playback)}
             symbols={table}
             rounding={rounding}
+            normStatus={normStatus}
           />
         ))}
       </ol>

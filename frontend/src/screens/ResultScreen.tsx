@@ -26,6 +26,8 @@ type CalculationType = components['schemas']['CalculationTypeView']
 
 const loadTypes = () => unwrap(api.GET('/calculation-types'))
 
+const SHOW_NORM_STATUS = false
+
 function stampReveal(phase: PlaybackPhase, envelope: Envelope): StampReveal {
   if (phase === 'playing') return 'pending'
   if (phase !== 'ended') return 'none'
@@ -51,7 +53,7 @@ function CheckedResult({
     <>
       <TraceRuler steps={envelope.trace} verdict={envelope.verdict} playback={playback} reveal={reveal} symbols={symbols} />
       <VerdictStamp envelope={envelope} reason={reason} editType={editType} reveal={reveal} />
-      <Outputs outputs={envelope.outputs} />
+      <Outputs outputs={envelope.outputs} reveal={reveal} />
       <Warnings warnings={envelope.warnings} />
       <Trace
         steps={envelope.trace}
@@ -59,6 +61,7 @@ function CheckedResult({
         playback={playback}
         symbols={symbols}
         rounding={rounding}
+        normStatus={SHOW_NORM_STATUS}
       />
     </>
   )

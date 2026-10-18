@@ -508,3 +508,19 @@ describe('Trace: values of an output shown by its rounding rule', () => {
     expect(substitutionOf(check.step_id, 'R')).toHaveTextContent('= 168,29 кПа')
   })
 })
+
+describe('Trace: without the verification status of the norms', () => {
+  it('shows no summary of unverified steps and no status of a reference, but the reference itself', () => {
+    render(
+      <I18nProvider initialLanguage="ru">
+        <Trace steps={steps} unverifiedStepCount={9} normStatus={false} />
+      </I18nProvider>,
+    )
+
+    expect(screen.queryByText('Шагов с непроверенными нормативными ссылками', { exact: false })).not.toBeInTheDocument()
+    expect(screen.queryByText('не проверено')).not.toBeInTheDocument()
+    expect(screen.queryByText('проверено')).not.toBeInTheDocument()
+    expect(within(stepOf(formula.step_id)).getByText('<NORM-DOC-PLACEHOLDER>')).toBeInTheDocument()
+    expect(within(stepOf(formula.step_id)).getByText('пункт: <CLAUSE-PLACEHOLDER>')).toBeInTheDocument()
+  })
+})

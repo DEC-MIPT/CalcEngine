@@ -14,6 +14,7 @@ function open(id: string) {
 }
 
 const stamp = () => document.querySelector('[data-verdict]')!
+const outputs = () => screen.getByRole('heading', { name: 'Выходные величины' }).closest('section')!
 const pending = () => document.querySelectorAll('[data-step][data-arrival="pending"]').length
 
 async function playThrough() {
@@ -40,11 +41,15 @@ describe('result screen: trace playback and verdict reveal', () => {
 
     expect(region).toHaveFocus()
     expect(stamp()).toHaveAttribute('data-reveal', 'pending')
+    expect(outputs()).toHaveAttribute('data-reveal', 'pending')
+    expect(outputs().querySelector('tbody')).toHaveAttribute('inert')
     expect(pending()).toBe(STEPS)
     await playThrough()
 
     expect(pending()).toBe(0)
     expect(stamp()).toHaveAttribute('data-reveal', 'celebrate')
+    expect(outputs()).toHaveAttribute('data-reveal', 'celebrate')
+    expect(outputs().querySelector('tbody')).not.toHaveAttribute('inert')
   })
 
   it.each([
@@ -57,6 +62,7 @@ describe('result screen: trace playback and verdict reveal', () => {
     await playThrough()
 
     expect(stamp()).toHaveAttribute('data-reveal', 'plain')
+    expect(outputs()).toHaveAttribute('data-reveal', 'plain')
   })
 
   it('shows everything at once after a skip, with no celebration', async () => {
@@ -68,6 +74,8 @@ describe('result screen: trace playback and verdict reveal', () => {
 
     expect(pending()).toBe(0)
     expect(stamp()).toHaveAttribute('data-reveal', 'none')
+    expect(outputs()).toHaveAttribute('data-reveal', 'none')
+    expect(document.querySelector('[data-outputs-status]')).toBeNull()
   })
 
   it('does not play again when the same result is opened again', async () => {
@@ -80,6 +88,7 @@ describe('result screen: trace playback and verdict reveal', () => {
     await screen.findByRole('region', { name: 'Проверка выполнена' })
 
     expect(stamp()).toHaveAttribute('data-reveal', 'none')
+    expect(outputs()).toHaveAttribute('data-reveal', 'none')
     expect(pending()).toBe(0)
   })
 

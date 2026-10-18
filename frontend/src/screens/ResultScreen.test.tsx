@@ -96,6 +96,16 @@ describe('opening a result by its address (4.3)', () => {
     expect(within(step).getByText('gamma_c1')).toHaveClass('sr-only')
   })
 
+  it('shows no verification status of the norms in the trace and no source column in the outputs', async () => {
+    open(`/calculations/${PASS_ID}`)
+
+    const trace = (await screen.findByRole('heading', { name: 'Ход расчёта', level: 2 })).closest('section')!
+    expect(within(trace).queryByText('Шагов с непроверенными нормативными ссылками', { exact: false })).toBeNull()
+    expect(within(trace).queryByText('не проверено')).toBeNull()
+    expect(within(trace).getAllByText('<NORM-DOC-PLACEHOLDER>').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Источник правила')).toBeNull()
+  })
+
   it('shows the outputs above the trace', async () => {
     open(`/calculations/${PASS_ID}`)
 
