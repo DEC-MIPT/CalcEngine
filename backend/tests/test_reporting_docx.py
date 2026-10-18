@@ -1,6 +1,7 @@
 import time
 from io import BytesIO
 
+import pytest
 from docx import Document
 from docx.oxml.ns import qn
 from docx.oxml.xmlchemy import BaseOxmlElement
@@ -9,6 +10,7 @@ from test_reporting_model import REQUEST, report
 
 from app.engine import foundations_shallow_r as pilot
 from app.engine.registry import CalculatorRegistry
+from app.reporting import docx_writer
 from app.reporting.accountability import RESPONSIBILITY
 from app.reporting.docx_writer import (
     TRACE_NORM_STATUS,
@@ -178,6 +180,19 @@ def test_the_trace_references_print_without_their_status() -> None:
     sources = [text for text in trace if text.startswith("Источник:")]
     assert not TRACE_NORM_STATUS
     assert sources and not any("статус" in text for text in sources)
+
+
+def test_the_trace_references_print_with_their_status_when_the_setting_is_on(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(docx_writer, "TRACE_NORM_STATUS", True)
+    paragraphs, _ = read_back(render_docx(report(verified_k=True)))
+
+    trace = paragraphs[paragraphs.index("2 Расчёт") : paragraphs.index("3 Заключение")]
+    sources = [text for text in trace if text.startswith("Источник:")]
+    assert sources and all("(статус:" in text for text in sources)
+    assert any(text.endswith("(статус: проверено)") for text in sources)
+    assert any(text.endswith("(статус: не проверено)") for text in sources)
 
 
 def test_a_failed_check_prints_as_not_passed() -> None:
