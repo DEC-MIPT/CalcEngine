@@ -2,6 +2,7 @@ import { CaretRight, CheckCircle, WarningCircle, XCircle } from '@phosphor-icons
 import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
+import { checkRounding, type OutputRounding } from '@/lib/rounding'
 import { symbolTable } from '@/lib/stepSymbol'
 import { arrivalOf, type Arrival, type TracePlayback } from '@/lib/useTracePlayback'
 import { Formula } from './Formula'
@@ -12,24 +13,28 @@ import { Button } from './ui/button'
 
 type Step = components['schemas']['ResultEnvelope']['trace'][number]
 type Quantity = components['schemas']['QuantityValue']
+type RoundingRule = components['schemas']['RoundingRule']
 
-function Value({ quantity }: { quantity: Quantity }) {
-  return <QuantityText value={quantity.value} unit={quantity.unit} />
+const NO_ROUNDING: OutputRounding = new Map()
+
+function Value({ quantity, rounding }: { quantity: Quantity; rounding?: RoundingRule }) {
+  return <QuantityText value={quantity.value} unit={quantity.unit} rounding={rounding} />
 }
 
 const SYMBOLS = { le: '≤', lt: '<', ge: '≥', gt: '>' } as const
 
 type CheckStep = Extract<Step, { kind: 'check' }>
 
-function Comparison({ step }: { step: CheckStep }) {
+function Comparison({ step, rounding }: { step: CheckStep; rounding: OutputRounding }) {
   const { t } = useI18n()
   const Icon = step.passed ? CheckCircle : XCircle
+  const [left, right] = checkRounding(step, rounding)
   return (
     <div className="grid gap-1">
       <p>
-        <Value quantity={step.result} />{' '}
+        <Value quantity={step.result} rounding={left} />{' '}
         <span aria-hidden="true">{SYMBOLS[step.operator]}</span>{' '}
-        <span className="sr-only">{t(`trace.op.${step.operator}`)}</span> <Value quantity={step.right} />
+        <span className="sr-only">{t(`trace.op.${step.operator}`)}</span> <Value quantity={step.right} rounding={right} />
       </p>
       <p
         className={
@@ -45,12 +50,16 @@ function Comparison({ step }: { step: CheckStep }) {
   )
 }
 
-function StepSummary({ step }: { step: Step }) {
+function resultRounding(step: Step, rounding: OutputRounding): RoundingRule | undefined {
+  return step.kind === 'check' ? checkRounding(step, rounding)[0] : rounding.get(step.step_id)
+}
+
+function StepSummary({ step, rounding }: { step: Step; rounding: OutputRounding }) {
   const { t } = useI18n()
   return (
     <span className="ml-auto" data-summary>
       <span className="font-mono">
-        <Value quantity={step.result} />
+        <Value quantity={step.result} rounding={resultRounding(step, rounding)} />
       </span>
       {step.kind === 'check' && <> · {t(step.passed ? 'trace.check.passed' : 'trace.check.failed')}</>}
     </span>
@@ -66,6 +75,7 @@ function TraceStep({
   onToggle,
   arrival,
   symbols,
+  rounding,
 }: {
   step: Step
   index: number
@@ -73,6 +83,7 @@ function TraceStep({
   onToggle: () => void
   arrival: Arrival
   symbols: ReadonlyMap<string, string>
+  rounding: OutputRounding
 }) {
   const { t } = useI18n()
   const detailsId = useId()
@@ -101,7 +112,7 @@ function TraceStep({
             <NamedSymbol name={step.step_id} latex={symbols.get(step.step_id)} />
           </span>
           <span className="text-sm text-muted-foreground">{t(`trace.kind.${step.kind}`)}</span>
-          <StepSummary step={step} />
+          <StepSummary step={step} rounding={rounding} />
         </button>
       </h3>
       <div id={detailsId} hidden={!expanded} className="step-details grid gap-3 border-t border-dashed border-border bg-background/40 px-3 py-3 pl-10">
@@ -115,18 +126,18 @@ function TraceStep({
               {step.substitutions.map((substitution) => (
                 <li key={substitution.symbol} className="flex items-baseline gap-1">
                   <NamedSymbol name={substitution.symbol} latex={symbols.get(substitution.symbol)} /> <span>=</span>{' '}
-                  <Value quantity={substitution} />
+                  <Value quantity={substitution} rounding={rounding.get(substitution.symbol)} />
                 </li>
               ))}
             </ul>
           </div>
         )}
         {step.kind === 'check' ? (
-          <Comparison step={step} />
+          <Comparison step={step} rounding={rounding} />
         ) : (
           <p>
             <span className="text-sm font-medium">{t('trace.result')}: </span>
-            <Value quantity={step.result} />
+            <Value quantity={step.result} rounding={rounding.get(step.step_id)} />
           </p>
         )}
         {step.norm_refs.length > 0 && (
@@ -154,11 +165,13 @@ export function Trace({
   unverifiedStepCount,
   playback,
   symbols,
+  rounding = NO_ROUNDING,
 }: {
   steps: readonly Step[]
   unverifiedStepCount: number
   playback?: TracePlayback
   symbols?: ReadonlyMap<string, string>
+  rounding?: OutputRounding
 }) {
   const { t, formatNumber } = useI18n()
   const table = useMemo(() => symbols ?? symbolTable(steps), [symbols, steps])
@@ -220,6 +233,7 @@ export function Trace({
             onToggle={() => toggle(index)}
             arrival={arrivalOf(index, playback)}
             symbols={table}
+            rounding={rounding}
           />
         ))}
       </ol>

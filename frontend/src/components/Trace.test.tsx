@@ -456,3 +456,55 @@ describe('Trace: steps and substitutions named by their symbols', () => {
     await expectNoA11yViolations(container)
   })
 })
+
+describe('Trace: values of an output shown by its rounding rule', () => {
+  const R = 168.28900000000002
+  const rounding = new Map([['R', { decimals: 2, mode: 'half_up' as const }]])
+  const traceWith = (p: number, passed: boolean) =>
+    steps.map((step) => {
+      if (step.step_id === 'R') return { ...step, result: { value: R, unit: 'kPa' } }
+      if (step.kind !== 'check') return step
+      return {
+        ...step,
+        substitutions: [
+          { symbol: 'p', value: p, unit: 'kPa' },
+          { symbol: 'R', value: R, unit: 'kPa' },
+        ],
+        result: { value: p, unit: 'kPa' },
+        right: { value: R, unit: 'kPa' },
+        passed,
+      }
+    }) as Step[]
+  const showRounded = (trace: Step[]) =>
+    render(
+      <I18nProvider initialLanguage="ru">
+        <Trace steps={trace} unverifiedStepCount={0} rounding={rounding} />
+      </I18nProvider>,
+    )
+  const substitutionOf = (id: string, symbol: string) => within(stepOf(id)).getByText(symbol).closest('li')!
+
+  it('rounds the step of the output, its substitutions and the side of a check', () => {
+    showRounded(traceWith(150, true))
+
+    expect(stepOf('R').querySelector('[data-summary]')).toHaveTextContent('168,29 кПа')
+    expect(within(stepOf('R')).getByText(/Результат:/).parentElement).toHaveTextContent('Результат: 168,29 кПа')
+    expect(substitutionOf(check.step_id, 'R')).toHaveTextContent('= 168,29 кПа')
+    expect(substitutionOf(check.step_id, 'p')).toHaveTextContent('= 150 кПа')
+    const comparison = within(stepOf(check.step_id)).getByText('Проверка выполнена').previousElementSibling as HTMLElement
+    expect(comparison).toHaveTextContent('150 кПа ≤ меньше или равно 168,29 кПа')
+  })
+
+  it('keeps the other values as they are', () => {
+    showRounded(traceWith(150, true))
+
+    expect(stepOf('gamma_c1').querySelector('[data-summary]')!.textContent).toBe('2')
+  })
+
+  it('shows the check unrounded when the rounded values would contradict it', () => {
+    showRounded(traceWith(168.29, false))
+
+    const comparison = within(stepOf(check.step_id)).getByText('Проверка не выполнена').previousElementSibling as HTMLElement
+    expect(comparison).toHaveTextContent('168,29 кПа ≤ меньше или равно 168,28900000000002 кПа')
+    expect(substitutionOf(check.step_id, 'R')).toHaveTextContent('= 168,29 кПа')
+  })
+})

@@ -5,6 +5,7 @@ import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
 import type { TextKey } from '@/i18n/dictionary'
 import { jumpTo } from '@/lib/jumpTo'
+import { checkRounding, outputRounding } from '@/lib/rounding'
 import { useFocusOnMount } from '@/lib/useFocusOnMount'
 import { EditInputsLink } from './EditInputsLink'
 import { Formula } from './Formula'
@@ -16,6 +17,7 @@ type Step = Envelope['trace'][number]
 type CheckStep = Extract<Step, { kind: 'check' }>
 type Quantity = components['schemas']['QuantityValue']
 type CheckReason = components['schemas']['CheckReason']
+type RoundingRule = components['schemas']['RoundingRule']
 
 const SYMBOLS = { le: '≤', lt: '<', ge: '≥', gt: '>' } as const
 
@@ -26,10 +28,10 @@ const REVEAL_CLASS: Record<StampReveal, string> = {
   none: '',
 }
 
-function Reading({ quantity }: { quantity: Quantity }) {
+function Reading({ quantity, rounding }: { quantity: Quantity; rounding: RoundingRule | undefined }) {
   return (
     <span className="whitespace-nowrap">
-      <QuantityText value={quantity.value} unit={quantity.unit} unitClassName="text-muted-foreground" />
+      <QuantityText value={quantity.value} unit={quantity.unit} unitClassName="text-muted-foreground" rounding={rounding} />
     </span>
   )
 }
@@ -74,6 +76,7 @@ export function VerdictStamp({
   const check = envelope.trace.find(
     (step): step is CheckStep => step.kind === 'check' && step.step_id === reason.step_id,
   )
+  const [left, right] = check ? checkRounding(check, outputRounding(envelope.outputs)) : []
   const Icon = passed ? CheckCircle : XCircle
   const tone = passed ? 'border-primary' : 'border-destructive'
   return (
@@ -100,8 +103,8 @@ export function VerdictStamp({
               <Formula latex={check.expression} />
             </span>
             <p className="font-mono text-verdict">
-              <Reading quantity={check.result} /> <span aria-hidden="true">{SYMBOLS[check.operator]}</span>
-              <span className="sr-only">{t(`trace.op.${check.operator}`)}</span> <Reading quantity={check.right} />
+              <Reading quantity={check.result} rounding={left} /> <span aria-hidden="true">{SYMBOLS[check.operator]}</span>
+              <span className="sr-only">{t(`trace.op.${check.operator}`)}</span> <Reading quantity={check.right} rounding={right} />
             </p>
           </div>
         )}

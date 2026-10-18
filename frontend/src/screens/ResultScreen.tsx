@@ -15,6 +15,7 @@ import { VerdictStamp, type StampReveal } from '@/components/VerdictStamp'
 import { Warnings } from '@/components/Warnings'
 import { useDraft } from '@/form/draftContext'
 import { useI18n } from '@/i18n/context'
+import { outputRounding } from '@/lib/rounding'
 import { symbolTable } from '@/lib/stepSymbol'
 import { useTracePlayback, type PlaybackPhase } from '@/lib/useTracePlayback'
 import { cn } from '@/lib/utils'
@@ -45,6 +46,7 @@ function CheckedResult({
   const playback = useTracePlayback(envelope.result_id, envelope.trace.length)
   const reveal = stampReveal(playback.phase, envelope)
   const symbols = useMemo(() => symbolTable(envelope.trace, types), [envelope.trace, types])
+  const rounding = useMemo(() => outputRounding(envelope.outputs), [envelope.outputs])
   return (
     <>
       <TraceRuler steps={envelope.trace} verdict={envelope.verdict} playback={playback} reveal={reveal} symbols={symbols} />
@@ -56,6 +58,7 @@ function CheckedResult({
         unverifiedStepCount={envelope.unverified_step_count}
         playback={playback}
         symbols={symbols}
+        rounding={rounding}
       />
     </>
   )

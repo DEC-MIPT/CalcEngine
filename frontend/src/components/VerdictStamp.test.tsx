@@ -191,3 +191,39 @@ describe('VerdictStamp: reveal after the trace playback', () => {
     await expectNoA11yViolations(container)
   })
 })
+
+describe('VerdictStamp: the value of an output by its rounding rule', () => {
+  const R = 168.28900000000002
+  const envelopeWith = (p: number, passed: boolean) => ({
+    ...passEnvelope,
+    outputs: passEnvelope.outputs.map((output) => ({ ...output, value: 168.29, rounding_rule: { decimals: 2, mode: 'half_up' } })),
+    trace: passEnvelope.trace.map((step) =>
+      step.kind === 'check'
+        ? {
+            ...step,
+            substitutions: [
+              { symbol: 'p', value: p, unit: 'kPa' },
+              { symbol: 'R', value: R, unit: 'kPa' },
+            ],
+            result: { value: p, unit: 'kPa' },
+            right: { value: R, unit: 'kPa' },
+            passed,
+          }
+        : step,
+    ),
+  })
+
+  it('rounds the side of the deciding check that is an output', () => {
+    show(envelopeWith(150, true))
+
+    expect(document.querySelector('[data-check="p_le_R"] p')).toHaveTextContent('150 кПа ≤меньше или равно 168,29 кПа')
+  })
+
+  it('shows the comparison unrounded when the rounded values would contradict the check', () => {
+    show(envelopeWith(168.29, false))
+
+    expect(document.querySelector('[data-check="p_le_R"] p')).toHaveTextContent(
+      '168,29 кПа ≤меньше или равно 168,28900000000002 кПа',
+    )
+  })
+})
