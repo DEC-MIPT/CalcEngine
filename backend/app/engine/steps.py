@@ -98,19 +98,28 @@ def confirm_selectors(entry: TableValue, inputs: Mapping[str, QuantityValue], se
             raise CalculationError(f"table value {entry.symbol!r}: selector {selector.symbol!r} differs from the input")
 
 
-def table_step(step_id: str, entry: TableValue) -> TableStep:
+def table_step(step_id: str, entry: TableValue, symbols: Mapping[str, str]) -> TableStep:
     """Записывает шаг трассы для табличного значения и заголовков, которые его выбрали.
 
-    Подстановки — заголовки из ``entry.selectors`` в их собственной единице.
+    Подстановки — заголовки из ``entry.selectors`` в их собственной единице, под именами
+    входов. В выражении каждый заголовок назван обозначением своего входа в LaTeX, чтобы
+    выражение отображалось (``calculation-engine`` "Typed trace step").
 
     Args:
         step_id: идентификатор шага.
         entry: табличное значение со своими ``NormRef`` и заголовками.
+        symbols: обозначение в LaTeX для имени каждого входа типа расчёта.
 
     Returns:
         Шаг таблицы.
+
+    Raises:
+        CalculationError: если у заголовка нет обозначения в ``symbols``.
     """
-    arguments = ", ".join(selector.symbol for selector in entry.selectors)
+    missing = [selector.symbol for selector in entry.selectors if selector.symbol not in symbols]
+    if missing:
+        raise CalculationError(f"table value {entry.symbol!r}: selector {missing[0]!r} has no LaTeX symbol")
+    arguments = ", ".join(symbols[selector.symbol] for selector in entry.selectors)
     expression = rf"{entry.latex} = {entry.latex}\left({arguments}\right)" if entry.selectors else entry.latex
     return TableStep(
         step_id=step_id,

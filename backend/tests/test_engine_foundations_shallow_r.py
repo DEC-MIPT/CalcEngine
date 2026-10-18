@@ -166,6 +166,8 @@ def test_the_steps_run_in_the_order_of_the_method() -> None:
     ]
     assert [len(step.substitutions) for step in result.trace[:6]] == [0, 0, 0, 1, 1, 1]
     assert result.trace[3].substitutions[0].symbol == "phi_II"
+    assert result.trace[3].expression == r"M_gamma = M_gamma\left(\varphi_{II}\right)"
+    assert result.trace[0].expression == "gamma_c1"
     assert result.trace[7].result == QuantityValue(value=172.5, unit="kPa")
     assert result.trace[8].expression == r"p \le R"
 
@@ -274,6 +276,11 @@ def test_the_pilot_selects_by_phi_ii_exactly_the_table_coefficients() -> None:
     assert set(pilot.SELECTORS) <= set(tables)
     assert set(pilot.SELECTORS.values()) <= {quantity.name for quantity in pilot.INPUTS}
     assert pilot.SELECTORS == {"m_gamma": "phi_II", "m_q": "phi_II", "m_c": "phi_II"}
+
+
+def test_every_input_of_the_pilot_has_its_latex_symbol_for_the_table_steps() -> None:
+    assert pilot.INPUT_SYMBOLS == {quantity.name: quantity.symbol for quantity in pilot.INPUTS}
+    assert pilot.INPUT_SYMBOLS["phi_II"] == r"\varphi_{II}"
 
 
 def test_headings_in_radians_are_confirmed_for_phi_ii_given_in_radians() -> None:

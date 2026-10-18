@@ -126,7 +126,7 @@
           "substitutions": []
         },
         {
-          "expression": "M_gamma = M_gamma\\left(phi_II\\right)",
+          "expression": "M_gamma = M_gamma\\left(\\varphi_{II}\\right)",
           "kind": "table",
           "norm_refs": [
             {
@@ -151,7 +151,7 @@
           ]
         },
         {
-          "expression": "M_q = M_q\\left(phi_II\\right)",
+          "expression": "M_q = M_q\\left(\\varphi_{II}\\right)",
           "kind": "table",
           "norm_refs": [
             {
@@ -176,7 +176,7 @@
           ]
         },
         {
-          "expression": "M_c = M_c\\left(phi_II\\right)",
+          "expression": "M_c = M_c\\left(\\varphi_{II}\\right)",
           "kind": "table",
           "norm_refs": [
             {
@@ -483,7 +483,7 @@
           "substitutions": []
         },
         {
-          "expression": "M_gamma = M_gamma\\left(phi_II\\right)",
+          "expression": "M_gamma = M_gamma\\left(\\varphi_{II}\\right)",
           "kind": "table",
           "norm_refs": [
             {
@@ -508,7 +508,7 @@
           ]
         },
         {
-          "expression": "M_q = M_q\\left(phi_II\\right)",
+          "expression": "M_q = M_q\\left(\\varphi_{II}\\right)",
           "kind": "table",
           "norm_refs": [
             {
@@ -533,7 +533,7 @@
           ]
         },
         {
-          "expression": "M_c = M_c\\left(phi_II\\right)",
+          "expression": "M_c = M_c\\left(\\varphi_{II}\\right)",
           "kind": "table",
           "norm_refs": [
             {
@@ -834,7 +834,7 @@
           "substitutions": []
         },
         {
-          "expression": "M_gamma = M_gamma\\left(phi_II\\right)",
+          "expression": "M_gamma = M_gamma\\left(\\varphi_{II}\\right)",
           "kind": "table",
           "norm_refs": [
             {
@@ -859,7 +859,7 @@
           ]
         },
         {
-          "expression": "M_q = M_q\\left(phi_II\\right)",
+          "expression": "M_q = M_q\\left(\\varphi_{II}\\right)",
           "kind": "table",
           "norm_refs": [
             {
@@ -884,7 +884,7 @@
           ]
         },
         {
-          "expression": "M_c = M_c\\left(phi_II\\right)",
+          "expression": "M_c = M_c\\left(\\varphi_{II}\\right)",
           "kind": "table",
           "norm_refs": [
             {

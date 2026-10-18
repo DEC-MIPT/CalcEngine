@@ -93,7 +93,7 @@ VALIDATED = (ValidatedBound(quantity="b", kind="max", value=5.0, inclusive=True,
 
 class SyntheticCalculator(Calculator[Mapping[str, QuantityValue], Parameters, CalculatorOutput]):
     def calculate(self, inputs: Mapping[str, QuantityValue], parameters: Parameters) -> CalculatorOutput:
-        k = table_step("k", parameters.coefficient)
+        k = table_step("k", parameters.coefficient, {"phi": r"\varphi"})
         y = formula_step("y", parameters.formula, {"k": k.result, "b": inputs["b"]})
         check = check_step("check", ("y", y.result), "le", ("y_{max}", parameters.limit), (REF,))
         return CalculatorOutput(trace=(k, y, check), outputs={"y": y.result})
