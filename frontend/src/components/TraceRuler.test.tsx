@@ -45,6 +45,29 @@ describe('TraceRuler', () => {
     expect(document.querySelector('[data-ruler-cursor]')).toBeNull()
   })
 
+  it('names a tick by the symbol of its step, the given symbols first, and by the id when there is none', () => {
+    const named = [
+      { ...steps[0], step_id: 'gamma_c1', expression: '\\gamma_{c1}' },
+      { ...steps[0], step_id: 'M_gamma', expression: 'M_{\\gamma} = M_{\\gamma}\\left(x\\right)' },
+      { ...steps[0], step_id: 'q', kind: 'formula', expression: '\\frac{a}{b}' },
+    ] as unknown as Step[]
+    render(<TraceRuler steps={named} verdict="pass" symbols={new Map([['M_gamma', 'M_\\gamma']])} />)
+
+    const labels = ticks().map((tick) => tick.querySelector<HTMLElement>('.tr-label')!)
+    expect(labels.map((label) => label.querySelector('[role="img"]')?.getAttribute('aria-label') ?? null)).toEqual([
+      null,
+      'M_\\gamma',
+      null,
+    ])
+    expect(labels.map((label) => label.querySelector('code')?.textContent ?? null)).toEqual(['gamma_c1', null, 'q'])
+  })
+
+  it('reads the symbols from the steps when none are given', () => {
+    render(<TraceRuler steps={[{ ...steps[0], expression: '\\gamma_{c1}' } as Step]} verdict="pass" />)
+
+    expect(document.querySelector('.tr-label [role="img"]')).toHaveAttribute('aria-label', '\\gamma_{c1}')
+  })
+
   it.each(['pass', 'fail'] as const)('ends with the mark of a %s verdict', (verdict) => {
     render(<TraceRuler steps={steps} verdict={verdict} />)
 

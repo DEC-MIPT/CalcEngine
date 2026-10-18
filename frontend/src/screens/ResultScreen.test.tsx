@@ -60,7 +60,10 @@ describe('opening a result by its address (4.3)', () => {
     expect(await screen.findByRole('region', { name: 'Проверка выполнена' })).toBeInTheDocument()
     requests.stop()
 
-    expect(requests.seen).toEqual([`GET /calculations/${PASS_ID}`, `GET /calculations/${PASS_ID}`])
+    expect(requests.seen.filter((request) => request !== 'GET /calculation-types')).toEqual([
+      `GET /calculations/${PASS_ID}`,
+      `GET /calculations/${PASS_ID}`,
+    ])
   })
 
   it('shows the trace of the stored result under the id', async () => {
@@ -70,6 +73,27 @@ describe('opening a result by its address (4.3)', () => {
     expect(within(screen.getByRole('region', { name: 'Ход расчёта' })).getAllByRole('heading', { level: 3 })).toHaveLength(
       passEnvelope.trace.length,
     )
+  })
+
+  it('typesets the substitutions by the symbols of the calculation types', async () => {
+    open(`/calculations/${PASS_ID}`)
+
+    const step = await screen.findByText((_, element) => element?.getAttribute('data-step') === 'R')
+    await waitFor(() =>
+      expect(within(step).getByText('gamma_II').closest('li')!.querySelector('[role="img"]')).toHaveAttribute(
+        'aria-label',
+        '\\gamma_{II}',
+      ),
+    )
+  })
+
+  it('still shows the trace, with the substitutions by name, when the calculation types do not load', async () => {
+    server.use(http.get('*/calculation-types', () => HttpResponse.json({}, { status: 500 })))
+    open(`/calculations/${PASS_ID}`)
+
+    const step = await screen.findByText((_, element) => element?.getAttribute('data-step') === 'R')
+    expect(within(step).getByText('gamma_II')).toHaveProperty('tagName', 'CODE')
+    expect(within(step).getByText('gamma_c1')).toHaveClass('sr-only')
   })
 
   it('shows the outputs above the trace', async () => {

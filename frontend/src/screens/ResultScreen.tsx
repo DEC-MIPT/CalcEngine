@@ -1,5 +1,5 @@
 import { ArrowRight } from '@phosphor-icons/react'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Link, useParams } from 'react-router'
 import { api, unwrap } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -15,11 +15,15 @@ import { VerdictStamp, type StampReveal } from '@/components/VerdictStamp'
 import { Warnings } from '@/components/Warnings'
 import { useDraft } from '@/form/draftContext'
 import { useI18n } from '@/i18n/context'
+import { symbolTable } from '@/lib/stepSymbol'
 import { useTracePlayback, type PlaybackPhase } from '@/lib/useTracePlayback'
 import { cn } from '@/lib/utils'
 
 type Envelope = components['schemas']['ResultEnvelope']
 type CheckReason = components['schemas']['CheckReason']
+type CalculationType = components['schemas']['CalculationTypeView']
+
+const loadTypes = () => unwrap(api.GET('/calculation-types'))
 
 function stampReveal(phase: PlaybackPhase, envelope: Envelope): StampReveal {
   if (phase === 'playing') return 'pending'
@@ -31,20 +35,28 @@ function CheckedResult({
   envelope,
   reason,
   editType,
+  types,
 }: {
   envelope: Envelope
   reason: CheckReason
   editType: string | null
+  types: readonly CalculationType[] | undefined
 }) {
   const playback = useTracePlayback(envelope.result_id, envelope.trace.length)
   const reveal = stampReveal(playback.phase, envelope)
+  const symbols = useMemo(() => symbolTable(envelope.trace, types), [envelope.trace, types])
   return (
     <>
-      <TraceRuler steps={envelope.trace} verdict={envelope.verdict} playback={playback} reveal={reveal} />
+      <TraceRuler steps={envelope.trace} verdict={envelope.verdict} playback={playback} reveal={reveal} symbols={symbols} />
       <VerdictStamp envelope={envelope} reason={reason} editType={editType} reveal={reveal} />
       <Outputs outputs={envelope.outputs} />
       <Warnings warnings={envelope.warnings} />
-      <Trace steps={envelope.trace} unverifiedStepCount={envelope.unverified_step_count} playback={playback} />
+      <Trace
+        steps={envelope.trace}
+        unverifiedStepCount={envelope.unverified_step_count}
+        playback={playback}
+        symbols={symbols}
+      />
     </>
   )
 }
@@ -57,6 +69,7 @@ export function ResultScreen() {
     [id],
   )
   const { state, retry } = useRequest(load)
+  const { state: typesState } = useRequest(loadTypes)
   const { sent } = useDraft()
 
   if (state.status === 'error' && state.error.kind === 'api' && state.error.status === 404) {
@@ -92,6 +105,7 @@ export function ResultScreen() {
               envelope={state.data}
               reason={state.data.verdict_reason}
               editType={editType}
+              types={typesState.status === 'ok' ? typesState.data : undefined}
             />
           )}
         </>

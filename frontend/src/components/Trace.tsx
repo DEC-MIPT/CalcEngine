@@ -1,9 +1,11 @@
 import { CaretRight, CheckCircle, WarningCircle, XCircle } from '@phosphor-icons/react'
-import { useId, useLayoutEffect, useRef, useState } from 'react'
+import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
+import { symbolTable } from '@/lib/stepSymbol'
 import { arrivalOf, type Arrival, type TracePlayback } from '@/lib/useTracePlayback'
 import { Formula } from './Formula'
+import { NamedSymbol } from './NamedSymbol'
 import { NormRefList } from './NormRefList'
 import { QuantityText } from './Quantity'
 import { Button } from './ui/button'
@@ -63,12 +65,14 @@ function TraceStep({
   expanded,
   onToggle,
   arrival,
+  symbols,
 }: {
   step: Step
   index: number
   expanded: boolean
   onToggle: () => void
   arrival: Arrival
+  symbols: ReadonlyMap<string, string>
 }) {
   const { t } = useI18n()
   const detailsId = useId()
@@ -93,7 +97,9 @@ function TraceStep({
             size={16}
             className={`shrink-0 self-center transition-transform motion-reduce:transition-none ${expanded ? 'rotate-90' : ''}`}
           />
-          <code className="font-semibold">{step.step_id}</code>
+          <span className="font-semibold" data-step-label>
+            <NamedSymbol name={step.step_id} latex={symbols.get(step.step_id)} />
+          </span>
           <span className="text-sm text-muted-foreground">{t(`trace.kind.${step.kind}`)}</span>
           <StepSummary step={step} />
         </button>
@@ -108,7 +114,8 @@ function TraceStep({
             <ul className="flex flex-wrap gap-x-5 gap-y-1">
               {step.substitutions.map((substitution) => (
                 <li key={substitution.symbol} className="flex items-baseline gap-1">
-                  <Formula latex={substitution.symbol} /> <span>=</span> <Value quantity={substitution} />
+                  <NamedSymbol name={substitution.symbol} latex={symbols.get(substitution.symbol)} /> <span>=</span>{' '}
+                  <Value quantity={substitution} />
                 </li>
               ))}
             </ul>
@@ -146,12 +153,15 @@ export function Trace({
   steps,
   unverifiedStepCount,
   playback,
+  symbols,
 }: {
   steps: readonly Step[]
   unverifiedStepCount: number
   playback?: TracePlayback
+  symbols?: ReadonlyMap<string, string>
 }) {
   const { t, formatNumber } = useI18n()
+  const table = useMemo(() => symbols ?? symbolTable(steps), [symbols, steps])
   const section = useRef<HTMLElement>(null)
   const playing = playback?.phase === 'playing'
   const skip = playback?.skip
@@ -209,6 +219,7 @@ export function Trace({
             expanded={expanded.has(index)}
             onToggle={() => toggle(index)}
             arrival={arrivalOf(index, playback)}
+            symbols={table}
           />
         ))}
       </ol>

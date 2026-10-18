@@ -81,6 +81,9 @@
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
+  mjx-container > svg {
+    display: inline-block;
+  }
   body {
     @apply bg-background font-sans text-foreground antialiased;
     line-height: 1.45;

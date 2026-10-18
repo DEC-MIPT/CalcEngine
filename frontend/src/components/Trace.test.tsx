@@ -39,9 +39,9 @@ describe('Trace: every field of a step (6.1a)', () => {
     show(steps)
 
     expect(screen.getByRole('heading', { name: 'Ход расчёта', level: 2 })).toBeInTheDocument()
-    expect(screen.getAllByRole('heading', { level: 3 }).map((heading) => heading.querySelector('code')?.textContent)).toEqual(
-      steps.map((step) => step.step_id),
-    )
+    expect(
+      screen.getAllByRole('heading', { level: 3 }).map((heading) => heading.querySelector('[data-step-label]')?.textContent),
+    ).toEqual(steps.map((step) => step.step_id))
   })
 
   it('shows the expression typeset, the substitutions with units, the result with its unit and the norm refs', () => {
@@ -49,10 +49,10 @@ describe('Trace: every field of a step (6.1a)', () => {
     const step = within(stepOf(formula.step_id))
 
     expect(step.getAllByRole('img', { name: formula.expression }).length).toBeGreaterThan(0)
-    for (const substitution of formula.substitutions) {
-      expect(step.getByRole('img', { name: substitution.symbol })).toBeInTheDocument()
-    }
     const list = step.getByRole('heading', { name: 'Подстановка' }).nextElementSibling as HTMLElement
+    for (const substitution of formula.substitutions) {
+      expect(within(list).getByText(substitution.symbol)).toBeInTheDocument()
+    }
     expect(list.children).toHaveLength(formula.substitutions.length)
     expect(list).toHaveTextContent('= 2 м')
     expect(list).toHaveTextContent('= 10 кН/м³')
@@ -376,6 +376,82 @@ describe('Trace: step-by-step playback', () => {
         <Trace steps={steps} unverifiedStepCount={0} playback={{ phase: 'playing', shown: 2, skip: vi.fn() }} />
       </I18nProvider>,
     )
+
+    await expectNoA11yViolations(container)
+  })
+})
+
+describe('Trace: steps and substitutions named by their symbols', () => {
+  const base = { substitutions: [], result: { value: 1, unit: '1' }, norm_refs: [] }
+  const latexSteps = [
+    { ...base, step_id: 'gamma_c1', kind: 'table', expression: '\\gamma_{c1}' },
+    {
+      ...base,
+      step_id: 'M_gamma',
+      kind: 'table',
+      expression: 'M_{\\gamma} = M_{\\gamma}\\left(phi_II\\right)',
+      substitutions: [{ symbol: 'phi_II', value: 20, unit: 'deg' }],
+    },
+    {
+      ...base,
+      step_id: 'R',
+      kind: 'formula',
+      expression: 'R = \\frac{\\gamma_{c1}}{k}',
+      substitutions: [
+        { symbol: 'gamma_c1', value: 1.1, unit: '1' },
+        { symbol: 'c_II', value: 10, unit: 'kPa' },
+      ],
+    },
+    { ...base, step_id: 'q', kind: 'formula', expression: '\\frac{a}{b}' },
+    { ...check, expression: 'p \\le R' },
+  ] as unknown as Step[]
+
+  const typeset = (element: HTMLElement) =>
+    [...element.querySelectorAll('[role="img"][aria-label]')].map((node) => node.getAttribute('aria-label'))
+  const label = (id: string) => stepOf(id).querySelector<HTMLElement>('[data-step-label]')!
+  const substitution = (id: string, symbol: string) =>
+    within(stepOf(id)).getByText(symbol).closest('li')!
+
+  it('names each step by the symbol its expression defines, the whole comparison for a check', () => {
+    show(latexSteps)
+
+    expect(typeset(label('gamma_c1'))).toEqual(['\\gamma_{c1}'])
+    expect(typeset(label('M_gamma'))).toEqual(['M_{\\gamma}'])
+    expect(typeset(label('R'))).toEqual(['R'])
+    expect(typeset(label('p_le_R'))).toEqual(['p \\le R'])
+    for (const id of ['gamma_c1', 'M_gamma', 'R', 'p_le_R']) {
+      expect(label(id).querySelector('[aria-hidden="true"]')).not.toBeNull()
+      expect(within(label(id)).getByText(id)).toHaveClass('sr-only')
+    }
+  })
+
+  it('keeps the step id for a formula without a left side', () => {
+    show(latexSteps)
+
+    expect(typeset(label('q'))).toEqual([])
+    expect(label('q').querySelector('code')).toHaveTextContent('q')
+  })
+
+  it('typesets a substitution known from the trace or the given symbols and shows any other by its name', () => {
+    show(latexSteps)
+
+    expect(typeset(substitution('R', 'gamma_c1'))).toEqual(['\\gamma_{c1}'])
+    expect(substitution('R', 'c_II').querySelector('code')).toHaveTextContent('c_II')
+  })
+
+  it('takes the symbols passed in over the ones read from the trace', () => {
+    render(
+      <I18nProvider initialLanguage="ru">
+        <Trace steps={latexSteps} unverifiedStepCount={0} symbols={new Map([['c_II', 'c_{II}']])} />
+      </I18nProvider>,
+    )
+
+    expect(typeset(substitution('R', 'c_II'))).toEqual(['c_{II}'])
+    expect(substitution('R', 'gamma_c1').querySelector('code')).toHaveTextContent('gamma_c1')
+  })
+
+  it('has no accessibility violations', async () => {
+    const { container } = show(latexSteps)
 
     await expectNoA11yViolations(container)
   })

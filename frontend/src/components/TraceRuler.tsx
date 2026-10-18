@@ -1,7 +1,9 @@
-import type { CSSProperties, MouseEvent } from 'react'
+import { useMemo, type CSSProperties, type MouseEvent } from 'react'
 import type { components } from '@/api/schema'
 import { jumpTo } from '@/lib/jumpTo'
+import { symbolTable } from '@/lib/stepSymbol'
 import { arrivalOf, type TracePlayback } from '@/lib/useTracePlayback'
+import { NamedSymbol } from './NamedSymbol'
 import type { StampReveal } from './VerdictStamp'
 
 type Envelope = components['schemas']['ResultEnvelope']
@@ -27,12 +29,15 @@ export function TraceRuler({
   verdict,
   playback,
   reveal = 'none',
+  symbols,
 }: {
   steps?: readonly Step[]
   verdict?: Envelope['verdict']
   playback?: TracePlayback
   reveal?: StampReveal
+  symbols?: ReadonlyMap<string, string>
 }) {
+  const table = useMemo(() => symbols ?? symbolTable(steps), [symbols, steps])
   const playing = playback?.phase === 'playing'
   const follow = (event: MouseEvent<HTMLAnchorElement>, index: number) => {
     if (playing) playback.skip()
@@ -58,7 +63,9 @@ export function TraceRuler({
             data-arrival={arrival}
           >
             <span className="tr-bar" />
-            <span className="tr-label">{step.step_id}</span>
+            <span className="tr-label">
+              <NamedSymbol name={step.step_id} latex={table.get(step.step_id)} />
+            </span>
           </a>
         )
       })}
