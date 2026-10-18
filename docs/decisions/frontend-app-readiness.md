@@ -126,3 +126,19 @@ no `coverage.include`; the `postgres`-marked tests were not run.
 
 Next: a second `tester` round for the backend feature at `4a04cca`; the frontend feature gets its
 GO after task 8.8.
+
+## Task 8.2, second round (2026-10-18)
+
+**`tester`: GO for the backend feature** `feature/frontend-app/backend` at `4a04cca`. In a worktree of
+that tip: `backend/check.sh` exit 0 (ruff clean; mypy "no issues found in 137 source files";
+lint-imports "4 kept, 0 broken"; 960 passed, 4 skipped (the `postgres` tests, no test database
+variable); coverage 100%, 2308 statements, 454 branches) and `pre-commit run --all-files` passed.
+The new test of task 10.11 was checked by breaking the code three times: the trace status forced off
+fails it, the status forced on fails the existing off-state test, and a broken "verified" label fails
+it. Every verify clause of section 2 and of tasks 10.7, 10.8, 10.11 and 10.12 is backed by a test.
+Not re-run this round: the `postgres` module (the only commit since round one adds a unit test and
+touches no migration or repository) and the manual Word render of 10.11 (recorded in the code
+journal).
+
+The frontend feature stays NO-GO until task 8.8 (branded Edge and Safari by hand). Next for the
+backend feature: the review (AGENTS.md section 2, step 7).
