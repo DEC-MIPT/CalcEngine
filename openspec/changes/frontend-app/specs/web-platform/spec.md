@@ -52,11 +52,15 @@ The frontend SHALL build the input form of a calculation type only from the entr
 to the input's listed `units`, preset to its `base_unit`; for an input with `whole_values_only` the
 unit choice is fixed to its `base_unit`, so the value is whole in the unit in which the type
 selects its table row. No field, label, unit or limit of a type
-SHALL be written in the frontend code (the display-only factors of "Unit echo in the base unit" are
-the unit vocabulary shared by all types, not a unit of a type). Before submission the form SHALL check that every field is
+SHALL be written in the frontend code (the display-only factors of "Unit echo in the base unit" and
+the Russian designations of the units, with the unit code shown in English, are the unit
+vocabulary shared by all types, not a unit of a type; they are spelled as the report's fixed table of
+`report-generator` "Report values, formulas and dates"). Before submission the form SHALL check that every field is
 filled, that the value is a finite number, and, for an input with `whole_values_only`, that the
 value is a whole number (a number equal to its integer part, so `30`, `30.0` and `30e0` are
-accepted and `30.5` is not); the form SHALL NOT round, interpolate or otherwise change an entered
+accepted and `30.5` is not); a decimal comma SHALL be accepted as well as a decimal point, so
+`172,5` is read and sent as the number 172.5 while the text in the field stays as typed; the form
+SHALL NOT round, interpolate or otherwise change an entered
 value. The form SHALL NOT decide whether a value is inside the method's range: that is the
 backend's warning or refusal. The labels, hints and units shown follow the interface language.
 
@@ -74,6 +78,10 @@ backend's warning or refusal. The labels, hints and units shown follow the inter
 - **WHEN** a user enters `30.5` in an input with `whole_values_only` and submits
 - **THEN** no request is sent, the field is marked with a message that names the whole-value
   rule, and the value stays `30.5` in the field
+
+#### Scenario: Decimal comma
+- **WHEN** a user enters `172,5` in a field and submits
+- **THEN** the request carries the number 172.5, and the field still shows `172,5`
 
 #### Scenario: Unit of a whole-values input
 - **WHEN** a user opens the form of a type that has an input with `whole_values_only` (for
@@ -99,12 +107,29 @@ developer, the normative control and the checker, a surname and a date. While th
 is on, the screen SHALL require the surname and the date of the developer and of the normative
 control, and the surname and the date of the checker when either is given, as the backend does
 (the norm source of these rules is in the `report-generator` delta of `calculation-core-contract`).
-The screen SHALL download the `.docx` that `POST /calculations/{result_id}/report` returns.
+The screen SHALL request the `.docx` from `POST /calculations/{result_id}/report` and, once it is
+issued, show a stamp shaped as a title block (columns 1, 5 and 9 and the word «ВЫПУЩЕН») with the
+file name and a download control; the file SHALL be saved only from that control, under the file
+name the response gives. While the request runs, the submit control SHALL show that the report is
+being generated (`aria-busy`) for at least 600 ms unless the user's system asks for reduced motion.
+An error shows no stamp.
+
+#### Scenario: Report being generated
+- **WHEN** a user submits a complete report form and the response arrives 100 ms later, and the
+  system does not ask for reduced motion
+- **THEN** the submit control is `aria-busy` and says that the report is being generated until
+  600 ms after the submit, and then the stamp shows columns 1, 5 and 9 of the title block, the word
+  «ВЫПУЩЕН», the file name and the download control
 
 #### Scenario: Download the report
 - **WHEN** a user fills the required title-block fields and the required signatories and submits
-- **THEN** the `.docx` of the stored result is downloaded under the file name the response gives,
-  and the user stays on the report screen
+- **THEN** the report of the stored result is generated, the stamp appears with the file name, and
+  choosing its download control saves the `.docx` under the file name the response gives, with the
+  user still on the report screen
+
+#### Scenario: Report request fails
+- **WHEN** the report request ends with an error
+- **THEN** no stamp appears and no file is saved
 
 #### Scenario: Incomplete signatories
 - **WHEN** the signature block is on and the developer's date is empty
@@ -225,7 +250,11 @@ readable at the contrast of "Non-functional — language, accessibility, browser
 the form is submitted. Counted from the submit, after 3 seconds the message SHALL say that the
 server is calculating, and after 10 seconds that it takes longer than usual and that the entered
 data is kept. When the request ends with an error, the fields SHALL be changeable again with their
-values kept, and the error is shown as without this requirement.
+values kept, and the error is shown as without this requirement. While the request runs, the form
+SHALL also trace the computation across its rows (a scan line passes the input rows from top to
+bottom and leaves each row marked); unless the user's system asks for reduced motion, the result
+SHALL open no sooner than 700 ms after the submit, and with reduced motion it opens as soon as the
+response arrives.
 
 #### Scenario: Request in progress
 - **WHEN** a user submits a valid form and the response has not arrived
@@ -247,6 +276,57 @@ values kept, and the error is shown as without this requirement.
 #### Scenario: Slow response
 - **WHEN** the response takes more than 10 seconds
 - **THEN** the message says that it takes longer than usual and that the entered data is kept
+
+#### Scenario: Minimum duration of the computation trace
+- **WHEN** the response arrives 100 ms after the submit and the system does not ask for reduced
+  motion
+- **THEN** the result opens 700 ms after the submit, and with reduced motion it opens when the
+  response arrives
+
+#### Scenario: Response after the minimum duration
+- **WHEN** the response arrives 900 ms after the submit
+- **THEN** the result opens when the response arrives, with no further wait
+
+### Requirement: Trace playback on first showing
+The first time a stored result is shown in a page session, and unless the user's system asks for
+reduced motion, the result screen SHALL show the trace steps one by one, at an interval of
+600 ms or of 10 s divided by the number of steps, whichever is shorter, so the whole playback takes
+at most 10 s. A pointer click, Space, Enter, Escape or Tab SHALL end the playback and show every
+step at once. Steps not shown yet SHALL NOT be reachable by keyboard or read by assistive
+technology. Until the last step is shown, the content of the verdict stamp SHALL be hidden from
+sight, and the values of the outputs table hidden from sight, keyboard and assistive technology,
+with the status «ВЫПОЛНЕНИЕ РАСЧЁТА» in their place and the heading and frame of the outputs table
+kept, so the trace does not move when they appear. The stamp keeps its accessible name, so the
+focus of "Verdict focus on arrival" announces the verdict at once and assistive technology does not
+wait for the playback; the stamp region is a live region, polite for a `pass` and assertive for a
+`fail`. After the last step a `pass` with no warning SHALL be revealed with an expressive stamp (a
+scan line from 200 ms, the content and the output values at 520 ms, a drawn check mark complete by
+1.9 s after the last step), and a `fail` or a `pass` with a warning at once; a refusal has no steps
+and shows at once. A result shown again in the same page session, or shown while the system asks
+for reduced motion, shows every step, the verdict and the outputs at once.
+
+#### Scenario: First showing of a result
+- **WHEN** a result with nine steps is shown for the first time in a page session
+- **THEN** the steps appear one by one, the stamp and the output values are held with the status
+  «ВЫПОЛНЕНИЕ РАСЧЁТА» until the last step, and then they are shown
+
+#### Scenario: Long trace
+- **WHEN** a result with 40 steps is shown for the first time in a page session
+- **THEN** the steps appear 250 ms apart, and the last one appears 10 s after the first showing at
+  the latest
+
+#### Scenario: Playback skipped
+- **WHEN** a user clicks, or presses Space, Enter, Escape or Tab, during the playback
+- **THEN** every step, the verdict and the output values are shown at once
+
+#### Scenario: Verdict announced on arrival
+- **WHEN** a result is shown for the first time and the playback starts
+- **THEN** focus is on the verdict stamp and its accessible name is the verdict, while the stamp's
+  content is hidden from sight until the last step
+
+#### Scenario: Result shown again
+- **WHEN** the same result is shown again in the page session
+- **THEN** every step, the verdict and the output values are shown at once, with no playback
 
 ### Requirement: Responsive type
 The page heading SHALL scale with the viewport between 1.875 rem and 2.25 rem, and the verdict line
@@ -273,30 +353,42 @@ fields of the form, the output values of a result) SHALL stay aligned on their r
 
 ### Requirement: Motion follows the user's setting
 Every animation or transition the interface adds (the frame of the verdict, the flash of a field
-after a unit change, the progress rule) SHALL run only when the user's
+after a unit change, the progress rule, the computation trace across the form, the trace playback
+and the verdict reveal, the drawn motif of the type selection, and the report stamp with its jolt of
+the form) SHALL run only when the user's
 system does not ask for reduced motion. With `prefers-reduced-motion: reduce`, each such change
 SHALL happen at once, without movement, and no information SHALL depend on the movement.
 
 #### Scenario: Reduced motion requested
 - **WHEN** the system asks for reduced motion and a user opens a result or sends the form
-- **THEN** no animation runs on the verdict, the field or the progress rule, and the state they
-  show is the same as without reduced motion
+- **THEN** no animation runs on the verdict, the field, the progress rule, the form or the trace,
+  and the state they show is the same as without reduced motion
 
 ### Requirement: Non-functional — language, accessibility, browsers
 The interface SHALL be available in Russian and in English, with Russian complete and a missing
 English text shown in Russian; numbers SHALL be shown with the decimal separator of the interface
-language. The `.docx` report stays in Russian. The interface SHALL meet WCAG 2.2 level AA: every
+language. In the pilot's first iteration (while the pilot is shown only inside the team: the two
+developers and the PM; `design.md` decision 12) the language switch SHALL NOT be shown and the
+interface is in Russian, because the calculations cover Russian norms; the English texts and the
+switch stay in the code, and the setting `SHOW_LANGUAGE_SWITCH` shows the switch again. The `.docx`
+report stays in Russian. The interface SHALL meet WCAG 2.2 level AA: every
 control reachable and operable by keyboard, text contrast at least 4.5:1 (3:1 for large text and
 for the boundaries of controls), no meaning carried by colour alone, and every field with a
 programmatically associated label. The interface SHALL work in the last two versions of Chrome,
 Firefox, Edge and Safari on desktop, and every calculation step SHALL render with its formula in
 each of them (`transparent-output` "Non-functional — completeness"). The time from the arrival of
 the backend's response to the first render of the target screen SHALL be under 1 second at the 95th
-percentile, measured over 20 runs in Chromium against the mocked backend. This refines the base
+percentile, measured over 20 runs in Chromium against the mocked backend; the minimum duration of
+the computation trace ("Calculation in progress") counts in this time. This refines the base
 requirement "Non-functional — integration and latency" for the frontend and does not replace it.
 
+#### Scenario: Language switch in the pilot's first iteration
+- **WHEN** a user opens any screen with `SHOW_LANGUAGE_SWITCH` off
+- **THEN** no language switch is shown and the texts are in Russian
+
 #### Scenario: Switch the language
-- **WHEN** a user switches the interface language from Russian to English
+- **WHEN** `SHOW_LANGUAGE_SWITCH` is on and a user switches the interface language from Russian
+  to English
 - **THEN** the screen texts, labels and hints that have an English text are shown in English and
   any without one stay in Russian, and `172.5` is shown as `172.5` in English and `172,5` in Russian
 

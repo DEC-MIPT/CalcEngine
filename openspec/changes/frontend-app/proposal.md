@@ -40,11 +40,21 @@ choices made are restated in `design.md`.
   the listing of each input and output. Metadata only: it does not change a calculation, a
   `NormRef`, a parameter, the result envelope or `input_hash`, and it reads nothing from
   `dec_normatives`.
-- `transparent-output`: "Expandable steps" gets keyboard and state scenarios; the trace and
-  warning requirements of `calculation-core-contract` stay as they are, and task 5.4 is split
+- `transparent-output`: "Expandable steps" gets keyboard and state scenarios, and steps open
+  expanded; three added requirements (steps named by their symbols, output values shown by their
+  rounding rule, result screen reading aids); task 5.4 of `calculation-core-contract` is split
   into three tasks here.
-- Code on two feature branches (`tasks.md`): `feature/frontend-app/backend` (the metadata) and
-  `feature/frontend-app/frontend` (the interface).
+- Added on 2026-10-18, after the work of `tasks.md` section 10 (`design.md` decisions 11-14):
+  `web-platform` requirements for the trace playback, the computation trace and the report stamp;
+  the settings of the pilot's first iteration; and edits made directly in
+  `calculation-core-contract` (its own change, not archived): `transparent-output` "Normative
+  clause references" and "Trace display consumes typed steps and warnings", and `report-generator`
+  "GOST report structure", "Automatic normative references in report", "Result accountability
+  block" and "Report values, formulas and dates" (settings `SHOW_NORM_STATUS`,
+  `SHOW_ROUNDING_SOURCE`, `TRACE_NORM_STATUS`, `ACCOUNTABILITY_SECTION`; Word equations; output
+  values by their rounding rule).
+- Code on two feature branches (`tasks.md`): `feature/frontend-app/backend` (the metadata and the
+  backend tasks of section 10) and `feature/frontend-app/frontend` (the interface).
 
 ## Capabilities
 
@@ -60,7 +70,10 @@ None added by this change beyond what other active changes create.
 - `calculation-api`: ADDED requirement "Input and output metadata in the types listing". It is
   ADDED, not MODIFIED, because the requirements of `calculation-api` and
   `calculation-core-contract` are still in their active changes and not in `openspec/specs/`.
-- `transparent-output`: MODIFIED "Expandable steps".
+- `transparent-output`: MODIFIED "Expandable steps"; ADDED "Trace steps named by their symbols",
+  "Values of an output shown by its rounding rule" and "Result screen reading aids".
+- `transparent-output` and `report-generator` requirements of `calculation-core-contract`: edited
+  in that change, not by a delta here, for the same archive-order reason.
 
 ## Non-goals
 
@@ -70,14 +83,21 @@ None added by this change beyond what other active changes create.
 - **Authorization, accounts, tiers and the trial.** The planned change `user-accounts-auth`
   (Akim) and the `user-accounts` capability own them; no login screen and no token handling here.
 - Changes to a calculation, a `NormRef`, a parameter file or the engine; range limits in the
-  contract (the method's range stays a server-side warning or refusal).
-- A design system with tokens, Storybook, and Playwright set-up (`design.md`, decision 5 and
-  "Risks").
+  contract (the method's range stays a server-side warning or refusal). Two exceptions were made
+  on 2026-10-18 and are recorded in `tasks.md` section 10: the text of the pilot's table-step
+  expressions names the selecting input by its LaTeX symbol (task 10.7; no value changes), and the
+  engineer rule of the pilot's `R` rounds to two decimals (task 10.8, `design.md` decision 13).
+- A design system with tokens and Storybook (`design.md`, decision 5). Playwright was set up by
+  task 3.8 after all.
 
 ## Impact
 
 - `backend/app/schemas/calculation.py`, `backend/app/schemas/api.py`,
   `backend/app/engine/foundations_shallow_r.py` (metadata for the pilot's inputs and outputs).
+- Section 10: `backend/app/engine/steps.py` and `foundations_shallow_r.py` (table-step text),
+  `backend/params/foundations_shallow_r.yaml` (rounding of `R`), `backend/app/reporting/`
+  (Word equations, rounding, the two report settings), `backend/requirements.txt`
+  (`latex2mathml`, `mathml2omml`), `backend/app/schemas/calculation.py` (`RoundingRule.apply`).
 - `frontend/` (all of it).
 - No change in `ml/`, `infra/` or `dec_normatives`; no Egor acknowledgement is needed because
   no file of his zone or his contract is touched.

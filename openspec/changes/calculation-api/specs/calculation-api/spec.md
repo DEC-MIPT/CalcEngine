@@ -154,8 +154,9 @@ requirement adds only its delivery.
 #### Scenario: Download the report of a stored result
 - **WHEN** a client posts a valid report request for a stored result
 - **THEN** the response is `200` with the `.docx` media type and an attachment file name
-  ending in `.docx`, and the document read back holds the stored result's inputs, trace,
-  conclusion and accountability block
+  ending in `.docx`, and the document read back holds the stored result's inputs, trace and
+  conclusion, and the accountability block while `ACCOUNTABILITY_SECTION` is on
+  (`calculation-core-contract` `report-generator` "Result accountability block")
 
 #### Scenario: Report of a refused result
 - **WHEN** a client posts a valid report request for a stored result whose verdict is

@@ -9,8 +9,10 @@ One developer (Akim) writes the frontend. The choices below come from
 `docs/akim/frontend-app-kickoff.md` unless a decision says otherwise.
 
 Component boundary for C/C++ (`openspec/config.yaml`): this change touches no hot path. The backend
-part only adds metadata to the quantity declarations and the listing; the pure calculation
-function, its boundary (WP5 decision 7) and the engine are unchanged.
+part adds metadata to the quantity declarations and the listing, and (section 10) the text of the
+pilot's table-step expressions, the rounding rule of `R` and the report's conversion to Word
+equations; the pure calculation function, its boundary (WP5 decision 7) and every computed value
+are unchanged, and the report conversion runs after the calculation, outside the swap boundary.
 
 ## Decisions
 
@@ -87,6 +89,23 @@ function, its boundary (WP5 decision 7) and the engine are unchanged.
      (a flash of 1 px or a colour, a stepped rule, an echo in text) except one expressive moment, the
      verdict: its frame is drawn in 120 ms and its word follows, with focus moved to it. Every such
      animation lives inside `@media (prefers-reduced-motion: no-preference)`.
+   - Bold pass and the expressive moments (Akim, 2026-10-08 "code now, docs later", and 2026-10-10;
+     recorded here on 2026-10-18). Where they differ, these bullets replace the motion bullet
+     above (100-150 ms), the "quiet except the verdict" sentence of the bullet above, and kickoff
+     answer Q4 = B of `docs/decisions/frontend/2026-10-08-frontend-ux-improvements-kickoff.md`:
+     - type selection: a full-bleed cobalt hero with a large heading and a drawn dimension-grid
+       motif;
+     - form: the active and the invalid row get a side rule; while a calculation is sent a scan line
+       traces the input rows, and the result opens no sooner than 700 ms after the submit (none
+       under reduced motion; `web-platform` "Calculation in progress");
+     - result: the trace plays back step by step on the first showing of a `result_id`, the stamp
+       and the output values wait for the last step, and a `pass` with no warning gets an
+       expressive stamp of about 1 s (`web-platform` "Trace playback on first showing");
+     - report: the submit control goes idle, sending (at least 600 ms), ready; on success a
+       title-block stamp strikes in 110 ms with an ink ring and a stepped 2 px jolt of the form,
+       and the file is saved only from the stamp's download control (`web-platform` "Report request
+       screen").
+     All of them run only under `prefers-reduced-motion: no-preference`.
    - Reference directions: (1) the title block and frame of a drawing sheet under GOST R 21.101
      (edition unverified; the report's own source is in `calculation-core-contract`), as the report
      uses it; (2) the readout of an inspection or measuring instrument (a value, its unit and its
@@ -107,7 +126,9 @@ function, its boundary (WP5 decision 7) and the engine are unchanged.
    warning or refusal, so there is one source for a limit and the form cannot disagree with it.
    - `whole_values_only` is checked in the input's base unit, and the form fixes the unit choice of
      such an input to its base unit (`phi_II` is whole in `deg`, although `rad` is in its unit
-     list), because the pilot selects the table row by whole degrees. The accepted spellings are
+     list), because the pilot selects the row of `Mγ`, `Mq`, `Mc` by a whole `φII` in degrees
+     (СП 22.13330.2016, table 5.5, `unverified`; the table gives no rule for values between its
+     rows, `docs/decisions/formula-autoparse-limits-egor.md`). The accepted spellings are
      numbers equal to their integer part (`30`, `30.0`, `30e0`).
    - The metadata lives with the declaration of the quantities in the engine module, as the units
      do (`QuantityDeclaration`, `engine/foundations_shallow_r.py`), and is carried to the
@@ -129,8 +150,8 @@ function, its boundary (WP5 decision 7) and the engine are unchanged.
    the response of `POST /calculations` as the same shape. Nothing is recomputed in the browser:
    the trace display consumes the envelope as it is (`transparent-output` "Trace display consumes
    typed steps and warnings").
-9. **Splitting task 5.4 of `calculation-core-contract`** (kickoff 8). The requirement text is
-   unchanged; the plan is three tasks in `tasks.md` section 6: a shared status component that
+9. **Splitting task 5.4 of `calculation-core-contract`** (kickoff 8). The requirement text was
+   unchanged by the split (decision 12 later added its first-iteration clauses); the plan is three tasks in `tasks.md` section 6: a shared status component that
    carries icon, text and frame shape (so "readable without colour" is tested once), the refusal
    view, and the warning view with the result. Task 3.4 is split in two (6.1a, 6.1b) and 3.5 is kept
    whole (6.2), and the expandable steps are task 6.3.
@@ -139,6 +160,70 @@ function, its boundary (WP5 decision 7) and the engine are unchanged.
     `normative-catalog-backend` (WP9, branch `feature/normative-catalog/backend`). Authorization is
     the planned change `user-accounts-auth` and the `user-accounts` capability. This change shows
     no login, token or plan.
+11. **Unit designations and the decimal comma** (Akim, 2026-10-06). The Russian designations of
+    the units (English shows the unit code) live in a frontend map of the unit vocabulary
+    (`frontend/src/i18n/units.ts`), spelled as the backend's report table (`UNIT_DESIGNATIONS`,
+    `backend/app/reporting/format.py`). A designation field in `GET /calculation-types` would be
+    cleaner, but it is a contract change; the map is the vocabulary shared by all types, like the
+    echo factors of `web-platform` "Unit echo in the base unit", and no unit of a type is written in
+    the frontend. Number fields accept a decimal comma as well as a point
+    (`frontend/src/form/parseValue.ts`): the request carries the number, the field keeps the text.
+12. **The pilot's first iteration and its settings** (decided by Akim on 2026-10-07 for the language
+    and on 2026-10-18 for the rest). "The pilot's first iteration" is the period while the pilot is
+    shown only inside the team: the two developers and the PM. It ends before the pilot is first
+    shown to anyone else (users, a review board, a thesis committee); then all five settings below
+    are turned on again, and the requirements apply in full. During it each setting hides something
+    the requirements still describe in full; each is one constant, turned back by one edit, with
+    tests for both states:
+    - `SHOW_LANGUAGE_SWITCH = false` (`frontend/src/components/AppShell.tsx`): no language switch;
+      the `en` dictionary, `I18nProvider` and `LanguageSwitch` stay;
+    - `SHOW_NORM_STATUS = false` (`frontend/src/screens/ResultScreen.tsx`): the trace shows no
+      status mark at its references and no unverified-step summary (`Trace normStatus`,
+      `NormRefList showStatus`); the refusal and the warnings keep the status;
+    - `SHOW_ROUNDING_SOURCE = false` (same file): the outputs table has no rounding-source column
+      (`Outputs source`); the source stays in the envelope and in the report;
+    - `TRACE_NORM_STATUS = False` (`backend/app/reporting/docx_writer.py`): the report's trace steps
+      print their references without status;
+    - `ACCOUNTABILITY_SECTION = False` (same file): the report's section 4 is not printed, and the
+      engineer-responsibility statement closes the conclusion instead. The report then carries no
+      `result_id` (it stays in the file name), `engine_version`, `input_hash`, warnings or step
+      statuses; Akim accepted this for reports read inside the team.
+    The output values held until the trace playback ends are not a setting of the first iteration:
+    they belong to the playback (`web-platform` "Trace playback on first showing").
+13. **Trace symbols and display rounding** (Akim, 2026-10-18). The display is frontend only; the
+    engine contract fixes `expression` as a LaTeX string and is unchanged, while the text the
+    pilot writes into its table steps changes (below). Step headers, ruler ticks and substitutions are typeset by symbols found in the
+    steps and in the types listing (`frontend/src/lib/stepSymbol.ts`, `NamedSymbol`), with
+    `step_id` kept for assistive technology (`transparent-output` "Trace steps named by their
+    symbols"). Values of an output are shown by its `rounding_rule` with the same half-up and
+    half-even rule as the backend (`frontend/src/lib/rounding.ts`, backend `RoundingRule.apply`);
+    the report does the same (`calculation-core-contract` `report-generator` "Report values,
+    formulas and dates"). On the backend feature:
+    - table steps write the selecting input by its LaTeX symbol (`\varphi_{II}`, not `phi_II`;
+      task 10.7). No value, `NormRef` or `input_hash` changes; the fixture of task 2.4 was
+      regenerated in the same commit (`ed6f672`) for the table-step expression strings only, so its test
+      still proves that the metadata changes no result;
+    - the engineer rule for the pilot's `R` went from 1 to 2 decimals (task 10.8,
+      `backend/params/foundations_shallow_r.yaml`). Engineer: Akim; rationale (as in the file):
+      rounding to hundredths of kPa for the pilot type, replacing the WP2 decision of 2026-09-30
+      (tenths), until checked against the WP4 reference examples. It is an `EngineerRule`, not a
+      norm value (`agent-docs/domain-constraints.md`: rounding from the norm, or set by the
+      engineer with a rationale); the test of task 2.4 uses its own rule and is not affected.
+      The rule belongs to the type's contract, not to the hashed parameter set
+      (`backend/app/engine/boundary.py`: `input_hash` covers the type, the inputs, the resolved
+      parameters and the two ranges), so `input_hash` does not change; new results carry `R`
+      rounded to two decimals, and the unrounded value and the trace are unchanged.
+    - showing a check unrounded when its rounded sides would read against `passed` is a display
+      rule chosen by Akim, not a norm rounding: it keeps the comparison on the screen and in the
+      report consistent with the engine's verdict, as the engine itself decides a check on
+      unrounded values (`calculation-core-contract` design.md, decision 14).
+14. **Report values and formulas as Word equations** (Akim, 2026-10-18; on the backend feature).
+    LaTeX goes to MathML with `latex2mathml` and to Office Math with `mathml2omml` (pinned
+    `0.0.2`, no type stubs, a mypy override), both pure Python and listed in
+    `backend/requirements.txt`. A paragraph that holds only an equation is a left-aligned
+    `m:oMathPara`, otherwise Word centres it; the top box that `mathml2omml` wraps around a
+    formula is kept so that Word does not break an equation, and removed only for a step's
+    expression so that a long formula can wrap at its operators.
 
 ## Non-functional requirements
 
@@ -169,7 +254,8 @@ Playwright (tasks 8.6, 8.7).
   is measured.
 - **Stale sentence in another change.** `calculation-core-contract` `tasks.md` says the frontend
   feature branches from `feature/calculation-engine/backend`; the engine is merged, and this change
-  states the branching (from `feature/frontend-app/backend`). Task 8.4 may correct it.
+  states the branching (from `feature/frontend-app/backend`). Resolved: that header now names
+  `feature/frontend-app/frontend` for tasks 3.4, 3.5 and 5.4, which task 8.4 ticked on 2026-10-18.
 - **Playwright is not set up.** Task 3.8 adds it; it is used for the cross-browser formula
   scenario, the keyboard journey, the contrast check and the transition time (tasks 3.8, 8.6,
   8.7, 8.9).
@@ -178,3 +264,9 @@ Playwright (tasks 8.6, 8.7).
   merged (`tasks.md` task 8.3).
 - **Design skills.** Visual details are not fixed here; the `ui-ux-tester` judges the result against
   decision 5 and the accessibility requirement.
+- **Unit map drift.** The designations of decision 11 are a second copy of the backend's report
+  table; a backend unit added without a frontend designation shows its code. A test that reads the
+  backend table, as the echo factors have (task 9.3), would close this; it is not written yet.
+- **The report without section 4 loses fields.** While `ACCOUNTABILITY_SECTION` is off, the report
+  carries no `result_id` (it stays in the file name), `engine_version`, `input_hash`, warnings or
+  status of the step references; a report shown outside the team should have it turned back on.

@@ -250,12 +250,17 @@ the frame and the title blocks from GOST R 21.101-2026 and adds no norm value of
     - A refused calculation keeps the body sections: the trace section states the refusal
       and holds no step, and the conclusion names the bound.
     - A formula is printed as its LaTeX from the catalog, as text, followed by the
-      substitutions and the result. Typeset formulas in Word are a later task.
+      substitutions and the result. Typeset formulas in Word are a later task. (Superseded on
+      2026-10-18 by `frontend-app` design.md, decision 14: every value and formula of the body
+      is a Word equation built from LaTeX.)
     - A number is printed as the shortest decimal that reads back to the same float, in
       positional notation without an exponent, with a decimal comma, and with the Russian designation of its unit (`kPa` as `кПа`) from a
       fixed table next to the unit vocabulary; the designations are `source: unverified`.
       Trace values are unrounded, as in the envelope; outputs are printed rounded, with
-      their rule and its source. A date prints as `ДД.ММ.ГГ` (GOST R 21.101-2026, edition
+      their rule and its source. (Changed on 2026-10-18, `frontend-app` design.md, decision 13:
+      every printed value of an output, in the trace too, is rounded by its rule with exactly its
+      decimals, and a check whose rounded sides would contradict `passed` prints unrounded; the
+      envelope stays unrounded.) A date prints as `ДД.ММ.ГГ` (GOST R 21.101-2026, edition
       unverified, Annex E, note 2).
     - Sheet frame and title block, GOST R 21.101-2026 (edition unverified): A4 with the
       title block along the short side, as Annex Zh, figure Zh.1 a) shows; the frame

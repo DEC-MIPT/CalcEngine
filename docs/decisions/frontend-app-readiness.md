@@ -72,3 +72,29 @@ latency", and the `calculation-api` "Calculation types listing".
 - `calculation-api` "Calculation types listing": the new requirement adds `label`, `symbol`,
   `hint`, `whole_values_only` "in addition to" the listed fields, so the listing's own list of
   fields stays true. Task 2.3 changes `InputView` and `OutputView` (`extra="forbid"` today) for it.
+
+## Spec pass of 2026-10-18 (tasks 8.4, section 10)
+
+The implementation had run ahead of the spec in 13 places. Akim chose to edit each requirement in
+the change that holds it (`frontend-app`, and directly in `calculation-core-contract` and
+`calculation-api`, both unarchived) and to describe the temporary simplifications of the pilot's
+first iteration as full behaviour plus five named settings (`frontend-app` design.md, decision 12:
+the first iteration lasts while the pilot is shown only inside the team). Sections 3-7 and 9 were
+ticked with their commits, section 10 records the work done outside the earlier tasks, and task
+10.13 (the two settings added during this pass) stays open until its commit.
+
+- `openspec validate --all --strict`: 20/20.
+- `spec-reviewer` pass 4: blocker 0, major 6, minor 10 (an outdated `calculation-api` scenario on
+  the accountability block; no named decision and exit criterion for the first iteration; the
+  table-step text and the rounding of `R` against the change's "engine unchanged" statements; no
+  engineer named for that rounding; scenarios tied to no testable state, with two simplifications
+  not behind a setting; a stale DOR record), all fixed.
+- `spec-reviewer` pass 5: blocker 0, major 1 (this DOR record, closed by it), minor 6, fixed or
+  answered: turning the settings back on is Akim's step before the first outside showing, stated in
+  the DOD and deliberately not a GO or archive condition.
+- `norm-traceability-checker`: no requirement fixes a norm formula, coefficient or limit. Fixed
+  after it: the whole-degree rule of `phi_II` now names СП 22.13330.2016 table 5.5 (`unverified`,
+  design decision 6); the "unrounded check" display rule is recorded as Akim's with its reason
+  (decision 13); the example values of the rounding scenarios are marked illustrative. Unchanged
+  and already marked `unverified`: GOST R 21.101-2026 for the report layout and dates, the unit
+  designations; the XML 1.0 character rule is a format rule, not a norm.
