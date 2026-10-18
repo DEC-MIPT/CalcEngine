@@ -52,8 +52,19 @@ def test_the_registered_types_are_listed_in_contract_order() -> None:
         "base_unit": "m",
         "dimension": "length",
         "units": ["m", "cm", "mm"],
+        "label": {"ru": "Ширина подошвы фундамента", "en": "Foundation base width"},
+        "symbol": "b",
+        "hint": None,
+        "whole_values_only": False,
     }
-    assert pilot["outputs"] == [{"name": "R", "base_unit": "kPa"}]
+    assert pilot["outputs"] == [
+        {
+            "name": "R",
+            "base_unit": "kPa",
+            "label": {"ru": "Расчётное сопротивление грунта", "en": "Design soil resistance"},
+            "symbol": "R",
+        }
+    ]
 
 
 def test_an_empty_registry_gives_an_empty_list() -> None:

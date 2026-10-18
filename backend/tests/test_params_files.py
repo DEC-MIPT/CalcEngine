@@ -54,7 +54,7 @@ def test_the_pilot_file_validates() -> None:
     parameters = load_parameters("foundations_shallow_r", PARAMS_ROOT)
 
     rounding = parameters.rounding_rules["R"]
-    assert (rounding.rule.decimals, rounding.rule.mode) == (1, "half_up")
+    assert (rounding.rule.decimals, rounding.rule.mode) == (2, "half_up")
     assert rounding.source.engineer and rounding.source.rationale
     assert parameters.validated_range == ()
 

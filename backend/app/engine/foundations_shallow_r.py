@@ -23,19 +23,69 @@ from app.schemas.calculation import (
     Source,
 )
 from app.schemas.resolved import Formula, TableValue, Threshold
+from app.schemas.text import LocalizedText
 
 NAME = "foundations_shallow_r"
 CHECK = "p_le_R"
 
 INPUTS = (
-    QuantityDeclaration(name="b", base_unit="m"),
-    QuantityDeclaration(name="d_1", base_unit="m"),
-    QuantityDeclaration(name="d_b", base_unit="m"),
-    QuantityDeclaration(name="gamma_II", base_unit="kN/m3"),
-    QuantityDeclaration(name="gamma_II_prime", base_unit="kN/m3"),
-    QuantityDeclaration(name="c_II", base_unit="kPa"),
-    QuantityDeclaration(name="phi_II", base_unit="deg"),
-    QuantityDeclaration(name="p", base_unit="kPa"),
+    QuantityDeclaration(
+        name="b",
+        base_unit="m",
+        label=LocalizedText(ru="Ширина подошвы фундамента", en="Foundation base width"),
+        symbol="b",
+    ),
+    QuantityDeclaration(
+        name="d_1",
+        base_unit="m",
+        label=LocalizedText(ru="Приведённая глубина заложения", en="Reduced foundation depth"),
+        symbol="d_1",
+        hint=LocalizedText(
+            ru="Значение, вычисленное отдельно; здесь оно вводится готовым",
+            en="A value calculated separately and entered as is",
+        ),
+    ),
+    QuantityDeclaration(
+        name="d_b",
+        base_unit="m",
+        label=LocalizedText(ru="Глубина подвала", en="Basement depth"),
+        symbol="d_b",
+    ),
+    QuantityDeclaration(
+        name="gamma_II",
+        base_unit="kN/m3",
+        label=LocalizedText(ru="Удельный вес грунта ниже подошвы", en="Unit weight of soil below the base"),
+        symbol=r"\gamma_{II}",
+    ),
+    QuantityDeclaration(
+        name="gamma_II_prime",
+        base_unit="kN/m3",
+        label=LocalizedText(ru="Удельный вес грунта выше подошвы", en="Unit weight of soil above the base"),
+        symbol=r"\gamma'_{II}",
+    ),
+    QuantityDeclaration(
+        name="c_II",
+        base_unit="kPa",
+        label=LocalizedText(ru="Удельное сцепление грунта", en="Soil cohesion"),
+        symbol="c_{II}",
+    ),
+    QuantityDeclaration(
+        name="phi_II",
+        base_unit="deg",
+        label=LocalizedText(ru="Угол внутреннего трения грунта", en="Soil friction angle"),
+        symbol=r"\varphi_{II}",
+        hint=LocalizedText(
+            ru="Целое число градусов: коэффициенты выбираются по строке таблицы",
+            en="A whole number of degrees: the coefficients are chosen by a table row",
+        ),
+        whole_values_only=True,
+    ),
+    QuantityDeclaration(
+        name="p",
+        base_unit="kPa",
+        label=LocalizedText(ru="Среднее давление под подошвой", en="Average pressure under the base"),
+        symbol="p",
+    ),
 )
 
 
@@ -47,6 +97,9 @@ SELECTORS: Mapping[str, str] = {"m_gamma": "phi_II", "m_q": "phi_II", "m_c": "ph
 выбираются. Это строение метода, а не нормативное значение (``normative-catalog-backend``
 design.md, решение 6).
 """
+
+INPUT_SYMBOLS: Mapping[str, str] = {quantity.name: quantity.symbol for quantity in INPUTS if quantity.symbol}
+"""Обозначение каждого входа пилота в LaTeX для выражений табличных шагов."""
 
 
 class Parameters(BaseModel):
@@ -94,7 +147,7 @@ class FoundationsShallowR(Calculator[Mapping[str, QuantityValue], Parameters, Ca
         )
         for name, entry in entries:
             confirm_selectors(entry, inputs, SELECTORS.get(name))
-        tables = tuple(table_step(entry.symbol, entry) for _, entry in entries)
+        tables = tuple(table_step(entry.symbol, entry, INPUT_SYMBOLS) for _, entry in entries)
         for step in tables:
             _bind(values, step.step_id, step.result)
         below = compare("k_z", inputs["b"], "lt", parameters.k_z_threshold.value)
@@ -123,7 +176,12 @@ def contract(rounding_rule: RoundingRule, rounding_source: Source) -> Calculatio
         inputs=INPUTS,
         outputs=(
             OutputDeclaration(
-                name="R", base_unit="kPa", rounding_rule=rounding_rule, rounding_source=rounding_source
+                name="R",
+                base_unit="kPa",
+                label=LocalizedText(ru="Расчётное сопротивление грунта", en="Design soil resistance"),
+                symbol="R",
+                rounding_rule=rounding_rule,
+                rounding_source=rounding_source,
             ),
         ),
         checks=(CHECK,),

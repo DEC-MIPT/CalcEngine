@@ -16,6 +16,7 @@ from app.schemas.calculation import (
     RoundingRule,
     verdict_of,
 )
+from app.schemas.text import LocalizedText
 
 REF = NormRef(
     document="<NORM-DOC-PLACEHOLDER>",
@@ -35,10 +36,12 @@ def check(step_id: str, passed: bool) -> CheckStep:
 def contract(**changes: Any) -> CalculationTypeContract:
     fields: dict[str, Any] = {
         "name": "t",
-        "inputs": (QuantityDeclaration(name="x", base_unit="m"),),
+        "inputs": (QuantityDeclaration(name="x", label=LocalizedText(ru="x"), symbol="x", base_unit="m"),),
         "outputs": (
             OutputDeclaration(
                 name="y",
+                label=LocalizedText(ru="y"),
+                symbol="y",
                 base_unit="m",
                 rounding_rule=RoundingRule(decimals=2, mode="half_up"),
                 rounding_source=(REF,),

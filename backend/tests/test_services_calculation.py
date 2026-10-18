@@ -24,6 +24,7 @@ from app.schemas.calculation import (
 from app.schemas.expression import parse_expression
 from app.schemas.parameters import EngineerRule
 from app.schemas.resolved import Formula
+from app.schemas.text import LocalizedText
 from app.services.calculation import CalculationService
 
 REF = NormRef(
@@ -37,10 +38,12 @@ RULE = EngineerRule(engineer="<ENGINEER>", rationale="<RATIONALE>")
 
 CONTRACT = CalculationTypeContract(
     name="synthetic",
-    inputs=(QuantityDeclaration(name="b", base_unit="m"),),
+    inputs=(QuantityDeclaration(name="b", label=LocalizedText(ru="b"), symbol="b", base_unit="m"),),
     outputs=(
         OutputDeclaration(
-            name="y", base_unit="m", rounding_rule=RoundingRule(decimals=2, mode="half_up"), rounding_source=RULE
+            name="y",
+            label=LocalizedText(ru="y"),
+            symbol="y", base_unit="m", rounding_rule=RoundingRule(decimals=2, mode="half_up"), rounding_source=RULE
         ),
     ),
     checks=("check",),

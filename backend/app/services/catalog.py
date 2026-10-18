@@ -9,7 +9,11 @@ from app.engine import foundations_shallow_r
 from app.engine.registry import CalculatorRegistry
 from app.parameters.loader import load_parameters
 from app.schemas.api import CalculationTypeView, InputView, OutputView
-from app.schemas.calculation import ValidatedBound
+from app.schemas.calculation import (
+    OutputDeclaration,
+    QuantityDeclaration,
+    ValidatedBound,
+)
 from app.schemas.units import UNITS, units_of
 
 
@@ -113,6 +117,26 @@ def load_validated_ranges(
     }
 
 
+def _input_view(quantity: QuantityDeclaration) -> InputView:
+    label, symbol = quantity.described()
+    dimension = UNITS[quantity.base_unit].dimension
+    return InputView(
+        name=quantity.name,
+        base_unit=quantity.base_unit,
+        dimension=dimension,
+        units=units_of(dimension),
+        label=label,
+        symbol=symbol,
+        hint=quantity.hint,
+        whole_values_only=quantity.whole_values_only,
+    )
+
+
+def _output_view(output: OutputDeclaration) -> OutputView:
+    label, symbol = output.described()
+    return OutputView(name=output.name, base_unit=output.base_unit, label=label, symbol=symbol)
+
+
 def calculation_types(registry: CalculatorRegistry) -> tuple[CalculationTypeView, ...]:
     """Описывает зарегистрированные типы расчёта для формы ввода.
 
@@ -130,19 +154,8 @@ def calculation_types(registry: CalculatorRegistry) -> tuple[CalculationTypeView
     return tuple(
         CalculationTypeView(
             name=contract.name,
-            inputs=tuple(
-                InputView(
-                    name=quantity.name,
-                    base_unit=quantity.base_unit,
-                    dimension=UNITS[quantity.base_unit].dimension,
-                    units=units_of(UNITS[quantity.base_unit].dimension),
-                )
-                for quantity in contract.inputs
-            ),
-            outputs=tuple(
-                OutputView(name=output.name, base_unit=output.base_unit)
-                for output in contract.outputs
-            ),
+            inputs=tuple(_input_view(quantity) for quantity in contract.inputs),
+            outputs=tuple(_output_view(output) for output in contract.outputs),
         )
         for contract in registry.contracts()
     )

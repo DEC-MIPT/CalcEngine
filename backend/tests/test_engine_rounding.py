@@ -5,7 +5,6 @@ from pydantic import ValidationError
 
 from app.engine.boundary import make_outputs
 from app.engine.result import assemble_result
-from app.engine.rounding import round_value
 from app.engine.steps import check_step, formula_step
 from app.schemas.calculation import (
     MAX_DECIMALS,
@@ -19,6 +18,7 @@ from app.schemas.calculation import (
 from app.schemas.expression import parse_expression
 from app.schemas.parameters import EngineerRule
 from app.schemas.resolved import Formula
+from app.schemas.text import LocalizedText
 
 REF = NormRef(
     document="<NORM-DOC-PLACEHOLDER>",
@@ -41,28 +41,30 @@ def rule(decimals: int, mode: str) -> RoundingRule:
 def test_a_tie_rounds_differently_in_half_up_and_half_even(
     value: float, decimals: int, half_up: float, half_even: float
 ) -> None:
-    assert round_value(value, rule(decimals, "half_up")) == half_up
-    assert round_value(value, rule(decimals, "half_even")) == half_even
+    assert rule(decimals, "half_up").apply(value) == half_up
+    assert rule(decimals, "half_even").apply(value) == half_even
 
 
 def test_rounding_reads_the_shortest_decimal_of_the_float() -> None:
     assert round(2.675, 2) == 2.67
-    assert round_value(2.675, rule(2, "half_up")) == 2.68
+    assert rule(2, "half_up").apply(2.675) == 2.68
 
 
 @pytest.mark.parametrize("mode", ["half_up", "half_even"])
 def test_a_value_that_is_not_a_tie_rounds_to_the_nearest(mode: str) -> None:
-    assert round_value(7.46, rule(1, mode)) == 7.5
-    assert round_value(7.44, rule(0, mode)) == 7.0
+    assert rule(1, mode).apply(7.46) == 7.5
+    assert rule(0, mode).apply(7.44) == 7.0
 
 
 def test_a_check_whose_outcome_would_change_on_the_rounded_value_uses_the_unrounded_value() -> None:
     contract = CalculationTypeContract(
         name="synthetic",
-        inputs=(QuantityDeclaration(name="a", base_unit="kPa"),),
+        inputs=(QuantityDeclaration(name="a", label=LocalizedText(ru="a"), symbol="a", base_unit="kPa"),),
         outputs=(
             OutputDeclaration(
-                name="y", base_unit="kPa", rounding_rule=rule(2, "half_up"), rounding_source=RULE
+                name="y",
+                label=LocalizedText(ru="y"),
+                symbol="y", base_unit="kPa", rounding_rule=rule(2, "half_up"), rounding_source=RULE
             ),
         ),
         checks=("check",),
@@ -115,8 +117,8 @@ def test_the_decimals_are_bounded_at_an_implementation_limit() -> None:
 def test_any_finite_value_is_rounded_without_an_invalid_operation(
     value: float, decimals: int, expected: float
 ) -> None:
-    assert round_value(value, rule(decimals, "half_up")) == expected
+    assert rule(decimals, "half_up").apply(value) == expected
 
 
 def test_a_large_value_keeps_its_rounding() -> None:
-    assert round_value(123456789012345.67, rule(1, "half_up")) == 123456789012345.7
+    assert rule(1, "half_up").apply(123456789012345.67) == 123456789012345.7

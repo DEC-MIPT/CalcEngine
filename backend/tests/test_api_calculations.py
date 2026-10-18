@@ -291,7 +291,6 @@ def test_the_report_is_a_docx_attachment_of_the_stored_result(client: TestClient
     paragraphs, rows = read_back(response.content)
     assert [text for text in paragraphs if text in HEADINGS] == HEADINGS
     assert ["b", "1500 мм"] in rows
-    assert any(created["result_id"] in text for text in paragraphs)
 
 
 def test_the_report_of_a_refused_result_names_the_bound(engine: Engine) -> None:

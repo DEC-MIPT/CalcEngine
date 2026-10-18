@@ -1,4 +1,5 @@
 import ast
+import json
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -165,6 +166,8 @@ def test_the_steps_run_in_the_order_of_the_method() -> None:
     ]
     assert [len(step.substitutions) for step in result.trace[:6]] == [0, 0, 0, 1, 1, 1]
     assert result.trace[3].substitutions[0].symbol == "phi_II"
+    assert result.trace[3].expression == r"M_gamma = M_gamma\left(\varphi_{II}\right)"
+    assert result.trace[0].expression == "gamma_c1"
     assert result.trace[7].result == QuantityValue(value=172.5, unit="kPa")
     assert result.trace[8].expression == r"p \le R"
 
@@ -275,6 +278,11 @@ def test_the_pilot_selects_by_phi_ii_exactly_the_table_coefficients() -> None:
     assert pilot.SELECTORS == {"m_gamma": "phi_II", "m_q": "phi_II", "m_c": "phi_II"}
 
 
+def test_every_input_of_the_pilot_has_its_latex_symbol_for_the_table_steps() -> None:
+    assert pilot.INPUT_SYMBOLS == {quantity.name: quantity.symbol for quantity in pilot.INPUTS}
+    assert pilot.INPUT_SYMBOLS["phi_II"] == r"\varphi_{II}"
+
+
 def test_headings_in_radians_are_confirmed_for_phi_ii_given_in_radians() -> None:
     in_radians = Selector(symbol="phi_II", value=QuantityValue(value=0.3, unit="rad"))
     selected = {
@@ -363,3 +371,15 @@ def test_the_import_scan_finds_every_import() -> None:
     assert modules == ["os", "socket", "pathlib", "", "app.db"]
     assert not any(is_allowed(module) for module in modules)
     assert is_allowed("app.schemas.resolved") and not is_allowed("app.schemasx")
+
+
+GOLDEN = Path(__file__).parent / "fixtures" / "pilot_envelope_before_metadata.json"
+GOLDEN_CASES = json.loads(GOLDEN.read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize("case", sorted(GOLDEN_CASES))
+def test_the_metadata_changes_no_result_trace_norm_reference_or_hash(case: str) -> None:
+    recorded = GOLDEN_CASES[case]
+    given = {name: QuantityValue(**value) for name, value in recorded["inputs"].items()}
+
+    assert run(given).model_dump(mode="json") == recorded["result"]

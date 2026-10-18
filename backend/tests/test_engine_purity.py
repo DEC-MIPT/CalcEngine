@@ -29,6 +29,7 @@ from app.schemas.calculation import (
 from app.schemas.expression import parse_expression
 from app.schemas.parameters import EngineerRule
 from app.schemas.resolved import Formula, Selector, TableValue
+from app.schemas.text import LocalizedText
 
 REF = NormRef(
     document="<NORM-DOC-PLACEHOLDER>",
@@ -42,12 +43,14 @@ RULE = EngineerRule(engineer="<ENGINEER>", rationale="<RATIONALE>")
 CONTRACT = CalculationTypeContract(
     name="synthetic",
     inputs=(
-        QuantityDeclaration(name="b", base_unit="m"),
-        QuantityDeclaration(name="phi", base_unit="deg"),
+        QuantityDeclaration(name="b", label=LocalizedText(ru="b"), symbol="b", base_unit="m"),
+        QuantityDeclaration(name="phi", label=LocalizedText(ru="phi"), symbol="phi", base_unit="deg"),
     ),
     outputs=(
         OutputDeclaration(
-            name="y", base_unit="m", rounding_rule=RoundingRule(decimals=2, mode="half_even"), rounding_source=RULE
+            name="y",
+            label=LocalizedText(ru="y"),
+            symbol="y", base_unit="m", rounding_rule=RoundingRule(decimals=2, mode="half_even"), rounding_source=RULE
         ),
     ),
     checks=("check",),
@@ -90,7 +93,7 @@ VALIDATED = (ValidatedBound(quantity="b", kind="max", value=5.0, inclusive=True,
 
 class SyntheticCalculator(Calculator[Mapping[str, QuantityValue], Parameters, CalculatorOutput]):
     def calculate(self, inputs: Mapping[str, QuantityValue], parameters: Parameters) -> CalculatorOutput:
-        k = table_step("k", parameters.coefficient)
+        k = table_step("k", parameters.coefficient, {"phi": r"\varphi"})
         y = formula_step("y", parameters.formula, {"k": k.result, "b": inputs["b"]})
         check = check_step("check", ("y", y.result), "le", ("y_{max}", parameters.limit), (REF,))
         return CalculatorOutput(trace=(k, y, check), outputs={"y": y.result})

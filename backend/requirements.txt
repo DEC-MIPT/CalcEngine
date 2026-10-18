@@ -5,4 +5,6 @@ alembic
 pyyaml
 uvicorn
 python-docx>=1.2,<2
+latex2mathml>=3.81,<4
+mathml2omml==0.0.2
 psycopg[binary]

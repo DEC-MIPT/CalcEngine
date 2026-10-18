@@ -15,6 +15,7 @@ from app.schemas.calculation import (
     RoundingRule,
 )
 from app.schemas.parameters import EngineerRule
+from app.schemas.text import LocalizedText
 from app.schemas.units import Dimension
 from app.services.catalog import (
     PARAMETER_MODELS,
@@ -47,10 +48,12 @@ class IdentityCalculator(Calculator[float, float, float]):
 def synthetic_contract(name: str) -> CalculationTypeContract:
     return CalculationTypeContract(
         name=name,
-        inputs=(QuantityDeclaration(name="x", base_unit="m"),),
+        inputs=(QuantityDeclaration(name="x", label=LocalizedText(ru="x"), symbol="x", base_unit="m"),),
         outputs=(
             OutputDeclaration(
                 name="y",
+                label=LocalizedText(ru="y"),
+                symbol="y",
                 base_unit="m",
                 rounding_rule=RoundingRule(decimals=2, mode="half_up"),
                 rounding_source=EngineerRule(engineer="<ENGINEER>", rationale="<RATIONALE>"),
@@ -134,7 +137,14 @@ def test_the_pilot_view_lists_inputs_and_outputs_in_contract_order() -> None:
     assert [item.base_unit for item in view.inputs] == [
         q.base_unit for q in foundations_shallow_r.INPUTS
     ]
-    assert view.outputs == (OutputView(name="R", base_unit="kPa"),)
+    assert view.outputs == (
+        OutputView(
+            name="R",
+            base_unit="kPa",
+            label=LocalizedText(ru="Расчётное сопротивление грунта", en="Design soil resistance"),
+            symbol="R",
+        ),
+    )
 
 
 def test_the_view_takes_each_dimension_from_the_unit_vocabulary() -> None:
@@ -151,7 +161,7 @@ def test_the_view_leaves_out_rounding_checks_and_sources() -> None:
     (view,) = calculation_types(build_registry(PARAMS_ROOT))
 
     assert set(view.model_dump()) == {"name", "inputs", "outputs"}
-    assert set(view.outputs[0].model_dump()) == {"name", "base_unit"}
+    assert set(view.outputs[0].model_dump()) == {"name", "base_unit", "label", "symbol"}
 
 
 def test_an_empty_registry_has_no_types() -> None:
@@ -168,8 +178,18 @@ def test_types_are_listed_in_registration_order() -> None:
     assert [view.name for view in views] == ["second", "first"]
     assert views[0] == CalculationTypeView(
         name="second",
-        inputs=(InputView(name="x", base_unit="m", dimension=Dimension.LENGTH, units=("m", "cm", "mm")),),
-        outputs=(OutputView(name="y", base_unit="m"),),
+        inputs=(
+            InputView(
+                name="x",
+                base_unit="m",
+                dimension=Dimension.LENGTH,
+                units=("m", "cm", "mm"),
+                label=LocalizedText(ru="x"),
+                symbol="x",
+                whole_values_only=False,
+            ),
+        ),
+        outputs=(OutputView(name="y", base_unit="m", label=LocalizedText(ru="y"), symbol="y"),),
     )
 
 
