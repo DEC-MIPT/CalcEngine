@@ -9,6 +9,7 @@ from test_reporting_model import REQUEST, report
 
 from app.engine import foundations_shallow_r as pilot
 from app.engine.registry import CalculatorRegistry
+from app.reporting.accountability import RESPONSIBILITY
 from app.reporting.docx_writer import (
     TRACE_NORM_STATUS,
     conclusion_lines,
@@ -52,7 +53,7 @@ def formulas(data: bytes) -> list[BaseOxmlElement]:
 def test_the_docx_holds_the_body_sections_in_order() -> None:
     paragraphs, _ = read_back(render_docx(report()))
 
-    expected = ["1 Исходные данные", "2 Расчёт", "3 Заключение", "4 Подотчётность результата"]
+    expected = ["1 Исходные данные", "2 Расчёт", "3 Заключение"]
     assert [text for text in paragraphs if text in expected] == expected
 
 
@@ -199,7 +200,7 @@ def test_a_refused_report_prints_the_refusal_and_the_bound() -> None:
     assert paragraphs[trace_start + 2] == "3 Заключение"
     lines = conclusion_lines(conclusion, model.symbols, model.rounding)
     assert paragraphs[trace_start + 3 : trace_start + 3 + len(lines)] == [plain(line) for line in lines]
-    assert paragraphs[trace_start + 3 + len(lines)] == "4 Подотчётность результата"
+    assert paragraphs[trace_start + 3 + len(lines) :] == [RESPONSIBILITY]
     assert latex(lines[1]) == r"Нарушенная граница: $b = 2\ \text{м}$, допускается не более $1\ \text{м}$."
     assert plain(lines[2]).endswith("(статус: не проверено)")
 
@@ -235,4 +236,4 @@ def test_a_report_of_200_trace_steps_renders_in_under_a_minute() -> None:
 
     assert elapsed < 60
     assert "200. Формула s199" in paragraphs
-    assert "4 Подотчётность результата" in paragraphs
+    assert "3 Заключение" in paragraphs

@@ -45,8 +45,16 @@ REFUSED_TRACE = "Расчёт не выполнялся: входное знач
 TRACE_NORM_STATUS = False
 """Печатать ли статус проверки ссылок в шагах расчёта.
 
-В первой итерации пилота он не печатается; статус остаётся в блоке подотчётности и у
-источников границ.
+В первой итерации пилота он не печатается; статус остаётся у источников границ в
+заключении.
+"""
+
+ACCOUNTABILITY_SECTION = False
+"""Печатать ли раздел «Подотчётность результата».
+
+В первой итерации пилота он не печатается; нумерация остальных разделов не меняется, а
+фраза об ответственности инженера печатается последним абзацем заключения. Модель отчёта
+по-прежнему собирает этот раздел, так что вернуть его можно, включив флаг.
 """
 
 
@@ -197,7 +205,10 @@ def render_docx(report: Report) -> bytes:
     document = Document()
     apply_sheet(document)
     add_title_blocks(document, report.request)
-    for number, section in enumerate(report.body, start=1):
+    sections = [
+        section for section in report.body if ACCOUNTABILITY_SECTION or not isinstance(section, AccountabilitySection)
+    ]
+    for number, section in enumerate(sections, start=1):
         heading = document.add_paragraph()
         heading.add_run(f"{number} {SECTION_TITLES[section.kind]}").bold = True
         if isinstance(section, InputSection):
@@ -209,6 +220,8 @@ def render_docx(report: Report) -> bytes:
             document.add_paragraph().add_run(RESPONSIBILITY).bold = True
         else:
             _write_lines(document, conclusion_lines(section, report.symbols, report.rounding))
+            if not ACCOUNTABILITY_SECTION:
+                document.add_paragraph().add_run(RESPONSIBILITY).bold = True
     buffer = BytesIO()
     document.save(buffer)
     return buffer.getvalue()
