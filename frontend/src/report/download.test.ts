@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { fileNameFrom, saveFile } from './download'
 
 afterEach(() => {
+  vi.useRealTimers()
   vi.restoreAllMocks()
   Reflect.deleteProperty(URL, 'createObjectURL')
   Reflect.deleteProperty(URL, 'revokeObjectURL')
@@ -41,7 +42,6 @@ describe('saveFile', () => {
     expect(clicked).toEqual([{ href: 'blob:report', download: 'report.docx' }])
     expect(revoke).not.toHaveBeenCalled()
     vi.runAllTimers()
-    vi.useRealTimers()
     expect(revoke).toHaveBeenCalledWith('blob:report')
     expect(document.querySelector('a[download]')).toBeNull()
   })
