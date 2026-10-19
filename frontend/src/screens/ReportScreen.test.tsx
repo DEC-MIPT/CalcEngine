@@ -249,6 +249,7 @@ describe('report download and errors (7.2)', () => {
     expect(alert).toHaveTextContent('Запрос отклонён')
     expect(within(alert).getByText('the signature block needs the surname and the date of developer')).toBeInTheDocument()
     expect(messageOf('Обозначение документа')).toBe('String should have at most 123 characters')
+    expect(screen.getByLabelText('Обозначение документа')).toHaveFocus()
     expect(screen.getByText('Input should be a valid boolean')).toBeInTheDocument()
     expect(saved).toEqual([])
     expect(stampOf()).toBeNull()

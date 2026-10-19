@@ -345,20 +345,9 @@ describe('Trace: step-by-step playback', () => {
     expect(document.querySelector('[data-skip-hint]')).toHaveTextContent(`03/${steps.length * 2}`)
   })
 
-  it('skips on a click anywhere in the trace', () => {
-    const skip = play('playing', 1)
+  it('shows no way to skip once the playback is over', () => {
+    play('ended', steps.length)
 
-    fireEvent.click(screen.getByRole('heading', { name: 'Ход расчёта' }))
-
-    expect(skip).toHaveBeenCalledTimes(1)
-  })
-
-  it('does not listen to clicks once the playback is over', () => {
-    const skip = play('ended', steps.length)
-
-    fireEvent.click(screen.getByRole('heading', { name: 'Ход расчёта' }))
-
-    expect(skip).not.toHaveBeenCalled()
     expect(document.querySelector('[data-skip-hint]')).toBeNull()
     expect(arrivals().every((arrival) => arrival === 'reveal')).toBe(true)
   })

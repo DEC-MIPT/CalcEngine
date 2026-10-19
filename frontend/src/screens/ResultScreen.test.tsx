@@ -130,6 +130,39 @@ describe('opening a result by its address (4.3)', () => {
     expect(screen.getByRole('link', { name: 'К выбору типа расчёта' })).toHaveAttribute('href', '/')
   })
 
+  it('says that the result was not found for an id the backend rejects as malformed', async () => {
+    server.use(
+      http.get('*/calculations/:id', () =>
+        HttpResponse.json(
+          {
+            code: 'validation_error',
+            message: 'The request does not match its schema.',
+            fields: [{ location: ['path', 'result_id'], message: 'Invalid value.' }],
+          },
+          { status: 422 },
+        ),
+      ),
+    )
+    open('/calculations/abc')
+
+    expect(await screen.findByRole('heading', { name: 'Результат не найден' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Повторить' })).toBeNull()
+  })
+
+  it.each([
+    ['another field', [{ location: ['query', 'x'], message: 'Invalid value.' }]],
+    ['no field', []],
+  ])('shows a 422 that names %s as an error', async (_case, fields) => {
+    server.use(
+      http.get('*/calculations/:id', () =>
+        HttpResponse.json({ code: 'validation_error', message: 'The request does not match its schema.', fields }, { status: 422 }),
+      ),
+    )
+    open(`/calculations/${PASS_ID}`)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('validation_error')
+  })
+
   it('shows a 503 with its code and retries the same request', async () => {
     server.use(
       http.get('*/calculations/:id', () =>

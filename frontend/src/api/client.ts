@@ -10,11 +10,15 @@ export type ApiError =
 
 export type ApiResult<T> = { ok: true; data: T } | { ok: false; error: ApiError }
 
-const DEFAULT_BASE_URL = 'http://127.0.0.1:8000'
+const DEV_BASE_URL = 'http://127.0.0.1:8000'
+
+export function baseUrlFrom(env: { VITE_API_BASE_URL?: string; DEV: boolean }): string {
+  return env.VITE_API_BASE_URL ?? (env.DEV ? DEV_BASE_URL : '')
+}
 
 export function createApi(options: ClientOptions = {}) {
   return createClient<paths>({
-    baseUrl: import.meta.env.VITE_API_BASE_URL ?? DEFAULT_BASE_URL,
+    baseUrl: baseUrlFrom(import.meta.env),
     fetch: (request) => globalThis.fetch(request),
     ...options,
   })

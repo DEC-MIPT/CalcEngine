@@ -5,13 +5,15 @@ import 'mathjax-full/js/input/tex/ams/AmsConfiguration.js'
 import 'mathjax-full/js/input/tex/base/BaseConfiguration.js'
 import { mathjax } from 'mathjax-full/js/mathjax.js'
 import { SVG } from 'mathjax-full/js/output/svg.js'
+import { SafeHandler } from 'mathjax-full/js/ui/safe/SafeHandler.js'
 
 type Document = ReturnType<typeof createDocument>
 
 function createDocument() {
   const adaptor = browserAdaptor()
-  RegisterHTMLHandler(adaptor)
+  SafeHandler(RegisterHTMLHandler(adaptor))
   return mathjax.document('', {
+    safeOptions: { allow: { URLs: 'none', classes: 'none', cssIDs: 'none', styles: 'none' } },
     InputJax: new TeX({
       packages: ['base', 'ams'],
       formatError: (_jax: unknown, error: Error): never => {

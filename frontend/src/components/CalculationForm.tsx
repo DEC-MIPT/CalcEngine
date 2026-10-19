@@ -220,6 +220,8 @@ export function CalculationForm({ type }: { type: CalculationType }) {
           ? [result.error.message]
           : mapped.general,
       )
+      const marked = type.inputs.find((input) => input.name in mapped.byField)
+      if (marked) document.getElementById(fieldId(marked.name))?.focus()
     } else {
       setFailure(result.error)
     }
@@ -295,7 +297,12 @@ export function CalculationForm({ type }: { type: CalculationType }) {
           </div>
         )}
         <div className="col-start-2 grid gap-2 sm:col-start-3 sm:self-start">
-          <Button type="submit" disabled={submitting} className="w-full">
+          <Button
+            type="submit"
+            aria-disabled={submitting ? true : undefined}
+            aria-busy={submitting ? true : undefined}
+            className="w-full aria-disabled:cursor-not-allowed aria-disabled:opacity-60 aria-disabled:active:translate-y-0"
+          >
             {t(submitting ? 'form.submitting' : 'form.submit')}
           </Button>
           <span aria-hidden="true" className="block h-0.5 bg-border">

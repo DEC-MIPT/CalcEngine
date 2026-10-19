@@ -97,6 +97,27 @@ describe('useTracePlayback', () => {
     expect(result.current.phase).toBe('skipped')
   })
 
+  it('skips on a click anywhere on the page', () => {
+    const { result } = renderHook(() => useTracePlayback('r1', 3))
+
+    act(() => {
+      document.body.click()
+    })
+
+    expect(result.current).toMatchObject({ shown: 3, phase: 'skipped' })
+  })
+
+  it('stops listening to clicks once the playback is over', () => {
+    const { result } = renderHook(() => useTracePlayback('r1', 3))
+    for (let step = 0; step < 3; step += 1) act(() => vi.advanceTimersByTime(stepInterval(3)))
+
+    act(() => {
+      document.body.click()
+    })
+
+    expect(result.current.phase).toBe('ended')
+  })
+
   it('skips on Tab and leaves the focus move to the browser', () => {
     const { result } = renderHook(() => useTracePlayback('r1', 3))
 

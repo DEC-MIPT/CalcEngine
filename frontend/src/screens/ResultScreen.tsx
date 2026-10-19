@@ -1,7 +1,7 @@
 import { ArrowRight } from '@phosphor-icons/react'
 import { useCallback, useMemo } from 'react'
 import { Link, useParams } from 'react-router'
-import { api, unwrap } from '@/api/client'
+import { api, unwrap, type ApiError } from '@/api/client'
 import type { components } from '@/api/schema'
 import { useRequest } from '@/api/useRequest'
 import { Outputs } from '@/components/Outputs'
@@ -25,6 +25,13 @@ type CheckReason = components['schemas']['CheckReason']
 type CalculationType = components['schemas']['CalculationTypeView']
 
 const loadTypes = () => unwrap(api.GET('/calculation-types'))
+
+const isMissingResult = (error: ApiError) =>
+  error.kind === 'api' &&
+  (error.status === 404 ||
+    (error.status === 422 &&
+      error.fields.length > 0 &&
+      error.fields.every((field) => field.location.join('.') === 'path.result_id')))
 
 const SHOW_NORM_STATUS = false
 const SHOW_ROUNDING_SOURCE = false
@@ -79,7 +86,7 @@ export function ResultScreen() {
   const { state: typesState } = useRequest(loadTypes)
   const { sent } = useDraft()
 
-  if (state.status === 'error' && state.error.kind === 'api' && state.error.status === 404) {
+  if (state.status === 'error' && isMissingResult(state.error)) {
     return <NotFoundState subject="result" />
   }
   const editType = state.status === 'ok' && sent?.resultId === state.data.result_id ? sent.type : null

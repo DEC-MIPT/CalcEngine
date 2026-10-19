@@ -53,6 +53,20 @@ describe('Formula', () => {
     expect(container.querySelector('a, script, svg')).toBeNull()
   })
 
+  it.each([
+    String.raw`\mmlToken{mi}[href="javascript:alert(1)"]{x}`,
+    String.raw`\mmlToken{mi}[style="position:fixed;inset:0;background:red"]{x}`,
+    String.raw`\mmlToken{mi}[class="evil" id="evil"]{x}`,
+  ])('drops the link, style, class and id that %s asks for', (latex) => {
+    const { container } = render(<Formula latex={latex} />)
+
+    const svg = container.querySelector('svg')
+
+    expect(svg).not.toBeNull()
+    expect(svg?.querySelector('a, [href], .evil, #evil')).toBeNull()
+    expect(svg?.outerHTML).not.toMatch(/javascript:|position:\s*fixed/)
+  })
+
   it('typesets again when the formula changes', () => {
     const { rerender } = render(<Formula latex="a" />)
 

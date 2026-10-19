@@ -1,5 +1,5 @@
 import { CaretRight, CheckCircle, WarningCircle, XCircle } from '@phosphor-icons/react'
-import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
 import { checkRounding, type OutputRounding } from '@/lib/rounding'
@@ -179,15 +179,7 @@ export function Trace({
 }) {
   const { t, formatNumber } = useI18n()
   const table = useMemo(() => symbols ?? symbolTable(steps), [symbols, steps])
-  const section = useRef<HTMLElement>(null)
   const playing = playback?.phase === 'playing'
-  const skip = playback?.skip
-  useLayoutEffect(() => {
-    const node = section.current
-    if (!playing || !node || !skip) return
-    node.addEventListener('click', skip)
-    return () => node.removeEventListener('click', skip)
-  }, [playing, skip])
   const [expanded, setExpanded] = useState<ReadonlySet<number>>(() => new Set(steps.map((_, index) => index)))
   const toggle = (index: number) =>
     setExpanded((current) => {
@@ -196,7 +188,7 @@ export function Trace({
       return next
     })
   return (
-    <section ref={section} aria-labelledby="trace-title" className="mt-8 grid gap-4" data-playback={playback?.phase ?? 'idle'}>
+    <section aria-labelledby="trace-title" className="mt-8 grid gap-4" data-playback={playback?.phase ?? 'idle'}>
       <h2 id="trace-title" tabIndex={-1} className="scroll-mt-4">
         {t('trace.title')}
       </h2>

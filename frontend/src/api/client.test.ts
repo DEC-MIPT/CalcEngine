@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createApi, unwrap } from './client'
+import { baseUrlFrom, createApi, unwrap } from './client'
 
 function json(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
@@ -11,6 +11,17 @@ function json(status: number, body: unknown): Response {
 function apiWith(respond: () => Response | Promise<Response>) {
   return createApi({ baseUrl: 'http://test.local', fetch: async () => respond() })
 }
+
+describe('baseUrlFrom', () => {
+  it('takes the configured address in any build', () => {
+    expect(baseUrlFrom({ VITE_API_BASE_URL: 'https://api.example', DEV: false })).toBe('https://api.example')
+  })
+
+  it('falls back to the local backend only in development', () => {
+    expect(baseUrlFrom({ DEV: true })).toBe('http://127.0.0.1:8000')
+    expect(baseUrlFrom({ DEV: false })).toBe('')
+  })
+})
 
 describe('unwrap', () => {
   it('returns the data of a successful response', async () => {

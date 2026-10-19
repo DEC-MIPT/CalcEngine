@@ -210,6 +210,8 @@ export function ReportForm({ resultId }: { resultId: string }) {
       const mapped = mapReportErrors(error.fields, FIELD_KEYS)
       setErrors(mapped.byField)
       setGeneral(mapped.general.length === 0 && Object.keys(mapped.byField).length === 0 ? [error.message] : mapped.general)
+      const marked = FIELD_KEYS.find((key) => key in mapped.byField)
+      if (marked) document.getElementById(fieldId(marked))?.focus()
     } else {
       setFailure(error)
     }

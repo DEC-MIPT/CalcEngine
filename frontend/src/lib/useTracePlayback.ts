@@ -57,7 +57,11 @@ export function useTracePlayback(resultId: string, stepCount: number): TracePlay
       skip()
     }
     document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
+    document.addEventListener('click', skip)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      document.removeEventListener('click', skip)
+    }
   }, [playing, skip])
 
   let phase: PlaybackPhase = 'idle'

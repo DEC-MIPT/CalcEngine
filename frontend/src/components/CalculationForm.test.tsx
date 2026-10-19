@@ -103,7 +103,7 @@ function fillPilot(overrides: Record<string, string> = {}) {
 
 const submit = () => fireEvent.click(screen.getByRole('button', { name: 'Рассчитать' }))
 
-function recordRequests(response: () => Response = () => HttpResponse.json(passEnvelope, { status: 201 })) {
+function recordRequests(response: () => Response | Promise<Response> = () => HttpResponse.json(passEnvelope, { status: 201 })) {
   const bodies: components['schemas']['CalculationRequest'][] = []
   server.use(
     http.post('*/calculations', async ({ request }) => {
@@ -295,6 +295,7 @@ describe('CalculationForm: server 422 (5.3)', () => {
 
     expect(await screen.findByText('b is wrong')).toBeInTheDocument()
     expect(screen.getByText('d_1 is wrong')).toBeInTheDocument()
+    expect(screen.getByLabelText(label('b'))).toHaveFocus()
   })
 
   it('shows an entry that names no field above the form', async () => {
@@ -358,25 +359,29 @@ describe('CalculationForm: values outside the method range (5.4)', () => {
     expect(bodies[0].inputs.phi_II).toEqual({ value: 89, unit: 'deg' })
   })
 
-  it('disables the button while the request is pending', async () => {
+  it('marks the button disabled while the request is pending, keeps its focus, and sends once', async () => {
     let release = () => {}
     const pending = new Promise<void>((resolve) => {
       release = resolve
     })
-    server.use(
-      http.post('*/calculations', async () => {
-        await pending
-        return HttpResponse.json(passEnvelope, { status: 201 })
-      }),
-    )
+    const requests = recordRequests(async () => {
+      await pending
+      return HttpResponse.json(passEnvelope, { status: 201 })
+    })
     open(pilot)
     fillPilot()
+    screen.getByRole('button', { name: 'Рассчитать' }).focus()
 
     submit()
 
-    expect(await screen.findByRole('button', { name: 'Расчёт…' })).toBeDisabled()
+    const button = await screen.findByRole('button', { name: 'Расчёт…' })
+    expect(button).toHaveAttribute('aria-disabled', 'true')
+    expect(button).toHaveAttribute('aria-busy', 'true')
+    expect(button).toHaveFocus()
+    fireEvent.click(button)
     release()
     await waitFor(() => expect(screen.queryByRole('button', { name: 'Расчёт…' })).not.toBeInTheDocument())
+    expect(requests).toHaveLength(1)
   })
 })
 
