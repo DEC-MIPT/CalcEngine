@@ -1,0 +1,23 @@
+import type { Dictionaries, Language, TextKey } from './dictionary'
+
+export function translate(
+  dictionaries: Dictionaries,
+  language: Language,
+  key: TextKey,
+): string {
+  return dictionaries[language][key] ?? dictionaries.ru[key]
+}
+
+const locales: Readonly<Record<Language, string>> = { ru: 'ru-RU', en: 'en-US' }
+
+export function formatNumber(value: number, language: Language, minimumFractionDigits = 0): string {
+  return new Intl.NumberFormat(locales[language], {
+    minimumFractionDigits,
+    maximumFractionDigits: 20,
+    useGrouping: false,
+  }).format(value)
+}
+
+export function pickText(text: { ru: string; en?: string | null }, language: Language): string {
+  return language === 'en' && text.en ? text.en : text.ru
+}
