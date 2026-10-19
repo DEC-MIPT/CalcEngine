@@ -391,6 +391,23 @@ Work Akim chose after section 9, done before its spec text; recorded here on 202
   replaced at import, no `sys.stdout` swap), and that degrees read `20°`; `backend/check.sh` with
   100% branch coverage (done 2026-10-18 on `feature/frontend-app/backend`, `dd3870f`: 971 passed,
   coverage 100%; `orchestrator` APPROVED in its third round)
+- [x] 10.15 Close the `orchestrator` review of the frontend feature (2026-10-19): typeset every
+  formula through the MathJax safe handler with URLs, classes, CSS ids and styles not allowed, so
+  that `\mmlToken` attributes from a server string reach no link or style (`web-platform` "Hostile
+  symbol", `design.md` decision 1); show a `422` on `path.result_id` as "not found"; run
+  Playwright on its own port without server reuse; keep `mockServiceWorker.js` out of a non-mock
+  build and the local backend fallback out of a production build; read only `filename*` as
+  percent-encoded and revoke the object URL after a delay; move focus to the first field a server
+  `422` marks in both forms and keep the calculate button focusable while sending
+  (`aria-disabled`); end the trace playback on a click anywhere on the page; move the Tailwind
+  packages to `devDependencies` (frontend); verify: tests that the `\mmlToken` link
+  (`javascript:` and `https:`), style (`position:fixed` and `color:red`), class and id payloads
+  typeset with none of them and fail without the strict options, that a malformed id shows "not
+  found" and other `422`s an error, that a production build has no `mockServiceWorker.js` and no
+  `127.0.0.1:8000`, the file name cases, the focus moves, one request per send, and the page-wide
+  skip; `frontend/check.sh` with 100% branch coverage (done 2026-10-19 on
+  `feature/frontend-app/frontend`, `1e701c0` and `8fc6d40`: 478 passed, branches 100%;
+  `orchestrator` APPROVED in its second round)
 
 ## Requirement coverage
 

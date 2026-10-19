@@ -198,3 +198,67 @@ Not blocking: the round-one notes on `npm audit` and `coverage.include` stay; a
 
 Next: the review (AGENTS.md section 2, step 7) and the merge into `develop`, then tasks 8.10 and
 8.11. The branch is pushed at `c3c37c4`.
+
+## `orchestrator` review of the frontend feature (2026-10-19)
+
+Two rounds on `feature/frontend-app/frontend`; the fixes are task 10.15, commits `1e701c0` and
+`8fc6d40`.
+
+- Round 1 at `c3c37c4`: CHANGES REQUESTED, blocker 0, major 1, minor 7. Scope: the diff over
+  `origin/develop`, which is `frontend/` plus one `.secrets.baseline` entry (`69c7b8a`, the MSW
+  worker's integrity checksum, a false positive reviewed by hand on the feature branch, AGENTS.md
+  section 2). `frontend/check.sh` exit 0 (463 passed, branches 100%); `git merge-tree` against
+  `origin/develop` has no conflict. Verified: the production build holds no mock code; no
+  `dangerouslySetInnerHTML`; `rounding.ts` matches `RoundingRule.apply` on 2.675, 2.665, -2.5,
+  1e-7, 1.5e21 and -0.004; `@xmldom/xmldom` comes only through `mathjax-full` →
+  `speech-rule-engine`, and the bundle contains no code from either.
+  - M1 (major): the base TeX package keeps `\mmlToken`, whose `href` and `style` attributes
+    reached the SVG output: `\mmlToken{mi}[href="javascript:alert(1)"]{x}` yielded
+    `<a href="javascript:alert(1)">`, against "Hostile symbol" and design decision 1.
+  - Minor: m1 a malformed `result_id` (`422` on `["path","result_id"]`) showed a retry, not "not
+    found"; m2 Playwright could reuse a non-mock server on 5173; m3 `mockServiceWorker.js` shipped
+    in `dist/`; m4 the `127.0.0.1:8000` fallback was built into production; m5 `fileNameFrom`
+    decoded a plain `filename=` and could throw, and the object URL was revoked at once; m6 no
+    focus move after a server `422`, and `disabled` on the calculate button dropped focus; m7 only
+    a click on the trace ended the playback, while the requirement says "a pointer click". Nit:
+    the Tailwind packages were in `dependencies`.
+- Round 2 at `1e701c0`: **APPROVED.** M1 closed by the MathJax `SafeHandler` (URLs, classes, CSS
+  ids and styles `none`), with tests that the `\mmlToken` link, style, class and id payloads
+  typeset with none of them; m1 by treating a `422` whose every field is `path.result_id` as not
+  found; m2 by port 5179 without server reuse; m3 by a build plugin that removes
+  `mockServiceWorker.js` from a non-mock `dist/` (checked in both modes); m4 by the
+  development-only fallback to `127.0.0.1:8000` (same origin otherwise); m5 by decoding only
+  `filename*`, with a fallback, and revoking the object URL after 40 s; m6 by focusing the first
+  field marked by a `422` and `aria-disabled` on the calculate button (one request, focus kept);
+  m7 by a `document` click listener inside `useTracePlayback`. The Tailwind packages moved to
+  `devDependencies` (the lockfile gains six optional `oxide-wasm32-wasi` entries); `npm audit
+  --omit=dev` no longer reports `source-map-js`. `frontend/check.sh`: 476 passed, branches 100%
+  (616/616). Not blocking: `download.test.ts` turned fake timers off inside the test body.
+- After round 2, `8fc6d40` changes two test files only: cases `href="https://example.com"` and
+  `style="color:red"`, which fail without the strict safe options, and `vi.useRealTimers()` moved
+  into `afterEach`.
+
+## Task 8.2, frontend feature confirmed at `8fc6d40` (2026-10-19)
+
+**`tester`: GO for the frontend feature** at `8fc6d40`. Since the final-round GO at `c3c37c4` there
+are two commits: `1e701c0` (task 10.15, the `orchestrator` review fixes, `frontend/` only) and
+`8fc6d40` (two test files).
+
+At `1e701c0`: Playwright on its own server at port 5179, Chromium 34 passed and `formulas.spec.ts`
+passed in Firefox and WebKit; a production build has no `mockServiceWorker.js` and no
+`127.0.0.1:8000`; each fix was broken by hand, and M1, m1, m4, m5, m6 (both focus moves and
+`aria-disabled`) and m7 each fail at least one test.
+
+At `8fc6d40`: `frontend/check.sh` exit 0, 478 passed, branch coverage 100% (616/616);
+`pre-commit run --all-files` passed. With `safeOptions` removed from `typeset.ts`, three cases fail:
+MathJax's default safe filter keeps an `https` link, `color: red`, and the `background:red` of the
+`position:fixed` case as `background-color: red` (it drops `position` and `inset`). So the stricter
+options of M1 are covered by tests.
+
+UI/UX: the round-one confirmation stands. The `aria-disabled` styles copy the `disabled` ones, and
+the axe and keyboard e2e tests pass.
+
+Not blocking: `vite.config.ts` is outside coverage; a production build checks its plugin instead.
+
+Next: the merge into `develop` (the `orchestrator` review is approved, section above), then tasks
+8.10 and 8.11.
