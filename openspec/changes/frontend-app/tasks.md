@@ -246,9 +246,13 @@ before task 2.1.
   percentile is 1000 ms or more (done 2026-10-18 on `feature/frontend-app/frontend`, `b538708`:
   `frontend/e2e/transition-time.spec.ts`; p95: type selection to form 11 ms, form to result 762 ms
   with the 700 ms computation trace, result by address 54 ms, report to stamp 578 ms)
-- [ ] 8.10 (spec) After the merge of the frontend feature, update the command lists of `AGENTS.md`
+- [x] 8.10 (spec) After the merge of the frontend feature, update the command lists of `AGENTS.md`
   and `CLAUDE.md` with `npm run gen:api`, `npm run dev:mock` and the Playwright command (documents,
-  on `develop`; needs Akim's word to edit them)
+  on `develop`; needs Akim's word to edit them) (done 2026-10-19 on `develop`, with Akim's word:
+  `CLAUDE.md` "Commands that exist today" lists `npm run dev`, `npm run dev:mock`, `npm run gen:api`
+  and `npm run test:e2e` with the one-time Playwright install, and its status names the merge;
+  `AGENTS.md` has no command list, and its section 7 already names Vitest and Playwright, so it is
+  unchanged)
 - [ ] 8.11 (spec) Archive this change after both features are merged and after `calculation-api`
   and `calculation-core-contract` are archived
 
