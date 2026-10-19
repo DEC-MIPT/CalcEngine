@@ -12,7 +12,7 @@ import os
 from typing import Any
 
 READER_ROLE = "dec_normatives_reader"
-READER_PASSWORD_VAR = "DEC_NORMATIVES_READER_PASSWORD"
+READER_PASSWORD_VAR = "DEC_NORMATIVES_READER_PASSWORD"  # pragma: allowlist secret
 
 _NORM_REF = """jsonb_build_array(jsonb_build_object(
         'document', d.designation,
@@ -46,14 +46,19 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, public AS $$
     FROM (
         SELECT 'clause'::text AS kind, d.id AS document_id, d.designation, d.edition,
                c.number AS number, NULLIF(c.title, '') AS title,
-               similarity(c.search_text, query) AS rank
+               greatest(similarity(c.search_text, query),
+                        word_similarity(query, c.search_text)) AS rank
         FROM clause c JOIN document d ON d.id = c.document_id
         WHERE similarity(c.search_text, query) > 0.1
+           OR word_similarity(query, c.search_text) > 0.3
         UNION ALL
         SELECT 'formula'::text, d.id, d.designation, d.edition,
-               f.number, NULL::text, similarity(f.search_text, query)
+               f.number, NULL::text,
+               greatest(similarity(f.search_text, query),
+                        word_similarity(query, f.search_text))
         FROM formula f JOIN document d ON d.id = f.document_id
         WHERE similarity(f.search_text, query) > 0.1
+           OR word_similarity(query, f.search_text) > 0.3
         UNION ALL
         SELECT 'document'::text, d.id, d.designation, d.edition,
                NULL::text, NULLIF(d.title, ''), similarity(d.designation, query)
@@ -147,5 +152,8 @@ def ensure_catalog_read(conn: Any, password: str | None = None) -> bool:
         cur.execute(f'REVOKE ALL ON ALL TABLES IN SCHEMA public FROM "{READER_ROLE}"')
         cur.execute(f'REVOKE ALL ON SCHEMA public FROM "{READER_ROLE}"')
         cur.execute("REVOKE CREATE ON SCHEMA public FROM PUBLIC")
+        cur.execute("SELECT current_database()")
+        dbname = cur.fetchone()["current_database"]
+        cur.execute(f'REVOKE TEMPORARY ON DATABASE "{dbname}" FROM "{READER_ROLE}"')
     conn.commit()
     return True

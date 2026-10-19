@@ -22,6 +22,7 @@ from app.schemas.calculation import (
     RoundingRule,
 )
 from app.schemas.parameters import EngineerRule
+from app.schemas.text import LocalizedText
 from app.services.calculation import CalculationService
 from app.services.parameter_source import ResolvedParameters
 
@@ -36,12 +37,14 @@ REF = NormRef(
 CONTRACT = CalculationTypeContract(
     name="synthetic",
     inputs=(
-        QuantityDeclaration(name="b", base_unit="m"),
-        QuantityDeclaration(name="p", base_unit="kPa"),
+        QuantityDeclaration(name="b", label=LocalizedText(ru="b"), symbol="b", base_unit="m"),
+        QuantityDeclaration(name="p", label=LocalizedText(ru="p"), symbol="p", base_unit="kPa"),
     ),
     outputs=(
         OutputDeclaration(
             name="y",
+            label=LocalizedText(ru="y"),
+            symbol="y",
             base_unit="m",
             rounding_rule=RoundingRule(decimals=2, mode="half_up"),
             rounding_source=EngineerRule(engineer="<ENGINEER>", rationale="<RATIONALE>"),

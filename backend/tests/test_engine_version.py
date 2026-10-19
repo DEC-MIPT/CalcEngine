@@ -16,6 +16,7 @@ from app.schemas.calculation import (
     RoundingRule,
 )
 from app.schemas.parameters import EngineerRule
+from app.schemas.text import LocalizedText
 
 BACKEND = Path(__file__).resolve().parents[1]
 ENGINE = Path(app.engine.__file__).parent
@@ -38,10 +39,12 @@ def test_a_result_carries_the_engine_version() -> None:
     rule = EngineerRule(engineer="<ENGINEER>", rationale="<RATIONALE>")
     contract = CalculationTypeContract(
         name="synthetic",
-        inputs=(QuantityDeclaration(name="x", base_unit="m"),),
+        inputs=(QuantityDeclaration(name="x", label=LocalizedText(ru="x"), symbol="x", base_unit="m"),),
         outputs=(
             OutputDeclaration(
                 name="y",
+                label=LocalizedText(ru="y"),
+                symbol="y",
                 base_unit="m",
                 rounding_rule=RoundingRule(decimals=1, mode="half_up"),
                 rounding_source=rule,

@@ -115,7 +115,11 @@ The system SHALL select a table value that depends on an input by the row headin
 table, with exactly one heading per parameter. The contract SHALL give, for each row of
 such a table, the heading's symbol (an input of the calculation type), the heading's
 value, and the heading's unit; every row of one parameter SHALL have a heading, or none
-SHALL. The backend SHALL convert the heading values and the input to the input's base
+SHALL. The backend SHALL know, for each calculation type, which table parameters its
+method selects by which input; this is the method's structure, not a norm value. A
+parameter that the method selects by an input SHALL come with headings of that input,
+and a parameter that the method selects by no input SHALL come as exactly one row with
+no heading symbol, heading value or heading unit. The backend SHALL convert the heading values and the input to the input's base
 unit at the boundary and SHALL select the row whose converted heading value equals the
 converted input exactly. Exact
 matching is an API rule of the backend, not a norm rule. The backend SHALL NOT
@@ -155,8 +159,11 @@ error", requires, whether or not it matches a row.
 #### Scenario: Rows that break the table rules
 - **WHEN** the contract gives, for one parameter, two rows with equal heading values,
   rows with a heading mixed with rows without one, rows with different heading symbols,
-  a heading symbol that names no input of the type, or a heading unit outside the
-  accepted list or of another dimension than that input
+  a heading symbol that names no input of the type, a heading unit outside the
+  accepted list or of another dimension than that input, a parameter that the method
+  selects by an input without a heading or with the heading of another input, a
+  parameter that the method selects by no input with a heading, or a row with a heading
+  value or heading unit but no heading symbol
 - **THEN** the calculation type is treated as having no usable parameter source
   ("Catalog parameter source", scenario "Catalog data that breaks the contract")
 
@@ -220,8 +227,9 @@ contract, the type SHALL be answered as having no usable parameter source.
 - **WHEN** the catalog data of the requested type miss a declared parameter, add an
   undeclared one, give one parameter in two kinds of entry or in the kind of entry that
   does not match the calculator's declaration, give a value that is not a finite number,
-  give an empty reference list, give a method range with two bounds of one kind on one
-  quantity or with no value between its bounds, or break another rule of this capability
+  give an empty reference list, give a row without a parameter name, give a method range
+  with two bounds of one kind on one quantity or with no value between its bounds, or
+  break another rule of this capability
 - **THEN** the response is `503` with the error body, code
   `parameter_source_unavailable`, naming the type; the engine does not run, nothing is
   stored, and one log line names the type, and the parameter when the breach has one,
@@ -301,8 +309,10 @@ then answer `503` with the error body and code `catalog_unavailable`, and a calc
 request for a type whose parameters come from the catalog SHALL answer `503` with code
 `parameter_source_unavailable` naming the type, with nothing stored. The code
 `catalog_unavailable` extends the error table of `calculation-api` "Error responses"
-with one row and a fixed message, and changes none of its rows. No response and no log
-line SHALL contain the database address or its credentials.
+with one row and a fixed message, and changes none of its rows. A search or document row
+of the contract that does not fit the response SHALL be answered the same way, with one
+log line that names the endpoint and holds no value. No response and no log line SHALL
+contain the database address or its credentials.
 
 #### Scenario: Catalog not configured
 - **WHEN** the application runs without `DEC_NORMATIVES_DATABASE_URL`
@@ -315,6 +325,12 @@ line SHALL contain the database address or its credentials.
   request
 - **THEN** the response is `503` with code `parameter_source_unavailable` naming the
   type, nothing is stored, and the response and log do not contain the database address
+
+#### Scenario: A search or document row of the wrong shape
+- **WHEN** the contract gives a search hit or a document or clause row that does not fit
+  the response, such as a hit of an unknown kind or a document without an edition
+- **THEN** the response is `503` with code `catalog_unavailable`, and one log line
+  `code=catalog_data_invalid` names the endpoint without any value
 
 #### Scenario: Catalog back
 - **WHEN** `dec_normatives` becomes reachable again after a `503`

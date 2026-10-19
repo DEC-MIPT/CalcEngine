@@ -289,10 +289,24 @@ unit. It holds at most one selector under decision 2, and is empty for an unsele
 entry; the tuple keeps the engine side open for a later two-key table. A selector whose
 symbol is not an input of the type makes `confirm_selectors` raise `CalculationError`.
 `table_step` takes its substitutions from `entry.selectors`. A new engine helper,
-`confirm_selectors(entry, inputs)`, converts each selector's value to the base unit of
-the base-unit input named by the selector's symbol with `engine.boundary.convert`, and
-raises `CalculationError` if the result differs from that input. The pilot calls it
+`confirm_selectors(entry, inputs, selected_by)`, first requires the entry's selector
+symbols to be exactly the method's (next paragraph), then converts each selector's value
+to the base unit of the base-unit input named by the selector's symbol with
+`engine.boundary.convert`, and raises `CalculationError` if the result differs from that
+input. The pilot calls it
 before `table_step`.
+
+Which input selects which table parameter is the method's structure, so the backend
+holds it, not the catalog (review of 2026-10-13 by the `orchestrator`, M1). The pilot
+module declares `SELECTORS` (`m_gamma`, `m_q`, `m_c` by `phi_II`), `Registration` carries
+it, and the source receives it as `TABLE_SELECTORS`. The source refuses (decision 7) a
+selected parameter without a heading or with the heading of another input, an
+unselected parameter with a heading, and a row without `heading_symbol` but with a
+`heading_value` or `heading_unit`. `confirm_selectors(entry, inputs, selected_by)` also
+requires the entry's selector symbols to be exactly `(selected_by,)` or empty, so a value
+the method selects by an input can never reach a step unselected. Without this, an
+ingestion error that bound `m_q` as one cell with no heading gave a `201` with a value
+that ignores `phi_II`, and the trace did not show it.
 
 - **Why:** Egor's answer 4 and minor 6 of the engine review. The engine stays pure and
   never looks anything up, but it can no longer silently use a value selected for
@@ -321,6 +335,11 @@ Any breach of the contract in a type's rows makes `CatalogParameterSource` raise
 - an empty or invalid `norm_refs`, or a `NormRef` invariant broken;
 - duplicate headings (equal after conversion to the input's base unit), rows with and
   without a heading mixed in one parameter, or two heading symbols in one parameter;
+- a parameter that the method selects by an input (decision 6, `SELECTORS`) without a
+  heading or with the heading of another input, a parameter that it selects by no input
+  with a heading, or a row with a `heading_value` or `heading_unit` but no
+  `heading_symbol`;
+- a row with no `parameter`;
 - a `heading_symbol` that names no input of the type, a `heading_unit` outside the
   list or of another dimension than that input, or a heading value whose conversion to
   the input's base unit overflows;
@@ -339,6 +358,10 @@ Before that, the source writes one warning line,
 `code=catalog_data_invalid type=<type> parameter=<parameter>` (without `parameter=` when
 the breach has no parameter, as for a missing binding), with no value and no pydantic
 text.
+
+A search hit, document or clause row that does not fit `SearchHit`, `DocumentView` or
+`ClauseView` makes `NormativesService` answer `503 catalog_unavailable`, after one line
+`code=catalog_data_invalid endpoint=<search|document>` with no value.
 
 - **Why:** the client can do nothing about bad catalog data, and the type is in effect
   unavailable until Egor fixes it. A `500` would hide which type is broken.

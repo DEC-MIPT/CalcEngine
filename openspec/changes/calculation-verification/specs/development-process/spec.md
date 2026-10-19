@@ -1,7 +1,6 @@
 ## ADDED Requirements
 
 ### Requirement: Correctness gate for calculation changes
-**Needs Egor review: `development-process` is a shared file. Not final until agreed.**
 
 The system SHALL require, for a change that contains code that adds or modifies a
 calculation, that the

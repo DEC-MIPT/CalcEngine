@@ -3,7 +3,7 @@ import uuid
 
 import pytest
 from sqlalchemy.orm import Session
-from test_reporting_docx import read_back
+from test_reporting_docx import plain, read_back
 from test_services_submit import (
     CONTRACT,
     REF,
@@ -33,7 +33,7 @@ REPORT_REQUEST = ReportRequest(
     developer=Signatory(surname="<DEVELOPER>", date=DAY),
     normative_control=Signatory(surname="<NORM-CONTROL>", date=DAY),
 )
-HEADINGS = ["1 Исходные данные", "2 Расчёт", "3 Заключение", "4 Подотчётность результата"]
+HEADINGS = ["1 Исходные данные", "2 Расчёт", "3 Заключение"]
 
 
 @pytest.fixture
@@ -41,7 +41,7 @@ def results(sqlite_session: Session) -> SpyRepository:
     return SpyRepository(sqlite_session)
 
 
-def test_the_report_holds_the_stored_inputs_trace_conclusion_and_accountability(
+def test_the_report_holds_the_stored_inputs_trace_and_conclusion(
     results: SpyRepository, engine_calls: list[str]
 ) -> None:
     service = make_service(results, FixedSource())
@@ -52,8 +52,7 @@ def test_the_report_holds_the_stored_inputs_trace_conclusion_and_accountability(
     assert [text for text in paragraphs if text in HEADINGS] == HEADINGS
     assert ["b", "1500 мм"] in rows
     assert [row[0] for row in rows if row[0] in ("b", "d", "p")] == ["b", "d", "p"]
-    assert "Выражение: y = 2 b" in paragraphs
-    assert any(str(envelope.result_id) in text for text in paragraphs)
+    assert "Выражение: y=2b" in paragraphs
     assert engine_calls == ["synthetic"]
 
 
@@ -62,9 +61,10 @@ def test_a_refused_result_s_report_states_the_refusal_and_names_the_bound(result
     service = make_service(results, FixedSource(method_range=(bound,)))
     envelope = service.submit(request())
     stored = service.get(envelope.result_id)
-    conclusion = build_report(CONTRACT, stored.inputs, stored.envelope, REPORT_REQUEST).body[2]
+    model = build_report(CONTRACT, stored.inputs, stored.envelope, REPORT_REQUEST)
+    conclusion = model.body[2]
     assert isinstance(conclusion, ConclusionSection)
-    expected = conclusion_lines(conclusion)
+    expected = [plain(line) for line in conclusion_lines(conclusion, model.symbols, model.rounding)]
 
     paragraphs, _ = read_back(service.report(envelope.result_id, REPORT_REQUEST))
 

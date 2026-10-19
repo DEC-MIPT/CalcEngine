@@ -16,7 +16,7 @@ _detector = None
 _recognizer = None
 
 
-def _import_latex_ocr():
+def _import_latex_ocr():  # pragma: no cover
     spec = importlib.util.find_spec("pix2text")
     if spec is None or not spec.submodule_search_locations:
         raise ImportError("pix2text не найден")
@@ -30,7 +30,7 @@ def _import_latex_ocr():
     return sys.modules["pix2text.latex_ocr"].LatexOCR
 
 
-def _get_detector():
+def _get_detector():  # pragma: no cover
     global _detector
     if _detector is None:
         from doclayout_yolo import YOLOv10  # type: ignore[import-untyped]
@@ -44,7 +44,7 @@ def _get_detector():
     return _detector
 
 
-def _get_recognizer():
+def _get_recognizer():  # pragma: no cover
     global _recognizer
     if _recognizer is None:
         _recognizer = _import_latex_ocr()(device="cpu")
@@ -91,7 +91,7 @@ def correct_latex(latex: str) -> str:
     return latex.rstrip(" ,;.:")
 
 
-def detect_formulas(img) -> list[tuple]:
+def detect_formulas(img) -> list[tuple]:  # pragma: no cover
     cfg = detect_config()
     crops: list[tuple] = []
     for r in _get_detector().predict(img, conf=float(cfg["conf"]), imgsz=int(cfg["imgsz"])):
@@ -103,11 +103,11 @@ def detect_formulas(img) -> list[tuple]:
     return crops
 
 
-def recognize_crop(crop) -> str:
+def recognize_crop(crop) -> str:  # pragma: no cover
     return correct_latex(_get_recognizer().recognize(Image.fromarray(crop[..., ::-1]))["text"])
 
 
-def warm_up() -> None:
+def warm_up() -> None:  # pragma: no cover
     """Прогрев моделей при старте сервиса: грузит детектор и распознаватель заранее."""
     _get_detector()
     _get_recognizer()

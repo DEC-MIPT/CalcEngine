@@ -235,6 +235,8 @@ def _caption_line(text: str) -> str:
 
 def _table_caption(page, bbox: tuple, prev_page=None) -> str:
     top = bbox[1]
+    if top <= 0:
+        return ""
     crop = page.within_bbox((0, max(0, top - 60), page.width, top))
     number = _caption_search(crop.extract_text() or "")
     if number:

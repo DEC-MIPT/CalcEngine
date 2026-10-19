@@ -1,7 +1,7 @@
 # Сквозная проверка пайплайна нормативов — Egor, 2026-10-04
 
 Ветка: `feature/normative-formula-contract/data` (зона data/ml).
-База для чистого прогона: пустая `dec_e2e` (`postgresql://dec:dec@localhost:5433/dec_e2e`).
+База для чистого прогона: пустая `dec_e2e` (`postgresql://dec:<password>@localhost:5433/dec_e2e`).
 
 ## Что сделано
 

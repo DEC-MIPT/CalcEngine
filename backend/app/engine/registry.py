@@ -1,6 +1,10 @@
 from typing import Any
 
-from app.core.exceptions import AlreadyRegisteredError, NotFoundError
+from app.core.exceptions import (
+    AlreadyRegisteredError,
+    ContractMetadataError,
+    NotFoundError,
+)
 from app.engine.base import Calculator
 from app.schemas.calculation import CalculationTypeContract
 
@@ -17,6 +21,11 @@ class CalculatorRegistry:
         if contract.name in self._entries:
             raise AlreadyRegisteredError(
                 f"calculation type {contract.name!r} is already registered"
+            )
+        problems = contract.metadata_problems()
+        if problems:
+            raise ContractMetadataError(
+                f"calculation type {contract.name!r} is not registered: {'; '.join(problems)}"
             )
         self._entries[contract.name] = (contract, calculator)
 

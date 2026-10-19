@@ -1,6 +1,7 @@
 from collections.abc import Mapping
 
-from app.core.exceptions import UnitError
+from app.core.exceptions import CalculationError, UnitError
+from app.engine.boundary import convert
 from app.engine.expression import evaluate_expression
 from app.schemas.calculation import (
     CheckStep,
@@ -61,23 +62,69 @@ def formula_step(
     )
 
 
-def table_step(step_id: str, entry: TableValue, selectors: Mapping[str, QuantityValue]) -> TableStep:
-    """Записывает шаг трассы для табличного значения и значений, которые его выбрали.
+def confirm_selectors(entry: TableValue, inputs: Mapping[str, QuantityValue], selected_by: str | None) -> None:
+    """Подтверждает, что табличное значение выбрано по тем входам, которые получил движок.
+
+    Значение, которое метод выбирает по входу, обязано нести заголовок именно этого
+    входа, а значение, которое метод по входу не выбирает, — не нести ни одного
+    (``normative-catalog-backend`` design.md, решение 6). Заголовок переводится в базовую
+    единицу входа тем же ``convert``, что и при выборе строки в источнике параметров, и
+    сравнивается со входом точно (``calculation-engine`` "Table value selectors"). Движок
+    ничего не ищет — только подтверждает выбор.
+
+    Args:
+        entry: табличное значение со своими ``selectors``.
+        inputs: входы в базовых единицах.
+        selected_by: вход, по которому метод выбирает это значение, или ``None``.
+
+    Raises:
+        CalculationError: если заголовки значения не те, что требует метод, символ
+            заголовка не вход, заголовок не переводится в единицу входа или не равен ему.
+    """
+    expected = () if selected_by is None else (selected_by,)
+    if tuple(selector.symbol for selector in entry.selectors) != expected:
+        raise CalculationError(f"table value {entry.symbol!r}: selectors differ from the method's")
+    for selector in entry.selectors:
+        if selector.symbol not in inputs:
+            raise CalculationError(f"table value {entry.symbol!r}: selector {selector.symbol!r} is not an input")
+        given = inputs[selector.symbol]
+        try:
+            heading = convert(selector.value, given.unit)
+        except UnitError:
+            raise CalculationError(
+                f"table value {entry.symbol!r}: selector {selector.symbol!r} cannot be expressed in {given.unit!r}"
+            ) from None
+        if heading.value != given.value:
+            raise CalculationError(f"table value {entry.symbol!r}: selector {selector.symbol!r} differs from the input")
+
+
+def table_step(step_id: str, entry: TableValue, symbols: Mapping[str, str]) -> TableStep:
+    """Записывает шаг трассы для табличного значения и заголовков, которые его выбрали.
+
+    Подстановки — заголовки из ``entry.selectors`` в их собственной единице, под именами
+    входов. В выражении каждый заголовок назван обозначением своего входа в LaTeX, чтобы
+    выражение отображалось (``calculation-engine`` "Typed trace step").
 
     Args:
         step_id: идентификатор шага.
-        entry: табличное значение со своими ``NormRef``.
-        selectors: входы, по которым выбрана строка таблицы.
+        entry: табличное значение со своими ``NormRef`` и заголовками.
+        symbols: обозначение в LaTeX для имени каждого входа типа расчёта.
 
     Returns:
         Шаг таблицы.
+
+    Raises:
+        CalculationError: если у заголовка нет обозначения в ``symbols``.
     """
-    arguments = ", ".join(selectors)
-    expression = rf"{entry.latex} = {entry.latex}\left({arguments}\right)" if selectors else entry.latex
+    missing = [selector.symbol for selector in entry.selectors if selector.symbol not in symbols]
+    if missing:
+        raise CalculationError(f"table value {entry.symbol!r}: selector {missing[0]!r} has no LaTeX symbol")
+    arguments = ", ".join(symbols[selector.symbol] for selector in entry.selectors)
+    expression = rf"{entry.latex} = {entry.latex}\left({arguments}\right)" if entry.selectors else entry.latex
     return TableStep(
         step_id=step_id,
         expression=expression,
-        substitutions=tuple(_substitution(name, value) for name, value in selectors.items()),
+        substitutions=tuple(_substitution(selector.symbol, selector.value) for selector in entry.selectors),
         result=entry.value,
         norm_refs=entry.norm_refs,
     )

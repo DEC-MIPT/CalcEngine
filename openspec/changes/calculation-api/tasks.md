@@ -109,7 +109,7 @@ Code journal: `docs/akim/reports/WP8-code-journal.md`, created before task 2.1.
   (`design.md` decision 9) (backend); verify: the `.docx` read back holds the stored
   inputs, trace, conclusion and accountability block; a refused result's report states
   the refusal and names the bound; an unknown id raises `NotFoundError`; a stored result
-  whose type is no longer registered raises `CalculationTypeNotRegisteredError` (done 2026-10-03, `82fc8ac` on `feature/calculation-api/backend`)
+  whose type is no longer registered raises `CalculationTypeNotRegisteredError` (done 2026-10-03, `82fc8ac` on `feature/calculation-api/backend`; since `frontend-app` task 10.12 the block is printed only with `ACCOUNTABILITY_SECTION` on, and the service tests check the inputs, trace and conclusion)
 
 ## 5. API (backend)
 

@@ -114,8 +114,9 @@ Before starting a development session, an agent MUST check the state of commits 
 Before starting a session, an agent MUST also read the current state of
 `docs/decisions/` (tracked in git). These files are the team's written channel:
 answers, confirmations, and review outcomes (for example
-`normref-questions-egor*.md`, `*-readiness*.md`) may have been added or updated
-since the last session. A decision or confirmation recorded there can change what
+`backend/2026-10-07-<topic>-to-egor.md`, or the older `*-readiness*.md` at the root) may
+have been added or updated since the last session. The layout of the folder is in
+section 7, "Decision files". A decision or confirmation recorded there can change what
 is blocked, agreed, or ready, so treat it as required context before acting.
 
 ## 3. DOR — Definition of Ready
@@ -179,11 +180,12 @@ takes the code-free path below instead.
 The team is three people: two developers, **Akim** and **Egor**, and a product manager
 (**PM**). The PM owns scope, pricing, and legal decisions, has no code zone and no
 branch, and has no agent unless a later change adds one. A PM decision is recorded by a
-developer as a dated entry in a tracked file under `docs/decisions/` (the decision, the
-PM's words, and where they were given).
+developer as a dated entry in a tracked file under `docs/decisions/product/` (the
+decision, the PM's words, and where they were given; section 7, "Decision files").
 
 - Before starting any development, ask which developer is working: Akim or Egor,
-  unless the agent's entry file already names the developer (`CLAUDE.md`: Akim).
+  unless the developer's own untracked instructions already name the developer (for
+  Claude Code, `CLAUDE.local.md` in that developer's checkout).
 - Responsibility zones MUST NOT overlap (the only shared artifact is SPECS).
 - Specs extended by developers MUST complement each other, never contradict.
 - Code MUST NOT overlap across zones, so git branches merge without conflicts.
@@ -227,6 +229,21 @@ Zone-to-agent mapping:
 - **Answers to questions**: when answering questions that a team member recorded in a
   `docs/decisions/` file, write the answers into the same file where the question was
   asked (append an `## Answers` section), not into a separate file.
+- **Decision files** (`docs/decisions/`; agreed by Akim and Egor, section 2 of
+  `docs/decisions/egor-open-points-akim.md` and Egor's reply of 2026-10-06):
+  - A new file goes into the folder of its direction: `data/`, `ml/`, `infra/` (Egor),
+    `backend/`, `frontend/` (Akim), `product/` (PM decisions, recorded by a developer).
+  - Its name is `YYYY-MM-DD-<topic>.md`, the date the file is created; it is never
+    renamed. Its Russian version is `YYYY-MM-DD-<topic>-rus.md` in the same folder.
+  - A topic between zones goes into the folder of whoever writes first (asks the
+    question or keeps the record), and the name ends with the addressee, for example
+    `2026-10-05-formula-autoparse-limits-to-akim.md`. The readiness record of a change
+    goes into the folder of the zone that leads the change.
+  - A new question on an earlier topic is a new file that links to the earlier one; the
+    earlier file stays a snapshot of its stage.
+  - Files created before this rule stay at the root of `docs/decisions/`; topics still
+    open in them go on in the same files until they close.
+  - A file and its `-rus` version change in the same commit.
 - **Never commit, merge, or push without the working developer's explicit consent.**
   Prepare and show the changes (diff) and the intended commit message, then wait for
   approval before running `git commit`, `git merge`, or `git push`.
@@ -244,14 +261,16 @@ Zone-to-agent mapping:
 
 ## 8. Where agents live
 
-- Kilo Code: `.kilo/agent/*.md` (canonical), `.kilo/skills/*/SKILL.md`,
-  `.kilocode/skills/*/SKILL.md`, `.kilocode/workflows/*.md`. Kilo reads `AGENTS.md` natively.
-- Claude Code: mirror under `.claude/agents/*.md`, `.claude/commands/`, `.claude/skills/`.
+- Claude Code: `.claude/agents/*.md` (canonical), `.claude/commands/`, `.claude/skills/`.
   Claude Code does not read `AGENTS.md`; `CLAUDE.md` imports it and adds nothing that
-  contradicts it. Claude-only settings live in `.claude/settings.json`.
-- Keep both mirrors in sync when adding or changing agents. Exception: agents that need
-  Claude-specific frontmatter (`model`, `tools`) may exist in `.claude/agents/` only,
-  and are listed in `CLAUDE.md`.
+  contradicts it. Shared project settings live in `.claude/settings.json` (committed);
+  machine-specific settings in `.claude/settings.local.json` (ignored).
+- Kilo Code: `.kilo/agent/*.md`, `.kilo/skills/*/SKILL.md`,
+  `.kilocode/skills/*/SKILL.md`, `.kilocode/workflows/*.md`. Kilo reads `AGENTS.md`
+  natively. Kept as a secondary mirror for fallback use.
+- Keep both in sync when adding or changing agents. Exception: agents with
+  Claude-specific frontmatter (`model`, `tools`) live in `.claude/agents/` only,
+  listed in `CLAUDE.md`.
 
 ## 9. Required skills
 
@@ -288,7 +307,7 @@ software-architecture-design, sqlite-database-expert, technical-writing, ui-ux-d
 
 ### At the start of every iteration
 
-- Ask which developer is working: Akim or Egor.
+- Ask which developer is working: Akim or Egor (section 5 says when this is skipped).
 - Verify that the required skills are present.
 - If a required skill is missing, print a warning with the exact install command and
   instruct the developer to install it.

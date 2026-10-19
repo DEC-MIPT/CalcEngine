@@ -1,0 +1,148 @@
+{
+  "summary": {
+    "pdf": "СП 31.13330.2021.pdf",
+    "formulas": 13,
+    "sympy_ok": 13,
+    "structural_ok": 13,
+    "cyrillic_base": 4,
+    "changed_by_normalization": 8,
+    "issues": {
+      "скобки": 0,
+      "нет отношения": 0,
+      "PUA-мусор": 0,
+      "проза в базе": 0
+    }
+  },
+  "records": [
+    {
+      "page": 12,
+      "number": "1",
+      "latex": "Q_{ж}=\\sum{q_{ж}N_{ж}/1000}",
+      "normalized": "Q_{ж}=\\sum{q_{ж}N_{ж}/1000}",
+      "issues": [],
+      "parse": "ok",
+      "cyrillic_base": false,
+      "png": "sp31_assets/p12_n1.png"
+    },
+    {
+      "page": 13,
+      "number": "2",
+      "latex": "\\left.\\begin{aligned}Q_{сут.max}=K_{сут.max}Q_{сут.m};\\\\Q_{сут.min}=K_{сут.min}Q_{сут.m}.\\end{aligned}\\right\\}",
+      "normalized": "\\left.\\begin{aligned}Q_\\text{сут.max}=K_\\text{сут.max}Q_\\text{сут.m};\\\\Q_\\text{сут.min}=K_\\text{сут.min}Q_\\text{сут.m}.\\end{aligned}\\right\\}",
+      "issues": [],
+      "parse": "ok",
+      "cyrillic_base": false,
+      "png": "sp31_assets/p13_n2.png"
+    },
+    {
+      "page": 13,
+      "number": "3",
+      "latex": "\\left.\\begin{aligned}q_{ч.max}=K_{ч.max}Q_{сут.max}/24;\\\\q_{ч.min}=K_{ч.min}Q_{сут.min}/24.\\end{aligned}\\right\\}",
+      "normalized": "\\left.\\begin{aligned}q_{ч.max}=K_{ч.max}Q_\\text{сут.max}/24;\\\\q_{ч.min}=K_{ч.min}Q_\\text{сут.min}/24.\\end{aligned}\\right\\}",
+      "issues": [],
+      "parse": "ok",
+      "cyrillic_base": false,
+      "png": "sp31_assets/p13_n3.png"
+    },
+    {
+      "page": 13,
+      "number": "4",
+      "latex": "\\left.\\begin{aligned}K_{ч.max}=\\alpha_{max}\\beta_{max};\\\\K_{ч.min}=\\alpha_{min}\\beta_{min}.\\end{aligned}\\right\\}",
+      "normalized": "\\left.\\begin{aligned}K_{ч.max}=\\alpha_{max}\\beta_{max};\\\\K_{ч.min}=\\alpha_{min}\\beta_{min}.\\end{aligned}\\right\\}",
+      "issues": [],
+      "parse": "ok",
+      "cyrillic_base": false,
+      "png": "sp31_assets/p13_n4.png"
+    },
+    {
+      "page": 39,
+      "number": "5",
+      "latex": "Д_{щ}=К_{щ}(\\frac{Д_{к}}{е_{к}}−щ_{0})+1",
+      "normalized": "Д_{щ}=K_{щ}(\\frac{Д_{к}}{e_{к}}−щ_{0})+1",
+      "issues": [],
+      "parse": "ok",
+      "cyrillic_base": true,
+      "png": "sp31_assets/p39_n5.png"
+    },
+    {
+      "page": 42,
+      "number": "6",
+      "latex": "h=\\zeta\\nu^{2}/2g",
+      "normalized": "h=\\zeta\\nu^{2}/2g",
+      "issues": [],
+      "parse": "ok",
+      "cyrillic_base": false,
+      "png": "sp31_assets/p42_n6.png"
+    },
+    {
+      "page": 44,
+      "number": "7",
+      "latex": "F_{в.о}=q\\beta_{об}/3,6v_{p}N_{p}",
+      "normalized": "F_\\text{в.о}=q\\beta_\\text{об}/3,6v_{p}N_{p}",
+      "issues": [],
+      "parse": "ok",
+      "cyrillic_base": false,
+      "png": "sp31_assets/p44_n7.png"
+    },
+    {
+      "page": 51,
+      "number": "8",
+      "latex": "N_{ТМ}=√F_{ТМ}/2.",
+      "normalized": "N_\\text{ТМ}=√F_\\text{ТМ}/2.",
+      "issues": [],
+      "parse": "ok",
+      "cyrillic_base": false,
+      "png": "sp31_assets/p51_n8.png"
+    },
+    {
+      "page": 51,
+      "number": "9",
+      "latex": "v_{ф}=v_{н}N_{ф}/(N_{ф}−N_{1})",
+      "normalized": "v_{ф}=v_{н}N_{ф}/(N_{ф}−N_{1})",
+      "issues": [],
+      "parse": "ok",
+      "cyrillic_base": false,
+      "png": "sp31_assets/p51_n9.png"
+    },
+    {
+      "page": 54,
+      "number": "10",
+      "latex": "Н_{ж}=Н_{з}а_{з}/100+0,3",
+      "normalized": "H_{ж}=H_{з}a_{з}/100+0,3",
+      "issues": [],
+      "parse": "ok",
+      "cyrillic_base": true,
+      "png": "sp31_assets/p54_n10.png"
+    },
+    {
+      "page": 64,
+      "number": "10",
+      "latex": "Д_{х}=0,7(Fe^{2+})",
+      "normalized": "Д_{x}=0,7(Fe^{2+})",
+      "issues": [],
+      "parse": "ok",
+      "cyrillic_base": true,
+      "png": "sp31_assets/p64_n10.png"
+    },
+    {
+      "page": 64,
+      "number": "11",
+      "latex": "Д_{п}=(Fe^{2+}).",
+      "normalized": "Д_{п}=(Fe^{2+}).",
+      "issues": [],
+      "parse": "ok",
+      "cyrillic_base": true,
+      "png": "sp31_assets/p64_n11.png"
+    },
+    {
+      "page": 85,
+      "number": "13",
+      "latex": "PN≥\\frac{P_{раб}+P_{\\tau}}{1,4}",
+      "normalized": "PN≥\\frac{P_\\text{раб}+P_{\\tau}}{1,4}",
+      "issues": [],
+      "parse": "ok",
+      "cyrillic_base": false,
+      "png": "sp31_assets/p85_n13.png"
+    }
+  ]
+}

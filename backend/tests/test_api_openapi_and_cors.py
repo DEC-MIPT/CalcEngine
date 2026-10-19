@@ -15,6 +15,8 @@ ENDPOINTS = {
     ("/calculations", "post"): {"404", "413", "422", "503"},
     ("/calculations/{result_id}", "get"): {"404", "422", "503"},
     ("/calculations/{result_id}/report", "post"): {"404", "409", "413", "422", "503"},
+    ("/normatives/search", "get"): {"422", "503"},
+    ("/normatives/documents/{document_id}", "get"): {"404", "422", "503"},
 }
 
 
@@ -35,7 +37,7 @@ def operation(openapi: dict[str, Any], path: str, method: str) -> dict[str, Any]
     return found
 
 
-def test_the_four_endpoints_are_described(openapi: dict[str, Any]) -> None:
+def test_the_endpoints_are_described(openapi: dict[str, Any]) -> None:
     described = {(path, method) for path, methods in openapi["paths"].items() for method in methods}
 
     assert set(ENDPOINTS) <= described
@@ -76,6 +78,27 @@ def test_the_success_responses_are_described(openapi: dict[str, Any]) -> None:
         "/ResultEnvelope"
     )
     assert DOCX in success("/calculations/{result_id}/report", "post", "200")
+    assert success("/normatives/search", "get", "200")["application/json"]["schema"]["$ref"].endswith("/SearchResults")
+    assert success("/normatives/documents/{document_id}", "get", "200")["application/json"]["schema"]["$ref"].endswith(
+        "/DocumentView"
+    )
+
+
+def test_the_catalog_parameters_are_described(openapi: dict[str, Any]) -> None:
+    search = {p["name"]: p for p in operation(openapi, "/normatives/search", "get")["parameters"]}
+    (document,) = operation(openapi, "/normatives/documents/{document_id}", "get")["parameters"]
+
+    assert (search["q"]["required"], search["q"]["schema"]["minLength"], search["q"]["schema"]["maxLength"]) == (
+        True,
+        2,
+        200,
+    )
+    assert {key: search["limit"]["schema"][key] for key in ("minimum", "maximum", "default")} == {
+        "minimum": 1,
+        "maximum": 50,
+        "default": 20,
+    }
+    assert (document["in"], document["schema"]["exclusiveMinimum"]) == ("path", 0)
 
 
 def test_the_error_body_schema_is_published(openapi: dict[str, Any]) -> None:

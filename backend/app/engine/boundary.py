@@ -6,7 +6,6 @@ from app.core.exceptions import CalculationError, UnitError
 from app.engine.applicability import check_applicability
 from app.engine.base import Calculator
 from app.engine.hashing import input_hash
-from app.engine.rounding import round_value
 from app.schemas.calculation import (
     ApplicabilityWarning,
     BoundViolation,
@@ -111,9 +110,7 @@ def make_outputs(
     return tuple(
         OutputValue(
             quantity=quantity.name,
-            value=round_value(
-                convert(values[quantity.name], quantity.base_unit).value, quantity.rounding_rule
-            ),
+            value=quantity.rounding_rule.apply(convert(values[quantity.name], quantity.base_unit).value),
             unit=quantity.base_unit,
             rounding_rule=quantity.rounding_rule,
             rounding_source=quantity.rounding_source,

@@ -47,3 +47,21 @@ def test_restore_indices_keeps_non_cyrillic() -> None:
 def test_restore_indices_no_symbols(symbols: list[str] | None) -> None:
     latex = r"x_{abc} + y"
     assert restore_indices(latex, symbols or []) == latex
+
+
+def test_symbol_sub_canon_single_char_returns_empty() -> None:
+    assert _symbol_sub_canon("P") == ""
+
+
+def test_close_empty_first_arg_returns_false() -> None:
+    assert not _close("", "ab")
+
+
+def test_close_empty_second_arg_returns_false() -> None:
+    assert not _close("ab", "")
+
+
+def test_restore_indices_no_close_match_inner_loop_exhausted() -> None:
+    # "rab" vs "xyz": 3 diffs > 1 → _close returns False → inner loop exits normally
+    result = restore_indices(r"P_{xyz}", ["Рраб"])
+    assert r"P_{xyz}" in result

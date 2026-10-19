@@ -1,8 +1,12 @@
 import datetime
+import operator
+from collections.abc import Callable, Mapping
 from decimal import Decimal
 from types import MappingProxyType
 
+from app.reporting.formula import Line, Math
 from app.schemas.calculation import (
+    CheckStep,
     MethodBound,
     NormRef,
     QuantityValue,
@@ -33,10 +37,19 @@ UNIT_DESIGNATIONS: MappingProxyType[str, str] = MappingProxyType(
 )
 """Русские обозначения единиц словаря в том виде, в каком они печатаются в отчёте (source: unverified)."""
 
-_ATTACHED = frozenset({"°"})
+LATEX_ATTACHED: MappingProxyType[str, str] = MappingProxyType({"°": r"\text{°}"})
+r"""Обозначения, которые пишутся вплотную к числу, и их запись в LaTeX.
 
-OPERATORS: MappingProxyType[str, str] = MappingProxyType(
-    {"le": "≤", "lt": "<", "ge": "≥", "gt": ">"}
+Знак градуса идёт текстом, а не ``^{\circ}``: иначе в формуле Word оказывается символ U+2218, и
+копирование и поиск дают ``30∘`` вместо ``30°``.
+"""
+
+LATEX_OPERATORS: MappingProxyType[str, str] = MappingProxyType(
+    {"le": r"\le", "lt": "<", "ge": r"\ge", "gt": ">"}
+)
+
+_HOLDS: MappingProxyType[str, Callable[[float, float], bool]] = MappingProxyType(
+    {"le": operator.le, "lt": operator.lt, "ge": operator.ge, "gt": operator.gt}
 )
 
 UNVERIFIED_TEXT = "не проверено"
@@ -51,57 +64,110 @@ VERDICT_TEXTS: MappingProxyType[str, tuple[str, str]] = MappingProxyType(
 """Тексты каждого вердикта: короткое имя для блока подотчётности и фраза заключения."""
 
 
-def format_number(value: float) -> str:
+def format_number(value: float, decimals: int = 0) -> str:
     """Форматирует число самой короткой десятичной записью без экспоненты и с запятой.
 
-    Запись читается обратно в то же значение float.
+    Запись читается обратно в то же значение float. Дробная часть дополняется нулями
+    до ``decimals`` знаков, как у округлённого значения выхода на экране результата.
 
     Args:
         value: число.
+        decimals: наименьшее число знаков после запятой.
 
     Returns:
-        Число в виде строки, например ``172,5`` или ``0,0000001``.
+        Число в виде строки, например ``172,5``, ``172,50`` или ``0,0000001``.
     """
-    if value == 0:
-        return "0"
-    text = format(Decimal(repr(value)).normalize(), "f")
-    return text.replace(".", ",")
+    text = "0" if value == 0 else format(Decimal(repr(value)).normalize(), "f")
+    whole, _, fraction = text.partition(".")
+    fraction = fraction.ljust(decimals, "0")
+    return f"{whole},{fraction}" if fraction else whole
 
 
-def format_quantity(value: QuantityValue) -> str:
-    """Форматирует значение с русским обозначением его единицы.
+def latex_number(value: float, decimals: int = 0) -> str:
+    """Записывает число в LaTeX так же, как ``format_number``.
 
-    У безразмерного значения обозначения нет.
+    Запятая заключена в фигурные скобки, чтобы после неё не было пробела.
+
+    Args:
+        value: число.
+        decimals: наименьшее число знаков после запятой.
+
+    Returns:
+        Число в LaTeX, например ``172{,}5``.
+    """
+    return format_number(value, decimals).replace(",", "{,}")
+
+
+def latex_quantity(value: QuantityValue, rule: RoundingRule | None = None) -> str:
+    """Записывает значение в LaTeX с русским обозначением его единицы.
+
+    У безразмерного значения обозначения нет. С правилом округления выхода значение
+    печатается округлённым и ровно с его числом знаков после запятой.
 
     Args:
         value: значение с единицей.
+        rule: правило округления выхода, если значение относится к выходу.
 
     Returns:
-        Строка вида ``172,5 кПа``.
+        Выражение LaTeX, например ``172{,}5\\ \\text{кПа}``.
     """
-    number, unit = format_number(value.value), UNIT_DESIGNATIONS[value.unit]
+    number = (
+        latex_number(value.value) if rule is None else latex_number(rule.apply(value.value), rule.decimals)
+    )
+    unit = UNIT_DESIGNATIONS[value.unit]
     if not unit:
         return number
-    return f"{number}{unit}" if unit in _ATTACHED else f"{number} {unit}"
+    if unit in LATEX_ATTACHED:
+        return number + LATEX_ATTACHED[unit]
+    return rf"{number}\ \text{{{unit}}}"
 
 
-def format_norm_ref(reference: NormRef) -> str:
-    """Форматирует ссылку на норму с её статусом.
+def check_rounding(
+    step: CheckStep, rounding: Mapping[str, RoundingRule]
+) -> tuple[RoundingRule | None, RoundingRule | None]:
+    """Находит правила округления, по которым печатаются стороны проверки.
+
+    Сторона, чья величина — выход, печатается по его правилу. Если округлённые стороны
+    противоречили бы исходу проверки, обе печатаются без округления, как на экране
+    результата.
+
+    Args:
+        step: шаг проверки; его подстановки называют левую и правую величины.
+        rounding: правила округления выходов по имени.
+
+    Returns:
+        Правила левой и правой сторон или ``None`` для стороны без округления.
+    """
+    left, right = (rounding.get(substitution.symbol) for substitution in step.substitutions[:2])
+
+    def shown(value: float, rule: RoundingRule | None) -> float:
+        return value if rule is None else rule.apply(value)
+
+    agrees = _HOLDS[step.operator](shown(step.result.value, left), shown(step.right.value, right)) == step.passed
+    return (left, right) if agrees else (None, None)
+
+
+def format_norm_ref(reference: NormRef, *, status: bool = True) -> str:
+    """Форматирует ссылку на норму, по умолчанию с её статусом.
 
     Редакция или пункт со значением ``unverified`` печатаются как непроверенные.
 
     Args:
         reference: ссылка на норму.
+        status: печатать ли статус проверки ссылки.
 
     Returns:
-        Строка ссылки со статусом.
+        Строка ссылки.
     """
     edition, clause = (
         UNVERIFIED_TEXT if part == "unverified" else part
         for part in (reference.edition, reference.clause)
     )
-    status = "проверено" if reference.status == "verified" else UNVERIFIED_TEXT
-    return f"{reference.document}, редакция: {edition}, пункт: {clause} (статус: {status})"
+    text = f"{reference.document}, редакция: {edition}, пункт: {clause}"
+    if not status:
+        return text
+    checked = "проверено" if reference.status == "verified" else UNVERIFIED_TEXT
+    return f"{text} (статус: {checked})"
 
 
 BOUND_WORDS: MappingProxyType[tuple[str, bool], str] = MappingProxyType(
@@ -113,7 +179,7 @@ ROUNDING_MODES: MappingProxyType[str, str] = MappingProxyType(
 )
 
 
-def format_bound(bound: MethodBound | ValidatedBound, unit: str) -> str:
+def format_bound(bound: MethodBound | ValidatedBound, unit: str) -> Line:
     """Описывает, что допускает граница, в единице входа, который она ограничивает.
 
     Args:
@@ -121,10 +187,10 @@ def format_bound(bound: MethodBound | ValidatedBound, unit: str) -> str:
         unit: базовая единица входа.
 
     Returns:
-        Строка вида «допускается не более 1 м».
+        Строка вида «допускается не более 1 м», где предел — формула.
     """
-    limit = format_quantity(QuantityValue(value=bound.value, unit=unit))
-    return f"допускается {BOUND_WORDS[(bound.kind, bound.inclusive)]} {limit}"
+    limit = latex_quantity(QuantityValue(value=bound.value, unit=unit))
+    return (f"допускается {BOUND_WORDS[(bound.kind, bound.inclusive)]} ", Math(limit))
 
 
 def format_engineer_rule(rule: EngineerRule) -> str:

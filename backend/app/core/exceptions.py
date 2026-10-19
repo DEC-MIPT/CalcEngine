@@ -10,6 +10,10 @@ class AlreadyRegisteredError(DECError):
     """Имя регистрируется второй раз."""
 
 
+class ContractMetadataError(DECError):
+    """У величины типа расчёта нет подписи или обозначения для человека."""
+
+
 class ParameterValidationError(DECError):
     """Данные параметров не проходят проверку схемы."""
 
@@ -49,3 +53,7 @@ class CalculationTypeNotRegisteredError(DECError):
 
 class DatabaseUnavailableError(DECError):
     """База приложения не настроена или не отвечает."""
+
+
+class CatalogUnavailableError(DECError):
+    """Каталог норм не настроен или не отвечает."""

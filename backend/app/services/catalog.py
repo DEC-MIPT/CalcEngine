@@ -1,11 +1,19 @@
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 from pathlib import Path
+
+from pydantic import BaseModel
 
 from app.core.exceptions import ParameterValidationError
 from app.engine import foundations_shallow_r
 from app.engine.registry import CalculatorRegistry
 from app.parameters.loader import load_parameters
 from app.schemas.api import CalculationTypeView, InputView, OutputView
-from app.schemas.calculation import ValidatedBound
+from app.schemas.calculation import (
+    OutputDeclaration,
+    QuantityDeclaration,
+    ValidatedBound,
+)
 from app.schemas.units import UNITS, units_of
 
 
@@ -19,7 +27,45 @@ def _register_foundations_shallow_r(registry: CalculatorRegistry, params_root: P
     foundations_shallow_r.register(registry, entry.rule, entry.source)
 
 
-REGISTRATIONS = (_register_foundations_shallow_r,)
+@dataclass(frozen=True)
+class Registration:
+    """Известный тип расчёта: как его зарегистрировать и какой моделью проверять его параметры.
+
+    Модель и карта выбора нужны источнику параметров каталога (``normative-catalog-backend``
+    design.md, решения 5 и 6): он собирает из строк каталога поля, проверяет их моделью и
+    сверяет заголовки таблиц со входами, по которым метод выбирает значения.
+
+    Attributes:
+        name: имя типа расчёта в реестре.
+        register: регистрация со значениями из файла параметров.
+        parameters: модель разрешённых параметров калькулятора.
+        selectors: табличный параметр, который метод выбирает по входу, → этот вход.
+    """
+
+    name: str
+    register: Callable[[CalculatorRegistry, Path], None]
+    parameters: type[BaseModel]
+    selectors: Mapping[str, str]
+
+
+REGISTRATIONS = (
+    Registration(
+        name=foundations_shallow_r.NAME,
+        register=_register_foundations_shallow_r,
+        parameters=foundations_shallow_r.Parameters,
+        selectors=foundations_shallow_r.SELECTORS,
+    ),
+)
+
+PARAMETER_MODELS: Mapping[str, type[BaseModel]] = {
+    registration.name: registration.parameters for registration in REGISTRATIONS
+}
+"""Модель разрешённых параметров каждого известного типа расчёта."""
+
+TABLE_SELECTORS: Mapping[str, Mapping[str, str]] = {
+    registration.name: registration.selectors for registration in REGISTRATIONS
+}
+"""Для каждого известного типа: табличный параметр, выбираемый по входу, → этот вход."""
 
 
 def build_registry(params_root: Path) -> CalculatorRegistry:
@@ -40,8 +86,8 @@ def build_registry(params_root: Path) -> CalculatorRegistry:
             правила округления выхода.
     """
     registry = CalculatorRegistry()
-    for register in REGISTRATIONS:
-        register(registry, params_root)
+    for registration in REGISTRATIONS:
+        registration.register(registry, params_root)
     return registry
 
 
@@ -71,6 +117,26 @@ def load_validated_ranges(
     }
 
 
+def _input_view(quantity: QuantityDeclaration) -> InputView:
+    label, symbol = quantity.described()
+    dimension = UNITS[quantity.base_unit].dimension
+    return InputView(
+        name=quantity.name,
+        base_unit=quantity.base_unit,
+        dimension=dimension,
+        units=units_of(dimension),
+        label=label,
+        symbol=symbol,
+        hint=quantity.hint,
+        whole_values_only=quantity.whole_values_only,
+    )
+
+
+def _output_view(output: OutputDeclaration) -> OutputView:
+    label, symbol = output.described()
+    return OutputView(name=output.name, base_unit=output.base_unit, label=label, symbol=symbol)
+
+
 def calculation_types(registry: CalculatorRegistry) -> tuple[CalculationTypeView, ...]:
     """Описывает зарегистрированные типы расчёта для формы ввода.
 
@@ -88,19 +154,8 @@ def calculation_types(registry: CalculatorRegistry) -> tuple[CalculationTypeView
     return tuple(
         CalculationTypeView(
             name=contract.name,
-            inputs=tuple(
-                InputView(
-                    name=quantity.name,
-                    base_unit=quantity.base_unit,
-                    dimension=UNITS[quantity.base_unit].dimension,
-                    units=units_of(UNITS[quantity.base_unit].dimension),
-                )
-                for quantity in contract.inputs
-            ),
-            outputs=tuple(
-                OutputView(name=output.name, base_unit=output.base_unit)
-                for output in contract.outputs
-            ),
+            inputs=tuple(_input_view(quantity) for quantity in contract.inputs),
+            outputs=tuple(_output_view(output) for output in contract.outputs),
         )
         for contract in registry.contracts()
     )

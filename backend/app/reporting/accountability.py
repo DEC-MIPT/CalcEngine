@@ -1,13 +1,16 @@
+from collections.abc import Mapping
+
 from app.reporting.format import (
     VERDICT_TEXTS,
     format_bound,
     format_engineer_rule,
     format_norm_ref,
-    format_quantity,
     format_rounding,
     format_source,
 )
+from app.reporting.formula import Line
 from app.reporting.model import AccountabilitySection
+from app.reporting.symbols import equation, named
 from app.schemas.calculation import BoundViolation, ResultEnvelope
 
 RESPONSIBILITY = (
@@ -19,52 +22,68 @@ RESPONSIBILITY = (
 NONE = "нет"
 
 
-def _reason(envelope: ResultEnvelope) -> str:
+def _reason(envelope: ResultEnvelope, symbols: Mapping[str, str]) -> Line:
     reason = envelope.verdict_reason
     if isinstance(reason, BoundViolation):
         return (
-            f"нарушенная граница области применения метода: {reason.bound.quantity} ="
-            f" {format_quantity(reason.value)}, {format_bound(reason.bound, reason.value.unit)};"
-            f" источник: {format_source(reason.bound.source)}"
+            "нарушенная граница области применения метода: ",
+            *equation(reason.bound.quantity, reason.value, symbols),
+            ", ",
+            *format_bound(reason.bound, reason.value.unit),
+            f"; источник: {format_source(reason.bound.source)}",
         )
-    return f"определяющая проверка {reason.step_id}"
+    return ("определяющая проверка ", named(reason.step_id, symbols))
 
 
-def _list(title: str, items: list[str]) -> list[str]:
-    return [f"{title}: {NONE}"] if not items else [f"{title}:", *(f"— {item}" for item in items)]
+def _list(title: str, items: list[Line]) -> list[Line]:
+    return [(f"{title}: {NONE}",)] if not items else [(f"{title}:",), *(("— ", *item) for item in items)]
 
 
-def accountability_lines(section: AccountabilitySection) -> list[str]:
+def accountability_lines(section: AccountabilitySection, symbols: Mapping[str, str]) -> list[Line]:
     """Собирает строки блока подотчётности на русском языке.
 
     В блок входит каждое поле конверта, которое требует "Result accountability block".
-    Фразу об ответственности инженера печатает после этих строк модуль вывода.
+    Значения величин — формулы. Фразу об ответственности инженера печатает после этих
+    строк модуль вывода.
 
     Args:
         section: раздел подотчётности модели отчёта с конвертом результата.
+        symbols: обозначения в LaTeX по имени шага или величины.
 
     Returns:
         Строки блока по порядку.
     """
     envelope = section.envelope
-    outputs = [
-        f"{output.quantity} = {format_quantity(output)}; округление: {format_rounding(output.rounding_rule)};"
-        f" источник правила: {format_source(output.rounding_source)}"
+    outputs: list[Line] = [
+        (
+            *equation(output.quantity, output, symbols, output.rounding_rule),
+            (
+                f"; округление: {format_rounding(output.rounding_rule)};"
+                f" источник правила: {format_source(output.rounding_source)}"
+            ),
+        )
         for output in envelope.outputs
     ]
-    warnings = [
-        f"{warning.bound.quantity} = {format_quantity(warning.value)} вне проверенного диапазона,"
-        f" {format_bound(warning.bound, warning.value.unit)}; источник: {format_source(warning.bound.source)}"
+    warnings: list[Line] = [
+        (
+            *equation(warning.bound.quantity, warning.value, symbols),
+            " вне проверенного диапазона, ",
+            *format_bound(warning.bound, warning.value.unit),
+            f"; источник: {format_source(warning.bound.source)}",
+        )
         for warning in envelope.warnings
     ]
     return [
-        f"Идентификатор результата (result_id): {envelope.result_id}",
-        f"Версия движка (engine_version): {envelope.engine_version}",
-        f"Хеш входных данных (input_hash): {envelope.input_hash}",
+        (f"Идентификатор результата (result_id): {envelope.result_id}",),
+        (f"Версия движка (engine_version): {envelope.engine_version}",),
+        (f"Хеш входных данных (input_hash): {envelope.input_hash}",),
         *_list("Выходные величины (outputs)", outputs),
-        *_list("Нормативные ссылки (norm_refs)", [format_norm_ref(reference) for reference in envelope.norm_refs]),
-        *_list("Правила инженера (engineer_rules)", [format_engineer_rule(rule) for rule in envelope.engineer_rules]),
-        f"Вердикт (verdict): {VERDICT_TEXTS[envelope.verdict][0]}; основание (verdict_reason): {_reason(envelope)}",
+        *_list("Нормативные ссылки (norm_refs)", [(format_norm_ref(reference),) for reference in envelope.norm_refs]),
+        *_list("Правила инженера (engineer_rules)", [(format_engineer_rule(rule),) for rule in envelope.engineer_rules]),
+        (
+            f"Вердикт (verdict): {VERDICT_TEXTS[envelope.verdict][0]}; основание (verdict_reason): ",
+            *_reason(envelope, symbols),
+        ),
         *_list("Предупреждения (warnings)", warnings),
-        f"Шагов с непроверенными ссылками (unverified_step_count): {envelope.unverified_step_count}",
+        (f"Шагов с непроверенными ссылками (unverified_step_count): {envelope.unverified_step_count}",),
     ]
