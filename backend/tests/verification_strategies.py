@@ -1,5 +1,5 @@
 import math
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
@@ -19,14 +19,14 @@ class Subject:
     Attributes:
         contract: контракт типа.
         calculator: калькулятор типа.
-        parameters: разрешённые параметры.
+        parameters: разрешённые параметры для данных входов (табличная строка зависит от входа).
         method_range: границы диапазона метода.
         plan: план инвариантов типа с допустимым диапазоном входов.
     """
 
     contract: CalculationTypeContract
     calculator: Calculator[Mapping[str, QuantityValue], Any, Any]
-    parameters: object
+    parameters: Callable[[Mapping[str, QuantityValue]], object]
     method_range: tuple[MethodBound, ...]
     plan: InvariantPlan
 

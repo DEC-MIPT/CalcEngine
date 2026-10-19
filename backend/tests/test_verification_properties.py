@@ -3,7 +3,7 @@ from collections.abc import Mapping
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
-from test_engine_foundations_shallow_r import ROUNDING, RULE, parameters
+from test_engine_foundations_shallow_r import ROUNDING, RULE, entry, parameters
 from test_verification_invariants import RANGES, SPECIFIC
 from test_verification_runner import (
     CONTRACT,
@@ -17,7 +17,7 @@ from verification_strategies import Subject, inputs_in_range
 
 from app.engine import foundations_shallow_r as pilot
 from app.engine.base import Calculator
-from app.engine.boundary import inputs_to_base_units
+from app.engine.boundary import convert, inputs_to_base_units
 from app.engine.pipeline import CalculatorOutput, calculate
 from app.schemas.calculation import CalculationResult, QuantityValue
 from app.verification.invariants import (
@@ -66,18 +66,26 @@ VERDICT_MONOTONE_IN_P = Invariant(
 )
 """Инварианты пилота, не зависящие от формулы R; подтверждены инженером (Аким) 2026-10-06 (задача 2.11)."""
 
+def pilot_parameters(given: Mapping[str, QuantityValue]) -> pilot.Parameters:
+    """Синтетические параметры пилота со строками таблицы, выбранными по ``phi_II`` входов."""
+    phi = convert(given["phi_II"], "deg").value
+    return parameters(
+        m_gamma=entry("M_gamma", 0.5, phi), m_q=entry("M_q", 5.0, phi), m_c=entry("M_c", 10.0, phi)
+    )
+
+
 SUBJECTS = (
     Subject(
         contract=CONTRACT,
         calculator=SyntheticCalculator(),
-        parameters=PARAMETERS,
+        parameters=lambda _: PARAMETERS,
         method_range=METHOD,
         plan=InvariantPlan(calculation_type=TYPE, valid_range=RANGES, invariants=(*shared_invariants(CONTRACT), SPECIFIC)),
     ),
     Subject(
         contract=PILOT_CONTRACT,
         calculator=pilot.FoundationsShallowR(),
-        parameters=parameters(),
+        parameters=pilot_parameters,
         method_range=(),
         plan=InvariantPlan(
             calculation_type=pilot.NAME,
@@ -107,7 +115,7 @@ def test_every_subject_has_a_plan_that_fits_its_contract(subject: Subject) -> No
 def test_an_input_in_another_unit_gives_the_same_result(subject: Subject, data: st.DataObject) -> None:
     inputs = data.draw(inputs_in_range(subject.plan))
 
-    assert unit_change_holds(subject.contract, subject.calculator, inputs, subject.parameters, subject.method_range)
+    assert unit_change_holds(subject.contract, subject.calculator, inputs, subject.parameters(inputs), subject.method_range)
 
 
 @pytest.mark.parametrize("subject", SUBJECTS, ids=subject_id)
@@ -116,7 +124,7 @@ def test_an_input_in_another_unit_gives_the_same_result(subject: Subject, data: 
 def test_the_same_inputs_give_the_same_result(subject: Subject, data: st.DataObject) -> None:
     inputs = data.draw(inputs_in_range(subject.plan))
 
-    assert determinism_holds(subject.contract, subject.calculator, inputs, subject.parameters, subject.method_range)
+    assert determinism_holds(subject.contract, subject.calculator, inputs, subject.parameters(inputs), subject.method_range)
 
 
 @CASES
@@ -140,14 +148,14 @@ def test_y_grows_with_b_in_the_synthetic_type(data: st.DataObject) -> None:
     grown = {**inputs, "b": QuantityValue(value=larger, unit="m")}
 
     def y(given: dict[str, QuantityValue]) -> float:
-        result = calculate(subject.contract, subject.calculator, given, subject.parameters, method_range=subject.method_range)
+        result = calculate(subject.contract, subject.calculator, given, subject.parameters(given), method_range=subject.method_range)
         return next(output.value for output in result.outputs if output.quantity == "y")
 
     assert y(inputs) <= y(grown)
 
 
 def pilot_run(inputs: dict[str, QuantityValue]) -> CalculationResult:
-    return calculate(PILOT.contract, PILOT.calculator, inputs, PILOT.parameters, method_range=PILOT.method_range)
+    return calculate(PILOT.contract, PILOT.calculator, inputs, PILOT.parameters(inputs), method_range=PILOT.method_range)
 
 
 def unrounded_r(result: CalculationResult) -> float:

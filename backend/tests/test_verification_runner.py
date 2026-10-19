@@ -22,6 +22,7 @@ from app.schemas.calculation import (
 from app.schemas.expression import parse_expression
 from app.schemas.parameters import EngineerRule
 from app.schemas.resolved import Formula
+from app.schemas.text import LocalizedText
 from app.verification.models import ExpectedOutput, ReferenceExample
 from app.verification.runner import ExampleParameters, run_suite, within_tolerance
 
@@ -36,10 +37,18 @@ REF = NormRef(
 RULE = EngineerRule(engineer="<ENGINEER>", rationale="<RATIONALE>")
 CONTRACT = CalculationTypeContract(
     name=TYPE,
-    inputs=(QuantityDeclaration(name="b", base_unit="m"), QuantityDeclaration(name="q", base_unit="1")),
+    inputs=(
+        QuantityDeclaration(name="b", label=LocalizedText(ru="b"), symbol="b", base_unit="m"),
+        QuantityDeclaration(name="q", label=LocalizedText(ru="q"), symbol="q", base_unit="1"),
+    ),
     outputs=(
         OutputDeclaration(
-            name="y", base_unit="m", rounding_rule=RoundingRule(decimals=3, mode="half_even"), rounding_source=RULE
+            name="y",
+            label=LocalizedText(ru="y"),
+            symbol="y",
+            base_unit="m",
+            rounding_rule=RoundingRule(decimals=3, mode="half_even"),
+            rounding_source=RULE,
         ),
     ),
     checks=("check",),
