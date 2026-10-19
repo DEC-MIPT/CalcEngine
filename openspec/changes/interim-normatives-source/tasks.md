@@ -145,8 +145,8 @@ feature and does not gate the backend feature or section 8.
 
 - [ ] 7.1 Write the manifest of the norm document with its edition as printed on the source
   text (status `unverified`), the sunset date and event, and the verifiers (`design.md`, open
-  questions 3, 4), and add the sunset test on the real manifest; verify: the loader accepts
-  it, and the test passes before the date
+  questions 3, 4, which must be answered before this task starts), and add the sunset test
+  on the real manifest; verify: the loader accepts it, and the test passes before the date
 - [ ] 7.2a Extract the pilot's R data (`design.md`, decision 11: the formula of R with its
   coefficients and tables, the threshold rule of `k_z`, the method bounds, the check) from the
   text layer; verify: every element is listed with its page in the working session's record
@@ -232,6 +232,8 @@ feature and does not gate the backend feature or section 8.
 - Reference example `ex1` needs its tolerances from the verifier (`design.md`, open question 1)
   before task 8.1.
 - No dependency on Egor's zones; Egor's acknowledgement (task 1.5) is part of the DOR.
+- Task 7.1 needs the verifier's name and the sunset date (`design.md`, open questions 3, 4);
+  sections 2-6 do not, since task 2.5 tests the sunset on a fixture manifest.
 
 ## DOR checklist
 
@@ -245,9 +247,8 @@ feature and does not gate the backend feature or section 8.
   to one feature
 - [x] Acceptance and Go/No-Go criteria written (below)
 - [x] Feature branches named
-- [ ] Dependencies satisfied for the start of section 2: Egor's acknowledgement (task 1.5);
-  the verifier named and the sunset date set (`design.md`, open questions 3, 4) before task
-  7.1
+- [ ] Dependencies satisfied: Egor's acknowledgement (task 1.5). The verifier's name and the
+  sunset date are not DOR items: they are needed only by task 7.1 (Akim, 2026-10-20)
 
 ## DOD and Go/No-Go
 

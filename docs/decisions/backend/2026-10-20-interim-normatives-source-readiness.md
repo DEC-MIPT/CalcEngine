@@ -13,10 +13,10 @@
 - The second `spec-reviewer` pass lists no blocker and no major finding.
 - `norm-traceability-checker` finds no norm value in the change.
 
-DOR still needs:
-- Egor's acknowledgement (task 1.5);
-- the verifier's name and the sunset date, before task 7.1 (`design.md`, open questions 3
-  and 4).
+DOR still needs Egor's acknowledgement (task 1.5), asked in
+`2026-10-20-interim-normatives-source-ack-to-egor.md`. The verifier's name and the sunset date
+(`design.md`, open questions 3 and 4) are needed only before task 7.1, not for DOR: sections
+2-6 do not use them, and task 2.5 tests the sunset on a fixture manifest (Akim, 2026-10-20).
 
 ## Akim's decisions (2026-10-19)
 
@@ -120,6 +120,6 @@ Pass 2 minors, all fixed:
 | Item | Who |
 |---|---|
 | Acknowledgement of this change as the second developer, and a look at the record format against `catalog_read` (task 1.5) | Egor |
-| The verifier's name and the sunset date (`design.md`, open questions 3, 4), before task 7.1 | Akim |
+| The verifier's name and the sunset date (`design.md`, open questions 3, 4); needed for task 7.1, not for DOR | Akim |
 | The PM's dated record that norm values may be kept in git for the pilot (open question 6, task 9.4) | PM, recorded by Akim |
 | Tolerances of `ex1`, and whether amendment 5 changes formula (5.7) (identifier given by Akim) (open questions 1, 2); needed for task 8.1, not for DOR | verifier |
