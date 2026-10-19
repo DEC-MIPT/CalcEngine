@@ -197,11 +197,13 @@ before task 2.1.
   the measured coverage fails (done 2026-10-18 on `feature/frontend-app/frontend` at `b538708`:
   462 tests, branch coverage 100%; the branch threshold cannot be raised above 100%, so the gate was
   shown with the statements threshold raised above the measured 99.87%, which fails the run)
-- [ ] 8.2 `tester` GO for each feature; `ui-ux-tester` confirms the screens, keyboard operation,
+- [x] 8.2 `tester` GO for each feature; `ui-ux-tester` confirms the screens, keyboard operation,
   contrast, no colour-only meaning and the visual brief of `design.md` decision 5 (tester)
   (2026-10-18, first round: `ui-ux-tester` CONFIRMED, its two moderate defects fixed in `74a1ee4`;
   `tester` NO-GO for both features, for the missing test of task 10.11 (added in `4a04cca`) and the
-  open tasks 8.1, 8.3 and 8.8; `docs/decisions/frontend-app-readiness.md`)
+  open tasks 8.1, 8.3 and 8.8; `docs/decisions/frontend-app-readiness.md`) (done: `tester` GO for
+  the backend feature at `dd3870f` on 2026-10-18 and for the frontend feature at `c3c37c4` on
+  2026-10-19, the round-one `ui-ux-tester` confirmation standing)
 - [x] 8.3 Run the journey end to end against the real backend and, once WP9 is merged, a real
   catalog source: type selection, form, result, report download, with the frontend and the backend
   on different origins and `DEC_CORS_ORIGINS` set (frontend); verify: a recorded manual run in which
@@ -233,9 +235,11 @@ before task 2.1.
   (light and dark, if both exist) in the run (done 2026-10-18 on `feature/frontend-app/frontend`,
   `b538708`: 11 screens and states, light only because the interface has no dark state; the
   `503` states are checked by 8.5, since the browser mocks cannot be overridden per test)
-- [ ] 8.8 Check once by hand in branded Edge and Safari that a result with a trace shows every
+- [x] 8.8 Check once by hand in branded Edge and Safari that a result with a trace shows every
   formula typeset and that the journey completes (frontend); verify: a recorded manual run with the
-  browser versions
+  browser versions (done 2026-10-19 by Akim on `feature/frontend-app/frontend` at `c3c37c4`, against
+  the real backend with the catalog: Edge 155.0.4283.62 and Safari 26.5.2, every formula typeset and
+  the journey complete; recorded in the code journal)
 - [x] 8.9 Measure the transition time of "Non-functional — language, accessibility, browsers"
   once all four screens exist (frontend); verify: a Playwright test in Chromium against the mocks
   takes 20 runs of response-to-first-render for each screen change and fails when the 95th

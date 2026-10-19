@@ -172,3 +172,29 @@ issues found in 137 source files", lint-imports "4 kept, 0 broken", 971 passed, 
 formula that cannot be converted" are backed by tests; the stdout test fails if the builtin
 `print` of `mathml2omml` is restored. UI/UX: N/A for the backend feature. With the `orchestrator`
 approval, the backend feature is ready to merge into `develop`.
+
+## Task 8.2, frontend feature final round (2026-10-19)
+
+**`tester`: GO for the frontend feature** `feature/frontend-app/frontend` at `c3c37c4`: the
+round-one tip `b538708` plus `74a1ee4` (the two `ui-ux-tester` fixes), the backend feature's
+`4a04cca` and `dd3870f`, and the merges `2a4489e` and `c3c37c4`. `frontend/check.sh` exit 0
+(`gen:api:check`, eslint and `tsc -b` clean; 463 passed in 45 files; branch coverage 100%, 605/605;
+statements 99.87%). `backend/check.sh` exit 0: ruff clean, mypy "no issues found in 137 source
+files", lint-imports "4 kept, 0 broken", 971 passed, 4 skipped (the `postgres` tests); coverage 100%
+(2325 statements, 454 branches). `pre-commit run --all-files` passed with no change to
+`.secrets.baseline`. Playwright against its own mock server: Chromium 34 passed; `formulas.spec.ts`
+passed in Firefox and in WebKit.
+
+Task 8.8 was done by hand by Akim on 2026-10-19: branded Edge 155.0.4283.62 and Safari 26.5.2 typeset
+every formula of a result with a trace and the journey completes; its tick is committed with this
+record. Every frontend-feature task is done except the post-merge spec tasks 8.10 and 8.11.
+
+UI/UX: the round-one confirmation stands. The backend commits change no screen; `74a1ee4` was checked
+at 375, 320 and 1280 px (the title, `lang="ru"`, the signatory captions visible only below `sm`, no
+overflow, 0 axe violations).
+
+Not blocking: the round-one notes on `npm audit` and `coverage.include` stay; a
+`StarletteDeprecationWarning` from the test client; the `postgres` tests were not run.
+
+Next: the review (AGENTS.md section 2, step 7) and the merge into `develop`, then tasks 8.10 and
+8.11. The branch is pushed at `c3c37c4`.
