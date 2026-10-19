@@ -262,3 +262,15 @@ Not blocking: `vite.config.ts` is outside coverage; a production build checks it
 
 Next: the merge into `develop` (the `orchestrator` review is approved, section above), then tasks
 8.10 and 8.11.
+
+## `fix/frontend-app/frontend`: frontend README (2026-10-19)
+
+**`tester`: GO for `fix/frontend-app/frontend`** at `6cc8baa`. Its one commit changes only
+`frontend/README.md`: the mocks section (the four envelopes and how they are picked, their ids, the
+`report.docx` stub, the `503` note, `mockServiceWorker.js` dropped outside mock mode), the `dev` and
+`test:e2e` rows, and the source layout. `frontend/check.sh` exit 0: 478 passed, branch coverage 100%
+(616/616). Every factual claim in the new text was checked against the code at that tip and holds.
+UI/UX and Playwright: N/A, because no executable file changed. Review: Akim confirmed the diff
+(no executable change, so no `orchestrator` round). Not blocking: an unchanged sentence says
+`fixtures.ts` was generated from the backend; the refused and warning envelopes were added later
+(`cd73b2f`, tasks 6.4a-6.4c) and their origin is not stated.
