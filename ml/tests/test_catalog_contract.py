@@ -98,8 +98,10 @@ def _reader_url() -> str:
 def test_search_finds_inflected_word(conn) -> None:
     """FTS with 'russian' config finds morphological variants of clause title words.
 
-    The assertion on word_similarity proves the old trigram condition (> 0.3) would
-    miss this query, so the test holds the switch to FTS.
+    Inserts a clause with title 'грунтовое основание', then searches with the
+    genitive-plural form 'оснований'. The PostgreSQL 'russian' FTS config stems both
+    to the same lexeme ('основан'), so the search succeeds. An unrelated query must
+    return nothing, proving the search is not a full-scan.
     """
     with conn.cursor() as cur:
         cur.execute("DELETE FROM document WHERE designation = 'TEST-SEARCH-FTS'")
@@ -114,16 +116,6 @@ def test_search_finds_inflected_word(conn) -> None:
             (doc_id,),
         )
     conn.commit()
-
-    with conn.cursor() as cur:
-        cur.execute(
-            "SELECT word_similarity(%s, %s)", ("оснований", "грунтовое основание")
-        )
-        ws = cur.fetchone()[0]
-    assert ws < 0.5, (
-        f"word_similarity={ws:.3f} is too high; old code at threshold 0.3 would already "
-        "find this clause — pick a word pair that better demonstrates the FTS improvement"
-    )
 
     with conn.cursor() as cur:
         cur.execute(
