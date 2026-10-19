@@ -38,6 +38,11 @@ SELECT c.document_id,
        c.number, NULLIF(c.title, '') AS title, c.page
 FROM clause c;
 
+CREATE INDEX IF NOT EXISTS idx_clause_title_fts ON clause
+    USING GIN (to_tsvector('russian', title));
+CREATE INDEX IF NOT EXISTS idx_formula_search_fts ON formula
+    USING GIN (to_tsvector('russian', search_text));
+
 CREATE OR REPLACE FUNCTION catalog_read.search(query text, max_rows int)
 RETURNS TABLE(kind text, document_id int, designation text, edition text,
               number text, title text, rank real)
@@ -46,19 +51,18 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, public AS $$
     FROM (
         SELECT 'clause'::text AS kind, d.id AS document_id, d.designation, d.edition,
                c.number AS number, NULLIF(c.title, '') AS title,
-               greatest(similarity(c.search_text, query),
-                        word_similarity(query, c.search_text)) AS rank
+               ts_rank(to_tsvector('russian', c.title),
+                       plainto_tsquery('russian', query)) AS rank
         FROM clause c JOIN document d ON d.id = c.document_id
-        WHERE similarity(c.search_text, query) > 0.1
-           OR word_similarity(query, c.search_text) > 0.3
+        WHERE to_tsvector('russian', c.title) @@ plainto_tsquery('russian', query)
         UNION ALL
         SELECT 'formula'::text, d.id, d.designation, d.edition,
                f.number, NULL::text,
-               greatest(similarity(f.search_text, query),
-                        word_similarity(query, f.search_text))
+               ts_rank(to_tsvector('russian', f.search_text),
+                       plainto_tsquery('russian', query))
         FROM formula f JOIN document d ON d.id = f.document_id
-        WHERE similarity(f.search_text, query) > 0.1
-           OR word_similarity(query, f.search_text) > 0.3
+        WHERE f.search_text <> ''
+          AND to_tsvector('russian', f.search_text) @@ plainto_tsquery('russian', query)
         UNION ALL
         SELECT 'document'::text, d.id, d.designation, d.edition,
                NULL::text, NULLIF(d.title, ''), similarity(d.designation, query)
@@ -112,13 +116,19 @@ def reader_password() -> str | None:
     return os.environ.get(READER_PASSWORD_VAR) or None
 
 
-def ensure_catalog_read(conn: Any, password: str | None = None) -> bool:
+def ensure_catalog_read(
+    conn: Any,
+    password: str | None = None,
+    role_name: str = READER_ROLE,
+) -> bool:
     """Создаёт схему, представления, функцию поиска и роль читателя идемпотентно.
 
     Args:
         conn: соединение владельца (ingestion).
         password: пароль роли читателя; при ``None`` берётся из окружения. Если пароль
             не задан, роль и права не создаются (представления создаются всегда).
+        role_name: имя роли читателя (по умолчанию ``READER_ROLE``). Для тестов
+            передаётся имя изолированной тестовой роли.
 
     Returns:
         ``True``, если роль читателя обеспечена; иначе ``False``.
@@ -133,27 +143,27 @@ def ensure_catalog_read(conn: Any, password: str | None = None) -> bool:
 
     with conn.cursor() as cur:
         cur.execute(
-            "SELECT 1 FROM pg_roles WHERE rolname = %s", (READER_ROLE,)
+            "SELECT 1 FROM pg_roles WHERE rolname = %s", (role_name,)
         )
         if cur.fetchone() is None:
-            cur.execute(f'CREATE ROLE "{READER_ROLE}" LOGIN')
+            cur.execute(f'CREATE ROLE "{role_name}" LOGIN')
         cur.execute(
-            f'ALTER ROLE "{READER_ROLE}" PASSWORD %s',
+            f'ALTER ROLE "{role_name}" PASSWORD %s',
             (password,),
         )
-        cur.execute(f'REVOKE ALL ON SCHEMA catalog_read FROM "{READER_ROLE}"')
-        cur.execute(f'GRANT USAGE ON SCHEMA catalog_read TO "{READER_ROLE}"')
+        cur.execute(f'REVOKE ALL ON SCHEMA catalog_read FROM "{role_name}"')
+        cur.execute(f'GRANT USAGE ON SCHEMA catalog_read TO "{role_name}"')
         cur.execute(
-            f'GRANT SELECT ON ALL TABLES IN SCHEMA catalog_read TO "{READER_ROLE}"'
+            f'GRANT SELECT ON ALL TABLES IN SCHEMA catalog_read TO "{role_name}"'
         )
         cur.execute(
-            f'GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA catalog_read TO "{READER_ROLE}"'
+            f'GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA catalog_read TO "{role_name}"'
         )
-        cur.execute(f'REVOKE ALL ON ALL TABLES IN SCHEMA public FROM "{READER_ROLE}"')
-        cur.execute(f'REVOKE ALL ON SCHEMA public FROM "{READER_ROLE}"')
+        cur.execute(f'REVOKE ALL ON ALL TABLES IN SCHEMA public FROM "{role_name}"')
+        cur.execute(f'REVOKE ALL ON SCHEMA public FROM "{role_name}"')
         cur.execute("REVOKE CREATE ON SCHEMA public FROM PUBLIC")
         cur.execute("SELECT current_database()")
         dbname = cur.fetchone()["current_database"]
-        cur.execute(f'REVOKE TEMPORARY ON DATABASE "{dbname}" FROM "{READER_ROLE}"')
+        cur.execute(f'REVOKE TEMPORARY ON DATABASE "{dbname}" FROM PUBLIC')
     conn.commit()
     return True

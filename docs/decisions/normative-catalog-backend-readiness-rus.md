@@ -653,6 +653,55 @@ passed, 26 skipped, 10 errors в `test_catalog_contract.py`; `ruff` и `mypy src
 
 Условия: все 200 не-корпусных не-postgres тестов проходят с кодом выхода 0; `retrieval.py` 100%; все модули `formulas/` 100%; покрытие `latex_reconstruct.py` ≥98% с PDF-корпусом (все 13 изначально пропущенных пар ветвей теперь покрыты unit-тестами в `test_latex_reconstruct_unit.py`); защитный код `_table_caption` покрыт; `openspec validate --strict` проходит; все критерии DOD выполнены. Ветка `fix/normative-parser/ml` готова к слиянию после оставшегося шага ревью (AGENTS.md, раздел 2, шаг 7).
 
+## Раздел 4: вердикт `tester` для normatives-collector (fix/normative-collector/data, 2026-10-13)
+
+- Ветка: `fix/normative-collector/data`, последний коммит `df7c9a6`
+- Изменение: `openspec/changes/normatives-collector/`
+- Тестировщик: агент `tester`, запуск 2026-10-13
+
+### Запуск тестов
+
+Команда из `ml/`:
+
+```shell
+/home/malkinte/.pyenv/versions/3.12.12/bin/pytest tests/test_collector.py \
+  --cov=src/normatives_pipeline/collector --cov-report=term-missing
+```
+
+Результат: **34 passed, 0 failed, 0 errors.** Код выхода 0. Все HTTP-вызовы замоканы;
+база данных и сеть не нужны.
+
+### Покрытие
+
+| Файл | Stmts | Miss | Branch | BrPart | Cover |
+|---|---|---|---|---|---|
+| `collector/__init__.py` | 1 | 0 | 0 | 0 | 100% |
+| `collector/__main__.py` | 1 | 0 | 0 | 0 | 100% |
+| `collector/cli.py` | 32 | 0 | 8 | 0 | 100% |
+| `collector/models.py` | 11 | 0 | 0 | 0 | 100% |
+| `collector/repositories/__init__.py` | 4 | 0 | 0 | 0 | 100% |
+| `collector/repositories/faufcc.py` | 27 | 0 | 2 | 0 | 100% |
+| `collector/repositories/fgiscs.py` | 27 | 0 | 4 | 0 | 100% |
+| `collector/repositories/pravo.py` | 28 | 0 | 6 | 0 | 100% |
+| `collector/services.py` | 33 | 0 | 8 | 0 | 100% |
+| `collector/storage.py` | 19 | 0 | 4 | 0 | 100% |
+| **ИТОГО** | **183** | **0** | **32** | **0** | **100%** |
+
+### Линтер и типы
+
+- `ruff check src/normatives_pipeline/collector/ tests/test_collector.py`:
+  **все проверки прошли.**
+- `mypy src/normatives_pipeline/collector/ tests/test_collector.py --ignore-missing-imports`:
+  **успешно: проблем в 11 исходных файлах не найдено.**
+
+### Вердикт
+
+- тесты: 34 / 0 прошли/не прошли
+- покрытие: 100% ветвей (183 выражения, 32 ветви, 0 пропущено)
+- UI/UX: N/A (UI не затронут)
+- вердикт: **GO**
+- дата: 2026-10-13
+
 ## Раздел 2: третье ревью Акима (2026-10-13)
 
 Проверено: `fix/normative-catalog/data` в том виде, в каком она влита в `develop` в

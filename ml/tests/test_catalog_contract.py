@@ -15,6 +15,7 @@ pytestmark = pytest.mark.postgres
 URL = require_test_db_url()
 
 PASSWORD = "test-reader"  # pragma: allowlist secret
+TEST_READER_ROLE = "dec_catalog_test_reader"
 
 EXPECTED = {
     "documents": [
@@ -45,7 +46,9 @@ def conn():
     require_test_db_url()
     connection = db.connect()
     db.init_schema(connection)
-    catalog_contract.ensure_catalog_read(connection, password=PASSWORD)
+    catalog_contract.ensure_catalog_read(
+        connection, password=PASSWORD, role_name=TEST_READER_ROLE
+    )
     yield connection
     connection.close()
 
@@ -89,32 +92,57 @@ def _reader_url() -> str:
     host = parts.hostname or "localhost"
     port = parts.port or 5432
     dbname = (parts.path or "/dec").lstrip("/")
-    return f"postgresql://dec_normatives_reader:{PASSWORD}@{host}:{port}/{dbname}"
+    return f"postgresql://{TEST_READER_ROLE}:{PASSWORD}@{host}:{port}/{dbname}"
 
 
 def test_search_finds_inflected_word(conn) -> None:
+    """FTS with 'russian' config finds morphological variants of clause title words.
+
+    The assertion on word_similarity proves the old trigram condition (> 0.3) would
+    miss this query, so the test holds the switch to FTS.
+    """
     with conn.cursor() as cur:
-        cur.execute("DELETE FROM document WHERE designation = 'TEST-SEARCH-INFLECT'")
+        cur.execute("DELETE FROM document WHERE designation = 'TEST-SEARCH-FTS'")
         cur.execute(
             "INSERT INTO document (designation, title, edition, year) "
-            "VALUES ('TEST-SEARCH-INFLECT', 'test', '2024', 2024) RETURNING id"
+            "VALUES ('TEST-SEARCH-FTS', 'test', '2024', 2024) RETURNING id"
         )
         doc_id = cur.fetchone()["id"]
         cur.execute(
             "INSERT INTO clause (document_id, number, title, page, search_text) "
-            "VALUES (%s, '5.1', 'холодный фундамент', 1, 'холодный фундамент')",
+            "VALUES (%s, '5.1', 'грунтовое основание', 1, 'грунтовый основание')",
             (doc_id,),
         )
     conn.commit()
+
     with conn.cursor() as cur:
         cur.execute(
-            "SELECT number FROM catalog_read.search(%s, %s)", ("холодными", 50)
+            "SELECT word_similarity(%s, %s)", ("оснований", "грунтовое основание")
         )
-        numbers = [r["number"] for r in cur.fetchall()]
+        ws = cur.fetchone()[0]
+    assert ws < 0.5, (
+        f"word_similarity={ws:.3f} is too high; old code at threshold 0.3 would already "
+        "find this clause — pick a word pair that better demonstrates the FTS improvement"
+    )
+
     with conn.cursor() as cur:
-        cur.execute("DELETE FROM document WHERE designation = 'TEST-SEARCH-INFLECT'")
+        cur.execute(
+            "SELECT number FROM catalog_read.search(%s, %s)", ("оснований", 50)
+        )
+        found = [r["number"] for r in cur.fetchall()]
+
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT number FROM catalog_read.search(%s, %s)", ("электромагнетизм", 50)
+        )
+        noise = [r["number"] for r in cur.fetchall()]
+
+    with conn.cursor() as cur:
+        cur.execute("DELETE FROM document WHERE designation = 'TEST-SEARCH-FTS'")
     conn.commit()
-    assert "5.1" in numbers, "inflected query must find clause whose search_text has the lemma"
+
+    assert "5.1" in found, "FTS must find clause by inflected form of its title word"
+    assert "5.1" not in noise, "FTS must not return clause for an unrelated query"
 
 
 def test_reader_role_refusals(conn) -> None:
@@ -128,6 +156,9 @@ def test_reader_role_refusals(conn) -> None:
         reader.rollback()
         with reader.cursor() as cur, pytest.raises(psycopg2.Error):
             cur.execute("SELECT 1 FROM public.document")
+        reader.rollback()
+        with reader.cursor() as cur, pytest.raises(psycopg2.Error):
+            cur.execute("CREATE TEMP TABLE tmp_hack (id int)")
         reader.rollback()
         with reader.cursor() as cur:
             cur.execute("SELECT count(*) FROM catalog_read.documents")

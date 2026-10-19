@@ -462,7 +462,7 @@ stays open until R1-R4 are fixed and re-reviewed.
 
 ## Section 2: Egor's fix status (2026-10-11)
 
-Branch `fix/normative-catalog/data`, commit `c6c17a5` (on top of `950a910`).
+Branch `fix/normative-catalog/data`, commit `1d858bc` (on top of `950a910`).
 145 tests pass; 24 skipped (need `DEC_TEST_NORMATIVES_DATABASE_URL`).
 
 **R1–R4 and m3–m5 are done; r2–r4 addressed; r5 noted.**
@@ -595,10 +595,9 @@ N/A — this fix branch contains no frontend or UI changes.
   uncovered branches attributable to this fix. GO.
 - UI/UX: N/A (no UI change).
 
-Task 2.7 conditions (B1, M1, M2 fixed, R1-R4 fixed, re-reviewed by Akim) are met per
-Egor's fix status above. The verdict clears the `tester` gate (AGENTS.md section 2,
-step 5) for the fix branch; the review step (step 7, Akim's re-review of the `c6c17a5`
-state) follows next.
+Task 2.7 conditions (B1, M1, M2 fixed, R1-R4 fixed) are met per Egor's fix status
+above. The verdict clears the `tester` gate (AGENTS.md section 2, step 5) for the fix
+branch; the review step (step 7, Akim's re-review of the `97e0bb2` state) follows next.
 
 ## Section 3: tester verdict for normatives-parser (fix/normative-parser/ml, 2026-10-13)
 
