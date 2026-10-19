@@ -84,11 +84,13 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   succeeds, the columns match decision 2, as the role an `INSERT`, a `CREATE TABLE` in
   `public` and a `SELECT` on a table outside `catalog_read` are all refused, the password
   appears in no log, and an import scan of `ml/` finds no import of the backend's package
-- [ ] 2.7 [Egor] `tester` GO for `feature/normative-catalog/data`, Akim's review, and
+- [x] 2.7 [Egor] `tester` GO for `feature/normative-catalog/data`, Akim's review, and
   the merge into `develop` (data); verify: the GO and the review are recorded in
   `docs/decisions/normative-catalog-backend-readiness.md` (2026-10-05: `tester` GO
-  recorded and the feature merged into `develop`; Akim's review acknowledgement is
-  pending — it is recorded in the readiness doc when he gives it)
+  recorded and the feature merged into `develop`; 2026-10-13: Akim's third review of
+  `fix/normative-catalog/data` at `c8fc338` — verdict: B1, M1 and M2 closed,
+  task 2.7 done on Akim's side; R5 and r6-r10 are follow-up findings for a separate
+  fix branch, none block task 2.7)
 
 ## 3. Groundwork (backend, Akim)
 
