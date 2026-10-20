@@ -38,9 +38,10 @@ what it does not say. Do not restate `AGENTS.md` here.
   (WP2; open: task 7.1, archive after WP1), `calculation-api` (WP8; only 6.5 sync and
   archive left, after WP2), `frontend-app` (no WP number; open: task 8.11, archive after
   `calculation-api` and `calculation-core-contract`), `calculation-verification` (WP4;
-  open: 2.11 for the engineer, 3.7 blocked on a typical calculation, 6.1-6.2; task 4.1 is
-  agreed by Egor, the edits of `tester.md` and the `test-process` skill are not applied
-  yet), `report-title-block-limits` (open: 3.3 merge, 3.5 sync),
+  open: 3.7 blocked on a typical calculation, 6.1-6.2; the property tests of 2.11 are on
+  the branch, `543876c`, not yet checked off; the correctness gate of task 4.1 is in
+  `tester.md` and the `test-process` skill since 2026-10-20),
+  `report-title-block-limits` (open: 3.3 merge, 3.5 sync),
   `normative-catalog-backend` (WP9, with Egor; open: 7.4, the deferred `orchestrator`
   findings m2 and m3 on `fix/normative-catalog/backend`, and 8.2 sync),
   `backend-layered-architecture` (WP5, all tasks done, not archived) and
