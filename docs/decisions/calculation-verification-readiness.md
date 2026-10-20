@@ -2,12 +2,14 @@
 
 - Date: 2026-09-27
 - Change: `openspec/changes/calculation-verification/`
-- Owner: Akim. Section 4 (shared files: `tester.md`, `test-process`, `development-process`) needs Egor's agreement (task 4.1, not applied yet).
+- Owner: Akim. Section 4 (shared files: `tester.md`, `test-process`, `development-process`) needs Egor's agreement (task 4.1; agreed 2026-10-11, applied 2026-10-20 in `2863bc9`).
 - Criteria: `openspec/specs/development-process/spec.md`, "Planning before implementation" and "Go/No-Go verdict and archive" (synced from `team-roles-update`, WP7, 2026-09-27); this change's own `tasks.md`, "DOD and Go / No-Go".
 
 Russian version: `calculation-verification-readiness-rus.md`. The earlier drafting record for this change is `docs/reports/WP4_report.md` (2026-09-26, Russian); this file is the tracked readiness record from today's spec-phase gate.
 
 ## Final status
+
+**GO (implementation, feature `calculation-verification-backend`) — 2026-10-20**; see section 5. The spec-phase verdict below stays as it was.
 
 **GO (spec phase, task 1.5) — 2026-09-27**
 
@@ -85,3 +87,47 @@ Two `spec-reviewer` passes on the current text after commit `11bdca4` (task 1.8 
 pipeline moved to `ml/` and `infra/`). First pass: 0 blockers, 0 major, wording minors
 (task 1.8 passages in the present tense, paths, the open-points paragraph), all fixed.
 Second pass: 0 blockers, 0 major, no finding. **READY for DOR.**
+
+## 5. Tester verdict (implementation, 2026-10-20)
+
+The `tester` ran on `feature/calculation-verification/backend` at `7271240` (`develop`
+merged in). Task 3.7 (latency test) had been moved to a follow-up by Akim the same day
+(`0fb0825`, `tasks.md` section 5). Open before this verdict: 6.1 and 6.2 only.
+
+```
+Verdict: GO (implementation phase, feature calculation-verification-backend)
+Change: calculation-verification (WP4), 2026-10-20
+Feature/branch/commit: calculation-verification-backend, feature/calculation-verification/backend, 7271240
+Conditions:
+- Tests: PASS. `./check.sh` exits 0: ruff clean; mypy "no issues found in 154 source files"; lint-imports "5 kept, 0 broken" (including "verification imports from the application only engine, schemas and core"); pytest "1155 passed, 11 skipped", hypothesis seed 2271787898. All 11 skips are environment skips (catalog and app database variables not set in that run).
+- Coverage: PASS. Total 100.00% branch (2755 statements, 504 branches); every module of app/verification at 100%.
+- Catalog run: PASS. `pytest -m postgres tests/test_verification_catalog_properties.py tests/test_catalog_ingested.py` with DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL set: 10 passed, seed 4026219359; repeated with seed 20261020: 10 passed. Each of the 7 catalog property tests: 100 passing, 0 failing, 0 invalid.
+- Invariant completeness: PASS, resting on the catalog run. The pilot has 11 invariants (2 shared, 3 formula-independent, 6 formula-dependent), each with a registered property test; the 6 formula-dependent ones and the k_z threshold test passed on the catalog under both seeds. Controls on a synthetic R run in the default suite, and the threshold test is shown to catch a drop.
+- Correctness gate: DOES NOT APPLY (development-process delta, scenario "Change without calculation code"). `git diff --name-only develop...HEAD` touches nothing under backend/app/engine, backend/app/services, backend/app/parameters or backend/params; the feature adds the verification framework, tests, an import contract and the Hypothesis dev dependency. The framework's reports (SuiteReport, GoReport with the three metrics, the regression runner) are exercised on a synthetic type only: no calculation type has real reference examples or a stored corpus yet.
+- Validation: PASS. `openspec validate --all --strict`: 21 passed, 0 failed.
+- Delta vs implementation: PASS (spot-check). Each requirement and scenario of the calculation-verification delta has named tests (reference examples, regression corpus, invariant tests, metrics), and "Calculation accuracy" of the calculation-engine delta is held by the per-quantity deviation. Not covered by design: ">= 3 examples per type" for foundations_shallow_r (non-goal, follow-up), a real frozen corpus recomputed on every change (design.md decision 18, open), "Calculation latency" (follow-up, former task 3.7). The development-process gate is applied in tester.md and the test-process skill (2863bc9).
+- UI/UX: N/A, the feature changes no UI.
+- Security: PASS. `pre-commit run --all-files` passes; no credential, eval/exec, subprocess or unsafe loader in the diff. The reader URL was used only on the command line.
+```
+
+Findings, none blocking:
+
+1. The next change that adds a calculation (for example `foundations-pressure-from-loads`)
+   cannot get GO under the gate without at least 3 real reference examples: a short suite
+   is invalid, so NO-GO. Today no type has any. The engineer's examples and the parameter
+   source of design decision 14 are to be planned before or with that change.
+2. The real regression corpus was not listed as a follow-up. It is added to `tasks.md`
+   section 5 together with this record, as task 6.2 asks for open items before the
+   archive.
+3. Invariant completeness counts a registered test even when it is skipped, so
+   `check.sh` alone would show GO with the 6 formula-dependent invariants skipped. A GO for
+   a later change that touches the pilot's formula or catalog quotes a run with
+   `DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL` set, as this one does.
+4. The catalog run used the interim database `dec` through the read-only role
+   `dec_normatives_reader` (ingested 2026-10-13), not a `_test` database. Acceptable,
+   because the role only reads.
+5. The `StarletteDeprecationWarning` (httpx with `starlette.testclient`) predates this
+   feature.
+
+Next: the `orchestrator` review of the feature (AGENTS.md section 2, step 7, chosen by
+Akim), then the merge into `develop`, then 6.1-6.2 (`spec-keeper` sync and archive).

@@ -2,12 +2,14 @@
 
 - Дата: 2026-09-27
 - Change: `openspec/changes/calculation-verification/`
-- Владелец: Аким. Раздел 4 (общие файлы: `tester.md`, `test-process`, `development-process`) требует согласия Егора (задача 4.1, ещё не применено).
+- Владелец: Аким. Раздел 4 (общие файлы: `tester.md`, `test-process`, `development-process`) требует согласия Егора (задача 4.1; согласовано 2026-10-11, применено 2026-10-20 в `2863bc9`).
 - Критерии: `openspec/specs/development-process/spec.md`, «Planning before implementation» и «Go/No-Go verdict and archive» (синхронизированы из `team-roles-update`, WP7, 2026-09-27); собственный `tasks.md` этого change, раздел «DOD and Go / No-Go».
 
 Английская версия: `calculation-verification-readiness.md`. Более ранняя запись по черновику change — `docs/reports/WP4_report.md` (2026-09-26, на русском); этот файл — отслеживаемая запись сегодняшнего спекового гейта.
 
 ## Итоговый статус
+
+**GO (реализация, фича `calculation-verification-backend`) — 2026-10-20**; см. раздел 5. Вердикт спековой фазы ниже остаётся как был.
 
 **GO (спековая фаза, задача 1.5) — 2026-09-27**
 
@@ -85,3 +87,46 @@ Conditions:
 переехал в `ml/` и `infra/`). Первый проход: 0 блокеров, 0 major, minor по формулировкам
 (места про задачу 1.8 в настоящем времени, пути, абзац об открытых вопросах), всё исправлено.
 Второй проход: 0 блокеров, 0 major, замечаний нет. **READY для DOR.**
+
+## 5. Вердикт tester (реализация, 2026-10-20)
+
+`tester` работал на `feature/calculation-verification/backend` в `7271240` (с влитым
+`develop`). Задачу 3.7 (тест задержки) Аким в тот же день вынес в follow-up (`0fb0825`,
+раздел 5 `tasks.md`). Открыты до этого вердикта были только 6.1 и 6.2.
+
+```
+Verdict: GO (implementation phase, feature calculation-verification-backend)
+Change: calculation-verification (WP4), 2026-10-20
+Feature/branch/commit: calculation-verification-backend, feature/calculation-verification/backend, 7271240
+Conditions:
+- Тесты: PASS. `./check.sh` завершается с кодом 0: ruff чист; mypy «no issues found in 154 source files»; lint-imports «5 kept, 0 broken» (в том числе «verification imports from the application only engine, schemas and core»); pytest «1155 passed, 11 skipped», seed hypothesis 2271787898. Все 11 пропусков — из-за окружения (переменные каталога и базы приложения в этом прогоне не заданы).
+- Покрытие: PASS. Всего 100.00% по ветвям (2755 операторов, 504 ветви); каждый модуль app/verification — 100%.
+- Прогон на каталоге: PASS. `pytest -m postgres tests/test_verification_catalog_properties.py tests/test_catalog_ingested.py` с заданной DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL: 10 passed, seed 4026219359; повтор с seed 20261020: 10 passed. У каждого из 7 property-тестов на каталоге: 100 passing, 0 failing, 0 invalid.
+- Полнота инвариантов: PASS, опирается на прогон на каталоге. У пилота 11 инвариантов (2 общих, 3 не зависящих от формулы, 6 зависящих), у каждого зарегистрирован property-тест; 6 формульных и тест порога k_z прошли на каталоге при обоих seed. Контрольные прогоны на синтетическом R идут в обычном наборе, и показано, что тест порога ловит скачок.
+- Условие корректности: НЕ ПРИМЕНЯЕТСЯ (дельта development-process, сценарий «Change without calculation code»). `git diff --name-only develop...HEAD` не затрагивает backend/app/engine, backend/app/services, backend/app/parameters и backend/params; фича добавляет фреймворк верификации, тесты, контракт импортов и dev-зависимость Hypothesis. Отчёты фреймворка (SuiteReport, GoReport с тремя метриками, регрессионный раннер) проверены только на синтетическом типе: ни у одного типа расчёта ещё нет настоящих эталонных примеров и сохранённого корпуса.
+- Валидация: PASS. `openspec validate --all --strict`: 21 passed, 0 failed.
+- Дельты и реализация: PASS (выборочно). У каждого требования и сценария дельты calculation-verification названы тесты (эталонные примеры, регрессионный корпус, инвариантные тесты, метрики); «Calculation accuracy» дельты calculation-engine держится отклонением по каждой величине. Не покрыто по замыслу: «>= 3 примера на тип» для foundations_shallow_r (non-goal, follow-up), настоящий замороженный корпус, пересчитываемый при каждом изменении (design.md, решение 18, открыто), «Calculation latency» (follow-up, бывшая задача 3.7). Условие development-process внесено в tester.md и скилл test-process (2863bc9).
+- UI/UX: N/A, фича не меняет интерфейс.
+- Безопасность: PASS. `pre-commit run --all-files` проходит; в diff нет учётных данных, eval/exec, subprocess или небезопасного загрузчика. URL роли-читателя использовался только в командной строке.
+```
+
+Находки, ни одна не блокирует:
+
+1. Следующий change, добавляющий расчёт (например `foundations-pressure-from-loads`), по
+   условию корректности не получит GO без хотя бы 3 настоящих эталонных примеров: короткий
+   набор недействителен, значит NO-GO. Сейчас их нет ни у одного типа. Эталоны инженера и
+   источник параметров по решению 14 нужно спланировать до этого change или вместе с ним.
+2. Настоящий регрессионный корпус не был записан в follow-up. Он добавлен в раздел 5
+   `tasks.md` вместе с этой записью, как требует задача 6.2 для открытых пунктов перед
+   архивом.
+3. Полнота инвариантов засчитывает зарегистрированный тест и тогда, когда он пропущен,
+   поэтому один `check.sh` показал бы GO с пропущенными 6 формульными инвариантами. GO
+   будущего change, затрагивающего формулу или каталог пилота, ссылается на прогон с
+   заданной `DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL`, как этот.
+4. Прогон на каталоге шёл на временной базе `dec` через роль только для чтения
+   `dec_normatives_reader` (ингест 2026-10-13), а не на `_test`-базе. Допустимо, потому что
+   роль только читает.
+5. `StarletteDeprecationWarning` (httpx с `starlette.testclient`) был и до этой фичи.
+
+Дальше: ревью фичи `orchestrator` (AGENTS.md, раздел 2, шаг 7, выбор Акима), затем
+слияние в `develop`, затем 6.1-6.2 (синхронизация и архив `spec-keeper`).
