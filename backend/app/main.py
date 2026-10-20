@@ -1,5 +1,6 @@
 from collections.abc import AsyncIterator, Mapping, Sequence
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,12 +11,13 @@ from app.api.errors import install_error_handlers
 from app.api.health import router as health_router
 from app.api.limits import BodySizeLimit
 from app.api.normatives import router as normatives_router
-from app.core.config import ApiSettings
+from app.core.config import ApiSettings, ParameterSourceSettings
 from app.db.catalog import CatalogSessions
 from app.engine.registry import CalculatorRegistry
 from app.schemas.calculation import ValidatedBound
 from app.services.catalog import build_registry, load_validated_ranges
 from app.services.catalog_source import catalog_sources
+from app.services.interim_source import interim_sources
 from app.services.parameter_source import ParameterSource
 
 
@@ -26,6 +28,7 @@ def create_app(
     session_factory: sessionmaker[Session] | None = None,
     validated_ranges: Mapping[str, Sequence[ValidatedBound]] | None = None,
     catalog_session_factory: sessionmaker[Session] | None = None,
+    source_settings: ParameterSourceSettings | None = None,
 ) -> FastAPI:
     """Собирает приложение (``calculation-api`` design.md, решения 1 и 7).
 
@@ -33,8 +36,11 @@ def create_app(
     запросе, которому нужна ``dec_app``, а настройки каталога норм — при первом
     запросе к каталогу (``normative-catalog-backend`` design.md, решение 4). Без
     переданного реестра при старте собираются реестр и проверенные диапазоны из
-    файлов параметров. Без переданных источников каждый тип реестра получает источник
-    каталога норм (``normative-catalog-backend`` design.md, решение 5). CORS разрешает
+    файлов параметров. Без переданных источников каждый тип реестра получает источник,
+    выбранный ``DEC_PARAMETER_SOURCE``: каталог норм (``normative-catalog-backend``
+    design.md, решение 5) или временные данные, загруженные и проверенные при старте
+    (``interim-normatives-source`` design.md, решение 7); поиск и документы норм всегда
+    читают каталог. CORS разрешает
     только источники из ``DEC_CORS_ORIGINS``, без учётных данных (``calculation-api``
     design.md, решение 8); заголовки ``Location`` и ``Content-Disposition`` открыты
     браузеру. Тесты передают свои реестр, диапазоны, источники и фабрики сессий.
@@ -48,11 +54,13 @@ def create_app(
         validated_ranges: проверенные диапазоны к переданному реестру.
         catalog_session_factory: готовая фабрика сессий каталога норм; приложение её не
             освобождает.
+        source_settings: выбор источника параметров; по умолчанию читается из окружения.
 
     Returns:
         Приложение FastAPI.
     """
     settings = api_settings or ApiSettings()
+    choice = source_settings or ParameterSourceSettings()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -64,7 +72,11 @@ def create_app(
         else:
             app.state.registry = registry
             app.state.validated_ranges = dict(validated_ranges or {})
-        if sources is None:
+        if sources is None and choice.dec_parameter_source == "interim":
+            app.state.sources = interim_sources(
+                app.state.registry, choice.dec_interim_root, choice.dec_interim_profile, datetime.now(UTC).date()
+            )
+        elif sources is None:
             app.state.sources = catalog_sources(app.state.registry, app.state.catalog)
         try:
             yield
