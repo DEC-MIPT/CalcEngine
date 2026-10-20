@@ -1,8 +1,10 @@
 import logging
+import re
 from pathlib import Path
 from typing import Any
 
 import pytest
+import yaml
 from interim_fixture import VERIFIER, formula, manifest, table_value, type_file, write
 
 from app.core.exceptions import ParameterValidationError
@@ -11,6 +13,7 @@ from app.parameters.interim_schemas import InterimFormula, InterimTableValue
 from app.services.interim_data import (
     Profile,
     check_documents,
+    document_digest,
     effective_status,
     record_digest,
 )
@@ -135,3 +138,75 @@ def test_draft_lists_no_unchecked_record(tmp_path: Path, caplog: pytest.LogCaptu
         load(tmp_path, "draft", formulas=[formula()])
 
     assert messages(caplog) == []
+
+
+def digest_of(root: Path) -> str:
+    (document,) = load_interim_root(root, {TYPE})
+    return document_digest(document)
+
+
+def test_the_digest_is_carried_by_each_type_of_the_document(tmp_path: Path) -> None:
+    data = load(tmp_path, "draft", formulas=[formula()])
+
+    assert data.data_sha256 == digest_of(tmp_path)
+    assert re.fullmatch(r"[0-9a-f]{64}", data.data_sha256)
+
+
+def test_the_digest_does_not_depend_on_comments_key_order_indentation_or_line_breaks(tmp_path: Path) -> None:
+    plain, styled = tmp_path / "plain", tmp_path / "styled"
+    write(plain / "doc" / "manifest.yaml", manifest())
+    write(plain / "doc" / f"{TYPE}.yaml", type_file(formulas=[formula()]))
+    write(styled / "doc" / "manifest.yaml", dict(reversed(list(manifest().items()))))
+    styled_file = styled / "doc" / f"{TYPE}.yaml"
+    record = dict(reversed(list(formula().items())))
+    text = yaml.safe_dump(
+        {"method_bounds": [], "checks": [], "thresholds": [], "table_values": [], "formulas": [record]},
+        indent=4,
+        width=20,
+        allow_unicode=True,
+    )
+    styled_file.write_text("# <COMMENT>\n" + text.replace("\n", "\r\n"), encoding="utf-8")
+
+    assert digest_of(plain) == digest_of(styled)
+    assert digest_of(plain) == digest_of(plain)
+
+
+def test_a_float_written_as_an_integer_gives_the_same_digest(tmp_path: Path) -> None:
+    first, second = tmp_path / "first", tmp_path / "second"
+    for root, value in ((first, 1.0), (second, 1)):
+        write(root / "doc" / "manifest.yaml", manifest())
+        write(root / "doc" / f"{TYPE}.yaml", type_file(table_values=[table_value(value=value)]))
+
+    assert digest_of(first) == digest_of(second)
+
+
+@pytest.mark.parametrize(
+    ("target", "change"),
+    [
+        ("type", {"value": 2.0}),
+        ("type", {"page": 2}),
+        ("type", {"norm_refs": [{"document": "<NORM-DOC-PLACEHOLDER-2>", "edition": "unverified", "clause": "unverified", "status": "unverified", "provenance": "machine-extracted"}]}),
+        ("type", {"verification": {"status": "pending", "comment": "<NOTE>"}}),
+        ("manifest", {"edition": "<EDITION-2>"}),
+    ],
+    ids=["value", "page", "reference", "verification", "manifest"],
+)
+def test_the_digest_follows_the_data(tmp_path: Path, target: str, change: dict[str, Any]) -> None:
+    before, after = tmp_path / "before", tmp_path / "after"
+    write(before / "doc" / "manifest.yaml", manifest())
+    write(before / "doc" / f"{TYPE}.yaml", type_file(table_values=[table_value()]))
+    write(after / "doc" / "manifest.yaml", manifest(**change) if target == "manifest" else manifest())
+    write(after / "doc" / f"{TYPE}.yaml", type_file(table_values=[table_value(**change) if target == "type" else table_value()]))
+
+    assert digest_of(before) != digest_of(after)
+
+
+def test_the_digest_covers_every_type_file_of_the_document(tmp_path: Path) -> None:
+    write(tmp_path / "doc" / "manifest.yaml", manifest())
+    write(tmp_path / "doc" / f"{TYPE}.yaml", type_file())
+    alone = digest_of(tmp_path)
+    write(tmp_path / "doc" / "another_type.yaml", type_file())
+
+    (document,) = load_interim_root(tmp_path, {TYPE, "another_type"})
+
+    assert document_digest(document) != alone

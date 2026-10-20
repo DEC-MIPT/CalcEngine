@@ -5,12 +5,16 @@ from dataclasses import dataclass
 from typing import Literal
 
 from app.engine.hashing import canonical_json
-from app.parameters.interim_loader import InterimDocument
+from app.parameters.interim_loader import MANIFEST, InterimDocument
 from app.parameters.interim_schemas import InterimRecord, VerificationStatus
 
 logger = logging.getLogger("app.services.interim_data")
 
 Profile = Literal["strict", "draft"]
+
+
+def _sha256(data: object) -> str:
+    return hashlib.sha256(canonical_json(data).encode("utf-8")).hexdigest()
 
 
 def record_digest(record: InterimRecord) -> str:
@@ -22,8 +26,28 @@ def record_digest(record: InterimRecord) -> str:
     Returns:
         Шестнадцатеричная строка из 64 символов.
     """
-    content = record.model_dump(mode="json", exclude={"verification"})
-    return hashlib.sha256(canonical_json(content).encode("utf-8")).hexdigest()
+    return _sha256(record.model_dump(mode="json", exclude={"verification"}))
+
+
+def document_digest(document: InterimDocument) -> str:
+    """SHA-256 проверенного содержимого каталога документа (design.md, решение 6).
+
+    Манифест и файлы типов берутся как проверенные данные, в порядке их путей от каталога
+    документа, и сериализуются ``canonical_json``: ключи отсортированы, разделители
+    фиксированы, UTF-8, числа — как в хеше движка. Digest покрывает каждое значение,
+    ссылку, страницу и запись проверки и не зависит от комментариев YAML, порядка ключей
+    и отступов.
+
+    Args:
+        document: документ загрузчика.
+
+    Returns:
+        Шестнадцатеричная строка из 64 символов.
+    """
+    contents = {MANIFEST: document.manifest.model_dump(mode="json")} | {
+        data_file.path.rsplit("/", 1)[-1]: data_file.content.model_dump(mode="json") for data_file in document.files
+    }
+    return _sha256([{"path": path, "content": contents[path]} for path in sorted(contents)])
 
 
 def effective_status(record: InterimRecord) -> VerificationStatus:
@@ -66,11 +90,13 @@ class InterimTypeData:
     Attributes:
         calculation_type: тип расчёта.
         file: путь файла от корня данных.
+        data_sha256: digest документа, которому принадлежит файл.
         records: записи файла в его порядке.
     """
 
     calculation_type: str
     file: str
+    data_sha256: str
     records: tuple[CheckedRecord, ...]
 
 
@@ -90,6 +116,7 @@ def check_documents(documents: Sequence[InterimDocument], profile: Profile) -> d
     """
     found: dict[str, InterimTypeData] = {}
     for document in documents:
+        digest = document_digest(document)
         for data_file in document.files:
             records: list[CheckedRecord] = []
             for path, record in data_file.content.records():
@@ -102,6 +129,9 @@ def check_documents(documents: Sequence[InterimDocument], profile: Profile) -> d
                     )
                 records.append(CheckedRecord(path=path, record=record, status=status))
             found[data_file.calculation_type] = InterimTypeData(
-                calculation_type=data_file.calculation_type, file=data_file.path, records=tuple(records)
+                calculation_type=data_file.calculation_type,
+                file=data_file.path,
+                data_sha256=digest,
+                records=tuple(records),
             )
     return found
