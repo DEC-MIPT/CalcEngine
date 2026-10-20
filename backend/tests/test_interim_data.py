@@ -1,11 +1,20 @@
 import logging
 import re
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
 import pytest
 import yaml
-from interim_fixture import VERIFIER, formula, manifest, table_value, type_file, write
+from interim_fixture import (
+    VERIFIER,
+    assert_before_sunset,
+    formula,
+    manifest,
+    table_value,
+    type_file,
+    write,
+)
 
 from app.core.exceptions import ParameterValidationError
 from app.parameters.interim_loader import load_interim_root
@@ -16,6 +25,7 @@ from app.services.interim_data import (
     document_digest,
     effective_status,
     record_digest,
+    warn_passed_sunsets,
 )
 
 TYPE = "synthetic_type"
@@ -210,3 +220,35 @@ def test_the_digest_covers_every_type_file_of_the_document(tmp_path: Path) -> No
     (document,) = load_interim_root(tmp_path, {TYPE, "another_type"})
 
     assert document_digest(document) != alone
+
+
+SUNSET = date(2099, 12, 31)
+
+
+def test_on_or_before_the_sunset_nothing_is_logged_and_the_reminder_passes(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    path = write(tmp_path / "doc" / "manifest.yaml", manifest())
+    documents = load_interim_root(tmp_path, set())
+
+    with caplog.at_level(logging.WARNING):
+        assert warn_passed_sunsets(documents, SUNSET) == ()
+        assert warn_passed_sunsets(documents, SUNSET - timedelta(days=1)) == ()
+
+    assert messages(caplog) == []
+    assert_before_sunset(path, SUNSET)
+
+
+def test_after_the_sunset_a_warning_names_document_date_and_event_and_the_reminder_fails(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    path = write(tmp_path / "doc" / "manifest.yaml", manifest())
+    documents = load_interim_root(tmp_path, set())
+    after = SUNSET + timedelta(days=1)
+
+    with caplog.at_level(logging.WARNING):
+        assert warn_passed_sunsets(documents, after) == ("doc",)
+
+    assert messages(caplog) == ["code=interim_sunset_passed document=doc date=2099-12-31 event=<SUNSET-EVENT>"]
+    with pytest.raises(AssertionError, match="passed its sunset 2099-12-31"):
+        assert_before_sunset(path, after)

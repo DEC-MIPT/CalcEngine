@@ -2,11 +2,16 @@ import hashlib
 import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
+from datetime import date
 from typing import Literal
 
 from app.engine.hashing import canonical_json
 from app.parameters.interim_loader import MANIFEST, InterimDocument
-from app.parameters.interim_schemas import InterimRecord, VerificationStatus
+from app.parameters.interim_schemas import (
+    InterimManifest,
+    InterimRecord,
+    VerificationStatus,
+)
 
 logger = logging.getLogger("app.services.interim_data")
 
@@ -135,3 +140,39 @@ def check_documents(documents: Sequence[InterimDocument], profile: Profile) -> d
                 records=tuple(records),
             )
     return found
+
+
+def sunset_passed(manifest: InterimManifest, today: date) -> bool:
+    """Прошла ли дата отключения временного источника (design.md, решение 8).
+
+    Args:
+        manifest: манифест документа.
+        today: сегодняшняя дата; в день отключения срок ещё не прошёл.
+
+    Returns:
+        ``True``, если сегодня позже даты отключения.
+    """
+    return today > manifest.sunset.date
+
+
+def warn_passed_sunsets(documents: Sequence[InterimDocument], today: date) -> tuple[str, ...]:
+    """Пишет предупреждение о каждом документе, чей срок прошёл; приложение стартует.
+
+    Строка называет документ, дату и событие, которое закрывает источник.
+
+    Args:
+        documents: документы загрузчика.
+        today: сегодняшняя дата.
+
+    Returns:
+        Имена каталогов документов с прошедшим сроком.
+    """
+    passed = tuple(document for document in documents if sunset_passed(document.manifest, today))
+    for document in passed:
+        logger.warning(
+            "code=interim_sunset_passed document=%s date=%s event=%s",
+            document.name,
+            document.manifest.sunset.date.isoformat(),
+            document.manifest.sunset.event,
+        )
+    return tuple(document.name for document in passed)
