@@ -67,6 +67,7 @@ Depends on `retarget-mvp-domain` for the list of calculation types of `foundatio
 
 - Filling the reference examples (3 per calculation type, one task per type, with `tolerance` and `tolerance_kind`) from the methodical guide, by the engineer, after this change is applied.
 - Former task 3.7 [blocked: typical calculation], moved here by Akim on 2026-10-20: test that a typical calculation completes in under 30 seconds (requirement "Calculation latency" of the `calculation-engine` delta), in the change that defines a typical calculation and where the time is measured. The requirement is archived with this change and has no test until then.
+- The real regression corpus (added 2026-10-20 after the `tester` implementation verdict, finding 2): the stored frozen entries per calculation type, their parameter source, and the build step that recomputes them and reads the declared differences of `proposal.md` (design decision 18, open). Until then the requirement "Regression corpus" is held by the runner's tests on synthetic entries only.
 
 ## 6. Close
 
