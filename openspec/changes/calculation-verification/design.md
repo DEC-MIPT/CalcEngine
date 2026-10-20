@@ -111,11 +111,12 @@ See `proposal.md` (Non-goals).
     `backend/requirements-dev.txt`, so the generating tests live in `backend/tests/` and
     `backend/app/verification/` never imports it. Each invariant runs on 100 generated
     cases per calculation type (`max_examples=100`, the tool's default), without the
-    tool's per-case deadline, since the latency requirement is a separate test (task
-    3.7). The seed is recorded in the test report: Hypothesis itself prints only the
-    falsifying input, not the seed (checked 2026-10-05 with Hypothesis 6.168), so
-    `backend/tests/conftest.py` picks a seed when `--hypothesis-seed` is not given, hands
-    it to Hypothesis, and prints it in the pytest report header (`hypothesis seed: <n>`);
+    tool's per-case deadline, since the latency requirement is a separate test (former
+    task 3.7, a follow-up in `tasks.md` section 5). The seed is recorded in the test
+    report: Hypothesis itself prints only the falsifying input, not the seed (checked
+    2026-10-05 with Hypothesis 6.168), so `backend/tests/conftest.py` picks a seed when
+    `--hypothesis-seed` is not given, hands it to Hypothesis, and prints it in the pytest
+    report header (`hypothesis seed: <n>`);
     a run started with `--hypothesis-seed=<n>` repeats it. The example database is off
     (`database=None`), so a run does not depend on earlier local runs.
     - Alternative: a generator of our own on `random.Random(seed)`. Rejected: it would
@@ -220,7 +221,8 @@ unit-change invariant uses "Explicit units at the boundary".
 
 ## Risks
 
-- Latency is not testable until "typical calculation" is defined; task 3.7 waits for it.
+- Latency is not testable until "typical calculation" is defined; its test (former task
+  3.7) is a follow-up in `tasks.md` section 5, and the requirement is archived without it.
 - `calculation-core-contract` changes after agreement. Mitigation: the items
   are listed above; only they are re-opened.
 - A published worked example has an error or uses another norm edition. Mitigation:
