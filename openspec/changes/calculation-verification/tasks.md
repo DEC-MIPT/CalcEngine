@@ -7,7 +7,8 @@ done on `feature/calculation-verification/backend` (Akim's zone, from `develop`)
 only when the whole feature is done. Checkboxes in this file are ticked in `develop` as each subtask is done on the feature branch; the code reaches `develop` only when the whole feature is done (`AGENTS.md`, Branching rules).
 
 Marker **[blocked: typical calculation]**: the task waits for the engineer's definition of a
-"typical calculation". `calculation-core-contract` is re-checked and `NormRef` is agreed
+"typical calculation". The only task with it, 3.7, moved to section 5 on 2026-10-20.
+`calculation-core-contract` is re-checked and `NormRef` is agreed
 in writing by Egor (`docs/decisions/normref-questions-egor.md`, commit `a1a896c`), so no
 task waits for it.
 
@@ -39,7 +40,7 @@ Depends on `retarget-mvp-domain` for the list of calculation types of `foundatio
 - [x] 2.8 Define the invariant list structure (identifier, statement, quantities), a way to declare the valid range per calculation type, and the seed record in the test report
 - [x] 2.9 Property test for unit-change consistency, shared by all types (uses the units requirement of `calculation-core-contract` by name)
 - [x] 2.10 Property test for determinism, shared by all types (uses "Pure calculation function" by name)
-- [ ] 2.11 (engineer, no code, no zone) Confirm the invariants specific to `foundations-shallow`; then add a property test for each (2026-10-06: 9 invariants and the valid input range confirmed by Akim, `docs/decisions/reference-examples-foundations.md`, section 4; property tests of the 3 formula-independent ones done on `feature/calculation-verification/backend`, `eefc660`; the 6 that depend on formula (5.7) wait for the pilot to run on the catalog's formula, design decision 14)
+- [x] 2.11 (engineer, no code, no zone) Confirm the invariants specific to `foundations-shallow`; then add a property test for each (2026-10-06: 9 invariants and the valid input range confirmed by Akim, `docs/decisions/reference-examples-foundations.md`, section 4; property tests of the 3 formula-independent ones done on `feature/calculation-verification/backend`, `eefc660`; 2026-10-20: the 6 that depend on formula (5.7) run on the formula and coefficients of the ingested catalog, `543876c`, and pass there; they are skipped without `DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL`)
 - [x] 2.12 Test: a listed invariant without a property test makes the verification incomplete
 
 ### Requirement 5: metrics, ready part (backend)
@@ -56,9 +57,8 @@ Depends on `retarget-mvp-domain` for the list of calculation types of `foundatio
 - [x] 3.4 (spec) Requirement 5, metric "traceability completeness": confirm the definition (NormRef is agreed): a step is verified when every `NormRef` in its `norm_refs` is verified, engineer-set sources are a separate count, and the count comes from the envelope's `unverified_step_count` (resolutions 3 and 5 in `calculation-core-contract` `design.md`)
 - [x] 3.5 Implement the traceability metric and attach it to the GO report
 - [x] 3.6 (spec) Remove the DRAFT markers from the requirement "Regression corpus", the metric, and the `development-process` delta; re-run `openspec validate --strict`
-- [ ] 3.7 [blocked: typical calculation] Test that a typical calculation completes in under 30 seconds (backend)
 
-## 4. Shared files: agreed with Egor (not applied)
+## 4. Shared files: agreed with Egor (applied 2026-10-20, `2863bc9`)
 
 - [x] 4.1 (spec) Agree with Egor the changes to `.claude/agents/tester.md` (its GO rule, lines 16-19) and its Kilo mirror, the `test-process` skill, and the `development-process` delta in this change. Both agent files stay identical. Do not apply before Egor agrees (2026-10-11: Egor agreed to the delta and to the proposed GO and NO-GO lines and the step "attach the correctness metrics" as written; the pipeline computes nothing, so the gate does not apply to his zone; `docs/decisions/backend/2026-10-07-pipeline-branch-and-process-to-egor.md`, answer 9)
 - [x] 4.2 (spec) Check that the `development-process` delta of this change and the `team-roles-update` delta do not contradict each other (2026-09-27: no contradiction. This change ADDS "Correctness gate for calculation changes"; `team-roles-update` MODIFIES "Non-overlapping developer responsibility zones", "Planning before implementation", "Review before merge", and "Go/No-Go verdict and archive" and ADDS "Shared decisions are tracked", so no requirement is touched by both. The correctness gate applies only to a change with calculation code, so it never meets the code-free GO path of `team-roles-update`; for a change with code it is an extra GO condition next to the coverage gate. The GO wording in `tester.md` must still list both gates when task 4.1 and `team-roles-update` Part B are applied)
@@ -66,6 +66,7 @@ Depends on `retarget-mvp-domain` for the list of calculation types of `foundatio
 ## 5. Follow-up, not in this change
 
 - Filling the reference examples (3 per calculation type, one task per type, with `tolerance` and `tolerance_kind`) from the methodical guide, by the engineer, after this change is applied.
+- Former task 3.7 [blocked: typical calculation], moved here by Akim on 2026-10-20: test that a typical calculation completes in under 30 seconds (requirement "Calculation latency" of the `calculation-engine` delta), in the change that defines a typical calculation and where the time is measured. The requirement is archived with this change and has no test until then.
 
 ## 6. Close
 
@@ -88,7 +89,7 @@ Depends on `retarget-mvp-domain` for the list of calculation types of `foundatio
 - [x] Each task is small enough for one session
 - [x] Acceptance and Go/No-Go criteria written (below)
 - [x] Branches defined (above)
-- [ ] Dependencies satisfied: `calculation-core-contract` DOR (blocks section 3 only); Egor review (section 4, done 2026-10-11)
+- [x] Dependencies satisfied: `calculation-core-contract` DOR (blocks section 3 only; met, section 3 done); Egor review (section 4, done 2026-10-11)
 
 ## DOD and Go / No-Go
 
