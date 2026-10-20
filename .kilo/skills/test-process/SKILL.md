@@ -18,15 +18,17 @@ description: Automated testing process for DEC. Defines pytest/Vitest/Playwright
 
 ## Verdict
 
-- **GO** — all tests pass with >= 95% branch coverage.
-- **NO-GO** — any test failure or coverage < 95%.
+- **GO** — all tests pass with >= 95% branch coverage and, for a change that adds or
+  modifies a calculation, the correctness gate of `development-process` holds.
+- **NO-GO** — any test failure, coverage < 95%, or a failed correctness gate.
 
 ## Workflow
 
 1. Write tests for the change (unit, integration, E2E as appropriate).
 2. Run the full relevant suite.
 3. Measure branch coverage for the changed code.
-4. Report the verdict (GO/NO-GO) with the coverage number.
+4. Attach the correctness metrics, for a change that adds or modifies a calculation.
+5. Report the verdict (GO/NO-GO) with the coverage number.
 
 ## Rules
 
