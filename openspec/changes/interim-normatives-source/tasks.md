@@ -43,9 +43,10 @@ feature and does not gate the backend feature or section 8.
   rule", or remove that requirement if the interim source is already gone (`design.md`,
   decision 9); verify: `openspec validate --all --strict` passes and OpenSpec reports no
   archive refusal for the deltas
-- [ ] 1.5 (spec) Get Egor's acknowledgement of this change as the second developer, with a
+- [x] 1.5 (spec) Get Egor's acknowledgement of this change as the second developer, with a
   look at the record format against the `catalog_read` rows (`design.md`, open question 5);
-  verify: a commit or comment by Egor that names this change
+  verify: a commit or comment by Egor that names this change (2026-10-20: `7f394e4`, items
+  1-3 acknowledged, 4a and 4b "Yes", in `docs/decisions/backend/2026-10-20-interim-normatives-source-ack-to-egor.md`)
 
 ## 2. Schema and data format (feature `interim-normatives/backend`)
 
@@ -247,7 +248,7 @@ feature and does not gate the backend feature or section 8.
   to one feature
 - [x] Acceptance and Go/No-Go criteria written (below)
 - [x] Feature branches named
-- [ ] Dependencies satisfied: Egor's acknowledgement (task 1.5). The verifier's name and the
+- [x] Dependencies satisfied: Egor's acknowledgement (task 1.5, `7f394e4`). The verifier's name and the
   sunset date are not DOR items: they are needed only by task 7.1 (Akim, 2026-10-20)
 
 ## DOD and Go/No-Go

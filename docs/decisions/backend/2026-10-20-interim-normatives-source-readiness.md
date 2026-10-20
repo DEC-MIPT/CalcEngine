@@ -7,7 +7,8 @@
 
 ## Verdict
 
-**Spec review criterion met (2026-10-20); DOR not yet met.**
+**DOR met (2026-10-21).** Spec review criterion met on 2026-10-20; Egor's acknowledgement
+(task 1.5) closed the last DOR item, see "DOR met" below.
 - `openspec validate interim-normatives-source --strict` passes, and so does
   `openspec validate --all --strict` (21/21).
 - The second `spec-reviewer` pass lists no blocker and no major finding.
@@ -119,7 +120,21 @@ Pass 2 minors, all fixed:
 
 | Item | Who |
 |---|---|
-| Acknowledgement of this change as the second developer, and a look at the record format against `catalog_read` (task 1.5) | Egor |
+| ~~Acknowledgement of this change as the second developer, and a look at the record format against `catalog_read` (task 1.5)~~ Done 2026-10-20, `7f394e4` | Egor |
 | The verifier's name and the sunset date (`design.md`, open questions 3, 4); needed for task 7.1, not for DOR | Akim |
 | The PM's dated record that norm values may be kept in git for the pilot (open question 6, task 9.4) | PM, recorded by Akim |
 | Tolerances of `ex1`, and whether amendment 5 changes formula (5.7) (identifier given by Akim) (open questions 1, 2); needed for task 8.1, not for DOR | verifier |
+
+## DOR met (2026-10-21)
+
+- Egor's answers of 2026-10-20 (`2026-10-20-interim-normatives-source-ack-to-egor.md`,
+  `7f394e4`): the change, the scoped exception and the rule that `NormRef` status is not
+  raised are acknowledged (items 1-3); the record lists mirror the `catalog_read` views one to
+  one, with no view change planned before CH3 (4a); the expression tree is the WP9 format,
+  unchanged (4b). Task 1.5 and the DOR item "Dependencies satisfied" are checked off.
+- Akim's decision before the code (2026-10-21): the profile judges records by group (a
+  formula, threshold or check by its parameter, a table value by its parameter and row
+  heading, a method bound by its quantity and kind). `rejected` records leave the group; an
+  empty group, or one that still holds a record its profile may not use, makes the parameter
+  or bound unusable (`503`). Recorded in `design.md`, decision 5.
+- Next: the feature branch `feature/interim-normatives/backend` from `develop`, sections 2-4.
