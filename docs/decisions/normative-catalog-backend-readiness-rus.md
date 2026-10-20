@@ -1064,3 +1064,36 @@ M1, m1 и m4 закрыты в коде и тестами, которые без
 
 **Вердикт: одобрено с мелкими доработками** (m-a, m-b, m-c, все исправлены выше). Задача
 7.3: GO `tester` и ревью записаны; дальше — слияние в `develop`.
+
+## Раздел 8: GO `tester` для `fix/normative-catalog-followup/data` (2026-10-20)
+
+- Ветка: `fix/normative-catalog-followup/data` на `27949c3` (фикс-коммиты); смёржена с
+  `develop` на `7f394e4`, итоговый HEAD `3f5264d` (только документы, конфликтов нет).
+- Фикс-коммиты: `fddfde3` (R5, r6-r10, p2-p5) и `27949c3` (алиас word_similarity,
+  убрана нестабильная проверка ws).
+- Изменённые файлы: `ml/src/normatives_pipeline/catalog_contract.py`,
+  `ml/tests/test_catalog_contract.py`, `ml/tests/test_pilot_catalog.py`,
+  `ml/tests/test_retrieval.py`, `ml/pyproject.toml`,
+  `docs/decisions/normative-catalog-backend-readiness*.md`.
+- **Тесты:** `.venv/bin/pytest ml/tests/ -x -q` → 254 прошло, 11 пропущено (postgres),
+  0 упало.
+- **Покрытие:** `retrieval.py` 100% по ветвям. `catalog_contract.py` 24%: весь
+  `test_catalog_contract.py` помечен `@pytest.mark.postgres`; строки 116-169
+  (`reader_password`, `ensure_catalog_read`) недостижимы без живой БД. Это pre-existing
+  ситуация, зафиксированная в r10 коммита `fddfde3`. Ни одна не-postgres ветвь
+  не пропущена.
+- **`openspec validate --all --strict`:** 21/21 прошло.
+- **Закрытые находки:**
+  - R5: поиск клауз/формул переведён с `word_similarity` на FTS с конфигом `russian` и
+    GIN-индексами; поиск документов остался триграммным. Тест использует алиас `AS ws`
+    (RealDictCursor) и убирает морфологически некорректное условие `ws < 0.5`.
+  - r6: `REVOKE TEMPORARY ON DATABASE` применяется к `PUBLIC`, а не к роли читателя.
+  - r7: `ensure_catalog_read` принимает `role_name`; тесты используют изолированную роль.
+  - r8: дубликат теста переименован, порядок импортов исправлен.
+  - r9: добавлен тест отката для пути ошибки `sync_pilot_catalog`.
+  - r10: покрытие только postgres зафиксировано в pyproject.toml и сообщении коммита.
+  - p2-p5: исправления записей процесса в readiness doc.
+- UI/UX: не применимо (только зона данных).
+
+**GO** для `fix/normative-catalog-followup/data` на `27949c3`. Тесты: GO. Покрытие: GO
+(пробел postgres-only pre-existing, зафиксирован). UI/UX: не применимо.

@@ -1058,3 +1058,35 @@ tracked task gates task 8.2.
 
 **Verdict: approved with minor follow-ups** (m-a, m-b, m-c, all fixed above). Task 7.3:
 the `tester` GO and the review are recorded; next, the merge into `develop`.
+
+## Section 8: `tester` GO for `fix/normative-catalog-followup/data` (2026-10-20)
+
+- Branch: `fix/normative-catalog-followup/data` at `27949c3` (fix commits); merged with
+  `develop` at `7f394e4` to form HEAD `3f5264d` (documents only, no conflict).
+- Fix commits: `fddfde3` (R5, r6-r10, p2-p5) and `27949c3` (word_similarity alias,
+  drop fragile ws assertion).
+- Changed files: `ml/src/normatives_pipeline/catalog_contract.py`,
+  `ml/tests/test_catalog_contract.py`, `ml/tests/test_pilot_catalog.py`,
+  `ml/tests/test_retrieval.py`, `ml/pyproject.toml`,
+  `docs/decisions/normative-catalog-backend-readiness*.md`.
+- **Tests:** `.venv/bin/pytest ml/tests/ -x -q` → 254 passed, 11 skipped (postgres), 0
+  failed.
+- **Coverage:** `retrieval.py` 100% branch. `catalog_contract.py` 24%: the entire
+  `test_catalog_contract.py` is `@pytest.mark.postgres`; lines 116-169
+  (`reader_password`, `ensure_catalog_read`) are not reachable without a live database.
+  This is pre-existing and noted in r10 of `fddfde3`. No non-postgres branch is missed.
+- **`openspec validate --all --strict`:** 21/21 passed.
+- **Findings closed:**
+  - R5: clause/formula search switched from `word_similarity` to FTS with `russian`
+    config and GIN indexes; document search keeps trigram. Test uses `AS ws` alias
+    (RealDictCursor) and drops the morphologically incorrect `ws < 0.5` assertion.
+  - r6: `REVOKE TEMPORARY ON DATABASE` targets `PUBLIC`, not the reader role.
+  - r7: `ensure_catalog_read` accepts `role_name`; tests use an isolated role.
+  - r8: duplicate test renamed, import order fixed.
+  - r9: rollback test added for `sync_pilot_catalog` error path.
+  - r10: postgres-only coverage noted in pyproject.toml and commit message.
+  - p2-p5: process record corrections in readiness doc.
+- UI/UX: N/A (data zone only).
+
+**GO** for `fix/normative-catalog-followup/data` at `27949c3`. Tests: GO. Coverage: GO
+(postgres-only gap pre-existing and noted). UI/UX: N/A.
