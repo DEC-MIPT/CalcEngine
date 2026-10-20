@@ -74,3 +74,27 @@
 Add `## Answers` below with one line per item: 1-3 "acknowledged" or your objection, and 4a
 and 4b. An acknowledgement in a commit message that names `interim-normatives-source` also
 counts (task 1.5).
+
+## Answers
+
+1. **Acknowledged.** The change as a whole.
+
+2. **Acknowledged.** The scoped exception to the catalog-only rule, under the stated
+   bounds (only while `DEC_PARAMETER_SOURCE=interim`, only for files in the interim
+   directory, only until the sunset event).
+
+3. **Acknowledged.** `NormRef.status` is not raised by the interim source. The backend's
+   existing rule stands.
+
+4a. **Yes.** The five view groups in `catalog_read` produce rows whose fields match the
+    lists in the table above one-to-one. Parameter names, symbols and units are the same
+    keys in both sources, so CH3 can compare record by record without renaming. No
+    planned changes to the views for the pilot scope before CH3.
+
+4b. **Yes.** The pipeline builds trees with exactly these node kinds:
+    `number`, `symbol`, `add`, `sub`, `mul`, `div`, `pow`, `neg`, `call`.
+    Function list: `sqrt`, `exp`, `ln`, `log10`, `sin`, `cos`, `tan`, `abs`, `min`,
+    `max`. This is the format agreed in WP9 (`normative-catalog-backend`, decision 3).
+    Format unchanged.
+
+Egor, 2026-10-20.
