@@ -3,6 +3,7 @@ ruff
 mypy
 pytest
 pytest-cov
+hypothesis>=6.168
 httpx
 types-PyYAML
 import-linter

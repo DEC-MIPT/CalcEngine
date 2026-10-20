@@ -55,7 +55,7 @@ def test_the_backend_keeps_every_contract(tmp_path: Path) -> None:
     completed = lint(tmp_path)
 
     assert completed.returncode == 0, completed.stdout
-    assert "Contracts: 4 kept, 0 broken." in completed.stdout
+    assert "Contracts: 5 kept, 0 broken." in completed.stdout
 
 
 @pytest.mark.parametrize(
@@ -80,6 +80,18 @@ def test_the_backend_keeps_every_contract(tmp_path: Path) -> None:
             "app.engine.reads -> app.parameters.loader",
         ),
         (
+            "verification/reads.py",
+            "from app.services import calculation\n",
+            "verification imports from the application only engine, schemas and core BROKEN",
+            "app.verification.reads -> app.services.calculation",
+        ),
+        (
+            "services/verifies.py",
+            "from app.verification import models\n",
+            "Layers follow backend-layered-architecture design.md decision 2 BROKEN",
+            "app.services.verifies -> app.verification.models",
+        ),
+        (
             "core/pipeline.py",
             "import normatives_pipeline\n",
             "the backend does not import the normative pipeline BROKEN",
@@ -98,7 +110,7 @@ def test_the_backend_keeps_every_contract(tmp_path: Path) -> None:
             "app.loose",
         ),
     ],
-    ids=["upward", "api-repositories", "engine-parameters", "pipeline", "package-outside-layers", "module-outside-layers"],
+    ids=["upward", "api-repositories", "engine-parameters", "verification-services", "services-verification", "pipeline", "package-outside-layers", "module-outside-layers"],
 )
 def test_a_forbidden_import_or_an_unplaced_package_breaks_its_contract_and_is_named(
     tmp_path: Path, module: str, body: str, contract: str, offending: str
