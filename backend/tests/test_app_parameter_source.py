@@ -13,7 +13,7 @@ from sqlalchemy.pool import StaticPool
 from test_engine_foundations_shallow_r import inputs
 from test_services_catalog_source import make_source, registry
 
-from app.core.config import INTERIM_ROOT, ParameterSourceSettings
+from app.core.config import INTERIM_ROOT, ApiSettings, ParameterSourceSettings
 from app.core.exceptions import ParameterValidationError
 from app.main import create_app
 from app.models import Base
@@ -21,6 +21,7 @@ from app.schemas.calculation import CATALOG_SOURCE
 from app.services.catalog_source import CatalogParameterSource
 from app.services.interim_source import InterimParameterSource
 
+FIXTURES = Path(__file__).parent / "fixtures" / "params"
 VARIABLES = ("DEC_PARAMETER_SOURCE", "DEC_INTERIM_PROFILE", "DEC_INTERIM_ROOT")
 
 
@@ -173,3 +174,16 @@ def test_an_unknown_setting_value_stops_the_start_naming_the_variable(
     with pytest.raises(ValidationError, match=variable):
         create_app()
 
+
+@pytest.mark.parametrize("source", ["catalog", "interim"])
+def test_a_norm_value_in_params_is_rejected_whatever_the_source(tmp_path: Path, source: str) -> None:
+    params = tmp_path / "params"
+    params.mkdir()
+    (params / f"{PILOT}.yaml").write_text((FIXTURES / "unknown_key.yaml").read_text(encoding="utf-8"), encoding="utf-8")
+    settings = ParameterSourceSettings.model_validate(
+        {"DEC_PARAMETER_SOURCE": source, "DEC_INTERIM_ROOT": str(interim_root(tmp_path / "interim"))}
+    )
+    app = create_app(api_settings=ApiSettings.model_validate({"DEC_PARAMS_ROOT": str(params)}), source_settings=settings)
+
+    with pytest.raises(ParameterValidationError, match="formulas"), TestClient(app):
+        pass
