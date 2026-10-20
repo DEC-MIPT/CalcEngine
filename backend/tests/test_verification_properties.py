@@ -1,9 +1,28 @@
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
+from typing import Any
 
 import pytest
+import test_verification_catalog_properties as on_catalog
 from hypothesis import given, settings
 from hypothesis import strategies as st
-from test_engine_foundations_shallow_r import ROUNDING, RULE, entry, parameters
+from pilot_invariants import (
+    FORMULA_INVARIANTS,
+    PILOT_RANGES,
+    R_AFFINE_IN_C_II,
+    R_AFFINE_IN_D_1,
+    R_GROWS_WITH_B,
+    R_GROWS_WITH_C_II,
+    R_GROWS_WITH_D_B,
+    R_GROWS_WITH_GAMMA_II,
+)
+from test_engine_foundations_shallow_r import (
+    ROUNDING,
+    RULE,
+    entry,
+    formula,
+    num,
+    parameters,
+)
 from test_verification_invariants import RANGES, SPECIFIC
 from test_verification_runner import (
     CONTRACT,
@@ -20,10 +39,10 @@ from app.engine.base import Calculator
 from app.engine.boundary import convert, inputs_to_base_units
 from app.engine.pipeline import CalculatorOutput, calculate
 from app.schemas.calculation import CalculationResult, QuantityValue
+from app.services.parameter_source import ResolvedParameters
 from app.verification.invariants import (
     DETERMINISM,
     UNIT_CHANGE,
-    InputRange,
     Invariant,
     InvariantPlan,
     determinism_holds,
@@ -37,18 +56,6 @@ CASES = settings(max_examples=100, deadline=None, database=None)
 """100 случаев на инвариант и тип, без лимита времени на случай и без базы примеров (решение 16)."""
 
 PILOT_CONTRACT = pilot.contract(ROUNDING, RULE)
-PILOT_RANGES = (
-    InputRange(quantity="b", lower=0.5, upper=20.0, unit="m"),
-    InputRange(quantity="d_1", lower=0.5, upper=5.0, unit="m"),
-    InputRange(quantity="d_b", lower=0.0, upper=2.0, unit="m"),
-    InputRange(quantity="gamma_II", lower=14.0, upper=22.0, unit="kN/m3"),
-    InputRange(quantity="gamma_II_prime", lower=14.0, upper=22.0, unit="kN/m3"),
-    InputRange(quantity="c_II", lower=0.0, upper=50.0, unit="kPa"),
-    InputRange(quantity="phi_II", lower=0.0, upper=45.0, unit="deg", whole=True),
-    InputRange(quantity="p", lower=50.0, upper=600.0, unit="kPa"),
-)
-"""Допустимый диапазон входов пилота; принят инженером (Аким) 2026-10-06, это не значения нормы."""
-
 P_DOES_NOT_CHANGE_R = Invariant(
     identifier="p-does-not-change-R",
     statement="The pressure p does not change R; it changes only the verdict.",
@@ -66,11 +73,11 @@ VERDICT_MONOTONE_IN_P = Invariant(
 )
 """Инварианты пилота, не зависящие от формулы R; подтверждены инженером (Аким) 2026-10-06 (задача 2.11)."""
 
-def pilot_parameters(given: Mapping[str, QuantityValue]) -> pilot.Parameters:
+def pilot_parameters(given: Mapping[str, QuantityValue], **changes: Any) -> pilot.Parameters:
     """Синтетические параметры пилота со строками таблицы, выбранными по ``phi_II`` входов."""
     phi = convert(given["phi_II"], "deg").value
     return parameters(
-        m_gamma=entry("M_gamma", 0.5, phi), m_q=entry("M_q", 5.0, phi), m_c=entry("M_c", 10.0, phi)
+        m_gamma=entry("M_gamma", 0.5, phi), m_q=entry("M_q", 5.0, phi), m_c=entry("M_c", 10.0, phi), **changes
     )
 
 
@@ -90,13 +97,19 @@ SUBJECTS = (
         plan=InvariantPlan(
             calculation_type=pilot.NAME,
             valid_range=PILOT_RANGES,
-            invariants=(*shared_invariants(PILOT_CONTRACT), P_DOES_NOT_CHANGE_R, VERDICT_IS_P_LE_R, VERDICT_MONOTONE_IN_P),
+            invariants=(
+                *shared_invariants(PILOT_CONTRACT),
+                P_DOES_NOT_CHANGE_R,
+                VERDICT_IS_P_LE_R,
+                VERDICT_MONOTONE_IN_P,
+                *FORMULA_INVARIANTS,
+            ),
         ),
     ),
 )
-"""Типы, на которых проверяются инварианты. Пилот считается на синтетических параметрах:
-формула 5.7 из каталога для тестов недоступна, а инварианты, которые от неё зависят,
-ждут её (задача 2.11)."""
+"""Типы, на которых проверяются инварианты. Пилот считается здесь на синтетических параметрах;
+инварианты, которые зависят от формулы R, проверяются на формуле и коэффициентах
+ингестированного каталога в ``test_verification_catalog_properties.py`` (задача 2.11)."""
 PILOT = SUBJECTS[1]
 
 
@@ -212,8 +225,44 @@ PROPERTY_TESTS = {
     (pilot.NAME, P_DOES_NOT_CHANGE_R.identifier): test_the_pressure_does_not_change_r,
     (pilot.NAME, VERDICT_IS_P_LE_R.identifier): test_the_verdict_is_pass_exactly_when_p_is_at_most_unrounded_r,
     (pilot.NAME, VERDICT_MONOTONE_IN_P.identifier): test_a_check_that_passes_at_p_passes_at_every_smaller_p,
+    (pilot.NAME, R_AFFINE_IN_C_II.identifier): on_catalog.test_equal_steps_of_c_ii_give_equal_steps_of_r,
+    (pilot.NAME, R_AFFINE_IN_D_1.identifier): on_catalog.test_equal_steps_of_d_1_give_equal_steps_of_r,
+    (pilot.NAME, R_GROWS_WITH_C_II.identifier): on_catalog.test_a_larger_c_ii_gives_an_r_not_smaller,
+    (pilot.NAME, R_GROWS_WITH_GAMMA_II.identifier): on_catalog.test_a_larger_gamma_ii_gives_an_r_not_smaller,
+    (pilot.NAME, R_GROWS_WITH_D_B.identifier): on_catalog.test_a_larger_d_b_gives_an_r_not_smaller,
+    (pilot.NAME, R_GROWS_WITH_B.identifier): on_catalog.test_a_larger_b_gives_an_r_not_smaller,
 }
 """Property-тест каждого инварианта каждого субъекта: пара (тип, инвариант) -> функция теста."""
+
+
+CONTINUOUS_K_Z = formula(r"k_z = \kappa", num(1.25), "k_z", {"k_z": "1"})
+"""Синтетическая ``k_z`` ниже порога, равная ``b / 4`` на синтетическом пороге 5 м."""
+
+
+def synthetic_catalog(**changes: Any) -> Callable[[Mapping[str, QuantityValue]], ResolvedParameters]:
+    """Синтетическая замена каталога для контрольных прогонов тестов, зависящих от формулы R."""
+    return lambda given: ResolvedParameters(parameters=pilot_parameters(given, **changes), method_range=())
+
+
+@pytest.mark.parametrize(
+    "test",
+    [
+        on_catalog.test_equal_steps_of_c_ii_give_equal_steps_of_r,
+        on_catalog.test_equal_steps_of_d_1_give_equal_steps_of_r,
+        on_catalog.test_a_larger_c_ii_gives_an_r_not_smaller,
+        on_catalog.test_a_larger_gamma_ii_gives_an_r_not_smaller,
+        on_catalog.test_a_larger_d_b_gives_an_r_not_smaller,
+        on_catalog.test_a_larger_b_gives_an_r_not_smaller,
+        on_catalog.test_r_does_not_drop_across_the_k_z_threshold,
+    ],
+)
+def test_the_formula_tests_pass_on_a_synthetic_r_that_keeps_the_invariants(test: Callable[..., None]) -> None:
+    test(resolve=synthetic_catalog(k_z_below=CONTINUOUS_K_Z))
+
+
+def test_the_threshold_test_finds_a_drop_of_r_at_the_k_z_threshold() -> None:
+    with pytest.raises(AssertionError):
+        on_catalog.test_r_does_not_drop_across_the_k_z_threshold(resolve=synthetic_catalog())
 
 
 def test_every_listed_invariant_has_a_property_test() -> None:
