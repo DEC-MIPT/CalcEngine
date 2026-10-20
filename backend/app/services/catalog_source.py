@@ -8,7 +8,7 @@ from app.db.catalog import UNREACHABLE, CatalogSessions
 from app.engine.boundary import inputs_to_base_units
 from app.engine.registry import CalculatorRegistry
 from app.repositories.normatives import NormativesRepository
-from app.schemas.calculation import QuantityValue
+from app.schemas.calculation import CATALOG_SOURCE, QuantityValue
 from app.services.catalog import PARAMETER_MODELS, TABLE_SELECTORS
 from app.services.parameter_assembly import NO_ROW, ParameterDataError, assemble
 from app.services.parameter_source import ParameterSource, ResolvedParameters
@@ -60,7 +60,8 @@ class CatalogParameterSource:
             inputs: входы запроса, уже проверенные по контракту типа.
 
         Returns:
-            Параметры, проверенные моделью типа, и границы метода в базовых единицах.
+            Параметры, проверенные моделью типа, и границы метода в базовых единицах,
+            с описанием источника ``catalog``.
 
         Raises:
             InputValidationError: если вход внутри диапазона метода не совпал ни с одной
@@ -97,6 +98,7 @@ class CatalogParameterSource:
                 thresholds,
                 checks,
                 bounds,
+                source=CATALOG_SOURCE,
             )
         except ParameterDataError as breach:
             named = "" if breach.parameter is None else f" parameter={breach.parameter}"

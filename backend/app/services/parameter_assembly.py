@@ -10,6 +10,7 @@ from app.engine.boundary import convert
 from app.schemas.api import FieldError
 from app.schemas.calculation import (
     MethodBound,
+    ParameterSourceInfo,
     QuantityDeclaration,
     QuantityValue,
     check_bounds,
@@ -255,6 +256,7 @@ def assemble(
     thresholds: Sequence[ThresholdRow],
     checks: Sequence[CheckRow],
     bounds: Sequence[MethodBoundRow],
+    source: ParameterSourceInfo | None = None,
 ) -> ResolvedParameters:
     """Собирает из строк данных параметры типа расчёта и диапазон метода.
 
@@ -276,6 +278,7 @@ def assemble(
         thresholds: строки порогов.
         checks: строки ссылок проверок.
         bounds: строки границ метода.
+        source: описание источника для ``ResolvedParameters``.
 
     Returns:
         Параметры, проверенные моделью, или снимок данных, и границы метода.
@@ -325,8 +328,8 @@ def assemble(
             thresholds={name: value for name, value in fields.items() if isinstance(value, Threshold)},
             checks={check.parameter: parse_norm_refs(check.norm_refs) for check in checks},
         )
-        return ResolvedParameters(parameters=snapshot, method_range=method_range)
+        return ResolvedParameters(parameters=snapshot, method_range=method_range, source=source)
     with _guard(None):
         parameters = model.model_validate(fields)
-    return ResolvedParameters(parameters=parameters, method_range=method_range)
+    return ResolvedParameters(parameters=parameters, method_range=method_range, source=source)
 
