@@ -5,6 +5,7 @@ from test_verification_runner import TYPE, example, output, registry, resolve
 from app.verification.models import parse_examples
 from app.verification.runner import (
     MIN_EXAMPLES_PER_TYPE,
+    DuplicateExampleId,
     NoCalculationTypes,
     RejectedExample,
     TooFewExamples,
@@ -110,3 +111,18 @@ def test_a_valid_suite_with_a_failing_example_is_no_go_without_reasons() -> None
     report = run_reference_suite(parse_examples(raw), [TYPE], registry(), resolve)
 
     assert (report.verdict, report.invalid) == ("NO-GO", ())
+
+
+def test_a_repeated_example_id_makes_the_suite_invalid_and_counts_once() -> None:
+    copies = [card("same", calculation_type=TYPE)] * 3
+
+    report = run_reference_suite(parse_examples(copies), [TYPE], registry(), resolve)
+
+    assert report.verdict == "NO-GO"
+    assert report.invalid == (DuplicateExampleId(example_id="same"), TooFewExamples(calculation_type=TYPE, count=1))
+
+
+def test_a_repeated_id_is_named_once_before_the_shortage() -> None:
+    parsed = parse_examples([*cards(3), card(f"{TYPE}-0", calculation_type=TYPE)])
+
+    assert suite_invalidity(parsed, [TYPE]) == (DuplicateExampleId(example_id=f"{TYPE}-0"),)

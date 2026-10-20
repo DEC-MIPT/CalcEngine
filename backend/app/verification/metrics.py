@@ -52,8 +52,8 @@ class Reproducibility:
 
     @property
     def verdict(self) -> Verdict:
-        """``NO-GO``, если доля ниже 100% (сбой детерминизма, design.md, решение 9)."""
-        return "NO-GO" if self.not_reproduced else "GO"
+        """``NO-GO``, если доля ниже 100% (сбой детерминизма, design.md, решение 9) или примеров нет."""
+        return "NO-GO" if self.not_reproduced or self.examples == 0 else "GO"
 
 
 @dataclass(frozen=True)

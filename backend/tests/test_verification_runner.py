@@ -151,6 +151,37 @@ def test_the_tolerance_rule_of_the_requirement_includes_its_edge(expected: dict[
     assert (report.verdict == "GO") is within
 
 
+@pytest.mark.parametrize(
+    ("computed", "expected", "within"),
+    [
+        (245.2, output(245.3, unit="kPa", tolerance=0.1), True),
+        (245.4, output(245.3, unit="kPa", tolerance=0.1), True),
+        (0.33, output(0.3, unit="1", tolerance=0.1, kind="relative"), True),
+        (245.2, output(245.31, unit="kPa", tolerance=0.1), False),
+        (245.2, output(245.3, unit="kPa", tolerance=0.0999), False),
+        (0.331, output(0.3, unit="1", tolerance=0.1, kind="relative"), False),
+    ],
+    ids=[
+        "decimal absolute at the lower edge",
+        "decimal absolute at the upper edge",
+        "decimal relative at the edge",
+        "decimal absolute just outside",
+        "decimal absolute with a smaller tolerance",
+        "decimal relative just outside",
+    ],
+)
+def test_a_decimal_value_on_the_edge_of_its_tolerance_is_within_it(
+    computed: float, expected: dict[str, Any], within: bool
+) -> None:
+    assert within_tolerance(computed, ExpectedOutput.model_validate(expected)) is within
+
+
+def test_an_empty_run_is_no_go() -> None:
+    report = run_suite([], registry(), resolve)
+
+    assert (report.verdict, report.runs) == ("NO-GO", ())
+
+
 def test_an_absolute_tolerance_applies_in_the_unit_of_the_expected_value() -> None:
     inside = run_suite([example(y=output(6001.0, unit="mm", tolerance=1.0))], registry(), resolve)
     outside = run_suite([example(y=output(6001.0, unit="mm", tolerance=0.5))], registry(), resolve)

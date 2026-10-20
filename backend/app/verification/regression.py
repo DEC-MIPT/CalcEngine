@@ -3,7 +3,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from app.core.exceptions import DECError
 from app.engine.pipeline import calculate
@@ -41,7 +41,7 @@ class CorpusEntry(BaseModel):
         entry_id: идентификатор записи.
         calculation_type: тип расчёта.
         inputs: входы со своими единицами.
-        outputs: выходы конверта в порядке конверта.
+        outputs: выходы конверта в порядке конверта, у каждой величины один выход.
         verdict: вердикт конверта.
         input_hash: ``input_hash`` конверта.
         engine_version: ``engine_version`` конверта.
@@ -56,6 +56,13 @@ class CorpusEntry(BaseModel):
     verdict: CalculationVerdict
     input_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
     engine_version: str = Field(pattern=r"\S")
+
+    @model_validator(mode="after")
+    def _one_output_per_quantity(self) -> "CorpusEntry":
+        quantities = [output.quantity for output in self.outputs]
+        if len(set(quantities)) != len(quantities):
+            raise ValueError("every output quantity of a corpus entry must be unique")
+        return self
 
 
 def freeze(

@@ -23,7 +23,7 @@ from app.verification.metrics import (
     traceability,
 )
 from app.verification.models import ReferenceExample
-from app.verification.runner import ExampleParameters, run_suite
+from app.verification.runner import ExampleParameters, SuiteReport, run_suite
 
 DRIFTING = "synthetic_drifting_type"
 
@@ -103,8 +103,16 @@ def test_a_refused_example_is_reproduced_when_both_refusals_are_equal() -> None:
     assert reproducibility(report).not_reproduced == ()
 
 
-def test_an_empty_run_has_no_rate() -> None:
-    assert Reproducibility(reproduced=0, examples=0, not_reproduced=()).rate is None
+def test_an_empty_run_has_no_rate_and_gives_no_go() -> None:
+    empty = Reproducibility(reproduced=0, examples=0, not_reproduced=())
+
+    assert (empty.rate, empty.verdict) == (None, "NO-GO")
+
+
+def test_the_go_report_of_a_claimed_go_without_examples_is_no_go() -> None:
+    report = go_report(SuiteReport(verdict="GO", runs=()))
+
+    assert report.effective_verdict == "NO-GO"
 
 
 def test_the_go_report_of_a_passing_reproduced_suite_is_go_with_both_metrics() -> None:

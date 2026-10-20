@@ -313,3 +313,17 @@ def test_a_calculator_with_state_breaks_unit_change_consistency() -> None:
     inputs = {"b": QuantityValue(value=2000.0, unit="mm"), "q": QuantityValue(value=1.0, unit="1")}
 
     assert not unit_change_holds(CONTRACT, DriftingCalculator(), inputs, PARAMETERS, METHOD)
+
+
+def test_inputs_left_in_their_own_units_break_unit_change_consistency(monkeypatch: pytest.MonkeyPatch) -> None:
+    def units_seen(
+        contract: object, calculator: object, inputs: Mapping[str, QuantityValue], *args: object, **kwargs: object
+    ) -> tuple[str, ...]:
+        return tuple(value.unit for value in inputs.values())
+
+    monkeypatch.setattr("app.verification.invariants.calculate", units_seen)
+    in_metres = {"b": QuantityValue(value=2.0, unit="m"), "q": QuantityValue(value=1.0, unit="1")}
+    in_millimetres = {"b": QuantityValue(value=2000.0, unit="mm"), "q": QuantityValue(value=1.0, unit="1")}
+
+    assert unit_change_holds(CONTRACT, SyntheticCalculator(), in_metres, PARAMETERS, METHOD)
+    assert not unit_change_holds(CONTRACT, SyntheticCalculator(), in_millimetres, PARAMETERS, METHOD)

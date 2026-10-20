@@ -113,6 +113,32 @@ def test_a_declaration_with_another_value_does_not_cover_the_difference() -> Non
     assert report.unused_declarations == (wrong,)
 
 
+def test_a_declaration_with_another_old_value_does_not_cover_the_difference() -> None:
+    old = stored(frozen(), outputs=(y(5.5),))
+    wrong = declared("e1", "y", QuantityValue(value=5.0, unit="m"), QuantityValue(value=6.0, unit="m"))
+
+    report = run_regression([old], registry(), resolve, [wrong])
+
+    assert (report.verdict, report.checks[0].outcome) == ("NO-GO", "undeclared")
+    assert report.unused_declarations == (wrong,)
+
+
+def test_the_same_number_in_another_unit_is_a_difference() -> None:
+    old = stored(frozen(), outputs=(CorpusOutput(quantity="y", value=6.0, unit="mm"),))
+
+    report = run_regression([old], registry(), resolve)
+
+    assert (report.verdict, report.checks[0].outcome) == ("NO-GO", "undeclared")
+    assert report.checks[0].undeclared == (
+        Difference(quantity="y", old=QuantityValue(value=6.0, unit="mm"), new=QuantityValue(value=6.0, unit="m")),
+    )
+
+
+def test_an_entry_with_two_outputs_of_one_quantity_is_rejected() -> None:
+    with pytest.raises(ValidationError, match="unique"):
+        stored(frozen(), outputs=(y(5.5), y(6.0)))
+
+
 def test_a_declaration_for_another_entry_does_not_cover_the_difference() -> None:
     old = stored(frozen(), outputs=(y(5.5),))
     other = declared("e2", "y", QuantityValue(value=5.5, unit="m"), QuantityValue(value=6.0, unit="m"))

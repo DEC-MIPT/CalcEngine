@@ -1,3 +1,4 @@
+import sys
 from collections import Counter
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -25,6 +26,14 @@ Verdict = Literal["GO", "NO-GO"]
 
 MIN_EXAMPLES_PER_TYPE = 3
 """Наименьшее число эталонных примеров на тип расчёта (design.md, решение 1); не значение нормы."""
+
+FLOAT_SLACK_ULPS = 4
+"""Запас на погрешность двоичного представления, в единицах последнего разряда.
+
+Значения на границе допуска в десятичной записи (245.2 и 245.3 при допуске 0.1)
+остаются в допуске, хотя их разность в ``float`` чуть больше 0.1. Это не часть допуска
+и не значение нормы.
+"""
 
 
 @dataclass(frozen=True)
@@ -119,11 +128,22 @@ class RejectedExample:
 
 
 @dataclass(frozen=True)
+class DuplicateExampleId:
+    """Две или больше принятых карточки набора несут один ``example_id``.
+
+    Attributes:
+        example_id: повторённый идентификатор.
+    """
+
+    example_id: str
+
+
+@dataclass(frozen=True)
 class NoCalculationTypes:
     """Набору не передан ни один тип расчёта, так что проверять нечего."""
 
 
-InvalidReason = TooFewExamples | RejectedExample | NoCalculationTypes
+InvalidReason = TooFewExamples | RejectedExample | DuplicateExampleId | NoCalculationTypes
 """Почему набор эталонов недействителен (сценарий "Too few or incomplete examples")."""
 
 
@@ -153,7 +173,8 @@ def within_tolerance(computed: float, expected: ExpectedOutput) -> bool:
     """Проверяет правило допуска требования «Reference examples».
 
     ``absolute``: модуль разности не больше ``tolerance``; ``relative``: не больше
-    ``tolerance`` на модуль ожидаемого значения. Граница допуска входит.
+    ``tolerance`` на модуль ожидаемого значения. Граница допуска входит, с запасом
+    ``FLOAT_SLACK_ULPS`` на погрешность двоичного представления.
 
     Args:
         computed: вычисленное значение в единице ожидаемого.
@@ -163,7 +184,8 @@ def within_tolerance(computed: float, expected: ExpectedOutput) -> bool:
         ``True``, если значение в допуске.
     """
     limit = expected.tolerance if expected.tolerance_kind == "absolute" else expected.tolerance * abs(expected.value)
-    return abs(computed - expected.value) <= limit
+    slack = FLOAT_SLACK_ULPS * sys.float_info.epsilon * max(abs(computed), abs(expected.value), limit)
+    return abs(computed - expected.value) <= limit + slack
 
 
 def _check(quantity: str, expected: ExpectedOutput, result: CalculationResult) -> QuantityCheck:
@@ -219,9 +241,9 @@ def run_suite(
 ) -> SuiteReport:
     """Прогоняет набор эталонных примеров (задача 2.3).
 
-    Вердикт ``GO``, только если каждый пример прошёл; иначе ``NO-GO``, и отчёт
-    называет пример, величину, вычисленное и ожидаемое значения и допуск (сценарий
-    "A quantity outside its tolerance").
+    Вердикт ``GO``, только если набор не пуст и каждый пример прошёл; иначе ``NO-GO``,
+    и отчёт называет пример, величину, вычисленное и ожидаемое значения и допуск
+    (сценарий "A quantity outside its tolerance").
 
     Args:
         examples: эталонные примеры набора.
@@ -232,28 +254,33 @@ def run_suite(
         Отчёт набора.
     """
     runs = tuple(run_example(example, registry, resolve) for example in examples)
-    verdict: Verdict = "GO" if all(run.outcome == "passed" for run in runs) else "NO-GO"
+    verdict: Verdict = "GO" if runs and all(run.outcome == "passed" for run in runs) else "NO-GO"
     return SuiteReport(verdict=verdict, runs=runs)
 
 
 def suite_invalidity(parsed: ParsedExamples, calculation_types: Sequence[str]) -> tuple[InvalidReason, ...]:
     """Находит причины, по которым набор эталонов недействителен.
 
-    Набор недействителен, если какая-либо карточка отклонена при разборе, если список
-    типов пуст или если у типа из списка меньше ``MIN_EXAMPLES_PER_TYPE`` принятых
-    примеров (задача 2.4). Отклонённая карточка в счёт примеров не входит.
+    Набор недействителен, если какая-либо карточка отклонена при разборе, если две
+    принятые карточки несут один ``example_id``, если список типов пуст или если у типа
+    из списка меньше ``MIN_EXAMPLES_PER_TYPE`` принятых примеров с разными
+    идентификаторами (задача 2.4). Отклонённая карточка в счёт примеров не входит.
 
     Args:
         parsed: итог ``parse_examples``.
         calculation_types: типы расчёта, которые набор обязан покрыть.
 
     Returns:
-        Причины в порядке: отклонённые карточки, пустой список, типы с нехваткой примеров.
+        Причины в порядке: отклонённые карточки, повторённые идентификаторы, пустой
+        список, типы с нехваткой примеров.
     """
     reasons: list[InvalidReason] = [RejectedExample(problem) for problem in parsed.problems]
+    ids = Counter(example.example_id for example in parsed.examples)
+    reasons.extend(DuplicateExampleId(example_id) for example_id, count in ids.items() if count > 1)
     if not calculation_types:
         reasons.append(NoCalculationTypes())
-    counts = Counter(example.calculation_type for example in parsed.examples)
+    distinct = dict.fromkeys((example.calculation_type, example.example_id) for example in parsed.examples)
+    counts = Counter(calculation_type for calculation_type, _ in distinct)
     reasons.extend(
         TooFewExamples(calculation_type, counts[calculation_type])
         for calculation_type in dict.fromkeys(calculation_types)
