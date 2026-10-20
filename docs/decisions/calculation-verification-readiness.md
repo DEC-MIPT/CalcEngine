@@ -131,3 +131,40 @@ Findings, none blocking:
 
 Next: the `orchestrator` review of the feature (AGENTS.md section 2, step 7, chosen by
 Akim), then the merge into `develop`, then 6.1-6.2 (`spec-keeper` sync and archive).
+
+## 6. Orchestrator review (2026-10-21)
+
+Reviewer: the `orchestrator` agent, chosen by Akim instead of Egor (AGENTS.md section 2,
+step 7). Scope: the diff `develop...feature/calculation-verification/backend` at
+`7271240`, against the proposal, design decisions 1-18, the three delta specs and
+`tasks.md`. Run in a throwaway worktree: the verification tests (182 passed, 7 skipped
+without a database, `app/verification` 100% branch), a probe of the seed wiring, and
+mutation probes. Not run: database tests, the whole `check.sh`, `openspec validate` (the
+`tester` ran them, section 5).
+
+**Verdict: changes requested** (one major finding), with a merge without a new `tester`
+round once finding 1 is fixed, because the fix does not touch the gate logic.
+
+| # | Severity | Finding | Disposition |
+|---|---|---|---|
+| 1 | major | `within_tolerance` compares in binary floating point, so a decimal value on the edge is outside (245.2 against 245.3 with 0.1 gives `0.10000000000002274`; 0.33 against 0.3 with a relative 0.1 likewise); the edge tests used values exact in binary | Fixed in `361aa97`: a slack of 4 units in the last place (`FLOAT_SLACK_ULPS`), and six decimal edge tests. Instead of the suggested `Decimal` from `repr`, because a value converted to another unit carries `float` noise that `repr` keeps. `design.md` decision 15 records the slack |
+| 2 | minor | Repeated `example_id` values count towards the minimum of 3 | Fixed in `361aa97`: reason `DuplicateExampleId`; the minimum counts distinct ids |
+| 3 | minor | `run_suite([])` and `go_report` of it give GO | Fixed in `361aa97`: an empty run is NO-GO; `Reproducibility.verdict` without examples is NO-GO |
+| 4 | minor | Three tests pass with the behaviour broken: (a) a declaration's `old` is not checked, (b) the unit in the regression comparison, (c) `unit_change_holds` without the conversion | Fixed in `361aa97`: a test for each; (c) is a negative control with a stand-in `calculate` that sees the units |
+| 5 | minor | `CorpusEntry.outputs` accepts one quantity twice, and the last one wins | Fixed in `361aa97`: a validator of unique quantities |
+| 6 | note | The parser of declared differences is lenient (header row, rows without a leading pipe, `#` in a code block, `""` and `-` as "no output"); all fail safe | Follow-up, `tasks.md` section 5 |
+| 7 | note | An errored example counts as "not reproduced" and is missing from `failures` | Follow-up, `tasks.md` section 5 |
+| 8 | note | For the real corpus: the build recomputes the corpus of the base branch and reads the declarations of the change | Added to the "real regression corpus" follow-up, `tasks.md` section 5 |
+| 9 | note | Nothing enforces that `app/verification` does not import Hypothesis | Follow-up, `tasks.md` section 5 |
+| 10 | note | Pilot tests repeat the bounds of `PILOT_RANGES` and the length units | Follow-up, `tasks.md` section 5 |
+| 11 | note | The seed header is not shown under `pytest -q` (`check.sh` does not use `-q`) | Follow-up, `tasks.md` section 5 |
+
+Checked and found in order by the reviewer: the tolerance edge and the unit of the
+comparison (decision 15), the suite verdict and its invalidity reasons, the three metrics
+against their definitions, the GO report, the regression comparison, the seed of decision
+16, no norm value in code or tests, purity and layering, and the Russian Google-style
+docstrings.
+
+After the fixes (`361aa97`): each new test fails when its fix is reverted (9 of 9
+mutations caught); `check.sh`: ruff, mypy, lint-imports clean, 1169 passed, 11 skipped,
+100% branch coverage. Next: the merge of the feature into `develop`, then 6.1-6.2.

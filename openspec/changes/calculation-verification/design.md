@@ -99,7 +99,11 @@ See `proposal.md` (Non-goals).
 15. **Comparison and the suite report** (added 2026-10-05, Akim). Each computed output
     is converted to the unit of its expected value with `engine.boundary.convert`
     before the tolerance applies, so an `absolute` tolerance stays in the unit the
-    engineer wrote it in. A refused result, or an expected output the result does not
+    engineer wrote it in. The edge of the tolerance is compared with a slack of a few
+    units in the last place of the values (`FLOAT_SLACK_ULPS` in the runner), so a
+    decimal value exactly on the edge (245.2 against 245.3 with 0.1) stays within it; the
+    slack is a floating-point allowance, not part of the tolerance (added 2026-10-21 after
+    the `orchestrator` review, finding 1). A refused result, or an expected output the result does not
     hold, fails that example. The suite report holds the verdict (GO, NO-GO, or
     "invalid suite" with its reasons) and, for every example and quantity, the computed
     value, the expected value, the `tolerance` and its kind (scenario "A quantity
