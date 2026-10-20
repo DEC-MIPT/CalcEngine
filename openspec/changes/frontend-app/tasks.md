@@ -197,11 +197,13 @@ before task 2.1.
   the measured coverage fails (done 2026-10-18 on `feature/frontend-app/frontend` at `b538708`:
   462 tests, branch coverage 100%; the branch threshold cannot be raised above 100%, so the gate was
   shown with the statements threshold raised above the measured 99.87%, which fails the run)
-- [ ] 8.2 `tester` GO for each feature; `ui-ux-tester` confirms the screens, keyboard operation,
+- [x] 8.2 `tester` GO for each feature; `ui-ux-tester` confirms the screens, keyboard operation,
   contrast, no colour-only meaning and the visual brief of `design.md` decision 5 (tester)
   (2026-10-18, first round: `ui-ux-tester` CONFIRMED, its two moderate defects fixed in `74a1ee4`;
   `tester` NO-GO for both features, for the missing test of task 10.11 (added in `4a04cca`) and the
-  open tasks 8.1, 8.3 and 8.8; `docs/decisions/frontend-app-readiness.md`)
+  open tasks 8.1, 8.3 and 8.8; `docs/decisions/frontend-app-readiness.md`) (done: `tester` GO for
+  the backend feature at `dd3870f` on 2026-10-18 and for the frontend feature at `c3c37c4` on
+  2026-10-19, the round-one `ui-ux-tester` confirmation standing)
 - [x] 8.3 Run the journey end to end against the real backend and, once WP9 is merged, a real
   catalog source: type selection, form, result, report download, with the frontend and the backend
   on different origins and `DEC_CORS_ORIGINS` set (frontend); verify: a recorded manual run in which
@@ -233,18 +235,24 @@ before task 2.1.
   (light and dark, if both exist) in the run (done 2026-10-18 on `feature/frontend-app/frontend`,
   `b538708`: 11 screens and states, light only because the interface has no dark state; the
   `503` states are checked by 8.5, since the browser mocks cannot be overridden per test)
-- [ ] 8.8 Check once by hand in branded Edge and Safari that a result with a trace shows every
+- [x] 8.8 Check once by hand in branded Edge and Safari that a result with a trace shows every
   formula typeset and that the journey completes (frontend); verify: a recorded manual run with the
-  browser versions
+  browser versions (done 2026-10-19 by Akim on `feature/frontend-app/frontend` at `c3c37c4`, against
+  the real backend with the catalog: Edge 155.0.4283.62 and Safari 26.5.2, every formula typeset and
+  the journey complete; recorded in the code journal)
 - [x] 8.9 Measure the transition time of "Non-functional — language, accessibility, browsers"
   once all four screens exist (frontend); verify: a Playwright test in Chromium against the mocks
   takes 20 runs of response-to-first-render for each screen change and fails when the 95th
   percentile is 1000 ms or more (done 2026-10-18 on `feature/frontend-app/frontend`, `b538708`:
   `frontend/e2e/transition-time.spec.ts`; p95: type selection to form 11 ms, form to result 762 ms
   with the 700 ms computation trace, result by address 54 ms, report to stamp 578 ms)
-- [ ] 8.10 (spec) After the merge of the frontend feature, update the command lists of `AGENTS.md`
+- [x] 8.10 (spec) After the merge of the frontend feature, update the command lists of `AGENTS.md`
   and `CLAUDE.md` with `npm run gen:api`, `npm run dev:mock` and the Playwright command (documents,
-  on `develop`; needs Akim's word to edit them)
+  on `develop`; needs Akim's word to edit them) (done 2026-10-19 on `develop`, with Akim's word:
+  `CLAUDE.md` "Commands that exist today" lists `npm run dev`, `npm run dev:mock`, `npm run gen:api`
+  and `npm run test:e2e` with the one-time Playwright install, and its status names the merge;
+  `AGENTS.md` has no command list, and its section 7 already names Vitest and Playwright, so it is
+  unchanged)
 - [ ] 8.11 (spec) Archive this change after both features are merged and after `calculation-api`
   and `calculation-core-contract` are archived
 
@@ -387,6 +395,23 @@ Work Akim chose after section 9, done before its spec text; recorded here on 202
   replaced at import, no `sys.stdout` swap), and that degrees read `20°`; `backend/check.sh` with
   100% branch coverage (done 2026-10-18 on `feature/frontend-app/backend`, `dd3870f`: 971 passed,
   coverage 100%; `orchestrator` APPROVED in its third round)
+- [x] 10.15 Close the `orchestrator` review of the frontend feature (2026-10-19): typeset every
+  formula through the MathJax safe handler with URLs, classes, CSS ids and styles not allowed, so
+  that `\mmlToken` attributes from a server string reach no link or style (`web-platform` "Hostile
+  symbol", `design.md` decision 1); show a `422` on `path.result_id` as "not found"; run
+  Playwright on its own port without server reuse; keep `mockServiceWorker.js` out of a non-mock
+  build and the local backend fallback out of a production build; read only `filename*` as
+  percent-encoded and revoke the object URL after a delay; move focus to the first field a server
+  `422` marks in both forms and keep the calculate button focusable while sending
+  (`aria-disabled`); end the trace playback on a click anywhere on the page; move the Tailwind
+  packages to `devDependencies` (frontend); verify: tests that the `\mmlToken` link
+  (`javascript:` and `https:`), style (`position:fixed` and `color:red`), class and id payloads
+  typeset with none of them and fail without the strict options, that a malformed id shows "not
+  found" and other `422`s an error, that a production build has no `mockServiceWorker.js` and no
+  `127.0.0.1:8000`, the file name cases, the focus moves, one request per send, and the page-wide
+  skip; `frontend/check.sh` with 100% branch coverage (done 2026-10-19 on
+  `feature/frontend-app/frontend`, `1e701c0` and `8fc6d40`: 478 passed, branches 100%;
+  `orchestrator` APPROVED in its second round)
 
 ## Requirement coverage
 

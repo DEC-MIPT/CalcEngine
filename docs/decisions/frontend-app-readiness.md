@@ -172,3 +172,105 @@ issues found in 137 source files", lint-imports "4 kept, 0 broken", 971 passed, 
 formula that cannot be converted" are backed by tests; the stdout test fails if the builtin
 `print` of `mathml2omml` is restored. UI/UX: N/A for the backend feature. With the `orchestrator`
 approval, the backend feature is ready to merge into `develop`.
+
+## Task 8.2, frontend feature final round (2026-10-19)
+
+**`tester`: GO for the frontend feature** `feature/frontend-app/frontend` at `c3c37c4`: the
+round-one tip `b538708` plus `74a1ee4` (the two `ui-ux-tester` fixes), the backend feature's
+`4a04cca` and `dd3870f`, and the merges `2a4489e` and `c3c37c4`. `frontend/check.sh` exit 0
+(`gen:api:check`, eslint and `tsc -b` clean; 463 passed in 45 files; branch coverage 100%, 605/605;
+statements 99.87%). `backend/check.sh` exit 0: ruff clean, mypy "no issues found in 137 source
+files", lint-imports "4 kept, 0 broken", 971 passed, 4 skipped (the `postgres` tests); coverage 100%
+(2325 statements, 454 branches). `pre-commit run --all-files` passed with no change to
+`.secrets.baseline`. Playwright against its own mock server: Chromium 34 passed; `formulas.spec.ts`
+passed in Firefox and in WebKit.
+
+Task 8.8 was done by hand by Akim on 2026-10-19: branded Edge 155.0.4283.62 and Safari 26.5.2 typeset
+every formula of a result with a trace and the journey completes; its tick is committed with this
+record. Every frontend-feature task is done except the post-merge spec tasks 8.10 and 8.11.
+
+UI/UX: the round-one confirmation stands. The backend commits change no screen; `74a1ee4` was checked
+at 375, 320 and 1280 px (the title, `lang="ru"`, the signatory captions visible only below `sm`, no
+overflow, 0 axe violations).
+
+Not blocking: the round-one notes on `npm audit` and `coverage.include` stay; a
+`StarletteDeprecationWarning` from the test client; the `postgres` tests were not run.
+
+Next: the review (AGENTS.md section 2, step 7) and the merge into `develop`, then tasks 8.10 and
+8.11. The branch is pushed at `c3c37c4`.
+
+## `orchestrator` review of the frontend feature (2026-10-19)
+
+Two rounds on `feature/frontend-app/frontend`; the fixes are task 10.15, commits `1e701c0` and
+`8fc6d40`.
+
+- Round 1 at `c3c37c4`: CHANGES REQUESTED, blocker 0, major 1, minor 7. Scope: the diff over
+  `origin/develop`, which is `frontend/` plus one `.secrets.baseline` entry (`69c7b8a`, the MSW
+  worker's integrity checksum, a false positive reviewed by hand on the feature branch, AGENTS.md
+  section 2). `frontend/check.sh` exit 0 (463 passed, branches 100%); `git merge-tree` against
+  `origin/develop` has no conflict. Verified: the production build holds no mock code; no
+  `dangerouslySetInnerHTML`; `rounding.ts` matches `RoundingRule.apply` on 2.675, 2.665, -2.5,
+  1e-7, 1.5e21 and -0.004; `@xmldom/xmldom` comes only through `mathjax-full` →
+  `speech-rule-engine`, and the bundle contains no code from either.
+  - M1 (major): the base TeX package keeps `\mmlToken`, whose `href` and `style` attributes
+    reached the SVG output: `\mmlToken{mi}[href="javascript:alert(1)"]{x}` yielded
+    `<a href="javascript:alert(1)">`, against "Hostile symbol" and design decision 1.
+  - Minor: m1 a malformed `result_id` (`422` on `["path","result_id"]`) showed a retry, not "not
+    found"; m2 Playwright could reuse a non-mock server on 5173; m3 `mockServiceWorker.js` shipped
+    in `dist/`; m4 the `127.0.0.1:8000` fallback was built into production; m5 `fileNameFrom`
+    decoded a plain `filename=` and could throw, and the object URL was revoked at once; m6 no
+    focus move after a server `422`, and `disabled` on the calculate button dropped focus; m7 only
+    a click on the trace ended the playback, while the requirement says "a pointer click". Nit:
+    the Tailwind packages were in `dependencies`.
+- Round 2 at `1e701c0`: **APPROVED.** M1 closed by the MathJax `SafeHandler` (URLs, classes, CSS
+  ids and styles `none`), with tests that the `\mmlToken` link, style, class and id payloads
+  typeset with none of them; m1 by treating a `422` whose every field is `path.result_id` as not
+  found; m2 by port 5179 without server reuse; m3 by a build plugin that removes
+  `mockServiceWorker.js` from a non-mock `dist/` (checked in both modes); m4 by the
+  development-only fallback to `127.0.0.1:8000` (same origin otherwise); m5 by decoding only
+  `filename*`, with a fallback, and revoking the object URL after 40 s; m6 by focusing the first
+  field marked by a `422` and `aria-disabled` on the calculate button (one request, focus kept);
+  m7 by a `document` click listener inside `useTracePlayback`. The Tailwind packages moved to
+  `devDependencies` (the lockfile gains six optional `oxide-wasm32-wasi` entries); `npm audit
+  --omit=dev` no longer reports `source-map-js`. `frontend/check.sh`: 476 passed, branches 100%
+  (616/616). Not blocking: `download.test.ts` turned fake timers off inside the test body.
+- After round 2, `8fc6d40` changes two test files only: cases `href="https://example.com"` and
+  `style="color:red"`, which fail without the strict safe options, and `vi.useRealTimers()` moved
+  into `afterEach`.
+
+## Task 8.2, frontend feature confirmed at `8fc6d40` (2026-10-19)
+
+**`tester`: GO for the frontend feature** at `8fc6d40`. Since the final-round GO at `c3c37c4` there
+are two commits: `1e701c0` (task 10.15, the `orchestrator` review fixes, `frontend/` only) and
+`8fc6d40` (two test files).
+
+At `1e701c0`: Playwright on its own server at port 5179, Chromium 34 passed and `formulas.spec.ts`
+passed in Firefox and WebKit; a production build has no `mockServiceWorker.js` and no
+`127.0.0.1:8000`; each fix was broken by hand, and M1, m1, m4, m5, m6 (both focus moves and
+`aria-disabled`) and m7 each fail at least one test.
+
+At `8fc6d40`: `frontend/check.sh` exit 0, 478 passed, branch coverage 100% (616/616);
+`pre-commit run --all-files` passed. With `safeOptions` removed from `typeset.ts`, three cases fail:
+MathJax's default safe filter keeps an `https` link, `color: red`, and the `background:red` of the
+`position:fixed` case as `background-color: red` (it drops `position` and `inset`). So the stricter
+options of M1 are covered by tests.
+
+UI/UX: the round-one confirmation stands. The `aria-disabled` styles copy the `disabled` ones, and
+the axe and keyboard e2e tests pass.
+
+Not blocking: `vite.config.ts` is outside coverage; a production build checks its plugin instead.
+
+Next: the merge into `develop` (the `orchestrator` review is approved, section above), then tasks
+8.10 and 8.11.
+
+## `fix/frontend-app/frontend`: frontend README (2026-10-19)
+
+**`tester`: GO for `fix/frontend-app/frontend`** at `6cc8baa`. Its one commit changes only
+`frontend/README.md`: the mocks section (the four envelopes and how they are picked, their ids, the
+`report.docx` stub, the `503` note, `mockServiceWorker.js` dropped outside mock mode), the `dev` and
+`test:e2e` rows, and the source layout. `frontend/check.sh` exit 0: 478 passed, branch coverage 100%
+(616/616). Every factual claim in the new text was checked against the code at that tip and holds.
+UI/UX and Playwright: N/A, because no executable file changed. Review: Akim confirmed the diff
+(no executable change, so no `orchestrator` round). Not blocking: an unchanged sentence says
+`fixtures.ts` was generated from the backend; the refused and warning envelopes were added later
+(`cd73b2f`, tasks 6.4a-6.4c) and their origin is not stated.
