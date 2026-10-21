@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml
 
-from extractcmp import checkpoints, marks, portions, promote, report
+from extractcmp import checkpoints, draft, marks, portions, promote, report
 from extractcmp.compare import compare_all
 from extractcmp.normalize import load_a, load_b
 
@@ -57,13 +57,7 @@ def build(args: argparse.Namespace) -> int:
     ex1 = _load(args.ex1)
     points = checkpoints.build(ex1, a.get("t55"), b.get("t55"))
     (out / "control-points.md").write_text(checkpoints.render(points, ex1), encoding="utf-8")
-    a_ed = a_data.get("source", {}).get("edition_as_printed", "—")
-    b_ed = b_data.get("meta", {}).get("edition", {}).get("printed_header", "—")
-    items = [
-        *portions.record_items(results),
-        portions.edition_item(str(a_ed), str(b_ed)),
-        *portions.control_point_items(points, ex1["label"]),
-    ]
+    items = _items(a_data, b_data, results, points, ex1)
     parts = portions.split(items)
     pdir = out / "portions"
     pdir.mkdir(exist_ok=True)
@@ -78,6 +72,40 @@ def build(args: argparse.Namespace) -> int:
     (pdir / "index.md").write_text(portions.render_index(parts, today), encoding="utf-8")
     counts = report.summary(results)
     print(dict(counts), f"portions={len(parts)}", f"minutes={sum(p.minutes for p in parts):.0f}")
+    return 0
+
+
+def _items(a_data: dict, b_data: dict, results: list, points: list, ex1: dict) -> list[portions.Item]:
+    a_ed = a_data.get("source", {}).get("edition_as_printed", "—")
+    b_ed = b_data.get("meta", {}).get("edition", {}).get("printed_header", "—")
+    return [
+        *portions.record_items(results),
+        portions.edition_item(str(a_ed), str(b_ed)),
+        *portions.control_point_items(points, ex1["label"]),
+    ]
+
+
+def make_draft(args: argparse.Namespace) -> int:
+    """Собирает черновик файла типа и сопоставление записей с листами.
+
+    Args:
+        args: разобранные аргументы подкоманды ``draft``.
+
+    Returns:
+        Код выхода.
+    """
+    a_data, b_data = _load(args.a), _load(args.b)
+    a, b = load_a(a_data), load_b(b_data)
+    results, _ = compare_all(a, b)
+    ex1 = _load(args.ex1)
+    points = checkpoints.build(ex1, a.get("t55"), b.get("t55"))
+    items = {i.item_id: i for i in _items(a_data, b_data, results, points, ex1)}
+    result = draft.build(b, items)
+    today = date.fromisoformat(args.date) if args.date else date.today()
+    args.out.write_text(_dump(result.type_file), encoding="utf-8")
+    args.mapping_out.write_text(_dump(result.mapping), encoding="utf-8")
+    args.notes_out.write_text(draft.render_notes(result, today.isoformat()), encoding="utf-8")
+    print({name: len(rows) for name, rows in result.type_file.items()}, f"not_stored={len(result.not_stored)}")
     return 0
 
 
@@ -152,6 +180,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     p.add_argument("--out-dir", type=Path, default=root)
     p.add_argument("--date", help="ГГГГ-ММ-ДД; по умолчанию сегодня")
     p.set_defaults(func=build)
+    p = sub.add_parser("draft", help="черновик файла типа и сопоставление с листами")
+    p.add_argument("--a", type=Path, default=root / "extract-a.yaml")
+    p.add_argument("--b", type=Path, default=root / "extract-b.yaml")
+    p.add_argument("--ex1", type=Path, default=HERE / "data" / "ex1.yaml")
+    p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--mapping-out", type=Path, default=root / "draft-mapping.yaml")
+    p.add_argument("--notes-out", type=Path, default=root / "draft-notes.md")
+    p.add_argument("--date", help="ГГГГ-ММ-ДД; по умолчанию сегодня")
+    p.set_defaults(func=make_draft)
     p = sub.add_parser("sign", help="подписать заполненный лист (выполняет верификатор)")
     p.add_argument("sheet", type=Path)
     p.add_argument("--by", required=True)

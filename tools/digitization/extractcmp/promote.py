@@ -155,13 +155,13 @@ def check_committed(path: Path, by: str) -> list[str]:
     return []
 
 
-def _items_by_record(sheets: Sequence[Mapping[str, Any]]) -> dict[str, list[tuple[str, Mapping[str, Any]]]]:
-    grouped: dict[str, list[tuple[str, Mapping[str, Any]]]] = {}
+def _items_by_local(sheets: Sequence[Mapping[str, Any]]) -> dict[str, tuple[str, Mapping[str, Any]]]:
+    items: dict[str, tuple[str, Mapping[str, Any]]] = {}
     for sheet in sheets:
         for item in sheet.get("items", []):
             local = str(item["item"]).split("/", 1)[1]
-            grouped.setdefault(item["record"], []).append((str(sheet["portion"]), {**item, "_local": local}))
-    return grouped
+            items[local] = (str(sheet["portion"]), {**item, "_local": local})
+    return items
 
 
 def _locate(draft: Mapping[str, Any], where: Mapping[str, Any]) -> dict[str, Any]:
@@ -186,8 +186,10 @@ def promote(
 
     Args:
         draft: черновик файла типа с пятью списками записей.
-        mapping: для каждого ``record`` листов: ``list``, ``index``, ``record_digest`` и
-            ``items`` (локальный идентификатор проверки → ``shown_digest``).
+        mapping: для каждой записи данных (ключ вида ``formulas/r``): ``list``, ``index``,
+            ``record_digest`` и ``items`` (локальный идентификатор проверки в листах →
+            ``shown_digest``). Одна проверка может стоять у нескольких записей, например
+            строка таблицы 5.5 у трёх коэффициентов.
         sheets: листы проверки.
         verifiers: имена из манифеста.
 
@@ -201,12 +203,11 @@ def promote(
     if problems:
         raise ValueError("; ".join(problems))
     result = copy.deepcopy(dict(draft))
-    grouped = _items_by_record(sheets)
+    available = _items_by_local(sheets)
     report: list[str] = []
     for record_id, where in mapping.items():
         record = _locate(result, where)
-        entries = grouped.get(record_id, [])
-        got = {local["_local"]: (portion, local) for portion, local in entries}
+        got = {local: available[local] for local in where["items"] if local in available}
         if record_digest(record) != where["record_digest"]:
             report.append(f"{record_id}: skipped, the record changed after it was mapped")
             continue
@@ -259,7 +260,11 @@ def _reject(record: dict[str, Any], record_id: str, got: Mapping[str, tuple[str,
 
 def _fix(record: dict[str, Any], record_id: str, got: Mapping[str, tuple[str, Mapping[str, Any]]]) -> str:
     for _, local in got.values():
-        if local["verdict"] == FIX:
-            record.update(local["corrected"])
+        if local["verdict"] != FIX:
+            continue
+        corrected = local["corrected"]
+        if any("/" in str(key) for key in corrected):
+            corrected = corrected.get(record_id, {})
+        record.update(corrected)
     record["verification"] = {"status": "pending"}
     return f"{record_id}: corrected, pending a new check"
