@@ -1,0 +1,29 @@
+# Values copied from the methodical guide as printed. They are not norm values of this
+# project and are not verified: the guide may follow another edition of the norm.
+label: из методички, редакция не подтверждена
+citation: >-
+  Линовский, Якушкина, 2023, Пример 1, раздел 3.2 (файл
+  docs/NTD/methodical_guides/Calc_OiF_Linkovskiy.pdf)
+card: docs/decisions/reference-examples-foundations.md, foundations-r-linovskiy2023-ex1
+pages: >-
+  7-9 по номерам внизу страниц в текстовом слое; в карточке ex1 назван шаг 4 на стр. 8;
+  верификатор сверяет по PDF
+read_with: pdftotext -layout, 2026-10-22
+inputs_r:
+  gamma_c1: {value: "1.1", unit: "-"}
+  gamma_c2: {value: "1.0", unit: "-"}
+  k: {value: "1", unit: "-"}
+  M_gamma: {value: "0.47", unit: "-"}
+  k_z: {value: "1", unit: "-"}
+  gamma_II: {value: "18.74", unit: "kN/m3"}
+  M_q: {value: "2.89", unit: "-"}
+  d_1: {value: "1.5", unit: m}
+  gamma_II_prime: {value: "18.74", unit: "kN/m3"}
+  d_b: {value: "0", unit: m}
+  M_c: {value: "5.48", unit: "-"}
+  c_II: {value: "16", unit: kPa}
+r_initial: {b: "1.5", r: "200.34", unit: kPa}
+r_refined: {b: "2.1", r: "206.16", unit: kPa}
+table_54: {i_l: "0.65", gamma_c1: "1.1", gamma_c2: "1.0"}
+table_55: {phi_ii: "19", M_gamma: "0.47", M_q: "2.89", M_c: "5.48"}
+check: {p_mean: "189.5", r: "206.16", unit: kPa, outcome: "p <= R выполняется"}

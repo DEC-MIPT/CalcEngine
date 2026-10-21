@@ -1,0 +1,4 @@
+extend = "../../backend/pyproject.toml"
+
+[lint]
+ignore = ["ISC004", "DTZ011"]
