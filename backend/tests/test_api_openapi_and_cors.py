@@ -110,6 +110,21 @@ def test_the_error_body_schema_is_published(openapi: dict[str, Any]) -> None:
     )
 
 
+def test_the_parameter_source_of_the_envelope_is_published_as_optional(openapi: dict[str, Any]) -> None:
+    schemas = openapi["components"]["schemas"]
+    envelope = next(schema for name, schema in schemas.items() if name.startswith("ResultEnvelope"))
+    label = envelope["properties"]["parameter_source"]
+
+    assert "parameter_source" not in envelope.get("required", [])
+    assert [option.get("$ref", option.get("type")) for option in label["anyOf"]] == [
+        "#/components/schemas/ParameterSourceInfo",
+        "null",
+    ]
+    info = schemas["ParameterSourceInfo"]["properties"]
+    assert info["kind"]["enum"] == ["catalog", "interim"]
+    assert set(info) == {"kind", "data_sha256", "profile"}
+
+
 def app_with(origins: str | None) -> TestClient:
     settings = ApiSettings.model_validate({} if origins is None else {"DEC_CORS_ORIGINS": origins})
     return TestClient(create_app(settings, registry=CalculatorRegistry()))

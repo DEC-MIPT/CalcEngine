@@ -13,7 +13,14 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 from test_reporting_docx import read_back
 from test_services_report import HEADINGS, REPORT_REQUEST
-from test_services_submit import CONTRACT, REF, RULE, FixedSource, SyntheticCalculator
+from test_services_submit import (
+    CONTRACT,
+    INTERIM,
+    REF,
+    RULE,
+    FixedSource,
+    SyntheticCalculator,
+)
 
 from app.engine.registry import CalculatorRegistry
 from app.main import create_app
@@ -244,6 +251,28 @@ def test_get_returns_a_refused_result_unchanged(engine: Engine) -> None:
 
     assert response.json() == created.json()
     assert response.json()["verdict"] == "refused"
+
+
+def test_a_source_without_a_description_answers_201_without_a_source_label(client: TestClient) -> None:
+    response = client.post("/calculations", json=body())
+
+    assert response.status_code == 201
+    assert "parameter_source" not in response.json()
+
+
+def test_a_result_stored_before_the_source_label_existed_is_read_without_it(engine: Engine) -> None:
+    with TestClient(make_app(engine, FixedSource(info=INTERIM))) as client:
+        created = client.post("/calculations", json=body()).json()
+        with Session(engine) as session:
+            row = session.get(CalculationResultRow, uuid.UUID(created["result_id"]))
+            assert row is not None
+            row.envelope = {key: value for key, value in row.envelope.items() if key != "parameter_source"}
+            session.commit()
+        response = client.get(f"/calculations/{created['result_id']}")
+
+    assert created["parameter_source"] == INTERIM.model_dump(mode="json")
+    assert response.status_code == 200
+    assert response.json() == {key: value for key, value in created.items() if key != "parameter_source"}
 
 
 def test_an_unknown_result_id_is_404(client: TestClient) -> None:

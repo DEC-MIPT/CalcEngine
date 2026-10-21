@@ -14,6 +14,7 @@ from app.schemas.calculation import (
     MethodBound,
     NormRef,
     OutputValue,
+    ParameterSourceInfo,
     QuantityValue,
     ResultEnvelope,
     RoundingRule,
@@ -307,3 +308,21 @@ def test_an_unverified_step_is_kept_marked_and_counted() -> None:
 def test_a_wrong_unverified_step_count_is_rejected(count: int) -> None:
     with pytest.raises(ValidationError, match="number of unverified steps"):
         CalculationResult(**completed(unverified_step_count=count))
+
+
+def test_an_envelope_without_a_parameter_source_is_valid_and_dumps_without_it() -> None:
+    envelope = ResultEnvelope(result_id=uuid4(), **completed())
+
+    assert envelope.parameter_source is None
+    assert "parameter_source" not in envelope.model_dump(mode="json")
+
+
+@pytest.mark.parametrize(
+    "source",
+    [ParameterSourceInfo(kind="catalog"), ParameterSourceInfo(kind="interim", data_sha256=HASH, profile="draft")],
+    ids=["catalog", "interim"],
+)
+def test_the_parameter_source_survives_a_json_round_trip(source: ParameterSourceInfo) -> None:
+    envelope = ResultEnvelope(result_id=uuid4(), parameter_source=source, **completed())
+
+    assert ResultEnvelope.model_validate(envelope.model_dump(mode="json")) == envelope

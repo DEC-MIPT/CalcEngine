@@ -509,9 +509,15 @@ CATALOG_SOURCE = ParameterSourceInfo(kind="catalog")
 
 
 class ResultEnvelope(CalculationResult):
-    """Результат расчёта с ``result_id``, который назначает слой сервисов."""
+    """Результат расчёта с ``result_id``, который назначает слой сервисов.
+
+    ``parameter_source`` не входит в ``input_hash`` и не читается движком; его нет у
+    результата источника без описания и у результата, сохранённого до появления поля
+    (``interim-normatives-source`` design.md, решение 13).
+    """
 
     result_id: UUID
+    parameter_source: ParameterSourceInfo | None = Field(default=None, exclude_if=lambda source: source is None)
 
 
 class CalculationRequest(BaseModel):

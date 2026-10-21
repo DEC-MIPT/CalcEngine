@@ -17,8 +17,10 @@ from app.core.config import INTERIM_ROOT, ApiSettings, ParameterSourceSettings
 from app.core.exceptions import ParameterValidationError
 from app.main import create_app
 from app.models import Base
+from app.parameters.interim_loader import load_interim_root
 from app.schemas.calculation import CATALOG_SOURCE
 from app.services.catalog_source import CatalogParameterSource
+from app.services.interim_data import document_digest
 from app.services.interim_source import InterimParameterSource
 
 FIXTURES = Path(__file__).parent / "fixtures" / "params"
@@ -109,6 +111,53 @@ def test_interim_chosen_reads_the_interim_file(results: Engine, tmp_path: Path) 
     resolved = source.resolve(PILOT, inputs())
     assert resolved.source is not None
     assert (resolved.source.kind, resolved.source.profile) == ("interim", "strict")
+
+
+@pytest.mark.parametrize(("profile", "checked"), [("strict", True), ("draft", False)])
+def test_a_new_interim_result_carries_the_kind_the_digest_and_the_profile(
+    results: Engine, tmp_path: Path, profile: str, checked: bool
+) -> None:
+    root = interim_root(tmp_path, **{PILOT: from_catalog(PILOT, checked=checked)})
+    (document,) = load_interim_root(root, (PILOT,))
+
+    with TestClient(application(results, interim(root, profile))) as client:
+        created = post(client)
+        read = client.get(created.headers["location"])
+
+    label = {"kind": "interim", "data_sha256": document_digest(document), "profile": profile}
+    assert (created.status_code, created.json()["parameter_source"]) == (201, label)
+    assert (read.status_code, read.json()["parameter_source"]) == (200, label)
+
+
+def test_a_new_catalog_result_carries_the_catalog_kind_without_digest_or_profile(
+    results: Engine, catalog_sqlite: Engine
+) -> None:
+    app = application(results, catalog_session_factory=sessionmaker(bind=catalog_sqlite))
+
+    with TestClient(app) as client:
+        created = post(client)
+
+    assert created.status_code == 201
+    assert created.json()["parameter_source"] == {"kind": "catalog", "data_sha256": None, "profile": None}
+
+
+def test_the_same_inputs_on_both_sources_give_the_same_hash_and_differ_only_in_the_label(
+    results: Engine, catalog_sqlite: Engine, tmp_path: Path
+) -> None:
+    catalog_app = application(results, catalog_session_factory=sessionmaker(bind=catalog_sqlite))
+    interim_app = application(results, interim(interim_root(tmp_path, **{PILOT: from_catalog(PILOT)})))
+
+    with TestClient(catalog_app) as client:
+        on_catalog = post(client).json()
+    with TestClient(interim_app) as client:
+        on_interim = post(client).json()
+
+    def unlabelled(envelope: dict[str, Any]) -> dict[str, Any]:
+        return {key: value for key, value in envelope.items() if key not in {"result_id", "parameter_source"}}
+
+    assert on_catalog["input_hash"] == on_interim["input_hash"]
+    assert (on_catalog["parameter_source"]["kind"], on_interim["parameter_source"]["kind"]) == ("catalog", "interim")
+    assert unlabelled(on_catalog) == unlabelled(on_interim)
 
 
 def test_interim_chosen_and_a_type_without_a_file_answers_503(results: Engine, tmp_path: Path) -> None:
