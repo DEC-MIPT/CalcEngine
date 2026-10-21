@@ -11,6 +11,7 @@ import { Checking } from './Checking'
 import { EditInputsLink } from './EditInputsLink'
 import { Formula } from './Formula'
 import { QuantityText } from './Quantity'
+import { SourceLabel } from './SourceLabel'
 import { buttonClass } from './ui/button'
 
 type Envelope = components['schemas']['ResultEnvelope']
@@ -134,6 +135,14 @@ export function VerdictStamp({
             <dd className="font-mono">{value}</dd>
           </div>
         ))}
+        {envelope.parameter_source && (
+          <div className="grid gap-0.5 border-t border-border px-4 py-2 sm:col-span-full">
+            <dt className="text-muted-foreground">{t('source.label')}</dt>
+            <dd>
+              <SourceLabel source={envelope.parameter_source} />
+            </dd>
+          </div>
+        )}
       </dl>
     </section>
   )
