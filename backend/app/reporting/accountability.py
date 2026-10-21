@@ -5,6 +5,7 @@ from app.reporting.format import (
     format_bound,
     format_engineer_rule,
     format_norm_ref,
+    format_parameter_source,
     format_rounding,
     format_source,
 )
@@ -42,9 +43,10 @@ def _list(title: str, items: list[Line]) -> list[Line]:
 def accountability_lines(section: AccountabilitySection, symbols: Mapping[str, str]) -> list[Line]:
     """Собирает строки блока подотчётности на русском языке.
 
-    В блок входит каждое поле конверта, которое требует "Result accountability block".
-    Значения величин — формулы. Фразу об ответственности инженера печатает после этих
-    строк модуль вывода.
+    В блок входит каждое поле конверта, которое требует "Result accountability block", и
+    строка источника параметров, если конверт её несёт (``interim-normatives-source``
+    design.md, решение 13). Значения величин — формулы. Фразу об ответственности инженера
+    печатает после этих строк модуль вывода.
 
     Args:
         section: раздел подотчётности модели отчёта с конвертом результата.
@@ -73,6 +75,9 @@ def accountability_lines(section: AccountabilitySection, symbols: Mapping[str, s
         )
         for warning in envelope.warnings
     ]
+    source: list[Line] = (
+        [] if envelope.parameter_source is None else [(format_parameter_source(envelope.parameter_source),)]
+    )
     return [
         (f"Идентификатор результата (result_id): {envelope.result_id}",),
         (f"Версия движка (engine_version): {envelope.engine_version}",),
@@ -86,4 +91,5 @@ def accountability_lines(section: AccountabilitySection, symbols: Mapping[str, s
         ),
         *_list("Предупреждения (warnings)", warnings),
         (f"Шагов с непроверенными ссылками (unverified_step_count): {envelope.unverified_step_count}",),
+        *source,
     ]
