@@ -114,32 +114,32 @@ feature and does not gate the backend feature or section 8.
 
 ## 5. Envelope and report (feature `interim-normatives/backend`)
 
-- [ ] 5.1 Add the optional `parameter_source` to `ResultEnvelope` and set it in the service
+- [x] 5.1 Add the optional `parameter_source` to `ResultEnvelope` and set it in the service
   from `ResolvedParameters.source` (`backend/app/services/calculation.py:77-123`); the engine
   and `input_hash` unchanged (`design.md`, decision 13); verify: tests of the scenarios "New
   interim result", "New catalog result", "Same inputs, same hash across sources", "Source
   without a description" and "Stored result without the field" (`calculation-api`), and
   "Digest in the result" (`interim-normatives`)
-- [ ] 5.2 Print the source line in the report: in the conclusion before the responsibility
+- [x] 5.2 Print the source line in the report: in the conclusion before the responsibility
   sentence while `ACCOUNTABILITY_SECTION` is off, in section 4 when it is on
   (`backend/app/reporting/docx_writer.py:53`, `:234-237`); verify: tests of the scenarios
   "Interim line in the conclusion", "Line printed once" and "Older result", with the flag in
   both states
-- [ ] 5.3 Run `backend/check.sh`; verify: it passes with branch coverage of `app` at 100% or
+- [x] 5.3 Run `backend/check.sh`; verify: it passes with branch coverage of `app` at 100% or
   at least 95%
 
 ## 6. Result screen (feature `interim-normatives/frontend`)
 
-- [ ] 6.1 Regenerate `frontend/src/api/schema.d.ts` with `npm run gen:api` after section 5;
+- [x] 6.1 Regenerate `frontend/src/api/schema.d.ts` with `npm run gen:api` after section 5;
   verify: `npm run gen:api:check` passes
-- [ ] 6.2 Show the source label in the stamp's description list
+- [x] 6.2 Show the source label in the stamp's description list
   (`frontend/src/components/VerdictStamp.tsx:110-138`) and in the refusal view, with Russian
   and English texts, the first 12 hex characters of the digest shown and the full digest as
   screen-reader text, and `draft` marked in words; update the mock fixtures with both kinds;
   verify: tests of the scenarios "Interim result labelled", "Draft marked in words",
   "Refusal labelled" and "Older result without the field", and the axe helper on the result
   screen in both kinds
-- [ ] 6.3 Run `frontend/check.sh` and the Playwright suite; verify: both pass, branch
+- [x] 6.3 Run `frontend/check.sh` and the Playwright suite; verify: both pass, branch
   coverage at least 95%
 
 ## 7. Digitization with the verifier (working process, data on the branch that owns each task)
