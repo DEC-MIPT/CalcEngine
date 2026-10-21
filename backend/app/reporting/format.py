@@ -232,6 +232,29 @@ def format_parameter_source(source: ParameterSourceInfo) -> str:
     )
 
 
+DRAFT_CAVEAT = (
+    "Внимание: значения нормативных параметров этого расчёта взяты из временных данных,"
+    " не прошедших верификацию; результат нельзя считать проверенным."
+)
+"""Оговорка отчёта о результате по временным данным профиля ``draft``."""
+
+
+def parameter_source_lines(source: ParameterSourceInfo) -> list[str]:
+    """Собирает строки источника параметров для отчёта.
+
+    Строка источника, а у профиля ``draft`` ещё и оговорка о непроверенных значениях
+    (``interim-normatives-source`` design.md, решение 13).
+
+    Args:
+        source: описание источника из конверта результата.
+
+    Returns:
+        Одна или две строки по порядку печати.
+    """
+    caveat = [DRAFT_CAVEAT] if source.profile == "draft" else []
+    return [format_parameter_source(source), *caveat]
+
+
 def format_rounding(rule: RoundingRule) -> str:
     return f"{rule.decimals} знак(а) после запятой, {ROUNDING_MODES[rule.mode]}"
 

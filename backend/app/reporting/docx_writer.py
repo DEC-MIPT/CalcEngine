@@ -13,8 +13,8 @@ from app.reporting.format import (
     check_rounding,
     format_bound,
     format_norm_ref,
-    format_parameter_source,
     latex_quantity,
+    parameter_source_lines,
 )
 from app.reporting.formula import FormulaError, Line, Math, omml, omml_paragraph
 from app.reporting.layout import apply_sheet, fit_table
@@ -238,7 +238,8 @@ def render_docx(report: Report) -> bytes:
             _write_lines(document, conclusion_lines(section, report.symbols, report.rounding))
             if not ACCOUNTABILITY_SECTION:
                 if section.parameter_source is not None:
-                    document.add_paragraph(format_parameter_source(section.parameter_source))
+                    for text in parameter_source_lines(section.parameter_source):
+                        document.add_paragraph(text)
                 document.add_paragraph().add_run(RESPONSIBILITY).bold = True
     buffer = BytesIO()
     document.save(buffer)

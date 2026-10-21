@@ -12,7 +12,11 @@ from app.engine import foundations_shallow_r as pilot
 from app.reporting import docx_writer
 from app.reporting.accountability import RESPONSIBILITY, accountability_lines
 from app.reporting.docx_writer import conclusion_lines, render_docx
-from app.reporting.format import format_parameter_source
+from app.reporting.format import (
+    DRAFT_CAVEAT,
+    format_parameter_source,
+    parameter_source_lines,
+)
 from app.reporting.model import (
     AccountabilitySection,
     ConclusionSection,
@@ -192,3 +196,37 @@ def test_a_result_without_a_source_has_no_line_in_the_block() -> None:
 
     assert printed_without[1:] == printed_with[1:-1]
     assert not any(text.startswith(SOURCE_PREFIX) for text in printed_without)
+
+
+DRAFT = ParameterSourceInfo(kind="interim", data_sha256="fedcba9876543210" * 4, profile="draft")
+
+
+def test_a_draft_result_prints_the_caveat_in_the_conclusion_after_the_source_line_and_once() -> None:
+    model = sourced_report(DRAFT)
+    paragraphs, _ = read_back(render_docx(model))
+
+    line, caveat = parameter_source_lines(DRAFT)
+    assert paragraphs[-3:] == [line, caveat, RESPONSIBILITY]
+    assert paragraphs.count(caveat) == 1
+    assert "не прошедших верификацию" in caveat
+    assert not any(character.isdigit() for character in caveat)
+
+
+@pytest.mark.parametrize("source", [INTERIM, CATALOG_SOURCE], ids=["strict", "catalog"])
+def test_a_result_that_is_not_draft_prints_no_caveat(source: ParameterSourceInfo) -> None:
+    paragraphs, _ = read_back(render_docx(sourced_report(source)))
+
+    assert DRAFT_CAVEAT not in paragraphs
+    assert parameter_source_lines(source) == [format_parameter_source(source)]
+
+
+@pytest.mark.usefixtures("printed")
+def test_a_draft_result_moves_the_caveat_with_the_source_line_into_the_block() -> None:
+    model = sourced_report(DRAFT)
+    paragraphs, _ = read_back(render_docx(model))
+
+    line, caveat = parameter_source_lines(DRAFT)
+    conclusion, accountability = paragraphs.index("3 Заключение"), paragraphs.index("4 Подотчётность результата")
+    assert caveat not in paragraphs[conclusion:accountability]
+    assert paragraphs[-3:] == [line, caveat, RESPONSIBILITY]
+    assert [latex(item) for item in accountability_lines(block(model.body[-1]), model.symbols)[-2:]] == [line, caveat]

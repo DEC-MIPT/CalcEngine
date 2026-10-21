@@ -5,9 +5,9 @@ from app.reporting.format import (
     format_bound,
     format_engineer_rule,
     format_norm_ref,
-    format_parameter_source,
     format_rounding,
     format_source,
+    parameter_source_lines,
 )
 from app.reporting.formula import Line
 from app.reporting.model import AccountabilitySection
@@ -76,7 +76,7 @@ def accountability_lines(section: AccountabilitySection, symbols: Mapping[str, s
         for warning in envelope.warnings
     ]
     source: list[Line] = (
-        [] if envelope.parameter_source is None else [(format_parameter_source(envelope.parameter_source),)]
+        [] if envelope.parameter_source is None else [(text,) for text in parameter_source_lines(envelope.parameter_source)]
     )
     return [
         (f"Идентификатор результата (result_id): {envelope.result_id}",),
