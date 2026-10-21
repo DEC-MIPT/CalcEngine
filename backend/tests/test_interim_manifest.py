@@ -10,13 +10,13 @@ MANIFEST = INTERIM_ROOT / "sp-22-13330-2016" / "manifest.yaml"
 
 
 def test_the_loader_accepts_the_real_manifest() -> None:
-    (document,) = load_interim_root(INTERIM_ROOT, set())
+    (document,) = load_interim_root(INTERIM_ROOT, {"foundations_shallow_r"})
 
     assert document.name == "sp-22-13330-2016"
     assert document.manifest.document == "СП 22.13330.2016"
     assert document.manifest.verifiers == ("Akim",)
     assert document.manifest.sunset.date == date(2026, 12, 1)
-    assert document.files == ()
+    assert [file.calculation_type for file in document.files] == ["foundations_shallow_r"]
 
 
 def test_the_real_sunset_has_not_passed() -> None:
