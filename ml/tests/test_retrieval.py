@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-from normatives_pipeline.retrieval import TfidfIndex, build_formula_items, normalize_text, recall_at_k
+from normatives_pipeline.retrieval import (
+    TfidfIndex,
+    build_formula_items,
+    normalize_text,
+    recall_at_k,
+)
 
 
 def test_yo_normalization() -> None:

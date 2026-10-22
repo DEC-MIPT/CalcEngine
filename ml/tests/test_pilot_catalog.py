@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+
 import pytest
 from conftest import require_test_db_url
 
@@ -153,7 +154,7 @@ def test_bind_registry_formula_with_unknown_unit_returns_false(monkeypatch) -> N
     assert pilot_catalog._bind_registry_formula(object(), 1, "9.9") is False
 
 
-def test_bind_registry_formula_with_missing_notation_symbol_returns_false(monkeypatch) -> None:
+def test_bind_registry_formula_with_empty_notation_returns_false(monkeypatch) -> None:
     monkeypatch.setattr(
         pilot_catalog.db, "fetch_formula_by_number",
         lambda *a, **k: {"id": 1, "expression": "x"},
@@ -204,6 +205,35 @@ def test_sync_skips_r_binding_when_formula_unconvertible(monkeypatch) -> None:
 def test_sync_without_document_is_noop(monkeypatch) -> None:
     monkeypatch.setattr(pilot_catalog.db, "fetch_document_id", lambda *_a, **_k: None)
     assert pilot_catalog.sync_pilot_catalog(object()) is False
+
+
+def test_sync_pilot_catalog_rolls_back_on_error(monkeypatch) -> None:
+    from types import SimpleNamespace
+
+    calls: list[str] = []
+    fake_conn = SimpleNamespace(
+        commit=lambda: calls.append("commit"),
+        rollback=lambda: calls.append("rollback"),
+    )
+    monkeypatch.setattr(pilot_catalog.db, "fetch_document_id", lambda *_a, **_k: 1)
+    monkeypatch.setattr(pilot_catalog.db, "delete_catalog_rows", lambda *_a, **_k: None)
+    monkeypatch.setattr(
+        pilot_catalog, "_write_synthetic_formulas", lambda *_a, **_k: set()
+    )
+    monkeypatch.setattr(
+        pilot_catalog, "_bind_registry_formula", lambda *_a, **_k: False
+    )
+
+    def _boom(*_a: object, **_k: object) -> None:
+        raise RuntimeError("simulated db error")
+
+    monkeypatch.setattr(pilot_catalog.db, "insert_catalog_bindings", _boom)
+
+    with pytest.raises(RuntimeError, match="simulated db error"):
+        pilot_catalog.sync_pilot_catalog(fake_conn)
+
+    assert "rollback" in calls, "conn.rollback() must be called on failure"
+    assert "commit" not in calls, "conn.commit() must not be called on failure"
 
 
 def test_binding_one_row_per_parameter_and_no_value_column(pilot_conn) -> None:
