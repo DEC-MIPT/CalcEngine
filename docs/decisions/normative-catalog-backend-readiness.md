@@ -1078,13 +1078,18 @@ the `tester` GO and the review are recorded; next, the merge into `develop`.
 - **`openspec validate --all --strict`:** 21/21 passed.
 - **Findings closed:**
   - R5: clause/formula search switched from `word_similarity` to FTS with `russian`
-    config and GIN indexes; document search keeps trigram. Test uses `AS ws` alias
-    (RealDictCursor) and drops the morphologically incorrect `ws < 0.5` assertion.
+    config and GIN indexes; document search keeps trigram. `27949c3` removes the
+    word_similarity query entirely (no alias). Test extended (f1 fix, 2026-10-22):
+    asserts that a clause whose `word_similarity` score exceeds 0.3 is not returned
+    by FTS, proving tsvector matching is used.
   - r6: `REVOKE TEMPORARY ON DATABASE` targets `PUBLIC`, not the reader role.
   - r7: `ensure_catalog_read` accepts `role_name`; tests use an isolated role.
   - r8: duplicate test renamed, import order fixed.
   - r9: rollback test added for `sync_pilot_catalog` error path.
-  - r10: postgres-only coverage noted in pyproject.toml and commit message.
+  - r10: postgres-only coverage noted in commit message of `fddfde3` only (not in
+    `pyproject.toml` — that commit added only the `requests` dependency there).
+    Package total without a live database stays ~73% by design; with postgres tests
+    the total reaches >=95%. No separate non-postgres task planned (f3, 2026-10-22).
   - p2-p5: process record corrections in readiness doc.
 - UI/UX: N/A (data zone only).
 

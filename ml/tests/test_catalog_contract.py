@@ -96,12 +96,14 @@ def _reader_url() -> str:
 
 
 def test_search_finds_inflected_word(conn) -> None:
-    """FTS with 'russian' config finds morphological variants of clause title words.
+    """FTS with 'russian' config finds morphological variants and rejects trigram-only matches.
 
-    Inserts a clause with title 'грунтовое основание', then searches with the
-    genitive-plural form 'оснований'. The PostgreSQL 'russian' FTS config stems both
-    to the same lexeme ('основан'), so the search succeeds. An unrelated query must
-    return nothing, proving the search is not a full-scan.
+    Inserts two test clauses:
+    - '5.1' titled 'грунтовое основание': FTS search for the genitive-plural 'оснований'
+      must find it (the 'russian' config stems both to the same lexeme).
+    - '5.8' titled 'дополнительные защитные мероприятия': word_similarity with 'мерзлый'
+      exceeds 0.3 (the old threshold), but FTS must not return it, proving the search
+      uses tsvector matching, not trigram similarity.
     """
     with conn.cursor() as cur:
         cur.execute("DELETE FROM document WHERE designation = 'TEST-SEARCH-FTS'")
@@ -115,6 +117,12 @@ def test_search_finds_inflected_word(conn) -> None:
             "VALUES (%s, '5.1', 'грунтовое основание', 1, 'грунтовый основание')",
             (doc_id,),
         )
+        cur.execute(
+            "INSERT INTO clause (document_id, number, title, page, search_text) "
+            "VALUES (%s, '5.8', 'дополнительные защитные мероприятия', 2, "
+            "'дополнительный защитный мероприятие')",
+            (doc_id,),
+        )
     conn.commit()
 
     with conn.cursor() as cur:
@@ -125,16 +133,28 @@ def test_search_finds_inflected_word(conn) -> None:
 
     with conn.cursor() as cur:
         cur.execute(
-            "SELECT number FROM catalog_read.search(%s, %s)", ("электромагнетизм", 50)
+            "SELECT word_similarity('мерзлый', 'дополнительный защитный мероприятие') AS ws"
         )
-        noise = [r["number"] for r in cur.fetchall()]
+        old_sql_score = cur.fetchone()["ws"]
+
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT number FROM catalog_read.search(%s, %s)", ("мерзлый", 50)
+        )
+        trigram_noise = [r["number"] for r in cur.fetchall()]
 
     with conn.cursor() as cur:
         cur.execute("DELETE FROM document WHERE designation = 'TEST-SEARCH-FTS'")
     conn.commit()
 
     assert "5.1" in found, "FTS must find clause by inflected form of its title word"
-    assert "5.1" not in noise, "FTS must not return clause for an unrelated query"
+    assert old_sql_score > 0.3, (
+        "word_similarity score must exceed the old threshold (0.3), "
+        "proving the old SQL would have returned this clause for query 'мерзлый'"
+    )
+    assert "5.8" not in trigram_noise, (
+        "FTS must not return a clause that only matches by trigram similarity"
+    )
 
 
 def test_reader_role_refusals(conn) -> None:
