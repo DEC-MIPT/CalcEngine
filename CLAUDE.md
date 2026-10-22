@@ -7,7 +7,7 @@ what it does not say. Do not restate `AGENTS.md` here.
 @AGENTS.md
 @agent-docs/domain-constraints.md
 
-## Status (2026-10-19)
+## Status (2026-10-21)
 
 - Code on `develop`: Akim's `backend/` — WP5 backend core (`53a4892`), WP6 backend
   tooling, the WP2 calculation engine (`8c001b9`) and report generator (`9642d8d`), the
@@ -16,9 +16,12 @@ what it does not say. Do not restate `AGENTS.md` here.
   `calculation_result` in `dec_app`, Alembic head `ae350ead9bfd`), the review follow-ups
   (`1027627`), the WP9 catalog backend (`ee94296`: the catalog parameter source,
   `GET /normatives/search`, `GET /normatives/documents/{document_id}`) and the backend part
-  of `frontend-app` (`57abe06`: quantity metadata, Word equations in the report), all with
-  branch coverage 100%; the pilot type `foundations_shallow_r` with its engineer-set file
-  `backend/params/foundations_shallow_r.yaml`; `frontend/` is the React app of
+  of `frontend-app` (`57abe06`: quantity metadata, Word equations in the report) and the
+  WP4 verification framework (`38f9185`: `app/verification` with the reference suite
+  runner, invariant plans, the three metrics and the regression runner; property tests
+  with Hypothesis, the pilot's formula-dependent invariants on the ingested catalog), all
+  with branch coverage 100%; the pilot type `foundations_shallow_r` with its engineer-set
+  file `backend/params/foundations_shallow_r.yaml`; `frontend/` is the React app of
   `frontend-app` (`c252375`, 2026-10-19). Egor's `ml/` (normative pipeline, collector and
   parser under `ml/src/normatives_pipeline/`, with `ml/pyproject.toml`, `ml/configs/`,
   `ml/research/`, `ml/tests/`), his WP9 data feature (`a01b84a`: schema `catalog_read`, its
@@ -27,20 +30,23 @@ what it does not say. Do not restate `AGENTS.md` here.
   (PostgreSQL `dec-postgres`, port 5433, single database `dec`). With
   `DEC_NORMATIVES_DATABASE_URL` set, `POST /calculations` for the pilot computes on the
   ingested catalog; without it the catalog paths answer `503`.
-- Not merged: Akim's `feature/calculation-verification/backend` (WP4; 166 commits behind
-  `develop`) and `feature/report-title-limits/backend` (`report-title-block-limits`,
+- Not merged: Akim's `feature/report-title-limits/backend` (`report-title-block-limits`,
   `tester` GO at `61fb8d4`; task 3.3, the merge, waits for Akim's word). Egor's
   `fix/formula-extractor/data` (`formula-extractor-fix`, all tasks done),
   `fix/normative-catalog-followup/data` (2026-10-19, follow-ups R5, r6-r10, p2-p5 of
-  Akim's third WP9 review) and `feature/normative-collector/data`. Merged branches stay on
-  `origin` (delete only on Akim's word).
+  Akim's third WP9 review; `tester` GO; Akim's review of 2026-10-20 approves it with one
+  test fix, f1, before the merge, `4b08288`) and `feature/normative-collector/data`.
+  Merged branches stay on `origin` (delete only on Akim's word).
 - Active changes (`openspec list` shows progress). Akim: `calculation-core-contract`
   (WP2; open: task 7.1, archive after WP1), `calculation-api` (WP8; only 6.5 sync and
   archive left, after WP2), `frontend-app` (no WP number; open: task 8.11, archive after
   `calculation-api` and `calculation-core-contract`), `calculation-verification` (WP4;
-  open: 2.11 for the engineer, 3.7 blocked on a typical calculation, 6.1-6.2; task 4.1 is
-  agreed by Egor, the edits of `tester.md` and the `test-process` skill are not applied
-  yet), `report-title-block-limits` (open: 3.3 merge, 3.5 sync),
+  feature merged, `38f9185`, after the `tester` GO and the `orchestrator` review, both in
+  `docs/decisions/calculation-verification-readiness.md`; open: 6.1-6.2, sync and archive,
+  deferred by Akim on 2026-10-21; follow-ups in `tasks.md` section 5: reference examples,
+  the latency test (former 3.7), the real regression corpus, review notes; the
+  correctness gate of task 4.1 is in `tester.md` and the `test-process` skill),
+  `report-title-block-limits` (open: 3.3 merge, 3.5 sync),
   `normative-catalog-backend` (WP9, with Egor; open: 7.4, the deferred `orchestrator`
   findings m2 and m3 on `fix/normative-catalog/backend`, and 8.2 sync),
   `backend-layered-architecture` (WP5, all tasks done, not archived) and
@@ -56,8 +62,12 @@ what it does not say. Do not restate `AGENTS.md` here.
   (untracked; decisions of 2026-10-18 and 2026-10-19). Its order: CH1
   `interim-normatives-source` (norm data from Akim's interim base; Egor and the PM agreed
   orally on 2026-10-18), phase 1b `foundations-pressure-from-loads` (a new type next to the
-  pilot that computes the base pressures from N, M and Q), the WP4 merge, then C2
-  structured inputs and the settlement blocks.
+  pilot that computes the base pressures from N, M and Q), the WP4 merge (done
+  2026-10-21, `38f9185`), then C2 structured inputs and the settlement blocks. Under the
+  WP4 correctness gate, phase 1b and every later change that adds or modifies a
+  calculation get GO only with at least 3 real reference examples per calculation type
+  (none exists yet; `calculation-verification` design decision 14 and `tasks.md`
+  section 5).
 - Pilot's first iteration (`frontend-app` design decision 12, while the pilot is shown
   only inside the team): `SHOW_LANGUAGE_SWITCH`, `SHOW_NORM_STATUS`,
   `SHOW_ROUNDING_SOURCE`, `TRACE_NORM_STATUS` and `ACCOUNTABILITY_SECTION` are off; they
@@ -208,6 +218,11 @@ Edit these only when the user explicitly says so; otherwise show a diff.
   The catalog module (`test_normatives_postgres.py`) also needs
   `DEC_TEST_NORMATIVES_DATABASE_URL` pointing at `dec_normatives_test` (made by hand on
   `dec-postgres`; the fixture refuses a database whose name does not end in `_test`).
+  `test_catalog_ingested.py` and `test_verification_catalog_properties.py` need
+  `DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL` (the reader role on the ingested `dec`, read
+  only). The invariant-completeness test counts those property tests even when they are
+  skipped, so a GO for a change that touches the pilot's formula or catalog quotes a run
+  with that variable set.
   Do not start `infra/docker-compose.yml` instead: its project name differs from the one
   that created `dec-postgres`, so the container name would clash.
 - Backend server: `uvicorn app.main:app --host 127.0.0.1` from `backend/`, with

@@ -99,7 +99,11 @@ See `proposal.md` (Non-goals).
 15. **Comparison and the suite report** (added 2026-10-05, Akim). Each computed output
     is converted to the unit of its expected value with `engine.boundary.convert`
     before the tolerance applies, so an `absolute` tolerance stays in the unit the
-    engineer wrote it in. A refused result, or an expected output the result does not
+    engineer wrote it in. The edge of the tolerance is compared with a slack of a few
+    units in the last place of the values (`FLOAT_SLACK_ULPS` in the runner), so a
+    decimal value exactly on the edge (245.2 against 245.3 with 0.1) stays within it; the
+    slack is a floating-point allowance, not part of the tolerance (added 2026-10-21 after
+    the `orchestrator` review, finding 1). A refused result, or an expected output the result does not
     hold, fails that example. The suite report holds the verdict (GO, NO-GO, or
     "invalid suite" with its reasons) and, for every example and quantity, the computed
     value, the expected value, the `tolerance` and its kind (scenario "A quantity
@@ -111,11 +115,12 @@ See `proposal.md` (Non-goals).
     `backend/requirements-dev.txt`, so the generating tests live in `backend/tests/` and
     `backend/app/verification/` never imports it. Each invariant runs on 100 generated
     cases per calculation type (`max_examples=100`, the tool's default), without the
-    tool's per-case deadline, since the latency requirement is a separate test (task
-    3.7). The seed is recorded in the test report: Hypothesis itself prints only the
-    falsifying input, not the seed (checked 2026-10-05 with Hypothesis 6.168), so
-    `backend/tests/conftest.py` picks a seed when `--hypothesis-seed` is not given, hands
-    it to Hypothesis, and prints it in the pytest report header (`hypothesis seed: <n>`);
+    tool's per-case deadline, since the latency requirement is a separate test (former
+    task 3.7, a follow-up in `tasks.md` section 5). The seed is recorded in the test
+    report: Hypothesis itself prints only the falsifying input, not the seed (checked
+    2026-10-05 with Hypothesis 6.168), so `backend/tests/conftest.py` picks a seed when
+    `--hypothesis-seed` is not given, hands it to Hypothesis, and prints it in the pytest
+    report header (`hypothesis seed: <n>`);
     a run started with `--hypothesis-seed=<n>` repeats it. The example database is off
     (`database=None`), so a run does not depend on earlier local runs.
     - Alternative: a generator of our own on `random.Random(seed)`. Rejected: it would
@@ -220,7 +225,8 @@ unit-change invariant uses "Explicit units at the boundary".
 
 ## Risks
 
-- Latency is not testable until "typical calculation" is defined; task 3.7 waits for it.
+- Latency is not testable until "typical calculation" is defined; its test (former task
+  3.7) is a follow-up in `tasks.md` section 5, and the requirement is archived without it.
 - `calculation-core-contract` changes after agreement. Mitigation: the items
   are listed above; only they are re-opened.
 - A published worked example has an error or uses another norm edition. Mitigation:

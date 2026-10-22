@@ -147,6 +147,13 @@
      `ParameterSourceUnavailableError` (`503 parameter_source_unavailable`), and one log line
      names the type and the parameter, as `catalog_data_invalid` does
      (`catalog_source.py:338-343`).
+   - The profile judges records by group (Akim, 2026-10-21): a formula, threshold or check
+     by its `parameter`; a table value by its `parameter` and row heading; a method bound by
+     its `quantity` and `kind`. `rejected` records leave the group first, so a corrected
+     record next to a rejected one replaces it. A group that is then empty, or that still
+     holds a record its profile may not use, makes its parameter or bound unusable, with the
+     answer and the log line above. So a `pending` table row under `strict` gives `503`, not
+     a `422` for a missing row, and a `pending` bound never widens the method range.
    - A type without a data file gets no interim source and answers
      `503 parameter_source_unavailable` through the existing path (`calculation.py:111-116`).
    - A data file of a type that is not registered is validated and skipped with one log line.
@@ -310,8 +317,8 @@
 |---|---|---|
 | 1 | Tolerance of each output of `ex1` and its `tolerance_source` (the card's tolerance cells are empty, `docs/decisions/reference-examples-foundations.md:103-135`) | verifier |
 | 2 | Does amendment 5 change formula (5.7) numerically (identifier given by Akim, checked by the verifier), and so is `ex1` a gate or only a control point | verifier |
-| 3 | The verifier's name for `verifiers` (today: Akim, see Risks) | Akim |
-| 4 | The sunset date | Akim |
+| 3 | The verifier's name for `verifiers` (today: Akim, see Risks) | Akim. Answered 2026-10-22: Akim |
+| 4 | The sunset date | Akim. Answered 2026-10-22: 2026-12-01; the event stays "the type is switched to the catalog in CH3" (decision 8) |
 | 5 | Acknowledgement of this change as the second developer (shared `openspec/`) and a look at the row format against `catalog_read` | Egor |
 | 6 | The PM's dated record that norm values may be kept in git for the pilot (oral consent, 2026-10-18) | PM, recorded by Akim |
 | 7 | A per-type source choice, if CH3 switches types one by one | Akim, in CH3 |

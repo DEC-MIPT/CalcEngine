@@ -43,102 +43,103 @@ feature and does not gate the backend feature or section 8.
   rule", or remove that requirement if the interim source is already gone (`design.md`,
   decision 9); verify: `openspec validate --all --strict` passes and OpenSpec reports no
   archive refusal for the deltas
-- [ ] 1.5 (spec) Get Egor's acknowledgement of this change as the second developer, with a
+- [x] 1.5 (spec) Get Egor's acknowledgement of this change as the second developer, with a
   look at the record format against the `catalog_read` rows (`design.md`, open question 5);
-  verify: a commit or comment by Egor that names this change
+  verify: a commit or comment by Egor that names this change (2026-10-20: `7f394e4`, items
+  1-3 acknowledged, 4a and 4b "Yes", in `docs/decisions/backend/2026-10-20-interim-normatives-source-ack-to-egor.md`)
 
 ## 2. Schema and data format (feature `interim-normatives/backend`)
 
-- [ ] 2.1 Add the Pydantic models of the manifest, the five record kinds and the verification
+- [x] 2.1 Add the Pydantic models of the manifest, the five record kinds and the verification
   record in `backend/app/parameters/interim_schemas.py`, every model with
   `extra="forbid"` and the length limits of `design.md` decision 2 (decisions 1-3); verify:
   tests of the scenarios "Record without a reference rejected", "Unknown field rejected" and
-  "Over-long label rejected" (`interim-normatives` "Interim normative data files")
-- [ ] 2.2 Add the loader: resolve the root, read only manifests and type files directly under
+  "Over-long label rejected" (`interim-normatives` "Interim normative data files") (2026-10-21, `213b58d` on `feature/interim-normatives/backend`)
+- [x] 2.2 Add the loader: resolve the root, read only manifests and type files directly under
   each document directory with `yaml.safe_load`, skip and log links outside the root and other
   files, validate, and report unknown types (`design.md`, decisions 1, 5; non-functional);
   verify: tests of the scenarios "File of an unregistered type", "File outside the root
-  ignored" and "No data value in the log"
-- [ ] 2.3 Validate verification records: the fields that `human-verified` requires, `by` in
+  ignored" and "No data value in the log" (2026-10-21, `58caf4b` on `feature/interim-normatives/backend`)
+- [x] 2.3 Validate verification records: the fields that `human-verified` requires, `by` in
   the manifest's `verifiers`, and `value_digest` against the record's canonical serialization,
   a mismatch counting as `pending` with a startup log line, and the startup warning of
   unchecked records under `strict` (`design.md`, decisions 3, 4); verify: tests of the
   scenarios "Verified record without its fields rejected", "Rejected record without its
   reason rejected", "Changed value needs a new check", "Pending record allowed without a
-  verifier" and "Strict lists unchecked values at startup"
-- [ ] 2.4 Compute the data digest per document directory with `canonical_json`
+  verifier" and "Strict lists unchecked values at startup" (2026-10-21, `abc8a7f` on `feature/interim-normatives/backend`)
+- [x] 2.4 Compute the data digest per document directory with `canonical_json`
   (`backend/app/engine/hashing.py:29-47`) over the validated content in path order
   (`design.md`, decision 6); verify: tests of the scenarios "Digest is deterministic" (a
-  change of comments, key order and indentation only) and "Digest follows the data"
-- [ ] 2.5 Check the sunset at startup (`design.md`, decision 8); verify: tests of the
+  change of comments, key order and indentation only) and "Digest follows the data" (2026-10-21, `8878e71` on `feature/interim-normatives/backend`)
+- [x] 2.5 Check the sunset at startup (`design.md`, decision 8); verify: tests of the
   scenarios "Date passed" and "Date not passed" on a fixture manifest with a fixed clock (the
   failing-after-date assertion is proved on the fixture); the test on the real manifest, the
-  live reminder, is added by task 7.1
+  live reminder, is added by task 7.1 (2026-10-21, `97d1e71` on `feature/interim-normatives/backend`)
 
 ## 3. Source and contract tests (feature `interim-normatives/backend`)
 
-- [ ] 3.1 Move the assembly functions of `backend/app/services/catalog_source.py` (binding,
+- [x] 3.1 Move the assembly functions of `backend/app/services/catalog_source.py` (binding,
   formula, threshold, table value, row selection, bounds) into
   `backend/app/services/parameter_assembly.py`, used by the catalog source (`design.md`,
   decision 5); verify: every existing catalog test passes unchanged and `lint-imports` keeps
-  the layer contracts
-- [ ] 3.2 Add the optional `source` field (`ParameterSourceInfo`) to `ResolvedParameters` and
+  the layer contracts (2026-10-21, `9fb5853` on `feature/interim-normatives/backend`)
+- [x] 3.2 Add the optional `source` field (`ParameterSourceInfo`) to `ResolvedParameters` and
   set it in the catalog source; verify: existing callers and test doubles unchanged, a test
-  that the catalog source returns kind `catalog`
-- [ ] 3.3 Add `InterimParameterSource` and `interim_sources(...)`: records → row records →
+  that the catalog source returns kind `catalog` (2026-10-21, `1df10ca` on `feature/interim-normatives/backend`)
+- [x] 3.3 Add `InterimParameterSource` and `interim_sources(...)`: records → row records →
   shared assembly, with the profile filter (`strict`, `draft`, `rejected` never used) and the
   log line that names type and parameter (`design.md`, decisions 4, 5); verify: tests of the
   scenarios "Strict refuses an unchecked value on request", "Draft uses pending values and
-  marks the result" and "References not raised"
-- [ ] 3.4 Build one contract test battery parametrized over both sources, from the
+  marks the result" and "References not raised" (2026-10-21, `00c765b` on `feature/interim-normatives/backend`)
+- [x] 3.4 Build one contract test battery parametrized over both sources, from the
   assertions of `backend/tests/test_services_catalog_source.py:59-157` and the data of
   `backend/tests/catalog_fixture.py`, with the same data written as interim files; catalog-only
   tests (SQL statements, connection errors) stay where they are; verify: the scenarios "Same
   data, same parameters", "Table row chosen by an input", "Input off every table row", "Input
-  outside the method range" and "Broken binding" pass for both sources
+  outside the method range" and "Broken binding" pass for both sources (2026-10-21, `270b1ca` on `feature/interim-normatives/backend`)
 
 ## 4. Settings and `.env.example` (feature `interim-normatives/backend`)
 
-- [ ] 4.1 Add the settings class with `DEC_PARAMETER_SOURCE`, `DEC_INTERIM_PROFILE` and
+- [x] 4.1 Add the settings class with `DEC_PARAMETER_SOURCE`, `DEC_INTERIM_PROFILE` and
   `DEC_INTERIM_ROOT` in `backend/app/core/config.py`, and choose `catalog_sources` or
   `interim_sources` in `create_app` (`backend/app/main.py:67-78`), the `sources` argument
   keeping priority (`design.md`, decision 7); verify: tests of the scenarios "Default stays
   the catalog", "Interim chosen", "Catalog mode and a type with interim data only", "Unknown
   setting value", "Catalog setting ignores interim files" and "Interim mode and a type without
-  a catalog source"
-- [ ] 4.2 List the three variables in `.env.example`, commented out with a one-line comment
-  each; verify: `pre-commit run --all-files` passes, including the settings hook
-- [ ] 4.3 Keep the engineer-set loader unchanged; verify: the existing test that a formula or
-  coefficient under `params/` is rejected still passes ("Norm value in params still rejected")
+  a catalog source" (2026-10-21, `52ad2a6` on `feature/interim-normatives/backend`)
+- [x] 4.2 List the three variables in `.env.example`, commented out with a one-line comment
+  each; verify: `pre-commit run --all-files` passes, including the settings hook (2026-10-21, `52ad2a6` on `feature/interim-normatives/backend`)
+- [x] 4.3 Keep the engineer-set loader unchanged; verify: the existing test that a formula or
+  coefficient under `params/` is rejected still passes ("Norm value in params still rejected") (2026-10-21, `b1839c7` on `feature/interim-normatives/backend`)
 
 ## 5. Envelope and report (feature `interim-normatives/backend`)
 
-- [ ] 5.1 Add the optional `parameter_source` to `ResultEnvelope` and set it in the service
+- [x] 5.1 Add the optional `parameter_source` to `ResultEnvelope` and set it in the service
   from `ResolvedParameters.source` (`backend/app/services/calculation.py:77-123`); the engine
   and `input_hash` unchanged (`design.md`, decision 13); verify: tests of the scenarios "New
   interim result", "New catalog result", "Same inputs, same hash across sources", "Source
   without a description" and "Stored result without the field" (`calculation-api`), and
   "Digest in the result" (`interim-normatives`)
-- [ ] 5.2 Print the source line in the report: in the conclusion before the responsibility
+- [x] 5.2 Print the source line in the report: in the conclusion before the responsibility
   sentence while `ACCOUNTABILITY_SECTION` is off, in section 4 when it is on
   (`backend/app/reporting/docx_writer.py:53`, `:234-237`); verify: tests of the scenarios
   "Interim line in the conclusion", "Line printed once" and "Older result", with the flag in
   both states
-- [ ] 5.3 Run `backend/check.sh`; verify: it passes with branch coverage of `app` at 100% or
+- [x] 5.3 Run `backend/check.sh`; verify: it passes with branch coverage of `app` at 100% or
   at least 95%
 
 ## 6. Result screen (feature `interim-normatives/frontend`)
 
-- [ ] 6.1 Regenerate `frontend/src/api/schema.d.ts` with `npm run gen:api` after section 5;
+- [x] 6.1 Regenerate `frontend/src/api/schema.d.ts` with `npm run gen:api` after section 5;
   verify: `npm run gen:api:check` passes
-- [ ] 6.2 Show the source label in the stamp's description list
+- [x] 6.2 Show the source label in the stamp's description list
   (`frontend/src/components/VerdictStamp.tsx:110-138`) and in the refusal view, with Russian
   and English texts, the first 12 hex characters of the digest shown and the full digest as
   screen-reader text, and `draft` marked in words; update the mock fixtures with both kinds;
   verify: tests of the scenarios "Interim result labelled", "Draft marked in words",
   "Refusal labelled" and "Older result without the field", and the axe helper on the result
   screen in both kinds
-- [ ] 6.3 Run `frontend/check.sh` and the Playwright suite; verify: both pass, branch
+- [x] 6.3 Run `frontend/check.sh` and the Playwright suite; verify: both pass, branch
   coverage at least 95%
 
 ## 7. Digitization with the verifier (working process, data on the branch that owns each task)
@@ -247,7 +248,7 @@ feature and does not gate the backend feature or section 8.
   to one feature
 - [x] Acceptance and Go/No-Go criteria written (below)
 - [x] Feature branches named
-- [ ] Dependencies satisfied: Egor's acknowledgement (task 1.5). The verifier's name and the
+- [x] Dependencies satisfied: Egor's acknowledgement (task 1.5, `7f394e4`). The verifier's name and the
   sunset date are not DOR items: they are needed only by task 7.1 (Akim, 2026-10-20)
 
 ## DOD and Go/No-Go
