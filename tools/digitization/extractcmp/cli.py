@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml
 
-from extractcmp import checkpoints, draft, marks, portions, promote, report
+from extractcmp import checkpoints, draft, marks, portions, promote, report, viewer
 from extractcmp.compare import compare_all
 from extractcmp.normalize import load_a, load_b
 
@@ -111,6 +111,33 @@ def make_draft(args: argparse.Namespace) -> int:
     return 0
 
 
+def make_html(args: argparse.Namespace) -> int:
+    """Строит страницы HTML листов: вырезки PDF, выписки и записи черновика.
+
+    Args:
+        args: разобранные аргументы подкоманды ``html``.
+
+    Returns:
+        Код выхода.
+    """
+    a_data, b_data = _load(args.a), _load(args.b)
+    a, b = load_a(a_data), load_b(b_data)
+    results, _ = compare_all(a, b)
+    ex1 = _load(args.ex1)
+    points = checkpoints.build(ex1, a.get("t55"), b.get("t55"))
+    items = {i.item_id: i for i in _items(a_data, b_data, results, points, ex1)}
+    ctx = viewer.context(_load(args.draft), _load(args.mapping), points, viewer.pdftoppm(args.pdf))
+    today = date.fromisoformat(args.date) if args.date else date.today()
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+    for path in args.sheets:
+        sheet = _load(path)
+        sources = {"PDF": _rel(args.pdf), "черновик": _rel(args.draft), "лист": _rel(path)}
+        out = args.out_dir / f"{sheet['portion']}.html"
+        out.write_text(viewer.render_page(ctx, sheet, items, today, sources), encoding="utf-8")
+        print(out)
+    return 0
+
+
 def _rel(path: Path) -> str:
     try:
         return str(path.resolve().relative_to(HERE.parent.parent))
@@ -204,5 +231,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("sheets", type=Path, nargs="+")
     p.set_defaults(func=apply)
+    p = sub.add_parser("html", help="страницы листов с вырезками PDF (только просмотр)")
+    p.add_argument("--a", type=Path, default=root / "extract-a.yaml")
+    p.add_argument("--b", type=Path, default=root / "extract-b.yaml")
+    p.add_argument("--ex1", type=Path, default=HERE / "data" / "ex1.yaml")
+    p.add_argument("--draft", type=Path, required=True)
+    p.add_argument("--mapping", type=Path, default=root / "draft-mapping.yaml")
+    p.add_argument("--pdf", type=Path, default=HERE.parent.parent / "docs" / "NTD" / "СП 22.13330.2016.pdf")
+    p.add_argument("--out-dir", type=Path, default=root / "sheets-html",
+                   help="вне git: в страницах вырезки текста нормы")
+    p.add_argument("--date", help="ГГГГ-ММ-ДД; по умолчанию сегодня")
+    p.add_argument("sheets", type=Path, nargs="+")
+    p.set_defaults(func=make_html)
     args = parser.parse_args(argv)
     return args.func(args)
