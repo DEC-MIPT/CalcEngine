@@ -1,0 +1,81 @@
+portion: P1-1
+generated: '2026-10-22'
+sources:
+  a: docs/akim/digitization/extract-a.yaml
+  b: docs/akim/digitization/extract-b.yaml
+verdicts_allowed:
+- верно
+- исправить
+- отклонить
+items:
+- item: P1-1/d_b_cap_2m
+  record: d_b_cap_2m
+  kind: record
+  page: '36'
+  shown_digest: 0a6c08ee9a2f1fdd94081ac12f7febc1f6478e054863e3384b3e872f1563411f
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1-1/h_n_allowances
+  record: h_n_allowances
+  kind: record
+  page: '36'
+  shown_digest: 14c7736160768c36b5c9b0660158a709d4cd3c2cd3741730aae2e651413360ee
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1-1/k_z_formula_b_below_threshold
+  record: k_z_formula_b_below_threshold
+  kind: record
+  page: '36'
+  shown_digest: 0d8e7687bac86911fca2b577d8a0392aa85ce4f335b72f281d1bcebb7f869530
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1-1/k_z_formula_b_from_threshold
+  record: k_z_formula_b_from_threshold
+  kind: record
+  page: '36'
+  shown_digest: fdf6437172e61021b5711205e4fb0ff6536985cb28c8a215af2d07f8ace27c73
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1-1/z0_in_k_z
+  record: k_z_formula_b_from_threshold
+  kind: record
+  page: '36'
+  shown_digest: 5acb71d56419d05e7adb9b6e343112baad2e750578a6973f95411a73f076a09b
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1-1/note1_b_sqrt_A
+  record: note1_b_sqrt_A
+  kind: record
+  page: '36'
+  shown_digest: 57bbe6a944ad4a004129bed02a39f05a9b705abc86852aba281524621c61fa5c
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1-1/r_formula_5_7
+  record: r_formula_5_7
+  kind: record
+  page: '36'
+  shown_digest: fcc7481aea441fcabfefea956937c5a16323131844492d2b54a8fce6b5a06f92
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+signature: null

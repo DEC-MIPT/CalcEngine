@@ -262,6 +262,8 @@ The Kilo mirrors carry no `model` or `tools`, so "read-only" is enforced by the
 prompt there, and by `tools` only in `.claude/agents/`. Keep the bodies identical.
 
 `docs/` is untracked by design (`.gitignore`), except `docs/decisions/`, which git
-tracks and the team uses as its written channel; do not `@import` from `docs/`.
+tracks and the team uses as its written channel, and `docs/verification/`, which holds
+the verifier's check sheets of interim normative data (Akim, 2026-10-27; see its
+`README.md`); do not `@import` from `docs/`.
 `docs/akim/` (plan, code journals, personal notes) is Akim's own zone and stays
 untracked on purpose (2026-09-28), not pushed to `origin`.

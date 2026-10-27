@@ -4,7 +4,7 @@ repos:
     hooks:
       - id: detect-secrets
         args: ['--baseline', '.secrets.baseline']
-        exclude: ^ml/research/.*\.ipynb$
+        exclude: ^(ml/research/.*\.ipynb|docs/verification/.*\.yaml)$
   - repo: local
     hooks:
       - id: env-example-matches-settings
