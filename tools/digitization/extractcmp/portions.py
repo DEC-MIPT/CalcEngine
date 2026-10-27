@@ -38,6 +38,12 @@ _GROUP_BY_KIND = {
     "checks": "P3",
     "method_bounds": "P3",
 }
+CHECKED_WITH = {"z0_in_k_z": "k_z_formula_b_from_threshold"}
+"""Проверка → проверка, с которой она идёт в одну порцию.
+
+Черновик собирает их в одну запись каталога (z_0 подставлен в формулу k_z), а ``promote``
+переносит запись, только если все её проверки лежат в одной порции.
+"""
 
 
 @dataclass
@@ -200,7 +206,8 @@ def record_items(results: Iterable[Comparison]) -> list[Item]:
         results: результаты сравнения.
 
     Returns:
-        Проверки; для каждой записи A и B есть хотя бы одна.
+        Проверки; для каждой записи A и B есть хотя бы одна. Проверка из `CHECKED_WITH`
+        получает запись и группу своей пары, чтобы ``split`` положил их в одну порцию.
     """
     items: list[Item] = []
     for cmp in results:
@@ -228,6 +235,11 @@ def record_items(results: Iterable[Comparison]) -> list[Item]:
                 shown_digest=_digest(a_text, b_text, cmp.key),
             )
         )
+    by_id = {i.item_id: i for i in items}
+    for item_id, partner in CHECKED_WITH.items():
+        if item_id in by_id and partner in by_id:
+            by_id[item_id].record = partner
+            by_id[item_id].group = by_id[partner].group
     return items
 
 

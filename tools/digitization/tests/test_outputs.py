@@ -6,6 +6,7 @@ import yaml
 from extractcmp import checkpoints, marks, portions, report
 from extractcmp.compare import compare_all
 from extractcmp.normalize import load_a, load_b
+from tests.conftest import a_scalar, b_scalar
 
 TODAY = date(2026, 10, 22)
 EX1 = yaml.safe_load((Path(__file__).resolve().parent.parent / "data" / "ex1.yaml").read_text(encoding="utf-8"))
@@ -128,6 +129,29 @@ def test_every_record_and_table_row_has_an_item(extracts):
     assert {"t55@phi=0", "t55@phi=1"} <= {i.item_id for i in items}
     assert len({i.item_id for i in items}) == len(items)
     assert all(i.group in ("P1", "P2", "P3") for i in items)
+
+
+def test_z0_goes_to_the_portion_of_the_k_z_formula(mutable):
+    a, b = mutable
+    a["records"] += [a_scalar("k_z_formula_b_from_threshold", kind="formulas"), a_scalar("z0_in_k_z")]
+    b["formulas"].append(b_scalar("k_z_formula_b_from_threshold", latex="k_{z}=z_{0}/b+0{,}2"))
+    b["thresholds"].append(b_scalar("z0_in_k_z"))
+    results, _ = compare_all(load_a(a), load_b(b))
+    items = {i.item_id: i for i in portions.record_items(results)}
+    assert (items["z0_in_k_z"].record, items["z0_in_k_z"].group) == ("k_z_formula_b_from_threshold", "P1")
+    assert items["thr"].group == "P3"
+    parts = portions.split(list(items.values()), minutes=1)
+    owner = {i.item_id: p.portion_id for p in parts for i in p.items}
+    assert owner["z0_in_k_z"] == owner["k_z_formula_b_from_threshold"]
+
+
+def test_z0_without_its_formula_keeps_its_group(mutable):
+    a, b = mutable
+    a["records"].append(a_scalar("z0_in_k_z"))
+    b["thresholds"].append(b_scalar("z0_in_k_z"))
+    results, _ = compare_all(load_a(a), load_b(b))
+    items = {i.item_id: i for i in portions.record_items(results)}
+    assert (items["z0_in_k_z"].record, items["z0_in_k_z"].group) == ("z0_in_k_z", "P3")
 
 
 def test_t55_row_difference_flagged(mutable):
