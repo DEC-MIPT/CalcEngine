@@ -1,5 +1,5 @@
 portion: P1-1
-generated: '2026-10-22'
+generated: '2026-10-27'
 sources:
   a: docs/akim/digitization/extract-a.yaml
   b: docs/akim/digitization/extract-b.yaml
@@ -8,26 +8,6 @@ verdicts_allowed:
 - исправить
 - отклонить
 items:
-- item: P1-1/d_b_cap_2m
-  record: d_b_cap_2m
-  kind: record
-  page: '36'
-  shown_digest: 0a6c08ee9a2f1fdd94081ac12f7febc1f6478e054863e3384b3e872f1563411f
-  verdict: null
-  corrected: null
-  by: null
-  at: null
-  comment: null
-- item: P1-1/h_n_allowances
-  record: h_n_allowances
-  kind: record
-  page: '36'
-  shown_digest: 14c7736160768c36b5c9b0660158a709d4cd3c2cd3741730aae2e651413360ee
-  verdict: null
-  corrected: null
-  by: null
-  at: null
-  comment: null
 - item: P1-1/k_z_formula_b_below_threshold
   record: k_z_formula_b_below_threshold
   kind: record
@@ -58,21 +38,91 @@ items:
   by: null
   at: null
   comment: null
-- item: P1-1/note1_b_sqrt_A
-  record: note1_b_sqrt_A
-  kind: record
-  page: '36'
-  shown_digest: 57bbe6a944ad4a004129bed02a39f05a9b705abc86852aba281524621c61fa5c
-  verdict: null
-  corrected: null
-  by: null
-  at: null
-  comment: null
 - item: P1-1/r_formula_5_7
   record: r_formula_5_7
   kind: record
   page: '36'
   shown_digest: fcc7481aea441fcabfefea956937c5a16323131844492d2b54a8fce6b5a06f92
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1-1/k_direct_tests
+  record: k_direct_tests
+  kind: record
+  page: '36'
+  shown_digest: e3de317b9ba588ee5d551573411d9270308b8b5093117b2ee9bcf6be88225ca9
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1-1/edition
+  record: edition
+  kind: edition
+  page: —
+  shown_digest: 200b1d9f96e600112e8047ea6437e3d439a60a75e45e2d17b2efd559f5779a77
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1-1/CP-K-1
+  record: CP-K-1
+  kind: control-point
+  page: —
+  shown_digest: 49cc19dcd89c919ff8fe70fa57c5beb7a49e699d3972f7a4b01e214ea352e753
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1-1/CP-KZ-1
+  record: CP-KZ-1
+  kind: control-point
+  page: —
+  shown_digest: 5d451e6ae3a7221869c6af2970cb390060567532070ca48a18abe1ef0512478b
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1-1/CP-KZ-2
+  record: CP-KZ-2
+  kind: control-point
+  page: —
+  shown_digest: 54976fbc2ced1d16bb55385b7d91366366f2e106edc91925334d379d2f829b85
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1-1/CP-R-1
+  record: CP-R-1
+  kind: control-point
+  page: —
+  shown_digest: b97bf80ceb787168c614101b0727f52f70e27625b44c87d17c5f12473e4af5c2
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1-1/CP-R-2
+  record: CP-R-2
+  kind: control-point
+  page: —
+  shown_digest: d43e850cc71cb399049c6a8451198fe7bde7e942a6fa582c1ed02ce1f61bfd26
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1-1/CP-R-3
+  record: CP-R-3
+  kind: control-point
+  page: —
+  shown_digest: afed4ad4860a19f8e9a0fe129566aa1e4b6ff9de88d2fec17ead2e56faf8ac62
   verdict: null
   corrected: null
   by: null
