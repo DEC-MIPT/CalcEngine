@@ -187,6 +187,11 @@ def test_check_committed_outside_a_repo(tmp_path, monkeypatch):
     assert promote.check_committed(path, "Vera") == ["the sheet is not in a git working tree"]
 
 
+def test_sheets_go_to_the_tracked_folder_by_default():
+    assert cli.SHEETS_DIR.parts[-3:] == ("docs", "verification", "interim-normatives-source")
+    assert cli.SHEETS_DIR.parent.parent.parent == cli.HERE.parent.parent
+
+
 def test_cli_build_sign_promote(tmp_path, extracts):
     a, b = extracts
     (tmp_path / "extract-a.yaml").write_text(yaml.safe_dump(a, allow_unicode=True), encoding="utf-8")
@@ -194,11 +199,13 @@ def test_cli_build_sign_promote(tmp_path, extracts):
     (tmp_path / "extract-a.report.md").write_text("Изм. N 5 здесь\n", encoding="utf-8")
     out = tmp_path / "out"
     code = cli.main(["build", "--a", str(tmp_path / "extract-a.yaml"), "--b", str(tmp_path / "extract-b.yaml"),
-                     "--out-dir", str(out), "--date", "2026-10-22"])
+                     "--out-dir", str(out), "--sheets-dir", str(out / "sheets" / "change"), "--date", "2026-10-22"])
     assert code == 0
-    for name in ("diff-report.md", "amendment-marks.md", "control-points.md", "portions/index.md", "portions/P1-1.yaml"):
+    for name in ("diff-report.md", "amendment-marks.md", "control-points.md", "sheets/change/index.md",
+                 "sheets/change/P1-1.yaml"):
         assert (out / name).exists()
-    sheet_path = out / "portions" / "P1-1.yaml"
+    assert not (out / "portions").exists()
+    sheet_path = out / "sheets" / "change" / "P1-1.yaml"
     filled = yaml.safe_load(sheet_path.read_text(encoding="utf-8"))
     first = filled["items"][0]
     first.update(verdict="верно", by="Vera", at="2026-10-25")

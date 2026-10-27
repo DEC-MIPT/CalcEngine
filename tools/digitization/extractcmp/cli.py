@@ -12,6 +12,8 @@ from extractcmp.compare import compare_all
 from extractcmp.normalize import load_a, load_b
 
 HERE = Path(__file__).resolve().parent.parent
+SHEETS_DIR = HERE.parent.parent / "docs" / "verification" / "interim-normatives-source"
+"""Отслеживаемая git папка листов: ``promote`` требует коммита листа подписавшим."""
 
 
 def _load(path: Path) -> dict:
@@ -59,8 +61,8 @@ def build(args: argparse.Namespace) -> int:
     (out / "control-points.md").write_text(checkpoints.render(points, ex1), encoding="utf-8")
     items = _items(a_data, b_data, results, points, ex1)
     parts = portions.split(items)
-    pdir = out / "portions"
-    pdir.mkdir(exist_ok=True)
+    pdir = args.sheets_dir
+    pdir.mkdir(parents=True, exist_ok=True)
     sources = {"a": _rel(args.a), "b": _rel(args.b)}
     for portion in parts:
         (pdir / f"{portion.portion_id}.md").write_text(
@@ -178,6 +180,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     p.add_argument("--b", type=Path, default=root / "extract-b.yaml")
     p.add_argument("--ex1", type=Path, default=HERE / "data" / "ex1.yaml")
     p.add_argument("--out-dir", type=Path, default=root)
+    p.add_argument("--sheets-dir", type=Path, default=SHEETS_DIR, help="листы порций и их оглавление")
     p.add_argument("--date", help="ГГГГ-ММ-ДД; по умолчанию сегодня")
     p.set_defaults(func=build)
     p = sub.add_parser("draft", help="черновик файла типа и сопоставление с листами")

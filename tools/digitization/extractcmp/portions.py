@@ -379,7 +379,7 @@ def render_markdown(portion: Portion, today: date, label: str) -> str:
         f"# Порция {portion.portion_id}: {GROUP_TITLES[portion.group]}",
         "",
         f"Дата: {today.isoformat()}. Проверок: {len(portion.items)}. Оценка: около {portion.minutes:.0f} мин "
-        "(гипотеза, допущения в `portions/index.md`).",
+        "(гипотеза, допущения в `index.md`).",
         "",
         "Вердикт записывается в лист `" + f"{portion.portion_id}.yaml`" + " (поля `verdict`, `by`, `at`, `comment`); "
         "значения: верно / исправить / отклонить. При «исправить» исправленное значение пишется в `corrected`. "
