@@ -128,7 +128,20 @@ def test_every_record_and_table_row_has_an_item(extracts):
     assert {r.key for r in results} <= records
     assert {"t55@phi=0", "t55@phi=1"} <= {i.item_id for i in items}
     assert len({i.item_id for i in items}) == len(items)
-    assert all(i.group in ("P1", "P2", "P3") for i in items)
+    assert all(i.group in portions.GROUPS for i in items)
+
+
+def test_records_outside_the_pilot_file_and_their_points_are_deferred(mutable):
+    a, b = mutable
+    b["extra_records"].append(b_scalar("d_b_cap_2m", latex="d_{b}=2"))
+    _, items = all_items((a, b))
+    group = {i.item_id: i.group for i in items}
+    assert group["d_b_cap_2m"] == group["CP-RULE-2"] == group["CP-D1-1"] == group["CP-K-2"] == "D"
+    assert group["extra1"] == group["CP-R-1"] == "P1"
+    parts = portions.split(items)
+    assert parts[-1].portion_id == "D-1"
+    assert "Порции D" in portions.render_index(parts, TODAY)
+    assert "отложено" in portions.render_markdown(parts[-1], TODAY, "label")
 
 
 def test_z0_goes_to_the_portion_of_the_k_z_formula(mutable):

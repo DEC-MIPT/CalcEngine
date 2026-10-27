@@ -13,7 +13,7 @@ class ControlPoint:
 
     Attributes:
         cp_id: идентификатор точки.
-        group: порция верификатора (``P1``, ``P2`` или ``P3``).
+        group: группа порций верификатора (``P1``, ``P2``, ``P3`` или отложенная ``D``).
         target: идентификаторы проверяемых записей.
         title: что проверяет точка.
         inputs: входы; ``None`` оставляет поле верификатору.
@@ -78,7 +78,7 @@ def build(ex1: Mapping[str, Any], a_t55: Entry | None, b_t55: Entry | None) -> l
                      "R при b ≥ 10 м (вторая ветвь k_z)",
                      {"b": None, "остальные входы": None}, {"R": None}, False,
                      "В ex1 b < 10 м; точку и ответ задаёт верификатор."),
-        ControlPoint("CP-D1-1", "P1", ("d1_formula_5_8",), "d_1 по формуле (5.8)",
+        ControlPoint("CP-D1-1", "D", ("d1_formula_5_8",), "d_1 по формуле (5.8)",
                      {"h_s": None, "h_cf": None, "gamma_cf": None, "gamma_II_prime": None}, {"d_1": None}, False,
                      "В ex1 d_1 дано как вход, формула (5.8) в примере не применяется."),
         ControlPoint("CP-KZ-1", "P1", ("k_z_formula_b_below_threshold",), "k_z при b < 10 м (ex1)",
@@ -87,12 +87,12 @@ def build(ex1: Mapping[str, Any], a_t55: Entry | None, b_t55: Entry | None) -> l
                      {"b": None}, {"k_z": None}, False, "В ex1 нет такого b."),
         ControlPoint("CP-K-1", "P1", ("k_direct_tests",), "k при прочностных характеристиках из испытаний (ex1)",
                      {"характеристики": "определены непосредственными испытаниями"}, {"k": inputs["k"]}, True),
-        ControlPoint("CP-K-2", "P1", ("k_from_appendix_A",), "k при характеристиках по таблицам приложения А",
+        ControlPoint("CP-K-2", "D", ("k_from_appendix_A",), "k при характеристиках по таблицам приложения А",
                      {"характеристики": "приняты по таблицам приложения А"}, {"k": None}, False,
                      "В ex1 такого случая нет."),
-        ControlPoint("CP-RULE-1", "P1", ("note5_d1_gt_d",), "Примечание 5: d_1 > d",
+        ControlPoint("CP-RULE-1", "D", ("note5_d1_gt_d",), "Примечание 5: d_1 > d",
                      {"d": None, "d_1": None}, {"d_1": None, "d_b": None}, False),
-        ControlPoint("CP-RULE-2", "P1", ("d_b_cap_2m",), "Подвал глубже 2 м",
+        ControlPoint("CP-RULE-2", "D", ("d_b_cap_2m",), "Подвал глубже 2 м",
                      {"глубина подвала": None}, {"d_b": None}, False),
         ControlPoint("CP-T54-1", "P2", ("t54_clayey_il_gt_0_5",), "Таблица 5.4: суглинок (ex1)",
                      {"I_L": t54["i_l"], "L/H": None}, {"gamma_c1": t54["gamma_c1"], "gamma_c2": t54["gamma_c2"]}, True,

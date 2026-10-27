@@ -29,7 +29,18 @@ GROUP_TITLES = {
     "P1": "формулы, их коэффициенты, правила, редакция и контрольные точки формул",
     "P2": "таблицы 5.4 и 5.5 и их контрольные точки",
     "P3": "порог k_z, границы метода, ссылка проверки p ≤ R",
+    "D": "отложено: правила и формулы вне R пилота (фаза 1b, структурированные входы C2)",
 }
+GROUPS = ("P1", "P2", "P3", "D")
+"""Порядок групп порций; ``D`` идёт последней и в задачи 7.3a–7.4 не входит."""
+DEFERRED = frozenset({
+    "d_b_cap_2m", "h_n_allowances", "note1_b_sqrt_A", "note5_d1_gt_d", "d1_formula_5_8", "k_from_appendix_A",
+})
+"""Записи, которых нет в файле типа пилота: их проверка отложена в группу ``D``.
+
+Решение Akim 2026-10-27: P1 проверяет только данные R пилота. Контрольные точки этих
+записей отнесены к ``D`` в ``checkpoints.py``.
+"""
 _GROUP_BY_KIND = {
     "formulas": "P1",
     "extra_records": "P1",
@@ -53,7 +64,7 @@ class Item:
     Attributes:
         item_id: уникальный идентификатор внутри порции.
         record: идентификатор записи (общий для A и B) или точки.
-        group: ``P1``, ``P2`` или ``P3``.
+        group: ``P1``, ``P2``, ``P3`` или отложенная ``D``.
         kind: ``record``, ``table-row``, ``control-point`` или ``edition``.
         title: короткое название.
         page: страницы PDF.
@@ -89,7 +100,7 @@ class Portion:
 
     Attributes:
         portion_id: например ``P1-1``.
-        group: ``P1``, ``P2`` или ``P3``.
+        group: ``P1``, ``P2``, ``P3`` или ``D``.
         items: проверки в порядке «расхождения и ambiguous первыми».
     """
 
@@ -221,7 +232,7 @@ def record_items(results: Iterable[Comparison]) -> list[Item]:
             Item(
                 item_id=cmp.key,
                 record=cmp.key,
-                group=_group(entry),
+                group="D" if cmp.key in DEFERRED else _group(entry),
                 kind="record",
                 title=cmp.key,
                 page=", ".join(map(str, entry.pages)) or "—",
@@ -295,10 +306,10 @@ def split(items: Sequence[Item], minutes: float = PORTION_MINUTES) -> list[Porti
         minutes: предел времени порции.
 
     Returns:
-        Порции P1-1, P1-2, …, P2-1, … в порядке групп.
+        Порции P1-1, P1-2, …, P2-1, …, D-1 в порядке `GROUPS`.
     """
     portions: list[Portion] = []
-    for group in ("P1", "P2", "P3"):
+    for group in GROUPS:
         records: dict[str, list[Item]] = {}
         for item in items:
             if item.group == group:
@@ -324,7 +335,7 @@ def portions_of(portions: Sequence[Portion], group: str) -> list[Portion]:
 
     Args:
         portions: порции.
-        group: ``P1``, ``P2`` или ``P3``.
+        group: ``P1``, ``P2``, ``P3`` или ``D``.
     """
     return [p for p in portions if p.group == group]
 
@@ -446,5 +457,9 @@ def render_index(portions: Sequence[Portion], today: date) -> str:
         "",
         "Разбиение на P1–P3 следует `interim-normatives-source`, задачи 7.3a–7.3c; порядок внутри "
         "группы: расхождения и ambiguous первыми. Так порции P1 с формулой (5.7) идут первыми.",
+        "",
+        "Порции D — проверки записей, которых нет в файле типа пилота (`DEFERRED` в `portions.py`), "
+        "и их контрольные точки. Они нужны фазе 1b и структурированным входам C2 и в задачи "
+        "7.3a–7.4 не входят (решение Akim 2026-10-27).",
     ]
     return "\n".join(out) + "\n"
