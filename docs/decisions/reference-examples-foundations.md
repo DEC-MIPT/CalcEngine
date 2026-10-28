@@ -132,7 +132,7 @@ Expected outputs:
 
 | Quantity | Symbol in the guide | Value | Unit | `tolerance` | `tolerance_kind` | `tolerance_source` |
 |---|---|---|---|---|---|---|
-| Design soil resistance | R | 206.16 | kPa | | `absolute` or `relative` | |
+| Design soil resistance | R | 206.16 | kPa | 0.005 | `absolute` | rounding of the result in the textbook to 0.01 kPa (verifier Akim, 2026-10-28, `interim-normatives-source` open question 1) |
 
 ### foundations-r-linovskiy2023-ex1-rz
 

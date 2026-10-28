@@ -315,7 +315,7 @@
 
 | # | Question | Addressee |
 |---|---|---|
-| 1 | Tolerance of each output of `ex1` and its `tolerance_source` (the card's tolerance cells are empty, `docs/decisions/reference-examples-foundations.md:103-135`) | verifier |
+| 1 | Tolerance of each output of `ex1` and its `tolerance_source` (the card's tolerance cells are empty, `docs/decisions/reference-examples-foundations.md:103-135`) | verifier. Answered 2026-10-28 (Akim, portion P1): R of `ex1` has an absolute tolerance of ±0.005 kPa; `tolerance_source`: the rounding of the result in the textbook to 0.01 kPa |
 | 2 | Does amendment 5 change formula (5.7) numerically (identifier given by Akim, checked by the verifier), and so is `ex1` a gate or only a control point | verifier. Answered 2026-10-28 (Akim, portion P1): no; formula (5.7) in the `ex1` textbook and in the norm with amendment 5 are identical, so `ex1` is a gate (task 8.1) |
 | 3 | The verifier's name for `verifiers` (today: Akim, see Risks) | Akim. Answered 2026-10-22: Akim |
 | 4 | The sunset date | Akim. Answered 2026-10-22: 2026-12-01; the event stays "the type is switched to the catalog in CH3" (decision 8) |

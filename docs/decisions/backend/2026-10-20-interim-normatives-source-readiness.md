@@ -123,7 +123,7 @@ Pass 2 minors, all fixed:
 | ~~Acknowledgement of this change as the second developer, and a look at the record format against `catalog_read` (task 1.5)~~ Done 2026-10-20, `7f394e4` | Egor |
 | The verifier's name and the sunset date (`design.md`, open questions 3, 4); needed for task 7.1, not for DOR | Akim |
 | The PM's dated record that norm values may be kept in git for the pilot (open question 6, task 9.4) | PM, recorded by Akim |
-| Tolerances of `ex1` (open question 1); needed for task 8.1, not for DOR | verifier |
+| ~~Tolerances of `ex1` (open question 1)~~ Answered 2026-10-28, see "Verifier's answers" | verifier |
 | ~~Whether amendment 5 changes formula (5.7) (identifier given by Akim) (open question 2)~~ Answered 2026-10-28, see "Verifier's answers" | verifier |
 
 ## DOR met (2026-10-21)
@@ -156,3 +156,8 @@ Pass 2 minors, all fixed:
   the `d_b` term is checked by control point CP-R-3, not by `ex1`.
 - Akim is both the author of the digitization and the verifier, so this check is not
   independent (`design.md`, Risks).
+- **Open question 1, tolerances of `ex1`** (task 7.3a, control point CP-R-2; Akim as the
+  verifier, 2026-10-28): `ex1` has one output, R = 206.16 kPa. Its tolerance is ±0.005 kPa,
+  absolute; `tolerance_source`: the rounding of the result in the textbook to 0.01 kPa. The
+  draft formula gives 206.155708 kPa, within it. Filled in the card
+  `foundations-r-linovskiy2023-ex1` of `docs/decisions/reference-examples-foundations.md`.
