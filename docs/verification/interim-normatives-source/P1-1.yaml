@@ -13,119 +13,126 @@ items:
   kind: record
   page: '36'
   shown_digest: 0d8e7687bac86911fca2b577d8a0392aa85ce4f335b72f281d1bcebb7f869530
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-10-27'
   comment: null
 - item: P1-1/k_z_formula_b_from_threshold
   record: k_z_formula_b_from_threshold
   kind: record
   page: '36'
   shown_digest: fdf6437172e61021b5711205e4fb0ff6536985cb28c8a215af2d07f8ace27c73
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-10-27'
   comment: null
 - item: P1-1/z0_in_k_z
   record: k_z_formula_b_from_threshold
   kind: record
   page: '36'
   shown_digest: 5acb71d56419d05e7adb9b6e343112baad2e750578a6973f95411a73f076a09b
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-10-27'
   comment: null
 - item: P1-1/r_formula_5_7
   record: r_formula_5_7
   kind: record
   page: '36'
   shown_digest: fcc7481aea441fcabfefea956937c5a16323131844492d2b54a8fce6b5a06f92
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-10-27'
   comment: null
 - item: P1-1/k_direct_tests
   record: k_direct_tests
   kind: record
   page: '36'
   shown_digest: e3de317b9ba588ee5d551573411d9270308b8b5093117b2ee9bcf6be88225ca9
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
-  comment: null
+  by: Akim
+  at: '2026-10-27'
+  comment: k = 1 — случай испытаний; ветка k = 1,1 вне объёма пилота, выбор — категориальный вход (C2)
 - item: P1-1/edition
   record: edition
   kind: edition
-  page: —
+  page: '2'
   shown_digest: 200b1d9f96e600112e8047ea6437e3d439a60a75e45e2d17b2efd559f5779a77
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
-  comment: null
+  by: Akim
+  at: '2026-10-28'
+  comment: Предисловие, последний абзац, стр. 2
 - item: P1-1/CP-K-1
   record: CP-K-1
   kind: control-point
   page: —
   shown_digest: 49cc19dcd89c919ff8fe70fa57c5beb7a49e699d3972f7a4b01e214ea352e753
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-10-28'
   comment: null
 - item: P1-1/CP-KZ-1
   record: CP-KZ-1
   kind: control-point
   page: —
   shown_digest: 5d451e6ae3a7221869c6af2970cb390060567532070ca48a18abe1ef0512478b
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-10-28'
   comment: null
 - item: P1-1/CP-KZ-2
   record: CP-KZ-2
   kind: control-point
   page: —
   shown_digest: 54976fbc2ced1d16bb55385b7d91366366f2e106edc91925334d379d2f829b85
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
-  comment: null
+  by: Akim
+  at: '2026-10-28'
+  comment: 'b = 10 м: k_z = 1,0; b = 12 м: k_z ≈ 0,867; b = 20 м: k_z = 0,6 (k_z = 8/b + 0,2); ветвь при
+    b = 10 м — P3-1, CP-KZ-3'
 - item: P1-1/CP-R-1
   record: CP-R-1
   kind: control-point
   page: —
   shown_digest: b97bf80ceb787168c614101b0727f52f70e27625b44c87d17c5f12473e4af5c2
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-10-28'
   comment: null
 - item: P1-1/CP-R-2
   record: CP-R-2
   kind: control-point
   page: —
   shown_digest: d43e850cc71cb399049c6a8451198fe7bde7e942a6fa582c1ed02ce1f61bfd26
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
-  comment: null
+  by: Akim
+  at: '2026-10-28'
+  comment: 'допуск R = ±0,005 кПа, абсолютный; tolerance_source: округление результата в методичке до
+    0,01 кПа (открытый вопрос 1)'
 - item: P1-1/CP-R-3
   record: CP-R-3
   kind: control-point
   page: —
   shown_digest: afed4ad4860a19f8e9a0fe129566aa1e4b6ff9de88d2fec17ead2e56faf8ac62
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
-  comment: null
-signature: null
+  by: Akim
+  at: '2026-10-28'
+  comment: 'γc1 = 1,25; γc2 = 1,0; k = 1; φII = 23°: Mγ = 0,66, Mq = 3,65, Mc = 6,24; kz = 1; b = 0,6
+    м; γII = γ''II = 19,33 кН/м³; d₁ = 0,53 м (5.8); d_b = 2,0 м; cII = 9 кПа → R = 254,57 кПа (методичка,
+    пример 2, стр. 22; «d1 = 1,5 м» во входах примера — опечатка)'
+signature:
+  by: Akim
+  at: '2026-10-28'
+  digest: 34bc6414cb2b77046155981082ff9252714e4440cf24ef72dfdfbec201415ce4
