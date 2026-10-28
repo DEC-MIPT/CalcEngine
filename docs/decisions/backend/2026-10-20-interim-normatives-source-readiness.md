@@ -123,7 +123,8 @@ Pass 2 minors, all fixed:
 | ~~Acknowledgement of this change as the second developer, and a look at the record format against `catalog_read` (task 1.5)~~ Done 2026-10-20, `7f394e4` | Egor |
 | The verifier's name and the sunset date (`design.md`, open questions 3, 4); needed for task 7.1, not for DOR | Akim |
 | The PM's dated record that norm values may be kept in git for the pilot (open question 6, task 9.4) | PM, recorded by Akim |
-| Tolerances of `ex1`, and whether amendment 5 changes formula (5.7) (identifier given by Akim) (open questions 1, 2); needed for task 8.1, not for DOR | verifier |
+| Tolerances of `ex1` (open question 1); needed for task 8.1, not for DOR | verifier |
+| ~~Whether amendment 5 changes formula (5.7) (identifier given by Akim) (open question 2)~~ Answered 2026-10-28, see "Verifier's answers" | verifier |
 
 ## DOR met (2026-10-21)
 
@@ -138,3 +139,20 @@ Pass 2 minors, all fixed:
   empty group, or one that still holds a record its profile may not use, makes the parameter
   or bound unusable (`503`). Recorded in `design.md`, decision 5.
 - Next: the feature branch `feature/interim-normatives/backend` from `develop`, sections 2-4.
+
+## Verifier's answers (portion P1)
+
+- **Open question 2, amendment 5 and formula (5.7)** (task 7.3a; Akim as the verifier,
+  2026-10-28): amendment 5 did not change formula (5.7). The formula in the textbook of `ex1`
+  (Linovskiy, Yakushkina, 2023) and formula (5.7) of СП 22.13330.2016 with amendments 1-5
+  (Akim's copy in `docs/NTD/`, PDF page 36) are identical. So `ex1` is a gate of task 8.1, not
+  only a control point. Akim's words: "Изм. № 5 СП формулу 5.7 не меняло. Формулы в методичке
+  ex1 и в СП (с учетом изм. № 5) идентичные. Соответственно, ex1 - гейт."
+- Context: amendment 5 was approved by order No. 884/пр of 7 December 2023 and is in force from
+  2024-01-08 (the foreword, PDF page 2). The mark "(Измененная редакция, Изм. № 5)." after note 6
+  of 5.6.7 (PDF page 37) has no binding to a paragraph in either extract
+  (`docs/akim/digitization/amendment-marks.md`, untracked). The draft formula gives R =
+  206.155708 kPa on the inputs of `ex1` against 206.16 kPa in the textbook; `d_b = 0` there, so
+  the `d_b` term is checked by control point CP-R-3, not by `ex1`.
+- Akim is both the author of the digitization and the verifier, so this check is not
+  independent (`design.md`, Risks).
