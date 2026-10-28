@@ -1,0 +1,31 @@
+portion: P2-3
+generated: '2026-10-22'
+sources:
+  a: docs/akim/digitization/extract-a.yaml
+  b: docs/akim/digitization/extract-b.yaml
+verdicts_allowed:
+- верно
+- исправить
+- отклонить
+items:
+- item: P2-3/CP-T55-3
+  record: CP-T55-3
+  kind: control-point
+  page: —
+  shown_digest: 069fceb4e9250f1e272935dd65f55a33013788e396e758b01dcaa6c7971e3ebe
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P2-3/CP-T55-4
+  record: CP-T55-4
+  kind: control-point
+  page: —
+  shown_digest: 8653e94932cf0da051ab766800c924a26ec23b4dbddb73c7abef3e93289d7124
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+signature: null

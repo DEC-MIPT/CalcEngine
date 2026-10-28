@@ -1,0 +1,91 @@
+portion: P2-1
+generated: '2026-10-22'
+sources:
+  a: docs/akim/digitization/extract-a.yaml
+  b: docs/akim/digitization/extract-b.yaml
+verdicts_allowed:
+- верно
+- исправить
+- отклонить
+items:
+- item: P2-1/t54_clayey_il_0_25_to_0_5
+  record: t54_clayey_il_0_25_to_0_5
+  kind: record
+  page: '37'
+  shown_digest: 16705e8036cab98a7dd19eb9f49d72ffda9003c17df8dfb0c404a5af57e08afc
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P2-1/t54_clayey_il_gt_0_5
+  record: t54_clayey_il_gt_0_5
+  kind: record
+  page: '37'
+  shown_digest: 14e2b7c9365c13646d8bf90555ee610de26dd832308d1d7f14c79dc680997785
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P2-1/t54_clayey_il_le_0_25
+  record: t54_clayey_il_le_0_25
+  kind: record
+  page: '37'
+  shown_digest: 235f12c5a1e59ff98e5186dd1e58221d7d17d3e4d26a6b46176244f73a41946a
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P2-1/t54_coarse_sandy_filler_and_sands
+  record: t54_coarse_sandy_filler_and_sands
+  kind: record
+  page: '37'
+  shown_digest: e7eec9f349bbfa4046bd221306b6ae3b9ccaa8b155dfaf29789439b53abe4744
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P2-1/t54_notes
+  record: t54_notes
+  kind: record
+  page: '37'
+  shown_digest: f2492637eff2f4d1f267e7e8d1b7e0258c60c9439d3141273cd2ff3aaa423082
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P2-1/t54_sands_fine
+  record: t54_sands_fine
+  kind: record
+  page: '37'
+  shown_digest: 45df7fb14e18444976bbab9523ae7accfc647be85ca47093bc74c3a41c386321
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P2-1/t54_sands_silty_low_moisture
+  record: t54_sands_silty_low_moisture
+  kind: record
+  page: '37'
+  shown_digest: 5d3a85718eed95ab53d5a90d123b8450317e5e4a48aa153781be9050ce58b20b
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P2-1/t54_sands_silty_wet_saturated
+  record: t54_sands_silty_wet_saturated
+  kind: record
+  page: '37'
+  shown_digest: de38136f7a557539926b733c90814e27544f84474c7c3542e040263875f8e702
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+signature: null

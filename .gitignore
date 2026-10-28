@@ -1,10 +1,12 @@
 # Research docs and project passport — intentionally untracked.
 # docs/akim/ (plan, code journals, personal notes) stays untracked on purpose: it is
-# Akim's own zone, not pushed to the remote. Only docs/decisions/ is the tracked,
-# shared channel with Egor.
+# Akim's own zone, not pushed to the remote. docs/decisions/ is the tracked, shared
+# channel with Egor; docs/verification/ holds the verifier's signed check sheets.
 docs/*
 !docs/decisions/
 !docs/decisions/**
+!docs/verification/
+!docs/verification/**
 Справочник студента/
 
 # Skills CLI cache (regenerable via skills-lock.json)
