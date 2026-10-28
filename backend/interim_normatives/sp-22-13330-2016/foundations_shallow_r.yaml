@@ -103,7 +103,11 @@ formulas:
     provenance: machine-extracted
   page: 36
   verification:
-    status: pending
+    status: human-verified
+    by: Akim
+    at: '2026-10-27'
+    portion: P1-1
+    value_digest: 2e90ef2fdb87877f759f4613322f8ccfe7f89908b52e7be9a90c855853acd62f
 - parameter: k_z_below
   result_symbol: k_z
   latex: k_{z}=1
@@ -120,7 +124,11 @@ formulas:
     provenance: machine-extracted
   page: 36
   verification:
-    status: pending
+    status: human-verified
+    by: Akim
+    at: '2026-10-27'
+    portion: P1-1
+    value_digest: e164f7c43d382612ca5f369079d584709dcac97e0f3d45730d136df58088b5b0
 - parameter: k_z_from
   result_symbol: k_z
   latex: k_{z}=8/b+0{,}2
@@ -148,7 +156,11 @@ formulas:
     provenance: machine-extracted
   page: 36
   verification:
-    status: pending
+    status: human-verified
+    by: Akim
+    at: '2026-10-27'
+    portion: P1-1
+    value_digest: 9f7823e9f13a54eeacabb3ad5c42d00adfa0ea780cceefdc4aab7b346762aef5
 table_values:
 - parameter: gamma_c1
   symbol: gamma_c1
@@ -200,7 +212,12 @@ table_values:
     provenance: machine-extracted
   page: 36
   verification:
-    status: pending
+    status: human-verified
+    by: Akim
+    at: '2026-10-27'
+    portion: P1-1
+    value_digest: 7fd73c29eab3ec3d3ffd1bac255683522e0dd2113a36b0b90d3b7d8005d73af4
+    comment: k = 1 — случай испытаний; ветка k = 1,1 вне объёма пилота, выбор — категориальный вход (C2)
 - parameter: m_gamma
   symbol: M_gamma
   latex: M_{\gamma}

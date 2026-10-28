@@ -12,7 +12,7 @@ from app.engine import foundations_shallow_r as pilot
 from app.engine.hashing import canonical_json
 from app.engine.registry import CalculatorRegistry
 from app.parameters.interim_loader import load_interim_root
-from app.services.interim_data import check_documents, record_digest
+from app.services.interim_data import check_documents, effective_status, record_digest
 from app.services.interim_source import interim_sources
 
 DOCUMENT = INTERIM_ROOT / "sp-22-13330-2016"
@@ -31,15 +31,33 @@ def raw_records() -> list[tuple[str, dict]]:
     return [(name, record) for name, records in data.items() for record in records]
 
 
-def test_the_loader_accepts_the_pilot_file_and_every_record_is_pending_with_its_page() -> None:
+def test_the_loader_accepts_the_pilot_file_and_every_record_has_its_page() -> None:
     (document,) = load_interim_root(INTERIM_ROOT, {pilot.NAME})
     (file,) = document.files
 
     assert file.calculation_type == pilot.NAME
-    assert all(record.verification.status == "pending" for _, record in file.content.records())
     assert all(record.page is not None for _, record in file.content.records())
     counts = Counter(name for name, _ in raw_records())
     assert counts == {"formulas": 3, "table_values": 141, "thresholds": 1, "checks": 1}
+
+
+def test_portion_p1_1_verified_the_pilot_formulas_and_k_and_no_checked_value_changed() -> None:
+    (document,) = load_interim_root(INTERIM_ROOT, {pilot.NAME})
+    (file,) = document.files
+    records = list(file.content.records())
+
+    verified = {
+        getattr(record, "parameter", None)
+        for _, record in records
+        if record.verification.status == "human-verified"
+    }
+    assert verified == {"r", "k_z_below", "k_z_from", "k"}
+    assert all(record.verification.status in ("pending", "human-verified") for _, record in records)
+    assert all(
+        record.verification.portion == "P1-1" and effective_status(record) == "human-verified"
+        for _, record in records
+        if record.verification.status == "human-verified"
+    )
 
 
 def test_the_file_is_written_in_the_form_the_loader_digests() -> None:
