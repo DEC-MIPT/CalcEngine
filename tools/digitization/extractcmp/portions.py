@@ -254,16 +254,22 @@ def record_items(results: Iterable[Comparison]) -> list[Item]:
     return items
 
 
-def edition_item(a_edition: str, b_edition: str) -> Item:
+EDITION_REGION = "раздел «Предисловие», последний абзац (перечень изменений); страницу указывает верификатор"
+"""Где искать редакцию по умолчанию: изменения СП перечислены в «Предисловии» (Akim, 2026-10-28)."""
+
+
+def edition_item(a_edition: str, b_edition: str, page: str = "—", region: str = EDITION_REGION) -> Item:
     """Строит проверку редакции документа.
 
     Args:
         a_edition: редакция, как её записало извлечение A.
         b_edition: редакция, как её записало извлечение B.
+        page: страница PDF с перечнем изменений, если она известна.
+        region: область этой страницы.
     """
     return Item(
         item_id="edition", record="edition", group="P1", kind="edition",
-        title="Редакция документа как напечатана", page="—", region="титульный лист; страницу указывает верификатор",
+        title="Редакция документа как напечатана", page=page, region=region,
         flags=["итог: проверка редакции"], a=a_edition, b=b_edition, priority=1,
         minutes=MINUTES["edition"], shown_digest=_digest(a_edition, b_edition),
     )

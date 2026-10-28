@@ -14,6 +14,8 @@ from extractcmp.normalize import load_a, load_b
 HERE = Path(__file__).resolve().parent.parent
 SHEETS_DIR = HERE.parent.parent / "docs" / "verification" / "interim-normatives-source"
 """Отслеживаемая git папка листов: ``promote`` требует коммита листа подписавшим."""
+DOCUMENT = HERE / "data" / "document.yaml"
+"""Сведения о документе, которые дал верификатор: где напечатан перечень изменений."""
 
 
 def _load(path: Path) -> dict:
@@ -80,9 +82,11 @@ def build(args: argparse.Namespace) -> int:
 def _items(a_data: dict, b_data: dict, results: list, points: list, ex1: dict) -> list[portions.Item]:
     a_ed = a_data.get("source", {}).get("edition_as_printed", "—")
     b_ed = b_data.get("meta", {}).get("edition", {}).get("printed_header", "—")
+    place = _load(DOCUMENT).get("edition", {}) if DOCUMENT.exists() else {}
+    where = {k: str(place[k]) for k in ("page", "region") if k in place}
     return [
         *portions.record_items(results),
-        portions.edition_item(str(a_ed), str(b_ed)),
+        portions.edition_item(str(a_ed), str(b_ed), **where),
         *portions.control_point_items(points, ex1["label"]),
     ]
 

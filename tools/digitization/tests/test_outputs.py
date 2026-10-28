@@ -238,3 +238,17 @@ def test_only_promote_module_knows_the_verified_status():
 def test_every_item_has_a_shown_digest(extracts):
     _, items = all_items(extracts)
     assert all(len(i.shown_digest) == 64 for i in items)
+
+
+def test_the_edition_is_looked_for_in_the_foreword(extracts, tmp_path, monkeypatch):
+    from extractcmp import cli, viewer
+
+    a, b, results, _ = prepared(extracts)
+    points = checkpoints.build(EX1, a["t55"], b["t55"])
+    edition = next(i for i in cli._items(extracts[0], extracts[1], results, points, EX1) if i.kind == "edition")
+    assert edition.page == "2" and "Предисловие" in edition.region
+    assert [(c.page, c.box[1], c.box[3]) for c in viewer.crops(edition.region, [2])] == [(2, 60, 220)]
+    monkeypatch.setattr(cli, "DOCUMENT", tmp_path / "missing.yaml")
+    default = next(i for i in cli._items(extracts[0], extracts[1], results, points, EX1) if i.kind == "edition")
+    assert (default.page, default.region) == ("—", portions.EDITION_REGION)
+    assert default.shown_digest == edition.shown_digest

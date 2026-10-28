@@ -1,0 +1,8 @@
+# СП 22.13330.2016 (с Изменениями N 1, 2, 3, 4, 5), docs/NTD/СП 22.13330.2016.pdf.
+# The amendments are listed in the foreword, not in the running header (Akim, the verifier,
+# 2026-10-28). Coordinates are pixels at 150 dpi, as in extract B.
+edition:
+  page: 2
+  region: >-
+    последний абзац раздела «Предисловие» и конец перечня «ВНЕСЕНЫ» над ним (≈ y 60-220);
+    начало перечня — на предыдущей странице
