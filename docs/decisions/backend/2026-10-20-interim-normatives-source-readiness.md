@@ -161,3 +161,25 @@ Pass 2 minors, all fixed:
   absolute; `tolerance_source`: the rounding of the result in the textbook to 0.01 kPa. The
   draft formula gives 206.155708 kPa, within it. Filled in the card
   `foundations-r-linovskiy2023-ex1` of `docs/decisions/reference-examples-foundations.md`.
+
+## Deferred portion D-1 (Akim, 2026-10-27; recorded 2026-10-29)
+
+- Portion D-1 (`docs/verification/interim-normatives-source/D-1.yaml`, 10 items, unsigned)
+  holds the checks of six records that the pilot's type file does not hold: the cap
+  d_b = 2 m, the h_n allowances, b = √A, note 5 on d_1 > d, formula (5.8) and k = 1.1 for
+  characteristics taken from appendix A, with their control points CP-D1-1, CP-K-2, CP-RULE-1
+  and CP-RULE-2. Akim took them out of P1 on 2026-10-27, so that P1 checks only the pilot's R
+  data (`design.md`, decision 11).
+- Why they stay out of tasks 7.3a-7.4: `extractcmp promote` writes verdicts only to records
+  of the type file, and these six have no record there. The schema has no rule record, `k`
+  has one value with no categorical selector, and the pilot takes `d_1` as an input
+  (`docs/akim/digitization/draft-notes.md`, untracked). Bringing them in would need a new
+  record kind, a categorical selector and a change of the calculation, which are outside this
+  change. The signed P1-1 already notes on `k`: "ветка k = 1,1 вне объёма пилота, выбор —
+  категориальный вход (C2)".
+- D-1 gates no feature of this change. It moves to the change that adds structured inputs
+  (C2); if phase 1b needs formula (5.8), it moves to task 7.5. Recorded in `tasks.md` after
+  section 7.
+- The check sheets are not rebuilt in `docs/verification/`: `extractcmp build` rewrites every
+  sheet there without a signature, which would void the signed P1-1. A later rebuild goes to
+  a temporary directory, and only the needed sheet is copied.

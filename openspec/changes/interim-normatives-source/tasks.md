@@ -177,6 +177,15 @@ feature and does not gate the backend feature or section 8.
   skipped as an unregistered type ("File of an unregistered type"), and `backend/check.sh`
   passes
 
+Deferred portion D-1 (Akim, 2026-10-27): the checks of six records that the pilot's type file
+does not hold (the cap d_b = 2 m, the h_n allowances, b = √A, note 5 on d_1 > d, formula
+(5.8) and k = 1.1 for characteristics taken from appendix A) and their control points
+CP-D1-1, CP-K-2, CP-RULE-1 and CP-RULE-2 are not part of tasks 7.3a-7.4 and gate no feature
+of this change. The type file has no rule record and no categorical selector for `k`, and the
+pilot takes `d_1` as an input (`design.md`, decision 11). They move to the change that adds
+structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. The sheet
+`docs/verification/interim-normatives-source/D-1.yaml` stays unsigned until then.
+
 ## 8. Integration test `ex1` (feature `interim-normatives/backend`)
 
 - [ ] 8.1 Add a backend test that runs reference example `ex1`
