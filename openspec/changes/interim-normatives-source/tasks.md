@@ -176,12 +176,12 @@ feature and does not gate the backend feature or section 8.
   `human-verified` or `rejected` with all its fields, and the answer on formula (5.7) is
   recorded in the readiness file (signed sheet `e9ad390`, promotion `f33df61`; signature
   and Git provenance rechecked 2026-11-01)
-- [ ] 7.3b Portion P2: the verifier checks the tables and their control points, discrepancies
+- [x] 7.3b Portion P2: the verifier checks the tables and their control points, discrepancies
   first; verify: every P2 record is `human-verified` or `rejected` with all its fields
-- [ ] 7.3c Portion P3: the verifier checks the threshold rule, the method bounds, the check's
+- [x] 7.3c Portion P3: the verifier checks the threshold rule, the method bounds, the check's
   reference and the control points of `ex1`; verify: every P3 record is `human-verified` or
   `rejected` with all its fields
-- [ ] 7.4 Re-check every correction (portion P4); verify: no R record is `pending` or
+- [x] 7.4 Re-check every correction (portion P4); verify: no R record is `pending` or
   `rejected`, and the `strict` startup warning lists no R record
 - [ ] 7.5 (feature `interim-normatives-phase1b-data/backend`) Extract and check the data that
   phase 1b needs (`design.md`, decision 11) into the file of its future type, by the same
@@ -201,7 +201,7 @@ structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. T
 
 ## 8. Integration test `ex1` (feature `interim-normatives/backend`)
 
-- [ ] 8.1 Add a backend test that runs reference example `ex1`
+- [x] 8.1 Add a backend test that runs reference example `ex1`
   (`docs/decisions/reference-examples-foundations.md:103-135`) through `POST /calculations`
   and `POST /calculations/{result_id}/report` with `DEC_PARAMETER_SOURCE=interim` and the
   `strict` profile on the real interim data; verify: the result has kind `interim`, profile

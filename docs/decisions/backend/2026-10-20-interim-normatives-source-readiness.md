@@ -331,3 +331,41 @@ refuses the pending records. Missing applicability content and empty `method_bou
 remain explicitly assigned to human review in P3, not silently counted as matches.
 P2/P3 verification, P4 if corrections arise, and strict ex1 acceptance remain open.
 No feature GO, commit, merge or archive follows from completing task 7.2c.
+
+## Verified R data and strict acceptance (2026-11-02)
+
+The backend working tree `feature/interim-normatives/backend` now loads all 146 R
+records as `human-verified`. `extractcmp promote` accepted the clean signed sheets
+P1-1 (`e9ad390`), P2-1 (`d7e0619`), P2-2 (`aed81c8`), P2-3 (`a1c6bf9`) and
+P3-1 (`f53f83c`), each last committed by signer Akim. Signature, mapping and shown
+digests passed; all 146 promotion report lines were successful, with no skipped or
+incomplete checks. The existing mapping and signed sheets are preserved.
+
+Semantic comparison before replacing the data confirmed exactly 142 changed
+`verification` blocks and no other content changes. All four P1 records are identical.
+Portion counts: P1-1 4, P2-1 2, P2-2 138, P3-1 2; no pending or rejected R record.
+P2-3 control points and notes remain evidence in sheets; rejected CP-T55-4 is not a
+mapped data dependency. P3-1 confirms empty `method_bounds` for this pilot.
+P4 is not required: promotion changed no values. Sunset remains 2026-12-01.
+
+Current document SHA-256:
+`9a19c159848ce71414ba75cb3fceab8d4586e29afacc99e41dfeb71f94ead57a`.
+`test_interim_pilot_data.py` checks current verification digests, P1 provenance and
+resolution in draft and strict without unchecked/changed warnings. Synthetic pending,
+rejected and stale-digest checks are retained. `test_interim_ex1_acceptance.py` passes
+real strict data through POST (201), stored-result GET and DOCX: R is within
+206.16 +/- 0.005 kPa, verdict pass, source kind interim/profile strict, current digest,
+and exactly one report source line. No unchecked or changed warning was captured.
+
+Focused manifest, real-data, source-contract, interim source/data and ex1 tests:
+71 passed, one existing Starlette deprecation warning. Sandbox TestClient stalled;
+completed runs used approved escalation. Full backend result: Ruff/mypy PASS, five architecture contracts PASS; 1338 passed, 11 skipped, 100.00% app/scripts branch coverage (3154 statements, 580 branches). PostgreSQL integration checks skipped: test database URLs were not configured.
+Pre-commit all-files passed both hooks; an explicit check of the untracked ex1 test
+passed secret scanning (settings hook N/A for that file). Strict CH1 validation and
+whitespace checks passed. Dependencies were not installed; migrations were not run.
+
+Task 9.1 and independent review are handed to tester. Final feature GO still requires
+the R data to be committed under the change's gate. No commit, merge, push, archive,
+frontend acceptance or phase-1b work is included in this result.
+
+Tester independent review: technical checks PASS, no blocker or major finding; UI/UX N/A (backend data/tests only). Task 9.1 remains open solely for the committed-R-data gate.
