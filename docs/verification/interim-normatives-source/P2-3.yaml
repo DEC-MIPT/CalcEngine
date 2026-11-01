@@ -13,19 +13,24 @@ items:
   kind: control-point
   page: —
   shown_digest: 069fceb4e9250f1e272935dd65f55a33013788e396e758b01dcaa6c7971e3ebe
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
-  comment: null
+  by: Akim
+  at: '2026-11-02'
+  comment: 'Ожидаемые значения заданы Акимом: phi_II = 45°; Mγ = 3,66; Mq = 15,64; Mc = 14,64.'
 - item: P2-3/CP-T55-4
   record: CP-T55-4
   kind: control-point
   page: —
   shown_digest: 8653e94932cf0da051ab766800c924a26ec23b4dbddb73c7abef3e93289d7124
-  verdict: null
+  verdict: отклонить
   corrected: null
-  by: null
-  at: null
-  comment: null
-signature: null
+  by: Akim
+  at: '2026-11-02'
+  comment: 'Контрольная точка с интерполяцией неприменима: основание для интерполяции коэффициентов таблицы
+    5.5 не найдено. Вердикт «отклонить» подтверждён Акимом в переписке. Промежуточное phi_II и ожидаемые
+    коэффициенты не задавались.'
+signature:
+  by: Akim
+  at: '2026-11-02'
+  digest: 5522c0fbfa3eb32387b8e382a9b05f87fd5ba995f011ec1b65b48f4baa078c31
