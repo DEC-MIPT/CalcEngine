@@ -13,59 +13,64 @@ items:
   kind: record
   page: '36'
   shown_digest: 0dc3ee833f58ab623b6c4c6fd9eb578c96196cc81463b0e21cccd9b3bd3fa327
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P3-1/check_p_le_R
   record: check_p_le_R
   kind: record
   page: 35, 36
   shown_digest: f9671573b4ffa92f9b612533ac156acd488107e580c526cc955725bcd00b5d93
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P3-1/method_bounds_none
   record: method_bounds_none
   kind: record
   page: —
   shown_digest: 24c25c6dbb0fb1e9b3e2e28b6a38a8ba983467b65fb6df85735c2c86a34c1f88
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
-  comment: null
+  by: Akim
+  at: '2026-11-02'
+  comment: 'Заключение Акима от 2026-11-02: существующие проверки для области пилота достаточны. В контексте
+    method_bounds_none подтверждена достаточность существующих проверок для текущего пилота.'
 - item: P3-1/CP-CHK-1
   record: CP-CHK-1
   kind: control-point
   page: —
   shown_digest: d4f6591c52a81d605ee9e4e9d7041720f41216a3ac03110a0d72a06b8a6b7b66
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P3-1/CP-CHK-2
   record: CP-CHK-2
   kind: control-point
   page: —
   shown_digest: 0e23906e8111b56e725331e06ed158f2cfba670f6979a38ee95047022e4925ec
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
-  comment: null
+  by: Akim
+  at: '2026-11-02'
+  comment: 'Контрольная точка задана Акимом: p = R = 215,6 кПа; условие p ≤ R выполняется.'
 - item: P3-1/CP-KZ-3
   record: CP-KZ-3
   kind: control-point
   page: —
   shown_digest: 9f03eff14ee3254e1a9b6b4a275e76aba6c637b9bb1d6292bf5793fe8d01d207
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
-  comment: null
-signature: null
+  by: Akim
+  at: '2026-11-02'
+  comment: 'Задано Акимом: при b = 10 м выбирается вторая ветвь (знак ≥); ожидаемое kz = 1; kz = z0/b
+    + 0,2 = 8/10 + 0,2 = 1.'
+signature:
+  by: Akim
+  at: '2026-11-02'
+  digest: b880c772c4d672d0950e6838a3b3ae2d5efc312b4f9a39983cf5f8a1e6ed6cde
