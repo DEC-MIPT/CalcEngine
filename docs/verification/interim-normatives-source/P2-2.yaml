@@ -13,519 +13,525 @@ items:
   kind: table-row
   page: 37, 38
   shown_digest: 09dd906b49a49ae60b55377e69f1352f7512f014dae2236f2172f0e3513a22f9
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=1
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 3338b468d0c2eebd5755a825ff47dd6821dfc16f4b2b58af01db5428fe713cb5
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=2
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 233f40557e815cfd85bf578d960950e54e04a86d5f3e22d8256196bd1d499127
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=3
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 3d0ebfa5227f380c6153dc3969531ee2985e2b63de7417045148f3b9c429520b
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=4
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: a80e195e2cfdfedd9d1771d0e3f3c40716b2a09e5073b3da16c23e3c4abfe37e
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=5
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: bff8dcd5eafb5d39af26e3c7d13a42804debd2f716ae5cf517704cd19ead9517
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=6
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 75b4043f4d945c313cb5d22c332a7c18cdd15a42a9cb2ee266fda967517c889a
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=7
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 512c51963fb513c92fd7582e93cdc006f04ed5d9a48f892f3f5a879490d10a6a
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=8
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 81b2fde928a56a005eb38cec4a9ed6af185cd4b7d188ed0de2c80321a53f25cb
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=9
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: ab99a4cf12612516d45faf3edad5221a47eeac366a30b5f2cacb5031f45dbb1b
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=10
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 65c672b2c2995d2940747c9d2af778b2e88f94dac114a698ecde65a7b7b33764
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=11
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 1a3c11e382d78ba419467ca81f6210adaed6740ac42dfe52baa935a229994193
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=12
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: df529246e3394b4c8e30953abe5914379463383b2e4c284ec0d2297893e650e6
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=13
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 556e08aed219c5f711f48453e129decb56fe66806abd5357228c94084e3c8470
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=14
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: ce1e7929112770e34ec3b5df4741f3ee765218e9b2a22fd09f646400445c7d99
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=15
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: d8a289b74691f460c45681eee0d0b3aa8de4a3048eb470ff3980a8b22ca8f517
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=16
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 818acbdd3d50411db763d1f7f847cf675871cd1ddb2b20eca1f2c44e7d39b209
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=17
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 9cf542df9e49b36ff71816302643e39c647800fffe6b2776947f4334bf7fd760
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=18
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 424306526f8c97e5fffb14e775739b9276c52eed07b53db720b2a4cd2280840a
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=19
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 3f9aadcc12a4a78ef73ffcadf48b4ebec192fcaec8be655e0b5287564b9ec506
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=20
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 10e02d4d9e3726f64094f9f5ac53683f94ca05018e36d2500fad7e2fd7dc3bfd
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=21
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: cf73583a1a34711e0b024f4127cdac3a0fbf559a608d60cac63608a176334214
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=22
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 271812d5d454ff6043f4bf07a1f9d71c33996af529230876330a8bf892f147bd
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=23
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: cf708a9910ae1f80ca799dbc6de7da5fe884219252fa4326497c880cc2eaa1b6
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=24
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 8046f93b980c09c3dc9ee9c831e1793d2101f60fb4ae3f470fc3dad673085cac
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=25
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 65e54655b47c17776abeb06ef59c73db4142d919bbacbac5a05ec5f12c193e85
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=26
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 407b7601bab4c3d4cf51774e05c09c925127dd6060dcff2048776ddb69f2385b
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=27
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: bbd09508edb48e9e4cdb380d402c24452c76146e3164402eb7275e44bec7c90d
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=28
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 49406d3c79757cc633466a06f94da3a0ea3de1b2e6491e8ba919826b18ac7a02
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=29
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 1a496c589e0a78a5fa46cfda83e4033229dce0465ae43b185a0128f563860911
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=30
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: d4185b3f216dae43b1c55eb5a3c501613e9e58a0f264ebd1f8734b90fc3b11de
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=31
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 8f7dea50631ccc1536456cda019e59ea3e43f7a30990534db933ae41559356d5
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=32
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: cdc02dd39d97495466ded88293c68bd28c2614a32fa338522c4dd0cb18753681
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=33
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 30402501f726baa7d396245f6f31508bfcd3143e88532d8846d1e54111f0932a
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=34
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 012f20137aec5c74c2e7e69b0cecf04394dafb15223f580301c9dc17ca7d28f2
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=35
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: abb360946bf3a551588ee58f4af83697f91b76ad8b818fc763df99b5289d506a
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=36
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: bed44346b43534bd3b30da4941858c3b0e035380cd55c70e6ebce502aeba68f7
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=37
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 9f62868cb5ff4121fbffb6f01c9bf52c67b56808eb0e035317773793dc162c8c
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=38
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: a2a13fce305342c3c459b2f3e18a359c1038ab32d14544e0d6774cc6982ced55
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=39
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: bda00790dc2bd05d27da985329393382b08909229dba6fc173129ad661e803c9
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=40
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 360c90b99bbd70eaa6b851f28c871d1cfcf0ff759301d9ad5f78b8b76ba06c79
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=41
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 92000706e7c64f1c42c29361b8dcbf0bc05c42fa1b41267b9d2f409a3f4b4524
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=42
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 8f567b7c714b34f16e9590340602a74a13c168561d3b112522e23ce8e773df21
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=43
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: be480c1428efcaf0b919aababe48ea37f55fec4982bd9f7d50a81c2d711a18db
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=44
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 68776b5d35f2b1990f9bed999209ef21e7307bd8e844379428f92b584d291964
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/t55@phi=45
   record: t55
   kind: table-row
   page: 37, 38
   shown_digest: 46b305d10a14f045b54d27e13499f4ba2f04eb5e1d4442bcded06dfdab8e60ed
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/CP-T54-1
   record: CP-T54-1
   kind: control-point
   page: —
   shown_digest: c6fbb2871a192cd6f9bfdf967f9ce0c6a4099b87ab4191e9d69ea5724147ffc0
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
-  comment: null
+  by: Akim
+  at: '2026-11-02'
+  comment: Строка Iₗ > 0,5; γc1 = 1,1; γc2 = 1,0. L/H для этой точки не требуется, поскольку γc2 одинаков
+    в обоих столбцах.
 - item: P2-2/CP-T54-2
   record: CP-T54-2
   kind: control-point
   page: —
   shown_digest: 1ec6bde3fd2753ccb3f2b17b0e34f9790fef1950d545941e377c409c2b608370
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
-  comment: null
+  by: Akim
+  at: '2026-11-02'
+  comment: 'Задано Акимом 2026-11-02: строка «То же, при 0,25 < I_L <= 0,5»; L/H = 3; y1 = y0 + (x1 −
+    x0) · (y2 − y0) / (x2 − x0); ожидаемое gamma_c2 = 1,04. Подстановка по таблице 5.4: x0=1,5, y0=1,1,
+    x1=3, x2=4, y2=1,0.'
 - item: P2-2/CP-T54-3
   record: CP-T54-3
   kind: control-point
   page: —
   shown_digest: 37b61584d6e471cae81be8724741d34d15a0cc0c34bda327e604692103993b54
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
-  comment: null
+  by: Akim
+  at: '2026-11-02'
+  comment: При I_L = 0,25 выбирается строка Iₗ ≤ 0,25. Подтверждено Акимом в переписке.
 - item: P2-2/CP-T54-4
   record: CP-T54-4
   kind: control-point
   page: —
   shown_digest: 6760ebd2732a331381b570bca425faf066ebea9b4515af29a2729b43ae0d8509
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
-  comment: null
+  by: Akim
+  at: '2026-11-02'
+  comment: При I_L = 0,5 выбирается строка 0,25 < Iₗ ≤ 0,5. Подтверждено Акимом в переписке.
 - item: P2-2/CP-T55-1
   record: CP-T55-1
   kind: control-point
   page: —
   shown_digest: b1b131cfcb415bf85446f1c387761d390af3112070ca60fdc8af4bcc6307c09b
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-02'
   comment: null
 - item: P2-2/CP-T55-2
   record: CP-T55-2
   kind: control-point
   page: —
   shown_digest: 14c6648e9b80a69a8b80d347591819bfdeb42589fefc54e307271304cc5c6dc1
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
-  comment: null
-signature: null
+  by: Akim
+  at: '2026-11-02'
+  comment: 'Ожидаемые значения при phi_II = 0° заданы Акимом: Mγ = 0, Mq = 1,00, Mc = 3,14.'
+signature:
+  by: Akim
+  at: '2026-11-02'
+  digest: e50d4e549ee1b2c65bfe0605d1304c9c54602b374d196576f4c3817381a72c79
