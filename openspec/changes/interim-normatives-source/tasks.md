@@ -144,25 +144,38 @@ feature and does not gate the backend feature or section 8.
 
 ## 7. Digitization with the verifier (working process, data on the branch that owns each task)
 
-- [ ] 7.1 Write the manifest of the norm document with its edition as printed on the source
+- [x] 7.1 Write the manifest of the norm document with its edition as printed on the source
   text (status `unverified`), the sunset date and event, and the verifiers (`design.md`, open
   questions 3, 4, which must be answered before this task starts), and add the sunset test
   on the real manifest; verify: the loader accepts it, and the test passes before the date
-- [ ] 7.2a Extract the pilot's R data (`design.md`, decision 11: the formula of R with its
+  (implementation `a69fbdf`; repeated checks recorded in the readiness file)
+- [x] 7.2a Extract the pilot's R data (`design.md`, decision 11: the formula of R with its
   coefficients and tables, the threshold rule of `k_z`, the method bounds, the check) from the
   text layer; verify: every element is listed with its page in the working session's record
-- [ ] 7.2b Extract the same data independently from page images, without seeing 7.2a; verify:
-  every element is listed with its page in a second record
-- [ ] 7.2c Compare 7.2a and 7.2b automatically (cell by cell and token by token; formulas by
-  numeric equivalence on random inputs) and write every record as `pending` with its `page`;
-  verify: the comparison report lists every element as match, difference or image-only, and
-  the loader accepts the file in the `draft` profile
-- [ ] 7.3a Portion P1: the verifier checks the formulas, their coefficients, their control
+  (`docs/akim/digitization/extract-a.yaml`, 19 paged records; local artifact, checked 2026-11-01)
+- [x] 7.2b Obtain independent image extraction C using decision 11's recheck protocol,
+  retaining A/B and B's disclosed dependence on A; verify: the record names every element
+  and page, PDF hash, files read and independence statement, with a spec-reviewer report
+  without blocker/major and strict validation before closure (2026-11-01: C and its
+  provenance report in the local recheck directory; review and checks in readiness)
+- [x] 7.2c Automatically compare A/C text content and B/C raster formulas, symbols and
+  values under decision 11, including formula equivalence on random inputs with the
+  verifier-approved domain and comparison criterion; verify: the report lists every
+  element as match, difference or unavailable/image-only, records seed, ranges, sample
+  count and all differences, and new/changed records are `pending` with a page and load
+  in `draft`. Existing signed data stays unchanged unless corrected and rechecked in P4.
+  Numerical settings approved by Akim on 2026-11-01; repeat run: 6 x 1,000 samples,
+  zero numerical differences (two sets are deferred D-1 diagnostics). Akim confirmed B
+  for both table 5.4 row headings and note 1 on 2026-11-01. All three text differences
+  are resolved; draft loading and source contracts rechecked (30 passed). No data
+  correction or status promotion. See the readiness completion record
+- [x] 7.3a Portion P1: the verifier checks the formulas, their coefficients, their control
   points and the edition, and answers whether amendment 5 changed formula (5.7) (identifier
   given by Akim, checked by the verifier); each check is recorded in the record and committed
   with the portion id (`design.md`, decisions 3, 10); verify: every P1 record is
   `human-verified` or `rejected` with all its fields, and the answer on formula (5.7) is
-  recorded in the readiness file
+  recorded in the readiness file (signed sheet `e9ad390`, promotion `f33df61`; signature
+  and Git provenance rechecked 2026-11-01)
 - [ ] 7.3b Portion P2: the verifier checks the tables and their control points, discrepancies
   first; verify: every P2 record is `human-verified` or `rejected` with all its fields
 - [ ] 7.3c Portion P3: the verifier checks the threshold rule, the method bounds, the check's
@@ -208,9 +221,11 @@ structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. T
   and `develop` passes both `check.sh`
 - [ ] 9.3a `tester` GO, review and merge of `feature/interim-normatives-phase1b-data/backend`;
   verify: recorded in the readiness file
-- [ ] 9.4 (spec) Record in the plan file and in Akim's PM record that the interim base is in
+- [x] 9.4 (spec) Record in the plan file and in Akim's PM record that the interim base is in
   use, with the oral consent of 2026-10-18 (`design.md`, decision 9, open question 6); verify:
-  the dated line exists
+  the dated line exists in `docs/decisions/product/2026-11-01-interim-normatives-consent.md`
+  and the local action plan. Consent is attributed to Akim; use is on the feature branch,
+  not a release on `develop`
 - [ ] 9.5 (spec) `spec-keeper` syncs the deltas into `openspec/specs/` and archives this
   change after all three features are merged and task 1.4 is resolved; verify:
   `openspec validate --all --strict` passes after the archive
@@ -239,8 +254,8 @@ structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. T
 - `calculation-core-contract` and `calculation-api` (not archived) own the envelope; this
   change adds an optional field next to them.
 - `frontend-app` is merged; section 6 builds on its result screen.
-- Reference example `ex1` needs its tolerances from the verifier (`design.md`, open question 1)
-  before task 8.1.
+- Reference example `ex1` has its verifier's tolerance recorded (`design.md`, open question 1,
+  answered 2026-10-28). Task 8.1 still needs verified R data.
 - No dependency on Egor's zones; Egor's acknowledgement (task 1.5) is part of the DOR.
 - Task 7.1 needs the verifier's name and the sunset date (`design.md`, open questions 3, 4);
   sections 2-6 do not, since task 2.5 tests the sunset on a fixture manifest.

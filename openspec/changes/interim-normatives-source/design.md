@@ -235,15 +235,35 @@
       3. automatic comparison, cell by cell and token by token, with formulas compared for
          numeric equivalence on random inputs;
       4. a person checks 100% of the elements, discrepancies first.
+    - Recheck protocol (2026-11-01): preserve extraction A, extraction B and their
+      original reports, including B's disclosure that it saw some values in A's report.
+      A separate agent with an empty conversation context produces extraction C from
+      page images. Its only task inputs are the source PDF, page list and output format;
+      it must not read A/B, pilot files, reference results or verifier sheets. Record the
+      PDF hash, pages, rendering commands, files read and the independence statement.
+      Compare A/C for content available in the text layer and B/C for raster formulas,
+      symbols and values. Map records explicitly and report every comparable cell/token
+      as a match or difference; missing content stays image-only or unavailable, never
+      an inferred match. Compare independently obtained B/C formulas on reproducible
+      random inputs, recording seed, ranges, sample count, criterion and every mismatch.
+      The verifier approves the input domain and numerical comparison criterion before
+      this comparison closes task 7.2c. These are software comparison settings, not a
+      normative tolerance or proof of formula correctness. A spec-reviewer checks this
+      clarification and strict validation passes before tasks 7.2b/c can close.
+    - New or changed data records remain `pending`; matching extractions never promotes
+      them. Preserve signed P1-1 and the existing P2-1 answers. A discrepancy affecting
+      signed data goes through a separate P4 correction and human recheck. Generate
+      replacement sheets in a temporary directory and transfer only the intended files.
+      Promote only after checking the sheet signature and Git provenance, then validate
+      each promoted `value_digest` with the backend loader.
     - Portions: P1 the formulas, their coefficients and the edition; P2 and P3 the tables
       and the control points, including `ex1`; P4 the re-check of every correction. Control
       points: two or three input sets per formula, and every branch and boundary of a
       threshold rule, chosen by the verifier.
     - Comparison scripts stay in the working session and do not enter `backend/`.
-    - Whether amendment 5 changed formula (5.7) — the identifier is given by Akim and is
-      checked by the verifier — is answered in portion P1. Until then `ex1` is a control
-      point, not a WP4 gate: by the author's reading, its textbook follows the earlier
-      amendments, a claim the verifier checks (`unverified`).
+    - The verifier answered the amendment-5 question in portion P1 on 2026-10-28:
+      `ex1` is a gate. See open questions 1 and 2 and the readiness record's
+      "Verifier's answers" for the answer and tolerance; the recheck does not reopen them.
     - The first portion set is the pilot's R: the formula of R with its coefficients and
       tables, the threshold rule of `k_z`, the method bounds and the reference of the check.
       A separate portion holds the data phase 1b needs: the mean unit weight of the
@@ -320,5 +340,5 @@
 | 3 | The verifier's name for `verifiers` (today: Akim, see Risks) | Akim. Answered 2026-10-22: Akim |
 | 4 | The sunset date | Akim. Answered 2026-10-22: 2026-12-01; the event stays "the type is switched to the catalog in CH3" (decision 8) |
 | 5 | Acknowledgement of this change as the second developer (shared `openspec/`) and a look at the row format against `catalog_read` | Egor |
-| 6 | The PM's dated record that norm values may be kept in git for the pilot (oral consent, 2026-10-18) | PM, recorded by Akim |
+| 6 | The PM's dated record that norm values may be kept in git for the pilot (oral consent, 2026-10-18) | Recorded 2026-11-01 from Akim's account of the oral consent of 2026-10-18; see `docs/decisions/product/2026-11-01-interim-normatives-consent.md`. This records feature-branch use, not release on `develop`. |
 | 7 | A per-type source choice, if CH3 switches types one by one | Akim, in CH3 |

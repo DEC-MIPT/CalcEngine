@@ -1095,3 +1095,31 @@ the `tester` GO and the review are recorded; next, the merge into `develop`.
 
 **GO** for `fix/normative-catalog-followup/data` at `27949c3`. Tests: GO. Coverage: GO
 (postgres-only gap pre-existing and noted). UI/UX: N/A.
+
+## Deferred backend findings m2/m3 (2026-11-01)
+
+Prepared on `fix/normative-catalog/backend` from `develop` at `34eb49a`, not committed
+or merged. This is the backend task 7.4, distinct from the earlier data-zone findings.
+For m2, choose `--no-access-log` in the documented Uvicorn commands in README, CLAUDE
+and AGENTS. The normative search logging requirement is unchanged. Custom deployment
+and proxy logging were not inspected. The document edits are prepared on `develop`.
+For m3, `get_catalog_engine` uses `isolation_level="REPEATABLE READ"`; the existing
+`test_the_engine_reads_only_and_hides_parameters` asserts it. Read-only connections,
+hidden query parameters and the existing session transaction boundary are preserved.
+
+Validation on this prepared fix: focused configuration test 1 passed; full
+`backend/check.sh`: 1169 passed, 11 skipped, one Starlette deprecation warning; branch
+coverage 100.00% (2771 statements, 506 branches); Ruff and mypy passed (154 files); five
+layer contracts kept. Test database URL variables were unset. Actual PostgreSQL
+concurrent-read behavior was not exercised. The sandbox TestClient run stalled and
+was stopped; the completed full run used approved escalation.
+
+Orchestrator review: no blocker/major in the prepared code and documentation. Commit
+and merge still require Akim's explicit consent. Task 7.4 and archive remain open
+until delivery is recorded; this does not resolve the other CH1 archive dependencies.
+
+Tester verdict for the prepared task 7.4 fix: **GO**, based on the completed full
+check above and independent inspection of the changed module's coverage (39 statements,
+8 branches, 100%). Code review found no findings; installed Uvicorn supports
+`--no-access-log`. UI/UX: N/A, no UI changes. This GO does not assert live PostgreSQL
+snapshot behavior and does not authorize commit, merge or archive.

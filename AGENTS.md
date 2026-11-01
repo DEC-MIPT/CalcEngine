@@ -8,14 +8,24 @@ This file is the single source of truth for how AI agents work in this repositor
 Every agent (orchestrator, analyst, developers, testers, spec-keeper) MUST read and
 follow it before acting.
 
+## Start here
+
+For a new task, use this file for shared rules and
+[docs/akim/README.md](docs/akim/README.md) for selective context and current-work pointers.
+That index is local and intentionally ignored by Git. If absent, use the map below,
+`openspec list`, the selected change's artifacts and relevant `docs/decisions/` records.
+Do not read the entire documentation archive before a local edit.
+
+Codex does not need to read `CLAUDE.md` or `CLAUDE.local.md` each session. They remain
+Claude Code entry points; their status snapshots are not the current task tracker.
+Preserve generated OpenSpec instructions and managed blocks; do not run OpenSpec
+initialization or update merely to refresh context.
+
 ## 1. Project summary
 
-- **Problem**: design engineers spend up to 30% of their time searching for current
-  norms, doing manual calculations, and re-checking them; arithmetic/methodology
-  errors and outdated norms cause expert-review rejections.
-- **Solution (USP)**: a "single window" combining a normative base (SP/GOST/SNiP),
-  a verified calculation engine, and a GOST report generator.
-- **Five product components**:
+- DEC is a web SaaS developed as a master's IT-product thesis. Keep the MVP bounded;
+  the product goals below do not imply that all capabilities are implemented or verified.
+- **Product components (target)**:
   1. Normatives catalog / normative base — PostgreSQL + full-text search.
   2. Calculation engine — Python (NumPy/SciPy), architecture ready to hot-swap hot
      paths to C/C++ later.
@@ -28,6 +38,66 @@ follow it before acting.
 - **Normative data**: NLP/RAG auto-parsing of norms (collector, regex baseline parser,
   embeddings retrieval on CPU) is part of the MVP; a generative-LLM extraction step is
   deferred. No ML in the calculation path (explicitly rejected).
+
+### Repository map and architecture
+
+| Area | Code and checks | Requirements and detail |
+|---|---|---|
+| Calculation engine | `backend/app/engine/`, `backend/app/parameters/`, `backend/tests/test_engine_*.py` | `agent-docs/domain-constraints.md`; changes `calculation-core-contract`, `calculation-verification` |
+| Backend/API | `backend/app/api/`, `services/`, `schemas/`, `repositories/`, `backend/alembic/`, `backend/tests/` | changes `backend-layered-architecture`, `calculation-api`, `normative-catalog-backend` |
+| Frontend and trace | `frontend/src/`, colocated `*.test.ts(x)`, `frontend/e2e/` | `frontend/README.md`; change `frontend-app` |
+| DOCX reports | `backend/app/reporting/`, `backend/tests/test_reporting_*.py` | `calculation-core-contract/specs/report-generator/`, change `report-title-block-limits` |
+| Normative pipeline | `ml/src/normatives_pipeline/`, `ml/configs/`, `ml/tests/` (Egor) | `ml/research/PIPELINE.md`, catalog contract in `docs/decisions/` |
+| Local infrastructure | `infra/docker-compose.yml` (Egor) | `README.md` local setup |
+| Requirements and working context | `openspec/specs/`, `openspec/changes/`; `docs/decisions/`, `docs/verification/` | `docs/akim/` holds local plans, analysis and code journals |
+
+Backend-relative names in the table are under `backend/app/`; change names are under
+`openspec/changes/`. On `develop`, the pilot `foundations_shallow_r` calculates R and
+checks supplied pressure p against it. Full settlement and pressure-from-loads calculations
+are expansion work; check the selected branch before assuming a component exists.
+
+The MVP target is a modular monolith with a separate worker process. The enforced backend
+layers are in `backend/pyproject.toml`; `backend/app/worker/` is currently a package stub.
+There is no worker launch command. The engine's pure `Calculator.calculate` function is
+the future C/C++ boundary (`backend-layered-architecture/design.md`, decision 7).
+Add services, queues or C++ only for a demonstrated need. NumPy/SciPy and PDF reports
+are target-stack statements, not dependencies or delivered features of the current backend.
+
+The cross-zone catalog contract is the database: read-only `catalog_read` views through
+the backend's repository and `DEC_NORMATIVES_DATABASE_URL`, never imports from `ml/`.
+See `docs/decisions/normative-catalog-backend-contract-akim.md`, including its Answers.
+`backend/params/` holds engineer-set values; the scoped exception for interim norm data
+is defined in the active `interim-normatives-source` change, not a general permission.
+
+### Commands and verification
+
+Commands below are defined in the named scripts/configuration and setup docs; listing
+them does not claim they passed in this session. Use the existing environment; installing
+dependencies or running migrations is a separate action. Activate `backend/.venv` before
+`backend/check.sh`: the script changes directory but does not activate that environment.
+
+| Working directory | Command | Purpose / prerequisite |
+|---|---|---|
+| Repository root | `openspec list`; `openspec status --change <name>` | Discover changes and artifact status; artifact completion is not DOR or GO |
+| Repository root | `openspec validate <name> --strict`; `openspec validate --all --strict` | Validate selected change / all specs and changes |
+| Repository root | `backend/check.sh` | Ruff, mypy, lint-imports, pytest with branch coverage of `app` and `scripts` >= 95% |
+| Repository root | `frontend/check.sh` | API schema drift, ESLint, TypeScript, Vitest coverage; needs npm dependencies and backend Python |
+| `backend/` | `.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --no-access-log` | Local API; database-backed requests need configured databases |
+| `backend/` | `.venv/bin/alembic upgrade head` | Mutates configured application DB; use only for a task that needs migrations |
+| `frontend/` | `npm run dev`; `npm run dev:mock` | Real backend / browser mocks; setup in `frontend/README.md` |
+| `frontend/` | `npm run gen:api`; `npm run gen:api:check` | Regenerate / check `src/api/schema.d.ts` after API schema changes |
+| `frontend/` | `npm run test:e2e` | Playwright; installed browsers required, own mock server on port 5179 |
+| Repository root | `backend/.venv/bin/pre-commit run --all-files` | Existing secret and settings hooks; may rewrite `.secrets.baseline` |
+| Repository root | `git diff --check` | Whitespace check for tracked edits |
+
+Sources: `backend/check.sh`, `backend/pyproject.toml`, `frontend/check.sh`,
+`frontend/package.json`, `frontend/playwright.config.ts`, `.pre-commit-config.yaml`,
+`README.md`. Setup and database commands are in `README.md`; verify whether
+`dec-postgres` already exists before choosing compose creation versus `docker start`.
+Backend `postgres` tests skip without the corresponding `DEC_TEST_*DATABASE_URL` variables
+(`backend/pyproject.toml`, marker description). Report skipped integration/catalog checks;
+a green local suite alone does not verify the real catalog or calculation correctness.
+Documentation-only edits need OpenSpec and document checks, not the full application suite.
 
 ## 2. Methodology: Spec-Driven Development (SDD) via OpenSpec
 
@@ -83,7 +153,8 @@ Every task in this project MUST be recorded in specs through OpenSpec. There is 
   has declared GO for the feature, and the review has passed (step 7 above). It is not
   merged per section or per subtask. One feature has exactly one branch; work in two zones
   is two features. A feature that needs code from an unmerged feature branches from it and
-  merges after it. Push the branch to `origin` with the commit that finishes a subtask, so
+  merges after it. With the explicit consent required by section 7, push the branch to
+  `origin` with the commit that finishes a subtask, so
   it stays visible, and bring new documents into it with `git merge develop`. The change
   is archived when all its features are merged.
   - Akim: `feature/<feature>/backend`, `feature/<feature>/frontend`
@@ -111,13 +182,32 @@ Before starting a development session, an agent MUST check the state of commits 
   `develop` is up to date before starting work.
 - Check `git status` for uncommitted or untracked work left by previous sessions.
 
-Before starting a session, an agent MUST also read the current state of
-`docs/decisions/` (tracked in git). These files are the team's written channel:
+Before starting a session, an agent MUST also inspect the current state of
+`docs/decisions/` (tracked in git): start with filenames, headings and recent Git changes,
+then read the decisions relevant to the selected task. These files are the team's written channel:
 answers, confirmations, and review outcomes (for example
 `backend/2026-10-07-<topic>-to-egor.md`, or the older `*-readiness*.md` at the root) may
 have been added or updated since the last session. The layout of the folder is in
 section 7, "Decision files". A decision or confirmation recorded there can change what
 is blocked, agreed, or ready, so treat it as required context before acting.
+
+Read Answers and later sections that resolve earlier questions in those decisions. Preserve
+all existing user edits, including ignored files; never reset, stash or overwrite them
+to obtain a clean tree. Check the current branch and whether required code has merged:
+`tasks.md` completion alone is not evidence that it exists on `develop`.
+
+Read base specs together with applicable active deltas and their readiness records.
+Some base specs still name the beam placeholder pending `retarget-mvp-domain`; do not
+silently copy it into foundation work. Distinguish requirements, observed code behavior,
+analysis hypotheses and plans. Recheck a report's relevant claim against the selected
+branch before relying on it; a filename containing "approved" is not an approval record.
+
+Update the existing working-state record or journal when task status materially changes,
+and maintain pointers in `docs/akim/README.md` when needed. Do not create a report for
+each action or a second backlog. Shared decisions belong in `docs/decisions/`; local
+`docs/akim/` material and source PDFs may be absent in another checkout. Never copy secrets,
+machine paths or personal settings into shared instructions. For technical prose use
+`technical-writing` when available; project conventions and explicit user scope prevail.
 
 ## 3. DOR — Definition of Ready
 
@@ -253,7 +343,21 @@ Zone-to-agent mapping:
   - Coverage target: >= 95% branch coverage.
 - **Domain constraints**: calculation code and norm references follow
   `agent-docs/domain-constraints.md` (pure, deterministic, explicit units, primary-source
-  citations only).
+  citations only). A methodology change also names its formula, units and applicability.
+  Never invent normative citations, coefficients, tolerances or expected results.
+- **Reference results**: record the source and derivation of control values. The tested
+  implementation's own output is not an independent oracle. Read the existing correctness
+  gate in `calculation-verification` and `docs/decisions/reference-examples-foundations.md`
+  before changing a calculation; coverage alone does not establish correctness.
+- **Conflicts and contracts**: explicitly report a conflict between a spec, source norm
+  and reference example. Do not choose a coefficient or rewrite the expected result to
+  make a test pass. Coordinate API/data changes through the applicable OpenSpec change
+  and the existing zone contract; regenerate frontend API types when required.
+- **Autonomy and questions**: make local reversible choices within the task. Ask when
+  ambiguity affects methodology, public contracts, requirement scope, compatibility or
+  another developer's zone. Permission for ordinary documentation edits is not permission
+  to commit, merge or push. Apply section 4 gates to closure; report completed work,
+  actual checks, skips and remaining decisions without inventing GO or acknowledgement.
 - **Code style**: no comments unless required; follow existing patterns; run lint and
   type checks before declaring done:
   - Backend: `ruff` (lint) + `mypy` (types).

@@ -183,3 +183,151 @@ Pass 2 minors, all fixed:
 - The check sheets are not rebuilt in `docs/verification/`: `extractcmp build` rewrites every
   sheet there without a signature, which would void the signed P1-1. A later rebuild goes to
   a temporary directory, and only the needed sheet is copied.
+
+## Recheck protocol review (2026-11-01)
+
+The spec-reviewer found 0 blockers, 0 major findings and 2 minor findings in the
+A/C and B/C amendment to design decision 11 and tasks 7.2b/c. Verdict: READY for this
+protocol amendment, not feature GO. The minors were the missing execution record for
+task 7.1 and obsolete wording that the amendment-5 answer still awaited P1. The actual
+checks are below, and decision 11 now points to the recorded answer.
+
+- `openspec validate interim-normatives-source --strict`: passed.
+- `openspec validate --all --strict`: 22 passed, 0 failed. The existing unrelated
+  `formula-extractor-fix` archive-target notice remains.
+- On `feature/interim-normatives/backend` at `f33df61`, using the existing backend
+  environment: `python -m pytest tests/test_interim_manifest.py
+  tests/test_interim_pilot_data.py tests/test_parameter_source_contract.py -q`:
+  30 passed, one Starlette deprecation warning. This confirms the manifest, current
+  P1 digests, draft resolution, strict refusal and both source contracts.
+- `extractcmp.promote.check_sheet` and `check_committed` returned no errors for
+  P1-1 with verifier Akim. Its signed commit remains `e9ad390`, its data promotion
+  `f33df61`. Both existing P2-1 answers are preserved; no new verdict was supplied.
+- Extraction A contains 19 records, all with a page. Extraction C was produced by
+  a separate agent with no inherited conversation, from the PDF and page list only.
+  It received no A/B, pilot files, expected results or verifier sheets. The PDF SHA-256
+  is `289dc6844340d0177dd01761af4b2adef075d567a16a9685d360b29a79700ecf`, equal to A/B's
+  source. Rendering and files-read evidence is retained with C. B's historical
+  dependence on A is preserved. This supplies task 7.2b's independent reading.
+
+The working-session artifacts are in
+`docs/akim/digitization/recheck-2026-11-01/` (ignored local files, not shared Git evidence):
+`extract-c.yaml`, its provenance report, `mapping.json`, `comparison.json`, `compare.py`,
+`numeric-proposal.json` and `report.md`. All 159 coefficient cells and 46 selectors match
+in A/C and B/C. Three B/C text differences remain: two silty-sand row headings disagree
+on the placement of wet sand, and note 1 differs in grammatical number. Akim must resolve
+them; matching numbers do not establish matching applicability. Empty `method_bounds`
+remains for P3 review. Six numerical diagnostics of 1,000 samples each found no difference,
+but their proposed input domain and comparison criterion have no verifier approval yet.
+Task 7.2c stays open. No status was promoted and signed sheets were not regenerated.
+
+Task 9.4 is recorded in [the PM record](../product/2026-11-01-interim-normatives-consent.md)
+and the local action plan, attributed to Akim's account of oral consent. It describes
+feature-branch use and does not claim release on `develop`.
+
+Follow-up spec-reviewer pass on these edits: 0 blockers, 0 major, 0 minor; READY
+for the protocol amendment. Task 7.2b is complete, 7.2c remains open. This is not feature GO.
+
+## Backend acceptance attempt (2026-11-01)
+
+Tester verdict: **NO-GO** for `feature/interim-normatives/backend`. The prepared
+`backend/tests/test_interim_ex1_acceptance.py` uses real interim files in `strict`,
+API creation and stored-result retrieval, the reference card's absolute R tolerance,
+the current document digest and one DOCX source line. It fails at the first POST:
+`503 parameter_source_unavailable`, because the remaining data is not human-verified.
+No xfail, skip, fixture promotion or changed expected result masks this gate.
+
+`backend/check.sh` on `f33df61` plus this uncommitted test: Ruff passed; mypy passed
+for 170 files; five layer contracts kept; 1336 passed, 11 skipped, 1 failed; app/scripts
+branch coverage 100.00% (3154 statements, 580 branches). The sole failure is the new
+acceptance test. The PostgreSQL checks were skipped, not verified.
+`pre-commit run --all-files`: both hooks passed. Independent test review found no
+blocker/major code finding; UI/UX is N/A for this backend test.
+
+A separate temporary diagnostic using `draft` passed API, persistence and DOCX checks
+(1 passed); it did not change the real data and is not strict acceptance. Sandbox
+TestClient attempts stalled; the completed full suite ran with approved escalation.
+Task 8.1 remains open, and the existing real-data strict-refusal test is retained until
+verified data is available. No feature is merged and no GO is granted.
+
+## Numerical comparison protocol approved (2026-11-01)
+
+Akim explicitly approved the proposed input ranges, seed, sample count and B/C
+comparison criterion for task 7.2c in this conversation. This resolves the pending
+protocol approval in the recheck record above. It is not approval of normative data,
+P2/P3 verdicts, the three text differences, or Git operations.
+
+The approved settings are Python `random.Random(20261101)`, restarted per expression,
+1,000 uniform samples per expression, variables drawn in sorted-name order, and
+`abs(B-C) <= max(1e-10, 1e-12 * max(abs(B), abs(C)))`.
+
+| Inputs | Approved sampling range |
+|---|---|
+| gamma_c1, gamma_c2, k, k_z | 0.1-2, dimensionless |
+| M_gamma, M_q, M_c | 0-20, dimensionless |
+| b | 0.1-50 m |
+| gamma_II, gamma_II_prime, gamma_cf | 0.1-30 kN/m³ |
+| d_1, d_b, h_s, h_cf | 0-10 m |
+| c_II | 0-100 kPa |
+| z_0 | 0.1-20 m |
+
+For the separate k_z branches, b ranges from 0.1 to the floating-point value immediately
+below 10, and from 10 to 50, respectively. Symbols vary independently; these artificial
+sampling domains are not normative bounds. The criterion does not change ex1's tolerance.
+
+Reran `backend/.venv/bin/python docs/akim/digitization/recheck-2026-11-01/compare.py`:
+all six expressions, 1,000 samples each, have zero differences (maximum absolute
+difference 0). Four expression sets belong to R; formula (5.8) and the appendix-A
+constant remain D-1 diagnostics, outside the R acceptance gate. A second run was
+byte-identical. The approved numerical settings were checked against the preserved
+proposal and are unchanged. Ruff passed. A/C and B/C field counts and the three
+text differences are unchanged. Task 7.2c remains open for their disposition;
+verification statuses and signed sheets are unchanged.
+
+The local recheck directory holds the approved settings in `numeric-proposal.json`,
+results in `comparison.json` and the report. Its `before-protocol-approval/` directory
+preserves the earlier unapproved artifacts. Approved settings file SHA-256:
+`f112f75d2b15cc230e49be11c2aabdfc91d922492750c30c4c41b0331b107a24`.
+
+## Table 5.4 row grouping resolved (2026-11-01)
+
+After viewing versions B/C and the rendered fragment of PDF page 37, Akim stated in
+this conversation: «Подтверждаю соответствие версии B». This resolves the two row-heading
+differences in task 7.2c in favour of B:
+
+| Record | Accepted B wording | gamma_c1 / gamma_c2 (L/H >= 4) / gamma_c2 (L/H <= 1.5) |
+|---|---|---|
+| `t54_sands_silty_low_moisture` | Пески пылеватые: маловлажные | 1.25 / 1.0 / 1.2 |
+| `t54_sands_silty_wet_saturated` | [Пески пылеватые:] и влажные, насыщенные водой | 1.1 / 1.0 / 1.2 |
+
+Source: СП 22.13330.2016, supplied consolidated PDF with amendments 1-5, table 5.4,
+PDF page 37; source identity is recorded in the recheck protocol above. Bracketed text
+supplies the common heading, not extra wording from the PDF. The two extractions and
+raw comparison results are preserved. The local report records this human disposition
+separately from the automatic differences. No backend data or verification sheet was
+changed: this decision resolves the row grouping, not every check in those P2 items.
+One text difference remains open: note 1, «от деформации оснований» in B versus
+«от деформаций оснований» in C. Task 7.2c remains open.
+
+## Table 5.4 note 1 resolved and task 7.2c complete (2026-11-01)
+
+After viewing B/C and the rendered note 1 on PDF page 37, Akim stated in this
+conversation: «Подтверждаю версию B». Accepted wording: «от деформации оснований».
+Source: СП 22.13330.2016, supplied consolidated PDF with amendments 1-5, table 5.4,
+note 1, PDF page 37. This resolves the last of the three B/C text differences.
+The decision concerns this phrase, not the whole P2 table-notes verification item.
+
+Task 7.2c is complete: the mapping and automatic report retain matches, differences
+and unavailable fields; the approved numerical comparison found no differences;
+Akim resolved all three text differences in favour of B. Original A/B/C and raw
+comparison results are preserved. No backend record needs a correction from these
+dispositions, and no new record was created. P1 and all verification blocks are unchanged.
+
+Repeated on the backend feature worktree: `python -m pytest
+ tests/test_interim_manifest.py tests/test_interim_pilot_data.py
+ tests/test_parameter_source_contract.py -q`: 30 passed, one existing Starlette warning.
+This confirms draft loading, current P1 digests and both source contracts; strict still
+refuses the pending records. Missing applicability content and empty `method_bounds`
+remain explicitly assigned to human review in P3, not silently counted as matches.
+P2/P3 verification, P4 if corrections arise, and strict ex1 acceptance remain open.
+No feature GO, commit, merge or archive follows from completing task 7.2c.

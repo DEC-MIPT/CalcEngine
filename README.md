@@ -81,9 +81,10 @@ export DEC_APP_DATABASE_URL='postgresql://dec:<password>@localhost:5433/dec_app'
 export DEC_NORMATIVES_DATABASE_URL='postgresql://dec_normatives_reader:<reader-password>@localhost:5433/dec'
 export DEC_CORS_ORIGINS='http://127.0.0.1:5173'
 .venv/bin/alembic upgrade head                      # once, and after each new migration
-.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --no-access-log
 ```
 
+- `--no-access-log` keeps normative search query strings out of Uvicorn access logs.
 - `DEC_CORS_ORIGINS` must hold the frontend's origin exactly (comma-separated for several).
 - Without `DEC_NORMATIVES_DATABASE_URL` the backend still starts, but `POST /calculations`
   answers `503 parameter_source_unavailable`.

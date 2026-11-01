@@ -225,11 +225,12 @@ Edit these only when the user explicitly says so; otherwise show a diff.
   with that variable set.
   Do not start `infra/docker-compose.yml` instead: its project name differs from the one
   that created `dec-postgres`, so the container name would clash.
-- Backend server: `uvicorn app.main:app --host 127.0.0.1` from `backend/`, with
+- Backend server: `uvicorn app.main:app --host 127.0.0.1 --no-access-log` from `backend/`, with
   `DEC_APP_DATABASE_URL` pointing at a migrated `dec_app` (`alembic upgrade head`);
   `DEC_CORS_ORIGINS` (comma-separated) and `DEC_PARAMS_ROOT` are optional.
   `DEC_NORMATIVES_DATABASE_URL` (the reader role) serves the catalog; without it the app
   still starts, and the catalog paths answer `503`.
+  `--no-access-log` keeps normative search query strings out of Uvicorn access logs.
 - Frontend: `frontend/check.sh` (`npm run gen:api:check`, `eslint`, `tsc -b`,
   `vitest run --coverage` with branch coverage >= 95%). From `frontend/`:
   - `npm run dev` — dev server against the real backend at `VITE_API_BASE_URL` (default
