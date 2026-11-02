@@ -62,3 +62,13 @@ satisfy feature acceptance. Logs are local temporary artifacts:
 `runtime.json`. No dependencies were installed and no global config/trust was
 modified. Changes remain uncommitted; merge, spec synchronization and archive
 remain open and are not implied by this feature GO.
+
+## Integration (2026-11-03)
+
+Akim explicitly requested commit, push and feature merge in the conversation.
+Documentation commit `2cc5eb4` is on develop. Feature commit `6df6917` was
+published to `origin/feature/codex-claude-mirror/backend` and merged into develop
+as `4c3297d` with no conflicts. The merge retains the tested feature tree.
+Task 5 is complete. Spec synchronization and archive (task 6) remain open.
+Local settings stay Git-ignored. The integration record is committed before
+publishing develop; remote publication is verified in the execution journal.

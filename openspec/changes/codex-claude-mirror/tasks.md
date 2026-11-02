@@ -21,7 +21,8 @@ maintained on develop; no commits or merges without explicit user consent.
 
 ## Closure
 
-- [ ] 5. User-approved commit, feature review and merge into develop.
+- [x] 5. User-approved commit, feature review and merge into develop
+  (2026-11-03: feature `6df6917`, merge `4c3297d`; tester GO and review recorded).
 - [ ] 6. Spec-keeper sync and archive after merge.
 
 ## DOD and GO/NO-GO
