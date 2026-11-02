@@ -222,6 +222,8 @@ structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. T
 - [ ] 9.3 Review of each feature by the `orchestrator` or Egor, then the merge into `develop`
   with Akim's word; verify: the reviews are recorded with no open blocker or major finding,
   and `develop` passes both `check.sh`
+  (2026-11-03: frontend `a8fb64e` APPROVE; backend P2 corrected in `479172e`,
+  re-review APPROVE/tester GO; integration and develop checks pending)
 - [ ] 9.3a `tester` GO, review and merge of `feature/interim-normatives-phase1b-data/backend`;
   verify: recorded in the readiness file
 - [x] 9.4 (spec) Record in the plan file and in Akim's PM record that the interim base is in

@@ -445,3 +445,14 @@ Strict OpenSpec validation passed (23/23); the unrelated `formula-extractor-fix`
 archive-target notice remains. Review and merge (9.3), phase-1b data (7.5/9.3a),
 specification work (1.4) and archive (9.5) remain open. No commit, merge or push
 was performed for this acceptance task.
+
+## Review correction committed (2026-11-03)
+
+Backend correction `479172e` makes source page mandatory and positive for all
+interim records. Independent re-review APPROVE and tester GO: 1351 passed,
+11 PostgreSQL skips (test URLs unset), 100% branch coverage; Ruff/mypy, five
+architecture contracts and pre-commit passed. Signed data and public OpenAPI
+are unchanged. Evidence and the initial finding are in
+[the feature review](2026-11-03-interim-normatives-source-review.md).
+Frontend review at `a8fb64e` is APPROVE. Task 9.3 remains open until authorized
+integration and both check scripts on develop. No merge or push was performed.
