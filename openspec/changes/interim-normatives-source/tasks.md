@@ -212,8 +212,9 @@ structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. T
 
 ## 9. Verify and close
 
-- [ ] 9.1 `tester` GO for `feature/interim-normatives/backend`; verify: the verdict with the
-  test count and the coverage is recorded in the readiness file
+- [x] 9.1 `tester` GO for `feature/interim-normatives/backend`; verify: the verdict with the
+  test count and the coverage is recorded in the readiness file (2026-11-02: GO at
+  `82c092d`, 1338 passed, 11 skipped, 100% branch coverage; dated tester entry)
 - [ ] 9.2 `tester` GO and `ui-ux-tester` confirmation for
   `feature/interim-normatives/frontend`; verify: both recorded in the readiness file
 - [ ] 9.3 Review of each feature by the `orchestrator` or Egor, then the merge into `develop`

@@ -369,3 +369,36 @@ the R data to be committed under the change's gate. No commit, merge, push, arch
 frontend acceptance or phase-1b work is included in this result.
 
 Tester independent review: technical checks PASS, no blocker or major finding; UI/UX N/A (backend data/tests only). Task 9.1 remains open solely for the committed-R-data gate.
+
+## Tester GO for backend, task 9.1 (2026-11-02)
+
+Tester verdict: **GO** for `feature/interim-normatives/backend` at
+`82c092d459bcea2c45cf8f1bc30112af075534e6`. The committed-R-data gate from the
+preceding entry is satisfied. Sections 2-5, R-data tasks 7.1-7.4 and task 8.1
+are complete; task 9.1 is complete.
+
+An independent tester reran `backend/check.sh` on an exact committed snapshot
+using the existing environment: Ruff PASS, mypy PASS, five architecture contracts
+KEPT; 1338 passed, 11 skipped, one existing Starlette deprecation warning.
+App/scripts branch coverage: 100%, all 3154 statements and 580 branches covered.
+Both hooks passed in `pre-commit run --all-files`. Real-data strict ex1 through
+API, stored-result reading and DOCX passed, as did all 21 source-contract tests.
+
+All five signed sheets passed signature and committed-author checks. Independent
+promotion from the parent commit reproduced all 146 records exactly as committed:
+only 142 verification blocks changed, values and four P1 records stayed unchanged.
+P4 is not required. No blocker or major finding remains in this acceptance scope.
+UI/UX: N/A for this backend-only gate.
+
+PostgreSQL tests were skipped: `DEC_TEST_APP_DATABASE_URL`,
+`DEC_TEST_NORMATIVES_DATABASE_URL` and `DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL`
+were not configured. This GO does not verify live-catalog integration.
+Sandbox TestClient stalled; the completed run used approved escalation.
+Local logs: `/tmp/ch1-91-tester/backend-check.log`, `pre-commit.log` and
+`promotion.log` in the same directory (temporary, not shared artifacts).
+Strict CH1 and all-artifact validation passed (22/22); the unrelated
+`formula-extractor-fix` archive-target notice remains.
+
+Frontend acceptance (9.2), feature review and merge (9.3), phase-1b data
+(7.5/9.3a), specification work (1.4) and archive (9.5) remain separate gates.
+No commit, merge or push was performed for task 9.1.
