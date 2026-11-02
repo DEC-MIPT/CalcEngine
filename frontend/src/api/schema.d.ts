@@ -515,6 +515,28 @@ export interface components {
             symbol: string;
         };
         /**
+         * ParameterSourceInfo
+         * @description Откуда пришли нормативные параметры расчёта (``interim-normatives-source`` design.md, решение 13).
+         *
+         *     У каталога нет ни digest данных, ни профиля; у временного источника есть оба.
+         *
+         *     Attributes:
+         *         kind: ``catalog`` или ``interim``.
+         *         data_sha256: SHA-256 данных временного источника; ``None`` у каталога.
+         *         profile: профиль временного источника; ``None`` у каталога.
+         */
+        ParameterSourceInfo: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "catalog" | "interim";
+            /** Data Sha256 */
+            data_sha256?: string | null;
+            /** Profile */
+            profile?: ("strict" | "draft") | null;
+        };
+        /**
          * QuantityValue
          * @description Конечное значение с единицей из словаря единиц.
          */
@@ -546,6 +568,10 @@ export interface components {
         /**
          * ResultEnvelope
          * @description Результат расчёта с ``result_id``, который назначает слой сервисов.
+         *
+         *     ``parameter_source`` не входит в ``input_hash`` и не читается движком; его нет у
+         *     результата источника без описания и у результата, сохранённого до появления поля
+         *     (``interim-normatives-source`` design.md, решение 13).
          */
         ResultEnvelope: {
             /** Engine Version */
@@ -576,6 +602,7 @@ export interface components {
              * Format: uuid
              */
             result_id: string;
+            parameter_source?: components["schemas"]["ParameterSourceInfo"] | null;
         };
         /**
          * RoundingRule

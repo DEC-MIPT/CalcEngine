@@ -1,11 +1,11 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { useState } from 'react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import type { components } from '@/api/schema'
 import { I18nProvider } from '@/i18n/I18nProvider'
 import type { Language } from '@/i18n/dictionary'
-import { failEnvelope, passEnvelope, warningEnvelope } from '@/mocks/fixtures'
+import { catalogSource, draftSource, failEnvelope, passEnvelope, strictSource, warningEnvelope } from '@/mocks/fixtures'
 import { expectNoA11yViolations } from '@/test/axe'
 import { VerdictStamp } from './VerdictStamp'
 
@@ -225,5 +225,39 @@ describe('VerdictStamp: the value of an output by its rounding rule', () => {
     expect(document.querySelector('[data-check="p_le_R"] p')).toHaveTextContent(
       '168,29 кПа ≤меньше или равно 168,28900000000002 кПа',
     )
+  })
+})
+
+describe('VerdictStamp parameter source label', () => {
+  it('shows no label for a result without the field (older result)', () => {
+    show(passEnvelope)
+
+    expect(document.querySelector('[data-source]')).toBeNull()
+    expect(screen.queryByText('Источник параметров')).toBeNull()
+  })
+
+  it('labels an interim result in the description list, with the profile and the short digest', () => {
+    show({ ...passEnvelope, parameter_source: strictSource })
+    const facts = document.querySelector('dl')!
+
+    expect(within(facts).getByText('Источник параметров')).toBeInTheDocument()
+    expect(facts.querySelector('[data-source="interim"]')).toHaveTextContent('ВРЕМЕННЫЕ ДАННЫЕ')
+    expect(facts).toHaveTextContent('профиль strict')
+    expect(within(facts).getByText('0123456789ab…')).toBeInTheDocument()
+  })
+
+  it('labels a catalog result with its name', () => {
+    show({ ...passEnvelope, parameter_source: catalogSource })
+
+    expect(document.querySelector('[data-source="catalog"]')).toHaveTextContent('каталог норм')
+  })
+
+  it('marks a draft result in words inside the stamp', async () => {
+    const { container } = show({ ...failEnvelope, parameter_source: draftSource })
+
+    expect(screen.getByRole('region', { name: 'Проверка не выполнена' })).toHaveTextContent(
+      'Черновик: значения не прошли верификацию',
+    )
+    await expectNoA11yViolations(container)
   })
 })

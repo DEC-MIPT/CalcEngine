@@ -2,6 +2,7 @@ import type { components } from '../api/schema'
 
 type CalculationTypeView = components['schemas']['CalculationTypeView']
 type ResultEnvelope = components['schemas']['ResultEnvelope']
+type ParameterSourceInfo = components['schemas']['ParameterSourceInfo']
 
 export const PASS_ID = '11111111-1111-4111-8111-111111111111'
 export const FAIL_ID = '22222222-2222-4222-8222-222222222222'
@@ -165,6 +166,20 @@ export const calculationTypes = [
     ]
   }
 ] satisfies CalculationTypeView[]
+
+export const strictSource = {
+  kind: 'interim',
+  data_sha256: '0123456789abcdef'.repeat(4), // pragma: allowlist secret
+  profile: 'strict',
+} satisfies ParameterSourceInfo
+
+export const draftSource = {
+  kind: 'interim',
+  data_sha256: 'fedcba9876543210'.repeat(4), // pragma: allowlist secret
+  profile: 'draft',
+} satisfies ParameterSourceInfo
+
+export const catalogSource = { kind: 'catalog' } satisfies ParameterSourceInfo
 
 export const passEnvelope = {
   "engine_version": "0.1.0",

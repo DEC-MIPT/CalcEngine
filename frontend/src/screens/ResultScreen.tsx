@@ -101,7 +101,7 @@ export function ResultScreen() {
         <>
           {state.data.verdict_reason.kind === 'bound' ? (
             <>
-              <Refusal reason={state.data.verdict_reason} />
+              <Refusal reason={state.data.verdict_reason} source={state.data.parameter_source} />
               <p className="mt-4 flex flex-wrap gap-3">
                 {editType && <EditInputsLink type={editType} bound={state.data.verdict_reason.bound} primary />}
                 <Link

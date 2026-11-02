@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { http, HttpResponse } from 'msw'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { PASS_ID, passEnvelope, REFUSED_ID, WARNING_ID } from '@/mocks/fixtures'
+import { draftSource, PASS_ID, passEnvelope, REFUSED_ID, refusedEnvelope, strictSource, WARNING_ID } from '@/mocks/fixtures'
 import { server } from '@/mocks/server'
 import { routes } from '@/routes'
 import { expectNoA11yViolations } from '@/test/axe'
@@ -296,5 +296,47 @@ describe('verdict first (critique of the result screen)', () => {
       `/calculations/${REFUSED_ID}/report`,
     )
     expect(screen.queryByRole('region', { name: /^Проверка/ })).toBeNull()
+  })
+})
+
+describe('parameter source label on the result screen', () => {
+  function serve(envelope: object) {
+    server.use(http.get('*/calculations/:id', () => HttpResponse.json(envelope)))
+  }
+
+  it('labels a refusal by interim data and keeps it axe clean', async () => {
+    serve({ ...refusedEnvelope, parameter_source: draftSource })
+    const { container } = open(`/calculations/${REFUSED_ID}`)
+    const refusal = await region(/^Расчёт не выполнен/)
+
+    expect(within(refusal).getByText('Источник параметров')).toBeInTheDocument()
+    expect(refusal.querySelector('[data-source="interim"]')).toHaveTextContent('ВРЕМЕННЫЕ ДАННЫЕ')
+    expect(refusal).toHaveTextContent('Черновик: значения не прошли верификацию')
+    await expectNoA11yViolations(container)
+  })
+
+  it('labels a refusal of a strict profile without the draft words', async () => {
+    serve({ ...refusedEnvelope, parameter_source: strictSource })
+    open(`/calculations/${REFUSED_ID}`)
+    const refusal = await region(/^Расчёт не выполнен/)
+
+    expect(refusal).toHaveTextContent('профиль strict')
+    expect(refusal).not.toHaveTextContent('Черновик')
+  })
+
+  it('shows no label on a refusal without the field', async () => {
+    open(`/calculations/${REFUSED_ID}`)
+    const refusal = await region(/^Расчёт не выполнен/)
+
+    expect(within(refusal).queryByText('Источник параметров')).toBeNull()
+  })
+
+  it('labels a checked result and keeps it axe clean', async () => {
+    serve({ ...passEnvelope, parameter_source: draftSource })
+    const { container } = open(`/calculations/${PASS_ID}`)
+    const stamp = await region(/^Проверка выполнена$/)
+
+    expect(stamp.querySelector('[data-profile="draft"]')).not.toBeNull()
+    await expectNoA11yViolations(container)
   })
 })
