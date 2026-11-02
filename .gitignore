@@ -10,7 +10,24 @@ docs/*
 Справочник студента/
 
 # Skills CLI cache (regenerable via skills-lock.json)
-.agents/
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/branching-convention
+!.agents/skills/openspec-apply-change
+!.agents/skills/openspec-archive-change
+!.agents/skills/openspec-explore
+!.agents/skills/openspec-propose
+!.agents/skills/openspec-sync-specs
+!.agents/skills/openspec-update-change
+!.agents/skills/opsx-apply
+!.agents/skills/opsx-archive
+!.agents/skills/opsx-explore
+!.agents/skills/opsx-propose
+!.agents/skills/opsx-sync
+!.agents/skills/opsx-update
+!.agents/skills/sdd-workflow
+!.agents/skills/test-process
 .claude/skills/find-skills
 
 # Python
@@ -61,3 +78,6 @@ docs/normative-base/
 .idea/
 .vscode/
 *.swp
+
+# Codex compatibility copy of personal Claude permissions
+.codex/settings.local.json
