@@ -1,0 +1,13 @@
+portion: P2b-1
+generated: '2026-11-03'
+sources:
+  a: docs/akim/digitization/phase1b-2026-11-03/extract-a.yaml
+  b: docs/akim/digitization/phase1b-2026-11-03/independent-b/extract-b.json
+  comparison: docs/akim/digitization/phase1b-2026-11-03/comparison/comparison.json
+  items_manifest: docs/akim/digitization/phase1b-2026-11-03/sheets/items.json
+verdicts_allowed:
+- верно
+- исправить
+- отклонить
+items: []
+signature: null

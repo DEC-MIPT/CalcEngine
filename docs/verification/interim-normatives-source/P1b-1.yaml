@@ -1,0 +1,93 @@
+portion: P1b-1
+generated: '2026-11-03'
+sources:
+  a: docs/akim/digitization/phase1b-2026-11-03/extract-a.yaml
+  b: docs/akim/digitization/phase1b-2026-11-03/independent-b/extract-b.json
+  comparison: docs/akim/digitization/phase1b-2026-11-03/comparison/comparison.json
+  items_manifest: docs/akim/digitization/phase1b-2026-11-03/sheets/items.json
+verdicts_allowed:
+- верно
+- исправить
+- отклонить
+items:
+- item: P1b-1/P1B-A01
+  record: P1B-A01
+  kind: record
+  page: '45'
+  shown_digest: 4007be9b9c2068d14a755c8131641de2c23a022968b7294cf341cab31511133e
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-1/P1B-A02
+  record: P1B-A02
+  kind: record
+  page: '44'
+  shown_digest: 04b6a761ee0851111d803137820f961c382dfc26532bb26ce960e5e569978b0e
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-1/P1B-A03
+  record: P1B-A03
+  kind: record
+  page: '44'
+  shown_digest: 7168e291c5d50fd0fd81347bbccfba36782cfa3d5638c1f29bac739d36f39d04
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-1/P1B-A04
+  record: P1B-A04
+  kind: record
+  page: '45'
+  shown_digest: 0cfe37cebc120e8a0745a929784d0fe85b55f7574039bae6ab7db42923556828
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-1/P1B-A05
+  record: P1B-A05
+  kind: record
+  page: '42'
+  shown_digest: 7894c7eeda26d7b22f40e12a34e6bab3ff1f2868bfc4196bf8f6c6575cd7feb4
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-1/P1B-A06
+  record: P1B-A06
+  kind: record
+  page: '42'
+  shown_digest: b237e46a88e3ff6233c0393d05d67a88db5c542b74366de0a82997f2112652e4
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-1/P1B-A07
+  record: P1B-A07
+  kind: record
+  page: '44'
+  shown_digest: e2897b79f46f2eccd19547ea7370fa85a482a9dbcc17ccda0671f5e400c6f7d1
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-1/P1B-A08
+  record: P1B-A08
+  kind: record
+  page: '43'
+  shown_digest: 3f07bd504eb7706266cc0a8289646453789be5841f43e24b905a9add1dd25e19
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+signature: null

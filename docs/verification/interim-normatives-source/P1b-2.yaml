@@ -1,0 +1,103 @@
+portion: P1b-2
+generated: '2026-11-03'
+sources:
+  a: docs/akim/digitization/phase1b-2026-11-03/extract-a.yaml
+  b: docs/akim/digitization/phase1b-2026-11-03/independent-b/extract-b.json
+  comparison: docs/akim/digitization/phase1b-2026-11-03/comparison/comparison.json
+  items_manifest: docs/akim/digitization/phase1b-2026-11-03/sheets/items.json
+verdicts_allowed:
+- верно
+- исправить
+- отклонить
+items:
+- item: P1b-2/CP-P1B-A02-1
+  record: P1B-A02
+  kind: control-point
+  page: '44'
+  shown_digest: 456483bbe525b20364d269dd93326564dd9685d19b6beeefc7518bd2c206ffd5
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-2/CP-P1B-A02-2
+  record: P1B-A02
+  kind: control-point
+  page: '44'
+  shown_digest: f5cce34ade02b84005f6657ac52680b1c75fff0b2c0db2a9e4ddd827960737a5
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-2/CP-P1B-A03-1
+  record: P1B-A03
+  kind: control-point
+  page: '44'
+  shown_digest: 2d54c766cf521d4cacc2aa5d5d0192ba5114e54d81c0cdcbf9bbe1cf9a252f09
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-2/CP-P1B-A03-2
+  record: P1B-A03
+  kind: control-point
+  page: '44'
+  shown_digest: 36d5f16a9ab044fbb3ba5bfb96a9b03846ce40b67541a86bcca70a64b4957935
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-2/CP-P1B-A04-1
+  record: P1B-A04
+  kind: control-point
+  page: '45'
+  shown_digest: 235f28af43ad7554f171c21d5c3d9a2e553464cb5860823cc7536ad73699fe68
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-2/CP-P1B-A04-2
+  record: P1B-A04
+  kind: control-point
+  page: '45'
+  shown_digest: 9797366e80fa2420b2f54d32d2398cf8e621906a68492db1cc585f3d1de10bad
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-2/CP-P1B-A07-below
+  record: P1B-A07
+  kind: control-point
+  page: '44'
+  shown_digest: 98c88a85cbdc8ab101c0abe4722cc41e733dea71134ecc003a53f236c6b81d48
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-2/CP-P1B-A07-at
+  record: P1B-A07
+  kind: control-point
+  page: '44'
+  shown_digest: 8861c205be0b334f1b1143ab5cdf15682a128fc5c3bbb5303ba7e9694c52d5ae
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+- item: P1b-2/CP-P1B-A07-above
+  record: P1B-A07
+  kind: control-point
+  page: '44'
+  shown_digest: 36aca0da7783707df936473c5fa819756c19e29dbc24d9cf293b3f1e9d7f12bd
+  verdict: null
+  corrected: null
+  by: null
+  at: null
+  comment: null
+signature: null

@@ -189,6 +189,13 @@ feature and does not gate the backend feature or section 8.
   listed verifier (`design.md`, open question 3), every record `human-verified` at the end; verify: the file validates and is
   skipped as an unregistered type ("File of an unregistered type"), and `backend/check.sh`
   passes
+  (2026-11-03: A has 8 pending target records, independent image-only B has 45;
+  structural comparison 115 matches/9 unavailable units/0 differences. Akim approved
+  numeric settings; 3 x 1000 samples passed, max difference 0.0 kPa. Human verification,
+  future-type YAML and feature acceptance remain pending; see readiness.
+  Unsigned sheets prepared: P1b-1 has 8 source records; P1b-2 has 9 control-point
+  placeholders without selected values; P2b-1 is an empty correction re-check template
+  to populate only after actual corrections. No verifier verdicts were entered.)
 
 Deferred portion D-1 (Akim, 2026-10-27): the checks of six records that the pilot's type file
 does not hold (the cap d_b = 2 m, the h_n allowances, b = √A, note 5 on d_1 > d, formula

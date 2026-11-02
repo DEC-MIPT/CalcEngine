@@ -479,3 +479,52 @@ Post-merge logs: `/tmp/dec-ch1-postmerge-backend.log` and
 Live application processes were not restarted. Phase-1b data (7.5/9.3a),
 requirement synchronization (1.4) and final sync/archive (9.5) remain open.
 This integration does not close the entire CH1 change.
+
+## Phase-1b numerical settings approved and comparison completed (2026-11-03)
+
+Akim approved the proposed software settings in this conversation with the words
+“Подтверждаю предложенные настройки”, after being told that the criterion was
+proposed by the assistant, not taken from SP22 or an engineering tolerance.
+Approval covers the exact proposal (SHA-256 recorded in local numeric-approval.json),
+including seed 20261103, 1000 samples for each of three formulas and the criterion
+abs(a-b) <= 1e-9 kPa + 1e-12*max(abs(a),abs(b)), with finite results required.
+
+Approved test ranges: N=[1,10000] kN, A=[0.25,100] m2, d=[0,5] m,
+M/M_x/M_y=[-10000,10000] kN*m, W/W_x/W_y=[0.01,100] m3,
+gamma_mt fixed at 20 kN/m3. These are comparison settings, not normative
+applicability limits or adopted engineering tolerances.
+
+Initial A has eight pending target records. Independent image-only B was obtained
+from a fresh-context agent using only the same source PDF, pages 42-45 and output
+format; it contains 45 pending records. All eight targets are mapped explicitly.
+Structural comparison has 115 matches, nine unavailable unit fields and zero
+differences; three exact arithmetic normal forms and 93/93 tokens of 5.6.26 agree.
+Source-caption ambiguity and unit inferences are preserved. A/B hashes are pinned.
+
+The approved numerical run passed all 3000 samples: 1000 each for (5.11) plus,
+(5.11) minus and (5.15). Zero mismatches, maximum absolute difference 0.0 kPa
+for every formula. Read-only provenance/result audit found no new gaps. All 53
+extraction records remain pending; numerical agreement is not human verification
+or a proof of normative correctness.
+
+Local evidence is under docs/akim/digitization/phase1b-2026-11-03/: immutable A/B,
+comparison/numeric-approval.json, numeric-results.json, comparison.json,
+numeric-run-metadata.json and report.md. Pre-approval reports were preserved.
+verification-preparation.md is a neutral human-review queue, not a signed sheet.
+Task 7.5 remains open for human verification/P1b-P2b decisions, future-type data
+packaging and feature acceptance. No runtime data, API, signed pilot records or
+application processes changed. No commit, merge or push was performed.
+
+## Phase-1b verification sheets prepared (2026-11-03)
+
+The sheets in docs/verification/interim-normatives-source/ are ready for human review:
+P1b-1 has eight source records; P1b-2 has nine control-point placeholders (two
+per formula and three threshold cases). Control inputs, expected results and
+engineering tolerances remain unselected. P2b-1 is an empty template to populate
+only after actual corrections; it must not be signed while empty. All verdict,
+correction, verifier and signature fields are blank. Existing pilot sheets are unchanged.
+
+Local evidence and shown-payload hashes are preserved in the phase-1b working
+folder under sheets/items.json. Control payloads and hashes must be updated before
+signing once the verifier selects data. These sheets do not yet provide the mapping
+to the future runtime YAML. Task 7.5 remains open; no verification status was promoted.
