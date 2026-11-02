@@ -332,4 +332,3 @@ def assemble(
     with _guard(None):
         parameters = model.model_validate(fields)
     return ResolvedParameters(parameters=parameters, method_range=method_range, source=source)
-

@@ -130,14 +130,8 @@ class VerificationRecord(_Strict):
 
 class _Record(_Strict):
     norm_refs: NormRefs
-    page: int | None = Field(default=None, ge=1)
+    page: int = Field(ge=1)
     verification: VerificationRecord
-
-    @model_validator(mode="after")
-    def _a_verified_record_has_its_page(self) -> "_Record":
-        if self.verification.status == "human-verified" and self.page is None:
-            raise ValueError("a human-verified record needs: page")
-        return self
 
 
 class InterimFormula(_Record):

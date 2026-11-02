@@ -26,6 +26,25 @@ def messages(caplog: pytest.LogCaptureFixture) -> list[str]:
     return [record.getMessage() for record in caplog.records if record.name == "app.parameters.interim_loader"]
 
 
+@pytest.mark.parametrize(
+    "verification",
+    [
+        {"status": "pending"},
+        {"status": "rejected", "by": VERIFIER, "at": "2026-10-21", "comment": "<REASON>"},
+    ],
+    ids=["pending", "rejected"],
+)
+def test_unverified_records_without_a_source_page_are_rejected(
+    tmp_path: Path, verification: dict[str, str]
+) -> None:
+    record = formula(verification=verification)
+    del record["page"]
+    document(tmp_path, synthetic_type=type_file(formulas=[record]))
+
+    with pytest.raises(ParameterValidationError, match=r"doc/synthetic_type.yaml: formulas.0.page:"):
+        load_interim_root(tmp_path, {TYPE})
+
+
 def test_a_document_with_its_manifest_and_type_files_is_loaded(tmp_path: Path) -> None:
     document(tmp_path, synthetic_type=type_file(formulas=[formula()]), other=type_file())
 

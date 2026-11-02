@@ -122,17 +122,33 @@ def test_a_checked_record_without_its_fields_is_rejected_naming_the_field(
     assert found == (f"formulas.0.verification: Value error, a {verification['status']} record needs: {missing}",)
 
 
-def test_a_verified_record_without_its_page_is_rejected() -> None:
-    verified = {"status": "human-verified", "by": VERIFIER, "at": "2026-10-21", "portion": "P1", "value_digest": DIGEST}
+@pytest.mark.parametrize(
+    "verification",
+    [
+        PENDING,
+        {"status": "human-verified", "by": VERIFIER, "at": "2026-10-21", "portion": "P1", "value_digest": DIGEST},
+        {"status": "rejected", "by": VERIFIER, "at": "2026-10-21", "comment": "<REASON>"},
+    ],
+    ids=["pending", "human-verified", "rejected"],
+)
+@pytest.mark.parametrize("page", ["missing", None, 0, -1], ids=["missing", "null", "zero", "negative"])
+def test_every_record_requires_a_positive_source_page(verification: dict[str, Any], page: str | int | None) -> None:
+    record = formula(verification=verification)
+    if page == "missing":
+        del record["page"]
+    else:
+        record["page"] = page
 
-    found = rejected(type_file(formulas=[formula(page=None, verification=verified)]))
+    found = rejected(type_file(formulas=[record]))
 
-    assert found == ("formulas.0: Value error, a human-verified record needs: page",)
+    assert len(found) == 1
+    assert found[0].startswith("formulas.0.page:")
 
 
-def test_a_pending_record_needs_no_verifier_fields_and_no_page() -> None:
-    parsed = InterimTypeFile.model_validate(type_file(formulas=[formula(page=None, verification=PENDING)]))
+def test_a_pending_record_needs_no_verifier_fields_but_has_its_page() -> None:
+    parsed = InterimTypeFile.model_validate(type_file(formulas=[formula(page=1, verification=PENDING)]))
 
+    assert parsed.formulas[0].page == 1
     assert parsed.formulas[0].verification == VerificationRecord(status="pending")
 
 

@@ -108,7 +108,7 @@ def test_pending_and_rejected_records_keep_their_status() -> None:
 
 
 def test_a_pending_record_without_a_verifier_passes(tmp_path: Path) -> None:
-    data = load(tmp_path, "draft", formulas=[formula(page=None)])
+    data = load(tmp_path, "draft", formulas=[formula(page=1)])
 
     assert data.records[0].status == "pending"
 
