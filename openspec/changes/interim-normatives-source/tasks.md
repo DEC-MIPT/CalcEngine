@@ -215,8 +215,10 @@ structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. T
 - [x] 9.1 `tester` GO for `feature/interim-normatives/backend`; verify: the verdict with the
   test count and the coverage is recorded in the readiness file (2026-11-02: GO at
   `82c092d`, 1338 passed, 11 skipped, 100% branch coverage; dated tester entry)
-- [ ] 9.2 `tester` GO and `ui-ux-tester` confirmation for
+- [x] 9.2 `tester` GO and `ui-ux-tester` confirmation for
   `feature/interim-normatives/frontend`; verify: both recorded in the readiness file
+  (2026-11-03: GO/UI confirmed at `a8fb64e`; 496 Vitest passed, 100% branches;
+  Playwright 50 passed/52 intentional skips; UI matrix 28/28)
 - [ ] 9.3 Review of each feature by the `orchestrator` or Egor, then the merge into `develop`
   with Akim's word; verify: the reviews are recorded with no open blocker or major finding,
   and `develop` passes both `check.sh`

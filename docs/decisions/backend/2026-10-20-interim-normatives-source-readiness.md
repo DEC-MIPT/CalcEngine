@@ -402,3 +402,46 @@ Strict CH1 and all-artifact validation passed (22/22); the unrelated
 Frontend acceptance (9.2), feature review and merge (9.3), phase-1b data
 (7.5/9.3a), specification work (1.4) and archive (9.5) remain separate gates.
 No commit, merge or push was performed for task 9.1.
+
+## Frontend acceptance, task 9.2 (2026-11-03)
+
+Tester verdict: **GO** for `feature/interim-normatives/frontend` at
+`a8fb64e5678420eceb084f5db325809854de4941`, after **UI/UX CONFIRMED** by
+ui-ux-tester. Task 9.2 is complete; this is frontend acceptance only.
+
+An exact committed snapshot passed `frontend/check.sh`: API schema drift check,
+ESLint and TypeScript PASS; 496 Vitest tests in 46 files passed, branch coverage
+100% (634/634). Relevant backend API/schema paths are identical between this
+snapshot and the accepted backend commit `82c092d`.
+The unchanged configured Playwright suite passed: 50 passed, 52 intentional skips.
+Chromium: 34 passed; Firefox and WebKit: 8 passed and 26 skipped each. Skips are
+existing Chromium-only recordings, keyboard/contrast and transition-time checks.
+
+Independent browser UI verification passed 28/28 combinations: catalog, interim
+strict/draft, strict/draft refusal, legacy absent/null source; RU/EN at 1280/375 px.
+The visible digest has 12 characters; the full 64 characters are in the
+accessibility tree. Draft is identified in words, labels are readable, and there
+is no horizontal page overflow. Full axe WCAG A/AA checks, including contrast,
+found zero violations. Final browser console, page and HTTP errors: zero.
+Keyboard trace toggling, visible focus and report navigation passed in all four
+language/viewport combinations. Final screenshots were visually inspected.
+
+Browser responses used fixtures. English used the existing provider state because
+the public language switch is intentionally hidden. This does not establish live
+backend/PostgreSQL integration, normative correctness or physical screen-reader
+verification. The backend correctness/strict gate remains the separate 9.1 record.
+
+Initial sandbox runs hit Python spawn EPERM and web-server restrictions; completed
+runs used approved escalation. Dependency symlinks in the temporary snapshot caused
+font 403s and two initial trace-playback failures. A local copy of existing
+dependencies resolved the snapshot issue; the entire unchanged suite and UI matrix
+then passed with actual fonts and no HTTP errors. No source edits, dependency
+installation or migrations were needed.
+
+Local evidence: `/tmp/dec-ch1-92/frontend-check.log`, `playwright-local-deps.log`,
+`ui-probe-final.log`, `ui-evidence/results.json` and screenshots in `ui-evidence/`
+under the same directory. These temporary files are not shared artifacts.
+Strict OpenSpec validation passed (23/23); the unrelated `formula-extractor-fix`
+archive-target notice remains. Review and merge (9.3), phase-1b data (7.5/9.3a),
+specification work (1.4) and archive (9.5) remain open. No commit, merge or push
+was performed for this acceptance task.
