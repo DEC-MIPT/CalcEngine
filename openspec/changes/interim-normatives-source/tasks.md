@@ -219,11 +219,13 @@ structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. T
   `feature/interim-normatives/frontend`; verify: both recorded in the readiness file
   (2026-11-03: GO/UI confirmed at `a8fb64e`; 496 Vitest passed, 100% branches;
   Playwright 50 passed/52 intentional skips; UI matrix 28/28)
-- [ ] 9.3 Review of each feature by the `orchestrator` or Egor, then the merge into `develop`
+- [x] 9.3 Review of each feature by the `orchestrator` or Egor, then the merge into `develop`
   with Akim's word; verify: the reviews are recorded with no open blocker or major finding,
   and `develop` passes both `check.sh`
   (2026-11-03: frontend `a8fb64e` APPROVE; backend P2 corrected in `479172e`,
-  re-review APPROVE/tester GO; integration and develop checks pending)
+  re-review APPROVE/tester GO; backend merge `2d0f7db`, frontend merge `cbfb634`;
+  both develop check.sh PASS: backend 1351 passed/11 skipped, frontend 496 passed,
+  branch coverage 100% in both; see readiness integration entry)
 - [ ] 9.3a `tester` GO, review and merge of `feature/interim-normatives-phase1b-data/backend`;
   verify: recorded in the readiness file
 - [x] 9.4 (spec) Record in the plan file and in Akim's PM record that the interim base is in

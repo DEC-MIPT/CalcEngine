@@ -456,3 +456,26 @@ are unchanged. Evidence and the initial finding are in
 [the feature review](2026-11-03-interim-normatives-source-review.md).
 Frontend review at `a8fb64e` is APPROVE. Task 9.3 remains open until authorized
 integration and both check scripts on develop. No merge or push was performed.
+
+## Feature integration, task 9.3 (2026-11-03)
+
+Task 9.3 is **complete**. Akim explicitly requested push and merge in the
+conversation. Reviewed backend `479172e` was published and merged into develop
+as `2d0f7db`, followed by reviewed frontend `a8fb64e` as `cbfb634`, without
+conflicts. Both feature tips are ancestors of develop; their application trees
+match the reviewed versions. The P2 correction remains included.
+
+Both check scripts passed on the actual merged develop, not only a temporary
+patch simulation. Backend: Ruff/mypy PASS, five architecture contracts KEPT,
+1351 passed, 11 skipped, one existing warning, 100% branch coverage
+(3149 statements, 578 branches). PostgreSQL checks skipped because test URLs
+were not configured. Frontend: API drift/ESLint/TypeScript PASS, 496 tests in
+46 files passed, 100% branch coverage (634/634). Both pre-commit hooks passed;
+strict OpenSpec validation passed (23/23). The existing unrelated
+formula-extractor-fix archive-target notice remains.
+
+Post-merge logs: `/tmp/dec-ch1-postmerge-backend.log` and
+`/tmp/dec-ch1-postmerge-frontend.log` (local temporary evidence).
+Live application processes were not restarted. Phase-1b data (7.5/9.3a),
+requirement synchronization (1.4) and final sync/archive (9.5) remain open.
+This integration does not close the entire CH1 change.
