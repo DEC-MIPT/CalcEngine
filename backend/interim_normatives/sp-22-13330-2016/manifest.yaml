@@ -1,0 +1,8 @@
+# The edition is as printed on the consolidated text; it stays unverified until WP3.
+document: СП 22.13330.2016
+edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+sunset:
+  date: 2026-12-01
+  event: the type is switched to the catalog in CH3
+verifiers:
+  - Akim

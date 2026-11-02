@@ -479,10 +479,45 @@ class CalculationResult(BaseModel):
             )
 
 
+class ParameterSourceInfo(BaseModel):
+    """Откуда пришли нормативные параметры расчёта (``interim-normatives-source`` design.md, решение 13).
+
+    У каталога нет ни digest данных, ни профиля; у временного источника есть оба.
+
+    Attributes:
+        kind: ``catalog`` или ``interim``.
+        data_sha256: SHA-256 данных временного источника; ``None`` у каталога.
+        profile: профиль временного источника; ``None`` у каталога.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    kind: Literal["catalog", "interim"]
+    data_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    profile: Literal["strict", "draft"] | None = None
+
+    @model_validator(mode="after")
+    def _fields_of_the_kind(self) -> "ParameterSourceInfo":
+        described = (self.data_sha256 is not None, self.profile is not None)
+        if described != ((True, True) if self.kind == "interim" else (False, False)):
+            raise ValueError("an interim source has a data digest and a profile, and the catalog has neither")
+        return self
+
+
+CATALOG_SOURCE = ParameterSourceInfo(kind="catalog")
+"""Описание источника каталога норм."""
+
+
 class ResultEnvelope(CalculationResult):
-    """Результат расчёта с ``result_id``, который назначает слой сервисов."""
+    """Результат расчёта с ``result_id``, который назначает слой сервисов.
+
+    ``parameter_source`` не входит в ``input_hash`` и не читается движком; его нет у
+    результата источника без описания и у результата, сохранённого до появления поля
+    (``interim-normatives-source`` design.md, решение 13).
+    """
 
     result_id: UUID
+    parameter_source: ParameterSourceInfo | None = Field(default=None, exclude_if=lambda source: source is None)
 
 
 class CalculationRequest(BaseModel):

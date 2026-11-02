@@ -9,6 +9,7 @@ from app.schemas.calculation import (
     CheckStep,
     MethodBound,
     NormRef,
+    ParameterSourceInfo,
     QuantityValue,
     RoundingRule,
     Source,
@@ -209,6 +210,49 @@ def format_source(source: Source) -> str:
     if isinstance(source, EngineerRule):
         return format_engineer_rule(source)
     return "; ".join(format_norm_ref(reference) for reference in source)
+
+
+def format_parameter_source(source: ParameterSourceInfo) -> str:
+    """Называет источник нормативных параметров расчёта одной фразой.
+
+    У временных данных фраза называет профиль и полный SHA-256 данных
+    (``interim-normatives-source`` design.md, решение 13).
+
+    Args:
+        source: описание источника из конверта результата.
+
+    Returns:
+        Строка источника.
+    """
+    if source.kind == "catalog":
+        return "Источник нормативных параметров: каталог норм."
+    return (
+        f"Источник нормативных параметров: временные нормативные данные, профиль {source.profile},"
+        f" SHA-256 данных {source.data_sha256}."
+    )
+
+
+DRAFT_CAVEAT = (
+    "Внимание: значения нормативных параметров этого расчёта взяты из временных данных,"
+    " не прошедших верификацию; результат нельзя считать проверенным."
+)
+"""Оговорка отчёта о результате по временным данным профиля ``draft``."""
+
+
+def parameter_source_lines(source: ParameterSourceInfo) -> list[str]:
+    """Собирает строки источника параметров для отчёта.
+
+    Строка источника, а у профиля ``draft`` ещё и оговорка о непроверенных значениях
+    (``interim-normatives-source`` design.md, решение 13).
+
+    Args:
+        source: описание источника из конверта результата.
+
+    Returns:
+        Одна или две строки по порядку печати.
+    """
+    caveat = [DRAFT_CAVEAT] if source.profile == "draft" else []
+    return [format_parameter_source(source), *caveat]
 
 
 def format_rounding(rule: RoundingRule) -> str:

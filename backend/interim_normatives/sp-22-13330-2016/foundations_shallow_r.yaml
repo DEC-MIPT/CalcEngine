@@ -1,0 +1,3162 @@
+formulas:
+- parameter: r
+  result_symbol: R
+  latex: R=\frac{\gamma_{c1}\gamma_{c2}}{k}\left[M_{\gamma}k_{z}b\gamma_{II}+M_{q}d_{1}\gamma'_{II}+(M_{q}-1)d_{b}\gamma'_{II}+M_{c}c_{II}\right]
+  tree:
+    kind: mul
+    left:
+      kind: div
+      left:
+        kind: mul
+        left:
+          kind: symbol
+          name: gamma_c1
+        right:
+          kind: symbol
+          name: gamma_c2
+      right:
+        kind: symbol
+        name: k
+    right:
+      kind: add
+      left:
+        kind: add
+        left:
+          kind: add
+          left:
+            kind: mul
+            left:
+              kind: mul
+              left:
+                kind: mul
+                left:
+                  kind: symbol
+                  name: M_gamma
+                right:
+                  kind: symbol
+                  name: k_z
+              right:
+                kind: symbol
+                name: b
+            right:
+              kind: symbol
+              name: gamma_II
+          right:
+            kind: mul
+            left:
+              kind: mul
+              left:
+                kind: symbol
+                name: M_q
+              right:
+                kind: symbol
+                name: d_1
+            right:
+              kind: symbol
+              name: gamma_II_prime
+        right:
+          kind: mul
+          left:
+            kind: mul
+            left:
+              kind: sub
+              left:
+                kind: symbol
+                name: M_q
+              right:
+                kind: number
+                value: 1.0
+            right:
+              kind: symbol
+              name: d_b
+          right:
+            kind: symbol
+            name: gamma_II_prime
+      right:
+        kind: mul
+        left:
+          kind: symbol
+          name: M_c
+        right:
+          kind: symbol
+          name: c_II
+  units:
+    M_c: '1'
+    M_gamma: '1'
+    M_q: '1'
+    R: kPa
+    b: m
+    c_II: kPa
+    d_1: m
+    d_b: m
+    gamma_II: kN/m3
+    gamma_II_prime: kN/m3
+    gamma_c1: '1'
+    gamma_c2: '1'
+    k: '1'
+    k_z: '1'
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, формула (5.7)
+    status: unverified
+    provenance: machine-extracted
+  page: 36
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-10-27'
+    portion: P1-1
+    value_digest: 2e90ef2fdb87877f759f4613322f8ccfe7f89908b52e7be9a90c855853acd62f
+- parameter: k_z_below
+  result_symbol: k_z
+  latex: k_{z}=1
+  tree:
+    kind: number
+    value: 1.0
+  units:
+    k_z: '1'
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, экспликация k_z
+    status: unverified
+    provenance: machine-extracted
+  page: 36
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-10-27'
+    portion: P1-1
+    value_digest: e164f7c43d382612ca5f369079d584709dcac97e0f3d45730d136df58088b5b0
+- parameter: k_z_from
+  result_symbol: k_z
+  latex: k_{z}=8/b+0{,}2
+  tree:
+    kind: add
+    left:
+      kind: div
+      left:
+        kind: number
+        value: 8.0
+      right:
+        kind: symbol
+        name: b
+    right:
+      kind: number
+      value: 0.2
+  units:
+    k_z: '1'
+    b: m
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, экспликация k_z
+    status: unverified
+    provenance: machine-extracted
+  page: 36
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-10-27'
+    portion: P1-1
+    value_digest: 9f7823e9f13a54eeacabb3ad5c42d00adfa0ea780cceefdc4aab7b346762aef5
+table_values:
+- parameter: gamma_c1
+  symbol: gamma_c1
+  latex: \gamma_{c1}
+  value: 1.1
+  unit: '1'
+  heading_symbol: null
+  heading_value: null
+  heading_unit: null
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.4
+    status: unverified
+    provenance: machine-extracted
+  page: 37
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-10-29'
+    portion: P2-1
+    value_digest: e59759ffab6ddb209eef78e5a9caf31765b08db971ee86ff324d966fae9f9da5
+    comment: gamma_c2 = 1.0 при любом L/H
+- parameter: gamma_c2
+  symbol: gamma_c2
+  latex: \gamma_{c2}
+  value: 1.0
+  unit: '1'
+  heading_symbol: null
+  heading_value: null
+  heading_unit: null
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.4
+    status: unverified
+    provenance: machine-extracted
+  page: 37
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-10-29'
+    portion: P2-1
+    value_digest: c7912e5d91b7bc4b0e34b5ab7547681e8622d5b5e6366508a730b3070987f17f
+    comment: gamma_c2 = 1.0 при любом L/H
+- parameter: k
+  symbol: k
+  latex: k
+  value: 1.0
+  unit: '1'
+  heading_symbol: null
+  heading_value: null
+  heading_unit: null
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, экспликация k
+    status: unverified
+    provenance: machine-extracted
+  page: 36
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-10-27'
+    portion: P1-1
+    value_digest: 7fd73c29eab3ec3d3ffd1bac255683522e0dd2113a36b0b90d3b7d8005d73af4
+    comment: k = 1 — случай испытаний; ветка k = 1,1 вне объёма пилота, выбор — категориальный вход (C2)
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.0
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 0.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 3797d811647db8f715f79b38f3f77b083e9876a609a2262d2b1c20e32c87d763
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.01
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 1.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 4f51e1375dc53e3ee039f335c543024257bf1798692423f39b00f338f5bbaf4b
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.03
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 2.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 1999b463faf29acc44e367f7528513256ba46bcf30ed3dc8950de67ee38cecb2
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.04
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 3.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 23eb1a61d8ca15a7c4ee57ad6afceca6eb11476a388cc6a4420d784797390eda
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.06
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 4.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: b05ced8ade4d3f1589e81acbe201550facc969820566b46cbd1ce385957a3c73
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.08
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 5.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 2b65ee8711a1635ce0e5cf790c290ddd7bfb9e0e7574de7c6cd28125bd2499fd
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.1
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 6.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 7d3fe76dfe49c228cb99644a8d27147b47c03e60e2b0c7f8fcf5bdf3f43ff5d4
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.12
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 7.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: d756c690410f913f616004908503813b8728706185df97af1c124fdcfc4003a2
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.14
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 8.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 6deae669c154a00c6d60389f57a3f93ca54a0da72e8b911155f899ba14ad651d
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.16
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 9.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: abd6e3c6e9569b412b833767d9a12e07d462b3f979df698b1993b2be58eb5e2f
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.18
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 10.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 60c4c876c21f9be2023959997cddc66f29777b3b697da699c51451a12aeb559b
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.21
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 11.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 8bb9adf3c253085c4aea5ba96c12e51c5d42cb9437bbcfb00e9f6e4ce60262ef
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.23
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 12.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: a9a2b1a3047fbbadc568a11f0cb7e456aadfa734bfc7bd27b15d241b3331ddfb
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.26
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 13.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 7b7290aabde98b9d6ba3ee3728780a1d78b9f22ac4693b96629ebe98f921037d
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.29
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 14.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 776f941e5ed4f4e21772498e25de50e9e1312a99eb99607d6ecef16ac3d5c690
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.32
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 15.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 134e6b27f59d6b72a06fd9e5cefcc078b49dd16e98c4a9a30bd55d11d6011db8
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.36
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 16.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: eda70f1bc5cc2579df8e5723a6de1ddad506afc655cf16542ee800af568343b8
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.39
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 17.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 973be7598f4cbf44e0451eb8358789cc6b273e99f05845488dc91ea401904ad9
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.43
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 18.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 29c2eb6114df4450e036e50332746ea464d4e9f135bc3ef8c621f9f99f0da542
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.47
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 19.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 67d6d613a65892695e776f7a0461bce2670cdd9091769cc7ed793fa7d1f7fe65
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.51
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 20.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 5753fb4160bd4d5c6847c11d4f6e7aa3913827ca7c20ce9385ca1d09d651c29b
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.56
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 21.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 54fa1fe21286ee1e621ca768a6e6ad7723ac92ada562d8351c0df0017b2aef40
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.61
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 22.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: d4f15a42af79ed6603707b3d5238f7fc6624c2dad46cadb44b401cf510cfd4f4
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.66
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 23.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: b0f9db7abfd8f1b0d56f5f6333ad934d21475aa7e7eeda84e680a8556927a838
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.72
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 24.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 6a83b7ce80054c31f8cdcac11187f76a6ee7876dbbf922a610748eb9ab8f30ae
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.78
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 25.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 7541555094d425232054120cacaba09a4eef70f9ecf648385d07d24339ed10bf
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.84
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 26.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 1df2c63e9f90ff2389bdae4bb06f6c199539df2660e2c82cc103f61a3883e71b
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.91
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 27.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: f18276d71b66f754cabc508056901f292d49f05d4cf46dcf0d59ba1292bd6db6
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 0.98
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 28.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 3a3d1c16d8a17d18d06a0793b487b920d1b132769d02156fce0052297c27c703
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 1.06
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 29.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 7c0e22b5815f7f110b5200a7e03c882fe74dd64d28637606c17cc70bf8feb40d
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 1.15
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 30.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 266111d095fc3fbf6ca4f64fe46f73d3e8a1e1df956cc820494388fc10cdc0be
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 1.24
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 31.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 7f3d8d52b6734beabf4e41a97236dd6a3d06fd05638de258696d946cc5911f9f
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 1.34
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 32.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: d109ff4e7541d37d8e4a3e1f003ba1d89b55f35201babef0a247ec6c2f740ce7
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 1.44
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 33.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 9d631b631f6d04cc7c7b68ae2cf8b57f277329eb0e62aca165043d426325f234
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 1.55
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 34.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 86ced4a923ca70b33916d69a0f8a7ea522e7accf5831786231317a331bd16593
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 1.68
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 35.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 30600db4733d9a4eb4c94c7d1848057ec0a1c5c41ac3dc27b5f995a01e38f04a
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 1.81
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 36.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: a2c5c018a5f94a6877e8459fc13eec835a49ac4cc8bee1492702c445c1765771
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 1.95
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 37.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 95b887c633a1cb0dba08ad30f760430b895fa45d0bdda9aa37a44548c0f3be0d
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 2.11
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 38.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 4a6fff6b6e66a8202e1fe4f5e32e304afba1a565d25e9a146934fc3e47519498
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 2.28
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 39.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: f9e82185a41eae409ddcbac36021883b7b39ce5de5759e915fca358e64b74ee1
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 2.46
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 40.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 6040d5dcdfadd48975276a4a323cec642e301f67f09e7e9f04d25e1d099ac06a
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 2.66
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 41.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 200e01fc26422c68d54916e09ba76d3d138cf06ea4db77e2eb3f71f0062d50d9
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 2.88
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 42.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 360d8e3f5427bc69f3fb814dd57fd1973efbd2fc18e069eee3d58ca6f3f3f988
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 3.12
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 43.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 537b81c2132912bd3b92e7af39b2ac3a79a0ddd5805bdcd84bc7cdbbe1e2952d
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 3.38
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 44.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: e5abd70f716afe5befa4ab865598f757d41806b3dcad025cee80df01916fa54e
+- parameter: m_gamma
+  symbol: M_gamma
+  latex: M_{\gamma}
+  value: 3.66
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 45.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: c5f123ca8711d6678c6466010aac9b4770c5f704b4c9d7d765c4408b0428db82
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 1.0
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 0.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: d7d421e294b777f22ecee66cd256964f20e503fa550ef0e7d2b90efce41a3071
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 1.06
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 1.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 985296d1652dc15990883935a331dc7abf4737cbec8a2172eee5ec1bb43284e5
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 1.12
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 2.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: ece32b2d56697bd4ccc9a1bd660b2c0b0927a60889520e2fb8fbc6ae7fe28aeb
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 1.18
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 3.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: ecddd9d798162c4f5fc3fa1db37b36fde85c68bca332145fb66688ca80d962ac
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 1.25
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 4.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: f5690462ce09613ebad5c9ebae78d4c2fb7e457e73bf0cc1c0c7770c7fc18f36
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 1.32
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 5.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 4e351a734f3566a9c6605c9cb4178a32e7c0d0a231331ed63be283e949350afb
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 1.39
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 6.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 6eb2dde6c18df022c7fd2cb5c4e262f2a984f7131d4eff8669f711f662fcc1a5
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 1.47
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 7.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: fcc7822001a003743c91fbfe60b03416d58cec6900b026ed54c048851e0fa289
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 1.55
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 8.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 9321b11d28917ca3a4fabb4c2e1c3341f02cc269089b80ebbf599d908e2680f3
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 1.64
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 9.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 4734dfe3877e3e4fa1f520b5f659682e20d502423fd25f7a5b2bb3c611c5362c
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 1.73
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 10.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 5200568182df63395e7c046bb5efb2fe3ad3a4dcc51421f249ff26c16bee2c16
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 1.83
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 11.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 18d18953d3d0c2642527247c5f27f90f9da480ea007d9509fa2dc9ed36be6400
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 1.94
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 12.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 5091ce3553acc86196ab17815e51183c06c3fbf1901e00c63a7cd349ebac1e52
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 2.05
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 13.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: f0a832699601be8e817f8acf1822710d64ded28c82e9d8ae4f1c6fd450e2df06
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 2.17
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 14.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: ac2cc6bd4d1a2dc51c9bbe46c73e55fa5e3bc46023a5a17e682fc4d0ea730800
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 2.3
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 15.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: cf4e6432f2873bf18a9bc7c696100badf67867e6376a42e7461958dc1293453a
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 2.43
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 16.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 0984ad23aed0e5de3117a3630c851abbbb00f6df8d87e339237c4be3be909c86
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 2.57
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 17.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: f61769c3e422be60d9807d3ce3d07ec0617b16a56174c2d9880aa244fb58140e
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 2.73
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 18.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 79d955ef81a1b4116ceb7b52c4d24016b7cfeb6929147d7aa4bf041b8efb80e6
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 2.89
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 19.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: d92a26448978c7e4e697bf84390526e3490f944e6006d252dba4f12ecb5df5f9
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 3.06
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 20.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 31562e9dc26111dfde9a738fca6819e41c4161432a29f91c069a84ee166f5fe6
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 3.24
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 21.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: c7714ef215e8af4f85344f0160f3636c4ad2bd2ecb15844195de480c64bd7451
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 3.44
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 22.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: d96ab6bb27e9ff7a44f022a512266d0c04503345a9e1f8824ff729f1f7e68ed2
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 3.65
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 23.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 5204e2f92fcf0252c0beffbb162f9bdc1f847332005df605b482768313665aa1
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 3.87
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 24.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 3ede0a475fe8f5f48fc5a2b71b7057ea5b86262adf3e8c7e165c9be2be6294c1
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 4.11
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 25.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 424c7e66e02f9cc430000c0e56316dfe407a7d5ceb4de182c2dde85498f30bd1
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 4.37
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 26.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: db8ad81aeb99497eda74b5656457c503ef06e43fd6d62c4d8e9178c015059677
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 4.64
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 27.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: acc14a873a8416404c22d4f48d078efbb13a70b960e1fa5519aaf5bde723d6a1
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 4.93
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 28.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: f1f472bc80925f25bbe82fe615edcef4efaf5c9727a5a5e2a8223ac758805730
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 5.25
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 29.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 7c6f8bd30054b76bffdf557d70ccbfb7d63f8a2352de2b1deee2e6a0196b741a
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 5.59
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 30.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: ecff67fe4d21f3ad44ad70b31d5d84c4c81e311aa75e9ac80955c91146badbab
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 5.95
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 31.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 9d3340c947bfbe192b556573cf986f544e81e20b5cedbbaaa2fa630df3fb0054
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 6.34
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 32.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: b4f46c7dc86e377f9de2d0835f0045fe356f18d1a95820905a0d362d3fa52055
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 6.76
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 33.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: b7f30f13d227de9ff6356d073cd2c1745ccbf0c04ca6d3f3f5e01f9d83ad76ca
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 7.22
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 34.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: fe42e135cb4bfd5afb0b353f7d0191dcd9a6b8c39fef57dc87bd0fc8b3452310
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 7.71
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 35.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: f557c4fa7d98f1aabe6fa2cdd5fdce88c93770276c7731ab2664ceeea45772b2
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 8.24
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 36.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 40884e5e8a901126b5e50aa62725041e29ed273e267d05e8f6199d4ef75df0de
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 8.81
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 37.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: df4a7b19d2b4e608c8b64d06005e1ec2ebf37a3072944b24a08f30948cb1f2b2
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 9.44
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 38.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 57e703131278bcb658e5b4dafb6055110681dddc95de890e1f055ea72e5e8af8
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 10.11
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 39.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 9ba00ab06735644cb3d845b4cb554d828cf31bf8e149edb0710666607cb2f2c8
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 10.85
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 40.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 327dd54ab405cc6c4a343f6943924fefbc75f3f7c45e7d112c753638836eda6d
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 11.64
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 41.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 046d7abc1010bd9f8229928f6806e6f827f66f8ce94250149374d080fd84a8ab
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 12.51
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 42.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: a9823f24f840f9a15a008f95d7e67997aa87e35e7bc7ca07a7f2e2ec7b33ed6b
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 13.46
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 43.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: ea25813e5b34f86524a4ae2c327b8bf364202b0e7f97d43d3a7264b1531fdcb1
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 14.5
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 44.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 3f6c1849d6964dbdad1e680611a2a33edaacad3da83c5f8300b15c3b12be8083
+- parameter: m_q
+  symbol: M_q
+  latex: M_{q}
+  value: 15.64
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 45.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: ad0736aeacd4fe941d469f139e333ebb3e22cd079527dea0261fe47a5a964999
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 3.14
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 0.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 441b0c89e7f62ca0087fc776546a0246ae5f7904227266513746216c654c8596
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 3.23
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 1.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: a472ea3062756f86df693fed72d1166c89d99c5c800e52b4bf3f4d83ca134ee8
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 3.32
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 2.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: ecdda570af99c61f533b92f8f2af24ff31098892acc5ebd9764638f6187dc488
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 3.41
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 3.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 41e002cce895014b590cf2a885ce5b6601671c521ad4b81669bbc8096a5ca598
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 3.51
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 4.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 898ee557e9f5f505a830b8ca0eae3c3c5000b9cc49214d6b22c689be5880b5f4
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 3.61
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 5.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 5171626eb12323b6ef797e389fb397a94357e345dc801b4dae7879d14c083586
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 3.71
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 6.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 1f9d3ef252e5642ea54fe6056c9f16b52f5330bf5405bc05986e42e03d14ddb0
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 3.82
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 7.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: b86c327adb8752f3cab395f3dd7735784ecbd3a5293d1561eea2dff33d02acd6
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 3.93
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 8.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 998508779c09ac8fbffbb98313d02f1ffce4670d2231ff0ce6b9985c18cdb152
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 4.05
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 9.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: cfc6d964baf98e5a62c81716ff3b68953e076fdbf5de5ca7e2e1d77d5a7d3296
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 4.17
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 10.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: c4ff8da6bed10fc9889c4b518e397edd8dce0c162e952ae08934136fbea367f3
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 4.29
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 11.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 06ddaceac0009af5560d77ebf1e5966fd2301199fd62ff32e38abeeb287ea4ef
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 4.42
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 12.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 06ff44bd7761e5fa578061c270348b10afc0646f3d0a7365149cdd7678d4033d
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 4.55
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 13.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: d775975bcbe3e7049dcdc36e34fdce926bff602a7ad710665129dd1cdb9c7a01
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 4.69
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 14.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: e51b40a707a8ca1cca88f3877b8366a24ffe141d38f8b6877821c25858880343
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 4.84
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 15.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 372151f9b89916967408c2afdf3991e23a2c4c4f00754bf20469f7fb535bc5ca
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 4.99
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 16.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: baf1f9bfc8d29b2c28dc2b85856ca95824e4300630b555029fc3a1e8f4b55351
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 5.15
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 17.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: bca3742760725912f322c9e22b465dc257f42d556a6fc2bc726b24d47e3abfd7
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 5.31
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 18.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 3b7f61c9ab464427360a56c344255d601e8fc103fecc88ef95a91a97814d01b7
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 5.48
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 19.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 178302ee64b4920863524b8d55fdd68a8a9420cc728069d31899b08fbdce1959
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 5.66
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 20.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 0e26a4a82305f5cab64eeb7cc586b89d0077111877272d5ea6d281e7da8324ba
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 5.84
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 21.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: dc15f1132d97c68a59e4a032a71720904b383c7039dfc14fb40757137fe14441
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 6.04
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 22.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 88a553ccc66bbd114929396497b0eb64c89a1c632d4bedaedfbd838fcf0215b6
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 6.24
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 23.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 77ce8b1558473f63ea3fb0b61444d1041e5ccf2ea2d65b06304eeed5e2afddfd
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 6.45
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 24.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 68bc3df28416f2cf420967cd307df94f71303cee134386c60289ff0d1f2e6b77
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 6.67
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 25.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 5e91b965ef2d81a4111cfa9a869962c9e198f7ddf93c3d62dd294ccba0f35ef5
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 6.9
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 26.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: b61db7e9b1a2589a77f5e22ac9645e9fb284f4cc4eac2688974cf97eb1024483
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 7.14
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 27.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 1bd3c1f4093ddc0c83dbc34f9ab74c5cf27f75b34f82ae8c396ca1d95f82d172
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 7.4
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 28.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 7a5f026e342c7cab9eb03cc8e78522a452cea102bd677cc8981d00655400ac24
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 7.67
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 29.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 0fb5587bf502f05b63fc3d09c15b213f42179771171724939fd5e7ddcfd3558b
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 7.95
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 30.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 26ce248324e83b62b6c8d239cac4749e48d0ba1e64ebf6b1feadd13a8a77f97a
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 8.24
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 31.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 66ea02ab19976f48d6ab067ef3d70d94478b470200c283e6a251d837077eb48e
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 8.55
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 32.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 2b03b996c3ae1ff02c78cd1891de485ba3a957d364aadd7603020c06fbc2d467
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 8.88
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 33.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 5a01d93f2b0078ded7f97f703dbce2b0cdbf09d27633a8bb575d6c0819b5ca1d
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 9.22
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 34.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: f54b2829929097b4e651735c7b8f7aeed678ac5d4dda8b84747d6226d52f4a34
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 9.58
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 35.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: bec1fcc3f59ee4a970779e6a97627120e01293d4b599bc0fcf72dd230b37b380
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 9.97
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 36.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: dc39c12441ace80627b73b420bc8e04d2e96a044bd908dbae184f1a970616655
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 10.37
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 37.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 9662890e6e768f5ff0dfbbc4d7aec69eacca546f762d1b11d5a4ccca29405533
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 10.8
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 38.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 77149fe41290dfd1c612caa6df2e847bbe6d693ccdece9e1898d7f75e5ecff29
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 11.25
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 39.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: ccc2a5226e23df554c5fe79901c26b4583f6592a2d2725d47311fec0b2756741
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 11.73
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 40.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: a57a49c08c0d21a6053aae6df77a957c2a1a5a7989fcf04f8f5b067649079834
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 12.24
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 41.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 3405cbbad727c4536fa2a3b39fcd85631899ef90d955e6d99bdea648f0453654
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 12.79
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 42.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 12fc62781d6e13272d63bacd141d8490ef1936aa5f0a63973b65280bea56e603
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 13.37
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 43.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: e96787599abafb69a7c23d9ed922f3a4986bc239ad7b80977da3ffbf0297f4bd
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 13.98
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 44.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 4b9266994d9dc21826c647fdc4e2ff5e316d0742b5e12001257c7e95597aa378
+- parameter: m_c
+  symbol: M_c
+  latex: M_{c}
+  value: 14.64
+  unit: '1'
+  heading_symbol: phi_II
+  heading_value: 45.0
+  heading_unit: deg
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, таблица 5.5
+    status: unverified
+    provenance: machine-extracted
+  page: 38
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P2-2
+    value_digest: 7f21de4b0f2766afd17704585be1b1f05e7a7965cdb0a0105c127587af54d868
+thresholds:
+- parameter: k_z_threshold
+  latex: b\geq 10\ \text{м}
+  value: 10.0
+  unit: m
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, экспликация k_z
+    status: unverified
+    provenance: machine-extracted
+  page: 36
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P3-1
+    value_digest: 0f9050e76f9b7f0a29de86a83a2ea8ab765497eda60d238168be586a0491fff3
+checks:
+- parameter: check_norm_refs
+  norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7
+    status: unverified
+    provenance: machine-extracted
+  page: 35
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-02'
+    portion: P3-1
+    value_digest: 33f963820fb44d056701270df1eb11124543e63d5e2b14918969a1b277cfbb7a
+method_bounds: []

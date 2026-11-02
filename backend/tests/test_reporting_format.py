@@ -5,12 +5,15 @@ from app.reporting.format import (
     check_rounding,
     format_norm_ref,
     format_number,
+    format_parameter_source,
     latex_number,
     latex_quantity,
 )
 from app.schemas.calculation import (
+    CATALOG_SOURCE,
     CheckStep,
     NormRef,
+    ParameterSourceInfo,
     QuantityValue,
     RoundingRule,
     Substitution,
@@ -115,3 +118,20 @@ def test_a_norm_ref_prints_with_its_status_and_unverified_parts() -> None:
     assert format_norm_ref(unverified) == "<DOC>, редакция: не проверено, пункт: <CLAUSE> (статус: не проверено)"
     assert format_norm_ref(verified) == "<DOC>, редакция: <ED>, пункт: <CLAUSE> (статус: проверено)"
     assert format_norm_ref(unverified, status=False) == "<DOC>, редакция: не проверено, пункт: <CLAUSE>"
+
+
+@pytest.mark.parametrize(
+    ("source", "text"),
+    [
+        (CATALOG_SOURCE, "Источник нормативных параметров: каталог норм."),
+        (
+            ParameterSourceInfo(kind="interim", data_sha256="f" * 64, profile="draft"),
+            f"Источник нормативных параметров: временные нормативные данные, профиль draft, SHA-256 данных {'f' * 64}.",
+        ),
+    ],
+    ids=["catalog", "interim-draft"],
+)
+def test_the_parameter_source_prints_its_kind_and_for_interim_data_the_profile_and_the_full_digest(
+    source: ParameterSourceInfo, text: str
+) -> None:
+    assert format_parameter_source(source) == text

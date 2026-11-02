@@ -21,11 +21,13 @@ from app.models.calculation_result import CalculationResultRow
 from app.repositories.calculation_result import CalculationResultRepository
 from app.schemas.api import FieldError
 from app.schemas.calculation import (
+    CATALOG_SOURCE,
     CalculationRequest,
     CalculationTypeContract,
     MethodBound,
     NormRef,
     OutputDeclaration,
+    ParameterSourceInfo,
     QuantityDeclaration,
     QuantityValue,
     RoundingRule,
@@ -52,6 +54,7 @@ def ref(document: str, clause: str = "<CLAUSE-PLACEHOLDER>") -> NormRef:
 
 REF = ref("<NORM-DOC-A>")
 RULE = EngineerRule(engineer="<ENGINEER>", rationale="<RATIONALE>")
+INTERIM = ParameterSourceInfo(kind="interim", data_sha256="a" * 64, profile="strict")
 
 CONTRACT = CalculationTypeContract(
     name="synthetic",
@@ -100,13 +103,14 @@ class SyntheticCalculator(Calculator[Mapping[str, QuantityValue], SyntheticParam
 
 
 class FixedSource:
-    def __init__(self, method_range: tuple[MethodBound, ...] = ()) -> None:
+    def __init__(self, method_range: tuple[MethodBound, ...] = (), info: ParameterSourceInfo | None = None) -> None:
         self.method_range = method_range
+        self.info = info
         self.calls: list[tuple[str, dict[str, QuantityValue]]] = []
 
     def resolve(self, calculation_type: str, inputs: Mapping[str, QuantityValue]) -> ResolvedParameters:
         self.calls.append((calculation_type, dict(inputs)))
-        return ResolvedParameters(parameters=PARAMETERS, method_range=self.method_range)
+        return ResolvedParameters(parameters=PARAMETERS, method_range=self.method_range, source=self.info)
 
 
 class SpyRepository(CalculationResultRepository):
@@ -364,3 +368,28 @@ def test_no_value_the_service_returns_is_an_orm_object(results: SpyRepository) -
     assert model_objects(envelope) == []
     assert model_objects(service.get(envelope.result_id)) == []
     assert model_objects([CalculationResultRow()]) != []
+
+
+@pytest.mark.parametrize("info", [INTERIM, CATALOG_SOURCE], ids=["interim", "catalog"])
+def test_the_source_description_labels_the_envelope_and_the_stored_record(
+    results: SpyRepository, info: ParameterSourceInfo
+) -> None:
+    service = make_service(results, FixedSource(info=info))
+
+    envelope = service.submit(request())
+
+    assert envelope.parameter_source == info
+    assert results.added[0]["envelope"]["parameter_source"] == info.model_dump(mode="json")
+    assert service.get(envelope.result_id).envelope.parameter_source == info
+
+
+def test_a_source_without_a_description_gives_no_label_and_otherwise_the_same_envelope(
+    results: SpyRepository,
+) -> None:
+    plain = make_service(results, FixedSource()).submit(request())
+    described = make_service(results, FixedSource(info=INTERIM)).submit(request())
+
+    assert plain.parameter_source is None
+    assert "parameter_source" not in results.added[0]["envelope"]
+    assert plain.input_hash == described.input_hash
+    assert plain.model_dump(exclude={"result_id"}) == described.model_dump(exclude={"result_id", "parameter_source"})

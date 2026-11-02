@@ -9,6 +9,7 @@ from app.schemas.calculation import (
     BoundViolation,
     CalculationTypeContract,
     CheckStep,
+    ParameterSourceInfo,
     QuantityValue,
     ResultEnvelope,
     RoundingRule,
@@ -42,12 +43,16 @@ class TraceSection(_Section):
 
 
 class ConclusionSection(_Section):
-    """Вердикт и то, что его решило: решающий шаг проверки или нарушенная граница."""
+    """Вердикт и то, что его решило: решающий шаг проверки или нарушенная граница.
+
+    ``parameter_source`` — источник параметров из конверта; ``None`` у результата без него.
+    """
 
     kind: Literal["conclusion"] = "conclusion"
     verdict: Literal["pass", "fail", "refused"]
     deciding_check: CheckStep | None
     violation: BoundViolation | None
+    parameter_source: ParameterSourceInfo | None = None
 
 
 class AccountabilitySection(_Section):
@@ -91,13 +96,23 @@ def _input_rows(
 def _conclusion(envelope: ResultEnvelope) -> ConclusionSection:
     reason = envelope.verdict_reason
     if isinstance(reason, BoundViolation):
-        return ConclusionSection(verdict=envelope.verdict, deciding_check=None, violation=reason)
+        return ConclusionSection(
+            verdict=envelope.verdict,
+            deciding_check=None,
+            violation=reason,
+            parameter_source=envelope.parameter_source,
+        )
     deciding = next(
         step
         for step in envelope.trace
         if isinstance(step, CheckStep) and step.step_id == reason.step_id
     )
-    return ConclusionSection(verdict=envelope.verdict, deciding_check=deciding, violation=None)
+    return ConclusionSection(
+        verdict=envelope.verdict,
+        deciding_check=deciding,
+        violation=None,
+        parameter_source=envelope.parameter_source,
+    )
 
 
 def build_report(

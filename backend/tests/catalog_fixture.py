@@ -257,17 +257,20 @@ def _encoded(view: str, row: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
-def _insert(connection: Connection, view: str, *, cast_json: bool) -> None:
+def _insert(
+    connection: Connection, view: str, *, cast_json: bool, rows: Mapping[str, Sequence[Mapping[str, Any]]] = ROWS
+) -> None:
     columns = [column for column, _ in CATALOG_COLUMNS[view]]
     values = ", ".join(
         f"CAST(:{column} AS jsonb)" if cast_json and (view, column) in JSON_COLUMNS else f":{column}"
         for column in columns
     )
     statement = text(f"INSERT INTO {SCHEMA}.{view} ({', '.join(columns)}) VALUES ({values})")
-    connection.execute(statement, [_encoded(view, row) for row in ROWS[view]])
+    if rows[view]:
+        connection.execute(statement, [_encoded(view, row) for row in rows[view]])
 
 
-def load_sqlite(engine: Engine) -> None:
+def load_sqlite(engine: Engine, rows: Mapping[str, Sequence[Mapping[str, Any]]] = ROWS) -> None:
     """Подключает к SQLite базу ``catalog_read`` в памяти и заполняет её таблицами-представлениями.
 
     ``ATTACH`` действует на одно соединение, поэтому движок должен держать одно
@@ -275,13 +278,14 @@ def load_sqlite(engine: Engine) -> None:
 
     Args:
         engine: движок SQLite в памяти со ``StaticPool``.
+        rows: строки представлений; по умолчанию ``ROWS``.
     """
     with engine.begin() as connection:
         connection.exec_driver_sql(f"ATTACH DATABASE ':memory:' AS {SCHEMA}")
         for view, columns in CATALOG_COLUMNS.items():
             body = ", ".join(f"{column} {SQLITE_TYPES[kind]}" for column, kind in columns)
             connection.exec_driver_sql(f"CREATE TABLE {SCHEMA}.{view} ({body})")
-            _insert(connection, view, cast_json=False)
+            _insert(connection, view, cast_json=False, rows=rows)
 
 
 def load_postgres(engine: Engine) -> None:

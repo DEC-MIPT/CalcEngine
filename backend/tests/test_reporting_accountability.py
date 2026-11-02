@@ -12,16 +12,35 @@ from app.engine import foundations_shallow_r as pilot
 from app.reporting import docx_writer
 from app.reporting.accountability import RESPONSIBILITY, accountability_lines
 from app.reporting.docx_writer import conclusion_lines, render_docx
-from app.reporting.model import AccountabilitySection, ConclusionSection, build_report
-from app.schemas.calculation import ValidatedBound
+from app.reporting.format import (
+    DRAFT_CAVEAT,
+    format_parameter_source,
+    parameter_source_lines,
+)
+from app.reporting.model import (
+    AccountabilitySection,
+    ConclusionSection,
+    Report,
+    build_report,
+)
+from app.schemas.calculation import CATALOG_SOURCE, ParameterSourceInfo, ValidatedBound
 
 WARNING_BOUND = ValidatedBound(quantity="b", kind="max", value=1.0, inclusive=True, source=RULE)
+INTERIM = ParameterSourceInfo(kind="interim", data_sha256="0123456789abcdef" * 4, profile="strict")
+SOURCE_PREFIX = "Источник нормативных параметров"
 
 
 @pytest.fixture
 def printed(monkeypatch: pytest.MonkeyPatch) -> None:
     """Включает печать раздела подотчётности, выключенную в первой итерации пилота."""
     monkeypatch.setattr(docx_writer, "ACCOUNTABILITY_SECTION", True)
+
+
+def sourced_report(source: ParameterSourceInfo | None) -> Report:
+    """Отчёт пилота по результату, конверт которого несёт данный источник параметров."""
+    given = inputs()
+    result = service().run(pilot.NAME, given, parameters(), source=source)
+    return build_report(pilot.contract(ROUNDING, RULE), given, result, REQUEST)
 
 
 def block(section: object) -> AccountabilitySection:
@@ -128,3 +147,86 @@ def test_a_refused_result_names_the_bound_and_its_norm_references() -> None:
     )
     assert "Выходные величины (outputs): нет" in lines
     assert lines[-1] == "Шагов с непроверенными ссылками (unverified_step_count): 0"
+
+
+def test_an_interim_line_stands_in_the_conclusion_right_before_the_responsibility_statement() -> None:
+    model = sourced_report(INTERIM)
+    conclusion = model.body[2]
+    assert isinstance(conclusion, ConclusionSection)
+    paragraphs, _ = read_back(render_docx(model))
+
+    start = paragraphs.index("3 Заключение")
+    lines = conclusion_lines(conclusion, model.symbols, model.rounding)
+    line = (
+        "Источник нормативных параметров: временные нормативные данные, профиль strict,"
+        f" SHA-256 данных {'0123456789abcdef' * 4}."
+    )
+    assert paragraphs[start + 1 :] == [*(plain(item) for item in lines), line, RESPONSIBILITY]
+    assert paragraphs.count(line) == 1
+
+
+@pytest.mark.usefixtures("printed")
+@pytest.mark.parametrize("source", [INTERIM, CATALOG_SOURCE], ids=["interim", "catalog"])
+def test_with_the_block_printed_the_source_line_moves_there_and_appears_once(source: ParameterSourceInfo) -> None:
+    model = sourced_report(source)
+    paragraphs, _ = read_back(render_docx(model))
+
+    line = format_parameter_source(source)
+    conclusion, accountability = paragraphs.index("3 Заключение"), paragraphs.index("4 Подотчётность результата")
+    assert line not in paragraphs[conclusion:accountability]
+    assert paragraphs[-2:] == [line, RESPONSIBILITY]
+    assert latex(accountability_lines(block(model.body[-1]), model.symbols)[-1]) == line
+    assert paragraphs.count(line) == 1
+
+
+def test_a_result_without_a_source_prints_the_report_without_the_line() -> None:
+    with_source, _ = read_back(render_docx(sourced_report(INTERIM)))
+    without_source, _ = read_back(render_docx(sourced_report(None)))
+
+    assert not any(text.startswith(SOURCE_PREFIX) for text in without_source)
+    assert without_source == [text for text in with_source if not text.startswith(SOURCE_PREFIX)]
+
+
+def test_a_result_without_a_source_has_no_line_in_the_block() -> None:
+    with_source = sourced_report(INTERIM)
+    without_source = sourced_report(None)
+
+    printed_with = [latex(line) for line in accountability_lines(block(with_source.body[-1]), with_source.symbols)]
+    printed_without = [latex(line) for line in accountability_lines(block(without_source.body[-1]), without_source.symbols)]
+
+    assert printed_without[1:] == printed_with[1:-1]
+    assert not any(text.startswith(SOURCE_PREFIX) for text in printed_without)
+
+
+DRAFT = ParameterSourceInfo(kind="interim", data_sha256="fedcba9876543210" * 4, profile="draft")
+
+
+def test_a_draft_result_prints_the_caveat_in_the_conclusion_after_the_source_line_and_once() -> None:
+    model = sourced_report(DRAFT)
+    paragraphs, _ = read_back(render_docx(model))
+
+    line, caveat = parameter_source_lines(DRAFT)
+    assert paragraphs[-3:] == [line, caveat, RESPONSIBILITY]
+    assert paragraphs.count(caveat) == 1
+    assert "не прошедших верификацию" in caveat
+    assert not any(character.isdigit() for character in caveat)
+
+
+@pytest.mark.parametrize("source", [INTERIM, CATALOG_SOURCE], ids=["strict", "catalog"])
+def test_a_result_that_is_not_draft_prints_no_caveat(source: ParameterSourceInfo) -> None:
+    paragraphs, _ = read_back(render_docx(sourced_report(source)))
+
+    assert DRAFT_CAVEAT not in paragraphs
+    assert parameter_source_lines(source) == [format_parameter_source(source)]
+
+
+@pytest.mark.usefixtures("printed")
+def test_a_draft_result_moves_the_caveat_with_the_source_line_into_the_block() -> None:
+    model = sourced_report(DRAFT)
+    paragraphs, _ = read_back(render_docx(model))
+
+    line, caveat = parameter_source_lines(DRAFT)
+    conclusion, accountability = paragraphs.index("3 Заключение"), paragraphs.index("4 Подотчётность результата")
+    assert caveat not in paragraphs[conclusion:accountability]
+    assert paragraphs[-3:] == [line, caveat, RESPONSIBILITY]
+    assert [latex(item) for item in accountability_lines(block(model.body[-1]), model.symbols)[-2:]] == [line, caveat]

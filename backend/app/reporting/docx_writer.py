@@ -14,6 +14,7 @@ from app.reporting.format import (
     format_bound,
     format_norm_ref,
     latex_quantity,
+    parameter_source_lines,
 )
 from app.reporting.formula import FormulaError, Line, Math, omml, omml_paragraph
 from app.reporting.layout import apply_sheet, fit_table
@@ -55,7 +56,9 @@ ACCOUNTABILITY_SECTION = False
 
 В первой итерации пилота он не печатается; нумерация остальных разделов не меняется, а
 фраза об ответственности инженера печатается последним абзацем заключения. Модель отчёта
-по-прежнему собирает этот раздел, так что вернуть его можно, включив флаг.
+по-прежнему собирает этот раздел, так что вернуть его можно, включив флаг. Строка
+источника параметров печатается там же, где фраза об ответственности, перед ней, и только
+один раз (``interim-normatives-source`` design.md, решение 13).
 """
 
 NOT_XML = re.compile("[^\t\n\r\u0020-\ud7ff\ue000-\ufffd\U00010000-\U0010ffff]")
@@ -234,6 +237,9 @@ def render_docx(report: Report) -> bytes:
         else:
             _write_lines(document, conclusion_lines(section, report.symbols, report.rounding))
             if not ACCOUNTABILITY_SECTION:
+                if section.parameter_source is not None:
+                    for text in parameter_source_lines(section.parameter_source):
+                        document.add_paragraph(text)
                 document.add_paragraph().add_run(RESPONSIBILITY).bold = True
     buffer = BytesIO()
     document.save(buffer)

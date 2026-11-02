@@ -18,6 +18,7 @@ from app.schemas.calculation import (
     CalculationRequest,
     CalculationResult,
     MethodBound,
+    ParameterSourceInfo,
     QuantityValue,
     ResultEnvelope,
     ValidatedBound,
@@ -74,16 +75,20 @@ class CalculationService:
         self._validated_ranges = validated_ranges
         self._results = results
 
-    def envelope(self, result: CalculationResult) -> ResultEnvelope:
+    def envelope(self, result: CalculationResult, source: ParameterSourceInfo | None = None) -> ResultEnvelope:
         """Превращает результат в конверт с новым ``result_id``.
 
         Args:
             result: результат расчёта.
+            source: описание источника параметров; ``None`` — конверт без
+                ``parameter_source`` (``interim-normatives-source`` design.md, решение 13).
 
         Returns:
-            Конверт; все поля, кроме ``result_id``, — из результата.
+            Конверт; все поля, кроме ``result_id`` и ``parameter_source``, — из результата.
         """
-        return ResultEnvelope.model_validate(dict(result) | {"result_id": self._new_id()})
+        return ResultEnvelope.model_validate(
+            dict(result) | {"result_id": self._new_id(), "parameter_source": source}
+        )
 
     def submit(self, request: CalculationRequest) -> ResultEnvelope:
         """Проверяет запрос, запускает расчёт и сохраняет результат.
@@ -120,6 +125,7 @@ class CalculationService:
             resolved.parameters,
             method_range=resolved.method_range,
             validated_range=self._validated_ranges.get(name, ()),
+            source=resolved.source,
         )
         results.add(
             result_id=envelope.result_id,
@@ -202,6 +208,7 @@ class CalculationService:
         *,
         method_range: Sequence[MethodBound] = (),
         validated_range: Sequence[ValidatedBound] = (),
+        source: ParameterSourceInfo | None = None,
     ) -> ResultEnvelope:
         result = calculate(
             self._registry.contract(calculation_type),
@@ -211,7 +218,7 @@ class CalculationService:
             method_range=method_range,
             validated_range=validated_range,
         )
-        return self.envelope(result)
+        return self.envelope(result, source)
 
 
 def calculation_service(
