@@ -1,0 +1,975 @@
+portion: P1b-2
+source_manifest: docs/akim/digitization/phase1b-2026-11-03/sheets/items.json
+source_pdf:
+  document: СП 22.13330.2016
+  edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+  pdf: docs/akim/sources/sp22.pdf
+  sha256: 289dc6844340d0177dd01761af4b2adef075d567a16a9685d360b29a79700ecf
+  pdf_pages:
+  - 42
+  - 43
+  - 44
+  - 45
+  page_numbering: 1-based PDF pages; matches printed page header
+items:
+  CP-P1B-A02-1:
+    record: P1B-A02
+    kind: control-point
+    shown_digest: d4e9aaf62a8217b87d5188f1a3c12ebe62e28c1df72adb8faa90f23a03d06f91
+    shown_payload:
+      display:
+        item_id: CP-P1B-A02-1
+        record: P1B-A02
+        group: P1
+        kind: control-point
+        title: 'Формула (5.11), ветвь «плюс»: контрольный набор 1'
+        page: '44'
+        region: см. страницы источника и пояснения
+        flags:
+        - контрольный набор и ручной результат подтверждены Akim 2026-11-04
+        a: '{"values": {"N": 600, "A": 6, "gamma_mt": 20, "d": 1, "M": 60, "W": 2}, "units": {"N": "kN",
+          "A": "m2", "gamma_mt": "kN/m3", "d": "m", "M": "kN*m", "W": "m3"}}'
+        b: '{"p_plus": 150, "unit": "kPa", "tolerance": 0, "tolerance_source": "Технический допуск 0 кПа
+          подтверждён Akim: выбранный набор даёт точные целые слагаемые и результат; не нормативный допуск.",
+          "independent_reference": "Ручной расчёт Akim по СП 22.13330.2016 с Изменениями № 1-5, п. 5.6.28,
+          формула (5.11), страница PDF 44: 600/6 + 20*1 + 60/2 = 100 + 20 + 30 = 150 кПа. Подтверждено
+          в переписке 2026-11-04."}'
+        notes:
+        - Синтетический набор для проверки арифметики ветви «плюс» формулы (5.11); не проверка полного
+          набора условий применимости.
+        - Входы, ручной результат 150 кПа и технический допуск 0 кПа подтверждены Akim в переписке 2026-11-04.
+        - Первоначальное сложение ассистента с результатом 160 кПа было ошибочным; Akim указал правильную
+          сумму 150 кПа. Результаты compare.py не использовались как эталон.
+        priority: 2
+        minutes: 0.0
+      evidence:
+        target:
+          id: P1B-A02
+          kind: formula
+          page: 44
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.28, formula (5.11)
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: p_edge_plus
+          result_symbol: p_plus
+          source_result_symbol: p
+          latex: p_{+}=\frac{N}{A}+\gamma_{mt}d+\frac{M}{W}
+          tree:
+            kind: add
+            left:
+              kind: add
+              left:
+                kind: div
+                left:
+                  kind: symbol
+                  name: N
+                right:
+                  kind: symbol
+                  name: A
+              right:
+                kind: mul
+                left:
+                  kind: symbol
+                  name: gamma_mt
+                right:
+                  kind: symbol
+                  name: d
+            right:
+              kind: div
+              left:
+                kind: symbol
+                name: M
+              right:
+                kind: symbol
+                name: W
+          units:
+            N: kN
+            A: m2
+            gamma_mt: kN/m3
+            d: m
+            M: kN*m
+            W: m3
+            p_plus: kPa
+          text_layer_status: formula image only
+          raster_supplement: true
+          source_combined_latex: p=\frac{N}{A}+\gamma_{mt}d\pm\frac{M}{W}
+          applicability_as_printed: e/l\leq1/6
+          context_pages:
+          - 44
+          - 45
+          normalization_note: Plus branch of the printed plus/minus formula. Alias is provisional; maximum
+            pressure for signed M is not inferred.
+        inputs:
+          N: 600
+          A: 6
+          gamma_mt: 20
+          d: 1
+          M: 60
+          W: 2
+        expected:
+          p_plus: 150
+          unit: kPa
+          tolerance: 0
+          tolerance_source: 'Технический допуск 0 кПа подтверждён Akim: выбранный набор даёт точные целые
+            слагаемые и результат; не нормативный допуск.'
+          independent_reference: 'Ручной расчёт Akim по СП 22.13330.2016 с Изменениями № 1-5, п. 5.6.28,
+            формула (5.11), страница PDF 44: 600/6 + 20*1 + 60/2 = 100 + 20 + 30 = 150 кПа. Подтверждено
+            в переписке 2026-11-04.'
+        input_units:
+          N: kN
+          A: m2
+          gamma_mt: kN/m3
+          d: m
+          M: kN*m
+          W: m3
+  CP-P1B-A02-2:
+    record: P1B-A02
+    kind: control-point
+    shown_digest: ad1b9a8b97c834b9e7b02dedbd2b563d2819625539c3f1ab26b05d709123dfcf
+    shown_payload:
+      display:
+        item_id: CP-P1B-A02-2
+        record: P1B-A02
+        group: P1
+        kind: control-point
+        title: 'Формула (5.11), ветвь «плюс»: контрольный набор 2'
+        page: '44'
+        region: см. страницы источника и пояснения
+        flags:
+        - контрольный набор и ручной результат подтверждены Akim 2026-11-04
+        a: '{"values": {"N": 900, "A": 6, "gamma_mt": 20, "d": 1.5, "M": 90, "W": 2}, "units": {"N": "kN",
+          "A": "m2", "gamma_mt": "kN/m3", "d": "m", "M": "kN*m", "W": "m3"}}'
+        b: '{"p_plus": 225, "unit": "kPa", "tolerance": 0, "tolerance_source": "Технический допуск 0 кПа
+          подтверждён Akim: выбранный набор даёт точные целые слагаемые и результат; не нормативный допуск.",
+          "independent_reference": "Ручной расчёт Akim по СП 22.13330.2016 с Изменениями № 1-5, п. 5.6.28,
+          формула (5.11), страница PDF 44: 900/6 + 20*1.5 + 90/2 = 150 + 30 + 45 = 225 кПа. Подтверждено
+          в переписке 2026-11-04."}'
+        notes:
+        - Синтетический набор для проверки арифметики ветви «плюс» формулы (5.11); не проверка полного
+          набора условий применимости.
+        - Входы, ручной результат 225 кПа и технический допуск 0 кПа подтверждены Akim в переписке 2026-11-04.
+          Результаты compare.py не использовались как эталон.
+        priority: 2
+        minutes: 0.0
+      evidence:
+        target:
+          id: P1B-A02
+          kind: formula
+          page: 44
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.28, formula (5.11)
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: p_edge_plus
+          result_symbol: p_plus
+          source_result_symbol: p
+          latex: p_{+}=\frac{N}{A}+\gamma_{mt}d+\frac{M}{W}
+          tree:
+            kind: add
+            left:
+              kind: add
+              left:
+                kind: div
+                left:
+                  kind: symbol
+                  name: N
+                right:
+                  kind: symbol
+                  name: A
+              right:
+                kind: mul
+                left:
+                  kind: symbol
+                  name: gamma_mt
+                right:
+                  kind: symbol
+                  name: d
+            right:
+              kind: div
+              left:
+                kind: symbol
+                name: M
+              right:
+                kind: symbol
+                name: W
+          units:
+            N: kN
+            A: m2
+            gamma_mt: kN/m3
+            d: m
+            M: kN*m
+            W: m3
+            p_plus: kPa
+          text_layer_status: formula image only
+          raster_supplement: true
+          source_combined_latex: p=\frac{N}{A}+\gamma_{mt}d\pm\frac{M}{W}
+          applicability_as_printed: e/l\leq1/6
+          context_pages:
+          - 44
+          - 45
+          normalization_note: Plus branch of the printed plus/minus formula. Alias is provisional; maximum
+            pressure for signed M is not inferred.
+        inputs:
+          N: 900
+          A: 6
+          gamma_mt: 20
+          d: 1.5
+          M: 90
+          W: 2
+        expected:
+          p_plus: 225
+          unit: kPa
+          tolerance: 0
+          tolerance_source: 'Технический допуск 0 кПа подтверждён Akim: выбранный набор даёт точные целые
+            слагаемые и результат; не нормативный допуск.'
+          independent_reference: 'Ручной расчёт Akim по СП 22.13330.2016 с Изменениями № 1-5, п. 5.6.28,
+            формула (5.11), страница PDF 44: 900/6 + 20*1.5 + 90/2 = 150 + 30 + 45 = 225 кПа. Подтверждено
+            в переписке 2026-11-04.'
+        input_units:
+          N: kN
+          A: m2
+          gamma_mt: kN/m3
+          d: m
+          M: kN*m
+          W: m3
+  CP-P1B-A03-1:
+    record: P1B-A03
+    kind: control-point
+    shown_digest: 6d65d0c9ce3929bb112e6fc22acfca8397138ef357cae4ca3008742440ca5a9f
+    shown_payload:
+      display:
+        item_id: CP-P1B-A03-1
+        record: P1B-A03
+        group: P1
+        kind: control-point
+        title: 'Формула (5.11), ветвь «минус»: контрольный набор 1'
+        page: '44'
+        region: см. страницы источника и пояснения
+        flags:
+        - контрольный набор и ручной результат подтверждены Akim 2026-11-05
+        a: '{"values": {"N": 600, "A": 6, "gamma_mt": 20, "d": 1, "M": 60, "W": 2}, "units": {"N": "kN",
+          "A": "m2", "gamma_mt": "kN/m3", "d": "m", "M": "kN*m", "W": "m3"}}'
+        b: '{"p_minus": 90, "unit": "kPa", "tolerance": 0, "tolerance_source": "Технический допуск 0 кПа
+          подтверждён Akim: выбранный набор даёт точные целые слагаемые и результат; не нормативный допуск.",
+          "independent_reference": "Ручной расчёт Akim по СП 22.13330.2016 с Изменениями № 1-5, п. 5.6.28,
+          формула (5.11), страница PDF 44: 600/6 + 20*1 - 60/2 = 100 + 20 - 30 = 90 кПа. Подтверждено
+          в переписке 2026-11-05."}'
+        notes:
+        - Синтетический набор для проверки арифметики ветви «минус» формулы (5.11); не проверка полного
+          набора условий применимости.
+        - Входы, ручной результат 90 кПа и технический допуск 0 кПа подтверждены Akim в переписке 2026-11-05.
+          Результаты compare.py не использовались как эталон.
+        priority: 2
+        minutes: 0.0
+      evidence:
+        target:
+          id: P1B-A03
+          kind: formula
+          page: 44
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.28, formula (5.11)
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: p_edge_minus
+          result_symbol: p_minus
+          source_result_symbol: p
+          latex: p_{-}=\frac{N}{A}+\gamma_{mt}d-\frac{M}{W}
+          tree:
+            kind: sub
+            left:
+              kind: add
+              left:
+                kind: div
+                left:
+                  kind: symbol
+                  name: N
+                right:
+                  kind: symbol
+                  name: A
+              right:
+                kind: mul
+                left:
+                  kind: symbol
+                  name: gamma_mt
+                right:
+                  kind: symbol
+                  name: d
+            right:
+              kind: div
+              left:
+                kind: symbol
+                name: M
+              right:
+                kind: symbol
+                name: W
+          units:
+            N: kN
+            A: m2
+            gamma_mt: kN/m3
+            d: m
+            M: kN*m
+            W: m3
+            p_minus: kPa
+          text_layer_status: formula image only
+          raster_supplement: true
+          source_combined_latex: p=\frac{N}{A}+\gamma_{mt}d\pm\frac{M}{W}
+          applicability_as_printed: e/l\leq1/6
+          context_pages:
+          - 44
+          - 45
+          normalization_note: Minus branch of the same printed formula. Minimum pressure for signed M
+            is not inferred.
+        inputs:
+          N: 600
+          A: 6
+          gamma_mt: 20
+          d: 1
+          M: 60
+          W: 2
+        expected:
+          p_minus: 90
+          unit: kPa
+          tolerance: 0
+          tolerance_source: 'Технический допуск 0 кПа подтверждён Akim: выбранный набор даёт точные целые
+            слагаемые и результат; не нормативный допуск.'
+          independent_reference: 'Ручной расчёт Akim по СП 22.13330.2016 с Изменениями № 1-5, п. 5.6.28,
+            формула (5.11), страница PDF 44: 600/6 + 20*1 - 60/2 = 100 + 20 - 30 = 90 кПа. Подтверждено
+            в переписке 2026-11-05.'
+        input_units:
+          N: kN
+          A: m2
+          gamma_mt: kN/m3
+          d: m
+          M: kN*m
+          W: m3
+  CP-P1B-A03-2:
+    record: P1B-A03
+    kind: control-point
+    shown_digest: 03125c03f17f3a75d10ca636ed261c23ea56d4cd9ec002e3488fff3759e2143d
+    shown_payload:
+      display:
+        item_id: CP-P1B-A03-2
+        record: P1B-A03
+        group: P1
+        kind: control-point
+        title: 'Формула (5.11), ветвь «минус»: контрольный набор 2'
+        page: '44'
+        region: см. страницы источника и пояснения
+        flags:
+        - контрольный набор и ручной результат подтверждены Akim 2026-11-05
+        a: '{"values": {"N": 900, "A": 6, "gamma_mt": 20, "d": 1.5, "M": 90, "W": 2}, "units": {"N": "kN",
+          "A": "m2", "gamma_mt": "kN/m3", "d": "m", "M": "kN*m", "W": "m3"}}'
+        b: '{"p_minus": 135, "unit": "kPa", "tolerance": 0, "tolerance_source": "Технический допуск 0
+          кПа подтверждён Akim: выбранный набор даёт точные целые слагаемые и результат; не нормативный
+          допуск.", "independent_reference": "Ручной расчёт Akim по СП 22.13330.2016 с Изменениями № 1-5,
+          п. 5.6.28, формула (5.11), страница PDF 44: 900/6 + 20*1.5 - 90/2 = 150 + 30 - 45 = 135 кПа.
+          Подтверждено в переписке 2026-11-05."}'
+        notes:
+        - Синтетический набор для проверки арифметики ветви «минус» формулы (5.11); не проверка полного
+          набора условий применимости.
+        - Входы, ручной результат 135 кПа и технический допуск 0 кПа подтверждены Akim в переписке 2026-11-05.
+          Результаты compare.py не использовались как эталон.
+        priority: 2
+        minutes: 0.0
+      evidence:
+        target:
+          id: P1B-A03
+          kind: formula
+          page: 44
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.28, formula (5.11)
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: p_edge_minus
+          result_symbol: p_minus
+          source_result_symbol: p
+          latex: p_{-}=\frac{N}{A}+\gamma_{mt}d-\frac{M}{W}
+          tree:
+            kind: sub
+            left:
+              kind: add
+              left:
+                kind: div
+                left:
+                  kind: symbol
+                  name: N
+                right:
+                  kind: symbol
+                  name: A
+              right:
+                kind: mul
+                left:
+                  kind: symbol
+                  name: gamma_mt
+                right:
+                  kind: symbol
+                  name: d
+            right:
+              kind: div
+              left:
+                kind: symbol
+                name: M
+              right:
+                kind: symbol
+                name: W
+          units:
+            N: kN
+            A: m2
+            gamma_mt: kN/m3
+            d: m
+            M: kN*m
+            W: m3
+            p_minus: kPa
+          text_layer_status: formula image only
+          raster_supplement: true
+          source_combined_latex: p=\frac{N}{A}+\gamma_{mt}d\pm\frac{M}{W}
+          applicability_as_printed: e/l\leq1/6
+          context_pages:
+          - 44
+          - 45
+          normalization_note: Minus branch of the same printed formula. Minimum pressure for signed M
+            is not inferred.
+        inputs:
+          N: 900
+          A: 6
+          gamma_mt: 20
+          d: 1.5
+          M: 90
+          W: 2
+        expected:
+          p_minus: 135
+          unit: kPa
+          tolerance: 0
+          tolerance_source: 'Технический допуск 0 кПа подтверждён Akim: выбранный набор даёт точные целые
+            слагаемые и результат; не нормативный допуск.'
+          independent_reference: 'Ручной расчёт Akim по СП 22.13330.2016 с Изменениями № 1-5, п. 5.6.28,
+            формула (5.11), страница PDF 44: 900/6 + 20*1.5 - 90/2 = 150 + 30 - 45 = 135 кПа. Подтверждено
+            в переписке 2026-11-05.'
+        input_units:
+          N: kN
+          A: m2
+          gamma_mt: kN/m3
+          d: m
+          M: kN*m
+          W: m3
+  CP-P1B-A04-1:
+    record: P1B-A04
+    kind: control-point
+    shown_digest: a931e365148d8ac39b5f0120bad13625381fe2b9d76556d47ba46495745e044b
+    shown_payload:
+      display:
+        item_id: CP-P1B-A04-1
+        record: P1B-A04
+        group: P1
+        kind: control-point
+        title: 'Формула (5.15), угловое давление: контрольный набор 1'
+        page: '45'
+        region: см. страницы источника и пояснения
+        flags:
+        - контрольный набор и ручной результат подтверждены Akim 2026-11-05
+        a: '{"values": {"N": 600, "A": 6, "gamma_mt": 20, "d": 1, "M_x": 60, "W_x": 3, "M_y": 50, "W_y":
+          2}, "units": {"N": "kN", "A": "m2", "gamma_mt": "kN/m3", "d": "m", "M_x": "kN*m", "W_x": "m3",
+          "M_y": "kN*m", "W_y": "m3"}}'
+        b: '{"P_max": 165, "unit": "kPa", "tolerance": 0, "tolerance_source": "Технический допуск 0 кПа
+          подтверждён Akim: выбранный набор даёт точные целые слагаемые и результат; не нормативный допуск.",
+          "independent_reference": "Ручной расчёт Akim по СП 22.13330.2016 с Изменениями № 1-5, п. 5.6.29,
+          формула (5.15), страница PDF 45: 600/6 + 20*1 + 60/3 + 50/2 = 100 + 20 + 20 + 25 = 165 кПа.
+          Подтверждено в переписке 2026-11-05."}'
+        notes:
+        - Синтетический набор для проверки арифметики формулы (5.15); не проверка полного набора условий
+          применимости.
+        - Входы, ручной результат 165 кПа и технический допуск 0 кПа подтверждены Akim в переписке 2026-11-05.
+          Результаты compare.py не использовались как эталон.
+        priority: 2
+        minutes: 0.0
+      evidence:
+        target:
+          id: P1B-A04
+          kind: formula
+          page: 45
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.29, formula (5.15)
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: p_corner
+          result_symbol: P_max
+          source_result_symbol: P_max
+          latex: P_{\max}=\frac{N}{A}+\gamma_{mt}d+\frac{M_x}{W_x}+\frac{M_y}{W_y}
+          tree:
+            kind: add
+            left:
+              kind: add
+              left:
+                kind: add
+                left:
+                  kind: div
+                  left:
+                    kind: symbol
+                    name: N
+                  right:
+                    kind: symbol
+                    name: A
+                right:
+                  kind: mul
+                  left:
+                    kind: symbol
+                    name: gamma_mt
+                  right:
+                    kind: symbol
+                    name: d
+              right:
+                kind: div
+                left:
+                  kind: symbol
+                  name: M_x
+                right:
+                  kind: symbol
+                  name: W_x
+            right:
+              kind: div
+              left:
+                kind: symbol
+                name: M_y
+              right:
+                kind: symbol
+                name: W_y
+          units:
+            N: kN
+            A: m2
+            gamma_mt: kN/m3
+            d: m
+            M_x: kN*m
+            W_x: m3
+            M_y: kN*m
+            W_y: m3
+            P_max: kPa
+          text_layer_status: formula image only
+          raster_supplement: true
+          applicability_summary: Rectangular foundation; moments in two directions parallel to x and y
+            axes.
+          normalization_note: Printed additive expression retained. No absolute values, axis reassignment
+            or Q-to-base-moment rule introduced.
+          unit_basis_note: Units of subscripted M/W follow the printed unsubscripted definitions; confirm
+            mapping with the verifier.
+        inputs:
+          N: 600
+          A: 6
+          gamma_mt: 20
+          d: 1
+          M_x: 60
+          W_x: 3
+          M_y: 50
+          W_y: 2
+        expected:
+          P_max: 165
+          unit: kPa
+          tolerance: 0
+          tolerance_source: 'Технический допуск 0 кПа подтверждён Akim: выбранный набор даёт точные целые
+            слагаемые и результат; не нормативный допуск.'
+          independent_reference: 'Ручной расчёт Akim по СП 22.13330.2016 с Изменениями № 1-5, п. 5.6.29,
+            формула (5.15), страница PDF 45: 600/6 + 20*1 + 60/3 + 50/2 = 100 + 20 + 20 + 25 = 165 кПа.
+            Подтверждено в переписке 2026-11-05.'
+        input_units:
+          N: kN
+          A: m2
+          gamma_mt: kN/m3
+          d: m
+          M_x: kN*m
+          W_x: m3
+          M_y: kN*m
+          W_y: m3
+  CP-P1B-A04-2:
+    record: P1B-A04
+    kind: control-point
+    shown_digest: 47f823909057e9df4c8d39a13be7b32cfdc1a3e5603f4d44158cab01e01ac01f
+    shown_payload:
+      display:
+        item_id: CP-P1B-A04-2
+        record: P1B-A04
+        group: P1
+        kind: control-point
+        title: 'Формула (5.15), угловое давление: контрольный набор 2'
+        page: '45'
+        region: см. страницы источника и пояснения
+        flags:
+        - контрольный набор и ручной результат подтверждены Akim 2026-11-05
+        a: '{"values": {"N": 900, "A": 6, "gamma_mt": 20, "d": 1.5, "M_x": 120, "W_x": 3, "M_y": 70, "W_y":
+          2}, "units": {"N": "kN", "A": "m2", "gamma_mt": "kN/m3", "d": "m", "M_x": "kN*m", "W_x": "m3",
+          "M_y": "kN*m", "W_y": "m3"}}'
+        b: '{"P_max": 255, "unit": "kPa", "tolerance": 0, "tolerance_source": "Технический допуск 0 кПа
+          подтверждён Akim: выбранный набор даёт точные целые слагаемые и результат; не нормативный допуск.",
+          "independent_reference": "Ручной расчёт Akim по СП 22.13330.2016 с Изменениями № 1-5, п. 5.6.29,
+          формула (5.15), страница PDF 45: 900/6 + 20*1.5 + 120/3 + 70/2 = 150 + 30 + 40 + 35 = 255 кПа.
+          Подтверждено в переписке 2026-11-05."}'
+        notes:
+        - Синтетический набор для проверки арифметики формулы (5.15); не проверка полного набора условий
+          применимости.
+        - Входы, ручной результат 255 кПа и технический допуск 0 кПа подтверждены Akim в переписке 2026-11-05.
+          Результаты compare.py не использовались как эталон.
+        priority: 2
+        minutes: 0.0
+      evidence:
+        target:
+          id: P1B-A04
+          kind: formula
+          page: 45
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.29, formula (5.15)
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: p_corner
+          result_symbol: P_max
+          source_result_symbol: P_max
+          latex: P_{\max}=\frac{N}{A}+\gamma_{mt}d+\frac{M_x}{W_x}+\frac{M_y}{W_y}
+          tree:
+            kind: add
+            left:
+              kind: add
+              left:
+                kind: add
+                left:
+                  kind: div
+                  left:
+                    kind: symbol
+                    name: N
+                  right:
+                    kind: symbol
+                    name: A
+                right:
+                  kind: mul
+                  left:
+                    kind: symbol
+                    name: gamma_mt
+                  right:
+                    kind: symbol
+                    name: d
+              right:
+                kind: div
+                left:
+                  kind: symbol
+                  name: M_x
+                right:
+                  kind: symbol
+                  name: W_x
+            right:
+              kind: div
+              left:
+                kind: symbol
+                name: M_y
+              right:
+                kind: symbol
+                name: W_y
+          units:
+            N: kN
+            A: m2
+            gamma_mt: kN/m3
+            d: m
+            M_x: kN*m
+            W_x: m3
+            M_y: kN*m
+            W_y: m3
+            P_max: kPa
+          text_layer_status: formula image only
+          raster_supplement: true
+          applicability_summary: Rectangular foundation; moments in two directions parallel to x and y
+            axes.
+          normalization_note: Printed additive expression retained. No absolute values, axis reassignment
+            or Q-to-base-moment rule introduced.
+          unit_basis_note: Units of subscripted M/W follow the printed unsubscripted definitions; confirm
+            mapping with the verifier.
+        inputs:
+          N: 900
+          A: 6
+          gamma_mt: 20
+          d: 1.5
+          M_x: 120
+          W_x: 3
+          M_y: 70
+          W_y: 2
+        expected:
+          P_max: 255
+          unit: kPa
+          tolerance: 0
+          tolerance_source: 'Технический допуск 0 кПа подтверждён Akim: выбранный набор даёт точные целые
+            слагаемые и результат; не нормативный допуск.'
+          independent_reference: 'Ручной расчёт Akim по СП 22.13330.2016 с Изменениями № 1-5, п. 5.6.29,
+            формула (5.15), страница PDF 45: 900/6 + 20*1.5 + 120/3 + 70/2 = 150 + 30 + 40 + 35 = 255
+            кПа. Подтверждено в переписке 2026-11-05.'
+        input_units:
+          N: kN
+          A: m2
+          gamma_mt: kN/m3
+          d: m
+          M_x: kN*m
+          W_x: m3
+          M_y: kN*m
+          W_y: m3
+  CP-P1B-A07-below:
+    record: P1B-A07
+    kind: control-point
+    shown_digest: 3b7704463f5e52ff2eb6bd245ff036e6c663b4a91f13450c9db3a55fd407a149
+    shown_payload:
+      display:
+        item_id: CP-P1B-A07-below
+        record: P1B-A07
+        group: P1
+        kind: control-point
+        title: 'Порог (5.11): ниже порога'
+        page: '44'
+        region: см. страницы источника и пояснения
+        flags:
+        - контрольный набор и ожидаемый вывод подтверждены Akim 2026-11-05
+        a: '{"values": {"e": 0.25, "l": 2}, "units": {"e": "m", "l": "m"}}'
+        b: '{"applicability": true, "applicability_scope": "Выполнено только условие e/l <= 1/6 для формулы
+          (5.11); остальные условия метода не проверяются.", "diagram_case": "б", "diagram": "trapezoidal",
+          "floor_loads": "absent", "ratio_fraction": {"numerator": 1, "denominator": 8}, "comparison":
+          "1/8 < 1/6", "comparison_policy": "Точное сравнение дробей; численный допуск не назначен.",
+          "independent_reference": "Akim подтвердил входы и вывод по СП 22.13330.2016 с Изменениями №
+          1-5, п. 5.6.28, страница PDF 44, и рисунку 5.1, страница PDF 43, в переписке 2026-11-05: условие
+          (5.11) выполнено; случай б, трапециевидная эпюра при отсутствии нагрузок на полы."}'
+        notes:
+        - Точное отношение e/l = 1/8 меньше 1/6. Численный допуск не назначен.
+        - Случай б рисунка 5.1 относится к отсутствию нагрузок на полы.
+        - Проверено только условие применимости (5.11) по e/l; остальные условия метода не проверяются.
+          Общий нормативный запрет отрыва не принят.
+        priority: 2
+        minutes: 0.0
+      evidence:
+        target:
+          id: P1B-A07
+          kind: applicability_threshold
+          page: 44
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.28, applicability of formula (5.11)
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: relative_eccentricity_formula_5_11_limit
+          quantity: e/l
+          relation: le
+          value_fraction:
+            numerator: 1
+            denominator: 6
+          unit: '1'
+          latex: e/l\leq1/6
+          text_layer_status: symbols and inequality image only
+          raster_supplement: true
+          source_editorial_note: Database manufacturer marks the printed expression as corresponding to
+            the original.
+          normalization_note: Exact fraction retained; no numeric tolerance or global method bound chosen.
+        case: below
+        inputs:
+          e: 0.25
+          l: 2
+        expected:
+          applicability: true
+          applicability_scope: Выполнено только условие e/l <= 1/6 для формулы (5.11); остальные условия
+            метода не проверяются.
+          diagram_case: б
+          diagram: trapezoidal
+          floor_loads: absent
+          ratio_fraction:
+            numerator: 1
+            denominator: 8
+          comparison: 1/8 < 1/6
+          comparison_policy: Точное сравнение дробей; численный допуск не назначен.
+          independent_reference: 'Akim подтвердил входы и вывод по СП 22.13330.2016 с Изменениями № 1-5,
+            п. 5.6.28, страница PDF 44, и рисунку 5.1, страница PDF 43, в переписке 2026-11-05: условие
+            (5.11) выполнено; случай б, трапециевидная эпюра при отсутствии нагрузок на полы.'
+        input_units:
+          e: m
+          l: m
+  CP-P1B-A07-at:
+    record: P1B-A07
+    kind: control-point
+    shown_digest: a14651dbfbee9fc5aecb8979df5791792dba1a1d1d2b1bc6118b4d8c8830165f
+    shown_payload:
+      display:
+        item_id: CP-P1B-A07-at
+        record: P1B-A07
+        group: P1
+        kind: control-point
+        title: 'Порог (5.11): на пороге'
+        page: '44'
+        region: см. страницы источника и пояснения
+        flags:
+        - контрольный набор и ожидаемый вывод подтверждены Akim 2026-11-05
+        a: '{"values": {"e": 0.5, "l": 3}, "units": {"e": "m", "l": "m"}}'
+        b: '{"applicability": true, "applicability_scope": "Выполнено только условие e/l <= 1/6 для формулы
+          (5.11), включая равенство; остальные условия метода не проверяются.", "diagram_case": "в", "diagram":
+          "triangular", "p_min": 0, "p_min_unit": "kPa", "floor_loads": "absent", "ratio_fraction": {"numerator":
+          1, "denominator": 6}, "comparison": "1/6 = 1/6", "comparison_policy": "Точное сравнение дробей;
+          численный допуск не назначен.", "independent_reference": "Akim подтвердил входы и вывод по СП
+          22.13330.2016 с Изменениями № 1-5, п. 5.6.28, страница PDF 44, и рисунку 5.1, страница PDF 43,
+          в переписке 2026-11-05: на пороге условие (5.11) выполнено; случай в, треугольная эпюра, p_min
+          = 0 при отсутствии нагрузок на полы."}'
+        notes:
+        - Точное отношение e/l = 1/6 равно порогу; знак <= включает равенство. Численный допуск не назначен.
+        - Случай в рисунка 5.1 относится к отсутствию нагрузок на полы; эпюра треугольная, p_min = 0 кПа.
+        - Проверено только условие применимости (5.11) по e/l; остальные условия метода не проверяются.
+          Общий нормативный запрет отрыва не принят.
+        priority: 2
+        minutes: 0.0
+      evidence:
+        target:
+          id: P1B-A07
+          kind: applicability_threshold
+          page: 44
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.28, applicability of formula (5.11)
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: relative_eccentricity_formula_5_11_limit
+          quantity: e/l
+          relation: le
+          value_fraction:
+            numerator: 1
+            denominator: 6
+          unit: '1'
+          latex: e/l\leq1/6
+          text_layer_status: symbols and inequality image only
+          raster_supplement: true
+          source_editorial_note: Database manufacturer marks the printed expression as corresponding to
+            the original.
+          normalization_note: Exact fraction retained; no numeric tolerance or global method bound chosen.
+        case: at
+        inputs:
+          e: 0.5
+          l: 3
+        expected:
+          applicability: true
+          applicability_scope: Выполнено только условие e/l <= 1/6 для формулы (5.11), включая равенство;
+            остальные условия метода не проверяются.
+          diagram_case: в
+          diagram: triangular
+          p_min: 0
+          p_min_unit: kPa
+          floor_loads: absent
+          ratio_fraction:
+            numerator: 1
+            denominator: 6
+          comparison: 1/6 = 1/6
+          comparison_policy: Точное сравнение дробей; численный допуск не назначен.
+          independent_reference: 'Akim подтвердил входы и вывод по СП 22.13330.2016 с Изменениями № 1-5,
+            п. 5.6.28, страница PDF 44, и рисунку 5.1, страница PDF 43, в переписке 2026-11-05: на пороге
+            условие (5.11) выполнено; случай в, треугольная эпюра, p_min = 0 при отсутствии нагрузок на
+            полы.'
+        input_units:
+          e: m
+          l: m
+  CP-P1B-A07-above:
+    record: P1B-A07
+    kind: control-point
+    shown_digest: 093eb0d5f6d530dfdf80d72463a6965949c9b83daf8aedf1e96559f798df9228
+    shown_payload:
+      display:
+        item_id: CP-P1B-A07-above
+        record: P1B-A07
+        group: P1
+        kind: control-point
+        title: 'Порог (5.11): выше порога'
+        page: '44'
+        region: см. страницы источника и пояснения
+        flags:
+        - контрольный набор и ожидаемый вывод подтверждены Akim 2026-11-05
+        a: '{"values": {"e": 0.4, "l": 2}, "units": {"e": "m", "l": "m"}}'
+        b: '{"applicability": false, "applicability_scope": "Условие e/l <= 1/6 для формулы (5.11) не
+          выполнено; подтверждён переход к формуле (5.12) с сохранением её условий и оговорок. Остальные
+          условия метода не проверяются.", "next_formula": "5.12", "diagram_case": "г", "diagram": "shortened
+          triangular, partial detachment", "floor_loads": "absent", "ratio_fraction": {"numerator": 1,
+          "denominator": 5}, "comparison": "1/6 < 1/5 < 1/4", "comparison_policy": "Точное сравнение дробей;
+          численный допуск не назначен.", "independent_reference": "Akim подтвердил набор e = 0.4 м, l
+          = 2 м, переход к формуле (5.12) и случай г по СП 22.13330.2016 с Изменениями № 1-5, п. 5.6.28,
+          страница PDF 44, и рисунку 5.1, страница PDF 43, в переписке 2026-11-05. Численное давление
+          по (5.12) этой точкой не проверяется."}'
+        notes:
+        - Точное отношение e/l = 1/5 больше 1/6 и меньше 1/4. Численный допуск не назначен.
+        - Подтверждён переход от формулы (5.11) к (5.12), а не запрет вычисления давления; численное значение
+          по (5.12) не проверялось.
+        - 'Случай г рисунка 5.1 при отсутствии нагрузок на полы: укороченная треугольная эпюра с частичным
+          отрывом подошвы.'
+        - Остальные условия метода не проверяются. Решение о включении отрыва в будущий расчёт не принимается;
+          общий нормативный запрет отрыва не принят.
+        priority: 2
+        minutes: 0.0
+      evidence:
+        target:
+          id: P1B-A07
+          kind: applicability_threshold
+          page: 44
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.28, applicability of formula (5.11)
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: relative_eccentricity_formula_5_11_limit
+          quantity: e/l
+          relation: le
+          value_fraction:
+            numerator: 1
+            denominator: 6
+          unit: '1'
+          latex: e/l\leq1/6
+          text_layer_status: symbols and inequality image only
+          raster_supplement: true
+          source_editorial_note: Database manufacturer marks the printed expression as corresponding to
+            the original.
+          normalization_note: Exact fraction retained; no numeric tolerance or global method bound chosen.
+        case: above
+        inputs:
+          e: 0.4
+          l: 2
+        expected:
+          applicability: false
+          applicability_scope: Условие e/l <= 1/6 для формулы (5.11) не выполнено; подтверждён переход
+            к формуле (5.12) с сохранением её условий и оговорок. Остальные условия метода не проверяются.
+          next_formula: '5.12'
+          diagram_case: г
+          diagram: shortened triangular, partial detachment
+          floor_loads: absent
+          ratio_fraction:
+            numerator: 1
+            denominator: 5
+          comparison: 1/6 < 1/5 < 1/4
+          comparison_policy: Точное сравнение дробей; численный допуск не назначен.
+          independent_reference: Akim подтвердил набор e = 0.4 м, l = 2 м, переход к формуле (5.12) и
+            случай г по СП 22.13330.2016 с Изменениями № 1-5, п. 5.6.28, страница PDF 44, и рисунку 5.1,
+            страница PDF 43, в переписке 2026-11-05. Численное давление по (5.12) этой точкой не проверяется.
+        input_units:
+          e: m
+          l: m
