@@ -43,11 +43,19 @@ profile.
   conclusion next to the engineer-responsibility sentence, because section 4 of the report is
   off in the pilot's first iteration (`backend/app/reporting/docx_writer.py:53`, `:234-237`).
 - **Data**: the pilot's R digitized and checked in full by a verifier; a second, separate
-  portion with the data that phase 1b (`foundations-pressure-from-loads`) needs, on its own
-  feature, which does not gate the backend feature (`design.md`, decision 11).
-- Code on three features: `feature/interim-normatives/backend`,
-  `feature/interim-normatives/frontend` and `feature/interim-normatives-phase1b-data/backend`
-  (`tasks.md`).
+  portion with the data that phase 1b (`foundations-pressure-from-loads`) needs, as a
+  continuation on `feature/interim-normatives/backend` by Akim's explicit instruction of
+  2026-11-06 (`design.md`, decision 14). Its acceptance is separate from the original
+  backend integration recorded in task 9.3.
+- **Storage of applicability and diagram conditions**: two optional typed lists preserve
+  exact fractional conditions and printed diagram forms for the future type. They use the
+  same verification and digest controls as existing records. They are stored and validated;
+  a registered type containing them cannot resolve parameters until its executable contract
+  is specified in a later change (`design.md`, decision 14).
+- Code uses `feature/interim-normatives/backend` and
+  `feature/interim-normatives/frontend` (`tasks.md`). The storage-format and phase-1b data
+  continuation reuses the existing backend branch; no separate phase-1b branch is created.
+  The continuation requires its own tester GO, review and integration gate (task 9.3a).
 
 ## Capabilities
 
@@ -95,8 +103,9 @@ decision 9).
 - **Writing to `dec_normatives` or changing Egor's views**, `ml/`, `infra/` or `params/`.
 - **CH2** (data of the settlement blocks), **CH3** (cross-check with the catalog and the move
   back), and **phase 1b** (the type that computes base pressures from loads).
-- **New engine mechanisms** (categorical selectors, interpolation, sums): the interim data use
-  only what the catalog's row records can express today.
+- **New engine mechanisms** (categorical selectors, interpolation, sums), or execution of
+  stored applicability and diagram conditions. The five executable record lists continue to
+  use the catalog row contract; the two additional lists are storage-only (decision 14).
 - **Choosing the source per calculation type.** One setting switches all types; a per-type
   choice is a later change if CH3 needs it.
 

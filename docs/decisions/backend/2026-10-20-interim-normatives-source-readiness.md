@@ -528,3 +528,104 @@ Local evidence and shown-payload hashes are preserved in the phase-1b working
 folder under sheets/items.json. Control payloads and hashes must be updated before
 signing once the verifier selects data. These sheets do not yet provide the mapping
 to the future runtime YAML. Task 7.5 remains open; no verification status was promoted.
+
+
+## Storage-format extension approved, planning revision (2026-11-06)
+
+Akim approved extending the interim format in the conversation with the words
+"Подтверждаю расширение формата". P1b-1 is signed and committed at `582ea84`;
+P1b-2 is signed and committed at `1c580fd`. These signed sheets provide source
+and control-point evidence, but do not themselves promote the newly shaped runtime records.
+
+Decision 14 and requirement "Stored applicability and diagram conditions" specify
+optional applicability and diagram lists. Exact fractional conditions and separate printed
+caption forms are preserved. The original five executable lists stay unchanged. New
+records use the existing verifier, digest and strict-warning controls. A registered type
+containing any new record refuses parameter resolution in both profiles, including when
+verified; an unregistered file is validated and skipped. No execution of these conditions,
+new engine mechanism, catalog view or public API schema change is authorized by this plan.
+
+Task 7.5 is decomposed into planning/review (7.5a), format implementation and tests (7.5b),
+and a pending future-type file (7.5c). Akim explicitly directed reuse of the existing
+`feature/interim-normatives/backend` branch on 2026-11-06; no separate phase-1b branch
+is created. This supersedes the original third-branch allocation, as an authorized exception
+to one branch per feature. Task 9.3 remains historical acceptance of the original reviewed
+features; task 9.3a gates tester GO, review and integration of this continuation. Documents
+stay on develop. The file
+will preserve eight source records. Promotion requires a checked source-to-runtime mapping
+and Git provenance; control points remain separate evidence. P2b-1 is still an empty
+correction template and must not be signed while empty.
+
+This entry records the approved scope and revised plan, not a new DOR or GO verdict.
+The extension still requires a current spec-reviewer report without blocker or major
+findings before implementation. Existing historical acceptance
+records remain valid evidence for their original feature revisions. Tasks 7.5, 9.3a, 1.4
+and 9.5 remain open. No commit, merge or push is performed by this planning revision.
+
+
+## Storage-format extension spec review, task 7.5a (2026-11-06)
+
+The spec-reviewer rechecked the current proposal, design, delta and tasks after the
+branch-plan revision and digest correction. Verdict: **READY**, 0 blockers, 0 major,
+0 minor findings. The resolved major finding concerned record-digest semantics:
+content changes outside verification affect both record and document digests;
+verification-only changes affect the document digest and leave the record digest unchanged.
+The current scenarios and task 7.5b state both cases explicitly.
+
+The review covers reuse of the existing `feature/interim-normatives/backend` branch,
+optional storage-only lists, fail-closed resolution for registered extended types,
+legacy digest compatibility and preservation of the original task 9.3 acceptance.
+Strict validation of this change and all artifacts passed (23/23); the existing unrelated
+formula-extractor-fix archive-target information remains. `git diff --check` passed.
+Task 7.5a is complete. Task 7.5b requires implementation and tests; task 7.5c requires
+the pending runtime file. No source-to-runtime status promotion, tester GO, integration,
+commit, merge or push is declared by this review record.
+
+Architect review (`phase1b_architecture`, read-only, 2026-11-06): suitable for
+implementation, no architectural blocker. The refusal checks the presence of new records
+before rejected-record filtering. Only empty new top-level lists are omitted from the
+document digest; all populated new records participate in iteration, verifier checks,
+effective status and digests. Existing pilot record digests remain unchanged. No engine,
+catalog or public API boundary changes are introduced. The architect edited no files.
+
+
+## Storage extension and pending data prepared (2026-11-06)
+
+Tasks 7.5b and 7.5c are complete in the uncommitted working tree on the existing
+feature/interim-normatives/backend branch, as Akim requested. The storage models
+retain exact integer fractions and separate diagram/caption expressions. New records
+participate in verification and digests; empty optional lists preserve legacy document
+digests. Registered types with stored-only conditions refuse resolution in both profiles.
+
+The future-type file foundations_pressure_from_loads.yaml holds eight pending records:
+three formulas, three table values, one applicability condition and one diagram record.
+It validates, logs its unregistered type and receives no parameter source. All selected
+source fields were compared with the signed P1b-1 payloads. Read-only architect review
+approved the implementation with 0 blocker, 0 major and 0 minor findings, and confirmed
+all 146 pilot record digests unchanged. Existing pilot data and signed sheets were not edited.
+
+The tester declared GO only for storage extension and pending data preparation. The clean
+full backend/check.sh passed: Ruff, mypy (171 files), five import contracts, 1430 tests
+passed, 11 skipped, and 100% statement and branch coverage of app/scripts (3178 statements,
+584 branches, no missing or partial branches). All three changed application modules have
+100% coverage. Seventy-nine new test cases cover the extension; pilot, manifest and ex1
+regression tests select the named pilot alongside the unregistered file. UI/UX: N/A,
+because there are no UI changes. PostgreSQL/catalog checks skipped for missing test URLs
+(three collection modules, one catalog fixture and seven ingested properties); the real
+catalog was not verified. One existing Starlette deprecation warning remains.
+
+An initial sandbox TestClient run stalled. The first complete escalated run found an old
+manifest-test assumption about a single file; after correcting the assertion for corpus
+coexistence, the clean full escalated run passed. OpenSpec selected/all strict validation
+and whitespace checks passed. No new calculation method is implemented or accepted.
+Task 7.5 remains open for the checked source-to-runtime mapping and status promotion;
+9.3a, 1.4 and 9.5 remain open. No commit, merge, push, migration or live-process restart
+was performed for this implementation.
+
+
+## Storage implementation committed (2026-11-06)
+
+Commit 014467f on feature/interim-normatives/backend records the reviewed storage
+extension, tests and eight pending records described above. Both commit hooks passed
+or skipped with no applicable files. The backend tree is clean. This commit does not
+promote data, merge the continuation or close task 7.5. No push was performed.

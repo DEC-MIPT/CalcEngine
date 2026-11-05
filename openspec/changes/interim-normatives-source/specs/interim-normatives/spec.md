@@ -4,7 +4,7 @@
 The system SHALL read interim norm-given parameters only from YAML files under one data root
 in the backend zone, outside `params/`: one directory per norm document holding a
 `manifest.yaml` and one file per calculation type, named as the type in the registry. A type
-file SHALL hold five lists, whose records have these fields, as the rows of the normative
+file SHALL hold the five required lists below, whose records have these fields, as the rows of the normative
 catalog contract do:
 - `formulas`: `parameter`, `result_symbol`, `latex`, `tree` (the expression tree), `units`;
 - `table_values`: `parameter`, `symbol`, `latex`, `value`, `unit`, and optionally
@@ -12,6 +12,9 @@ catalog contract do:
 - `thresholds`: `parameter`, `latex`, `value`, `unit`;
 - `checks`: `parameter`;
 - `method_bounds`: `quantity`, `kind`, `value`, `unit`, `inclusive`.
+
+The optional lists specified by "Stored applicability and diagram conditions" extend this
+format without changing the five required lists.
 
 Every record SHALL also have `norm_refs` (one or more complete `NormRef` objects), `page` (the
 page of the source text the value was read from) and `verification`. The manifest SHALL name
@@ -42,6 +45,76 @@ verifier.
 #### Scenario: File of an unregistered type
 - **WHEN** a valid type file names a calculation type that is not registered
 - **THEN** the file is validated, its type gets no source, and one log line names the file
+
+### Requirement: Stored applicability and diagram conditions
+The system SHALL accept optional `applicability_conditions` and `diagram_cases` lists in an
+interim type file, defaulting each to empty. Every record SHALL have the same `norm_refs`,
+positive `page` and `verification` contract as records in the five required lists. New
+records and all nested objects SHALL reject unknown fields. The existing identifier and
+LaTeX limits SHALL apply to their labels and expressions, including unit keys and values.
+
+An applicability record SHALL have `parameter`, `quantity`, `applies_to`, `latex`, `unit`,
+`relation` (`lt`, `le`, `eq`, `ge` or `gt`) and `value_fraction`. `value_fraction` SHALL hold
+strict integer `numerator` and positive strict integer `denominator`; booleans and values
+requiring numeric coercion SHALL be rejected. The stored fraction SHALL remain exact and
+SHALL NOT be converted into a floating-point threshold or a global method bound.
+
+A diagram record SHALL have `parameter`, `units`, a non-empty `cases` list and a non-empty
+`caption_forms_as_printed` list. Every case SHALL have `figure_case`, `diagram`,
+`condition_latex` and optionally `edge_ordinate_latex`. Identifiers SHALL represent labels;
+LaTeX fields SHALL represent printed expressions. Caption forms SHALL remain separate from
+case expressions, preserving their differences without normalization or correction.
+
+These records SHALL participate in record iteration, verifier validation, effective status,
+strict startup warnings and record/document digests. Iteration SHALL append applicability
+records and then diagram records after the existing five lists, preserving each list's
+order. An unregistered type file SHALL remain validated and skipped as specified by
+"Interim normative data files". A registered type containing any such record SHALL refuse
+parameter resolution with `ParameterSourceUnavailableError` in both `strict` and `draft`,
+regardless of verification status; the API SHALL retain `503 parameter_source_unavailable`.
+Logs SHALL name the type and parameter without data values. The system SHALL NOT silently
+drop or execute these records through the catalog assembly.
+
+#### Scenario: Legacy file without optional lists
+- **WHEN** a valid type file contains only the five required lists
+- **THEN** both optional lists are empty and the file retains its existing loading and
+  parameter resolution behavior
+
+#### Scenario: Exact fraction preserved
+- **WHEN** an applicability record has valid integer numerator and positive integer denominator
+- **THEN** loading and serialization retain those integers, relation and applies_to label
+  without floating-point conversion
+
+#### Scenario: Invalid fraction rejected
+- **WHEN** a fraction has a non-positive denominator, boolean, non-integer or unknown field,
+  or the applicability relation is not one of the supported labels
+- **THEN** validation rejects the file and names the offending path without its data value
+
+#### Scenario: Diagram expressions remain distinct
+- **WHEN** a valid diagram record has different printed expressions in cases and caption forms
+- **THEN** both forms and their order survive loading and serialization unchanged
+
+#### Scenario: Invalid nested diagram rejected
+- **WHEN** a diagram has an empty cases or caption list, a missing case field, an unknown
+  nested field or a label or expression exceeding its applicable limit
+- **THEN** validation rejects the file and names the offending path without its data value
+
+#### Scenario: New records use the verification gate
+- **WHEN** a new record lacks required verification fields, names an unlisted verifier, or
+  has a human-verified digest that differs from its current content
+- **THEN** the same rejection or effective-pending rules as "Verification record" apply
+  and strict startup warnings include effective-pending records
+
+#### Scenario: Unregistered extended file is stored without execution
+- **WHEN** an extended type file is valid but its calculation type is not registered
+- **THEN** the loader validates all records, logs the file as unregistered and exposes no source
+  for that type
+
+#### Scenario: Registered extended file cannot bypass stored conditions
+- **WHEN** a registered type containing any new record resolves parameters in either profile,
+  including when all records are human-verified or rejected
+- **THEN** resolution raises ParameterSourceUnavailableError, the API returns the existing
+  503 error code, and no stored condition is dropped or executed
 
 ### Requirement: Verification record
 Every interim record SHALL carry a verification record with `status` (`pending`,
@@ -114,7 +187,8 @@ label.
 objects (`Formula`, `TableValue`, `Threshold` and the reference lists of the checks), the same
 method range and the same errors as `CatalogParameterSource` for the same data. One
 parametrized contract test battery SHALL run against both sources, with the same data loaded
-into each.
+into each. This equivalence applies to the five executable lists; storage-only extended
+records use the refusal specified by "Stored applicability and diagram conditions".
 
 #### Scenario: Same data, same parameters
 - **WHEN** the battery loads one data set into the catalog fixture and into interim files and
@@ -143,7 +217,23 @@ serialization of the validated manifest and type files, taken in the order of th
 relative to the document directory, with sorted keys, fixed separators and UTF-8. The digest
 SHALL cover every value, reference, page and verification record and SHALL NOT depend on YAML
 comments, key order or whitespace. Every result computed from interim data SHALL carry this
-digest in its source label.
+digest in its source label. Empty optional applicability and diagram lists SHALL be omitted
+from canonical type-file data; populated optional lists SHALL be included. Existing record
+serialization SHALL remain unchanged.
+
+#### Scenario: Legacy digest preserved
+- **WHEN** a corpus has only the original five lists, with optional lists absent or explicitly empty
+- **THEN** its document and existing record digests equal those from the original format
+
+#### Scenario: Extended digest covers the stored content
+- **WHEN** a new applicability or diagram record changes outside its verification object,
+  including a nested expression, reference or page
+- **THEN** the affected record digest and document digest change
+
+#### Scenario: Verification-only change preserves the record digest
+- **WHEN** only a verification field of a new applicability or diagram record changes
+- **THEN** the document digest changes and the record digest remains unchanged because
+  record digests exclude the verification object
 
 #### Scenario: Digest is deterministic
 - **WHEN** the same data are loaded twice, or after a change of comments, key order or

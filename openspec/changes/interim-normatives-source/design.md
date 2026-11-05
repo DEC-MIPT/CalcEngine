@@ -75,7 +75,8 @@
    - The root defaults to `backend/interim_normatives` and can be moved with
      `DEC_INTERIM_ROOT` (decision 7).
 
-2. **Records repeat the catalog rows.**
+2. **Records repeat the catalog rows.** Decision 14 adds two storage-only lists; the
+   five lists in this decision remain required and keep their existing field contracts.
    - A type file has five lists: `formulas`, `table_values`, `thresholds`, `checks` and
      `method_bounds`. Their fields are those of the row records
      (`backend/app/schemas/normatives.py:11-70`):
@@ -269,8 +270,9 @@
       A separate portion holds the data phase 1b needs: the mean unit weight of the
       foundation with the soil above it, the formulas of the edge and corner pressures with
       their limits, and the condition of a trapezoidal pressure diagram. That portion lives on
-      its own feature (`feature/interim-normatives-phase1b-data/backend`), does not gate the
-      backend feature or `ex1`, and is needed for the DOR of phase 1b.
+      its own feature under the original branch plan, which did not gate the original
+      backend feature or `ex1`. Decision 14 supersedes that branch allocation for the
+      continuation; the data portion is still needed for the DOR of phase 1b.
 
 12. **The C/C++ boundary is unchanged.** The swap boundary of the engine
     (`calculation-engine` "Hot-swap boundary for C/C++") is the calculation function. The
@@ -293,6 +295,53 @@
       section 4 is on, the line moves there and extends the content of
       `calculation-core-contract` "Result accountability block".
 
+14. **Store applicability and diagram conditions without executing them.**
+    - Akim approved the format extension and explicitly directed reuse of the existing
+      `feature/interim-normatives/backend` branch in the conversation on 2026-11-06. No
+      separate phase-1b branch is created. This instruction supersedes the branch allocation
+      in decision 11 and is an explicit exception to one branch per feature. The original
+      task 9.3 acceptance and merge remain historical evidence for their reviewed revisions;
+      task 9.3a gates GO, review and integration of this continuation. Documents stay on
+      `develop`. The original
+      five lists remain required. `applicability_conditions` and `diagram_cases` are optional
+      lists, defaulting to empty. Their records inherit the existing `norm_refs`, positive
+      `page` and `verification` fields and reject unknown fields, including nested ones.
+    - An applicability record has `parameter`, `quantity`, `applies_to`, `latex`, `unit`,
+      `relation` (one of `lt`, `le`, `eq`, `ge`, `gt`) and `value_fraction`. The fraction holds
+      `numerator` and `denominator` as strict integers, rejects booleans and coerced numbers,
+      and requires a positive denominator. It is serialized as written, without rounding or
+      implicit conversion into a numeric threshold or global method bound. `applies_to` names
+      the formula or rule whose condition is being stored; it is not an instruction to run it.
+    - A diagram record has `parameter`, `units`, non-empty `cases` and non-empty
+      `caption_forms_as_printed`. Each case has `figure_case`, `diagram`, `condition_latex`
+      and optional `edge_ordinate_latex`. These are short labels and printed expressions,
+      not passages from the norm. Caption expressions remain separate from figure expressions;
+      the serializer does not reconcile or correct their differences.
+    - Existing identifier and LaTeX limits apply to all new labels, unit keys and values,
+      and expressions, including nested cases and caption forms. Each new record is visited
+      by `records()` after the original five lists, in applicability-then-diagram order.
+      Verifier checks, effective verification status, strict startup warnings and record
+      digests therefore cover them by the existing rules.
+    - Empty optional lists are omitted from canonical type-file data for the document digest,
+      whether absent or explicitly empty in YAML. This preserves the document digest of a
+      legacy corpus containing no new records. Populated lists participate in that digest.
+      Existing record serialization and per-record digests do not change. Adding a populated
+      file to a document changes that document's digest as required by decision 6.
+    - Unregistered type files remain validated and logged without receiving a source. If a
+      registered type contains any applicability or diagram record, `resolve` raises
+      `ParameterSourceUnavailableError` (`503 parameter_source_unavailable`) in both profiles,
+      regardless of verification status. It logs only type and parameter names. The source
+      cannot drop these records or execute their conditions through the catalog assembly.
+      The engine, catalog views, public API schema and C/C++ calculation boundary do not change.
+    - The first prepared corpus contains eight `pending` records: three formulas, three table
+      values, one applicability condition and one diagram record. Signed source and control
+      sheets remain immutable. Promotion requires a separately checked mapping to runtime
+      record digests and Git provenance; source verification alone does not promote a newly
+      shaped runtime record. The control points remain separate reference evidence.
+    - Regression tests select the pilot file by its calculation type, because another
+      unregistered file now coexists in the document directory. Pilot data and their record
+      digests stay unchanged; startup warnings for the new pending records are expected.
+
 ## Non-functional requirements
 
 - **Security.**
@@ -306,7 +355,8 @@
 - **Coverage.** Branch coverage of the changed backend code at least 95% (`backend/check.sh`
   holds 100% today). Frontend branch coverage at least 95%.
 - **Accessibility.** The label on the result screen is text, not colour alone, and the axe
-  check of the screens passes.
+  check of the screens passes. The storage-only extension changes no UI; its UI/UX check is
+  N/A for that reason.
 
 ## Risks
 

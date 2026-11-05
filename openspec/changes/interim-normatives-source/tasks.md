@@ -2,19 +2,21 @@
 
 Owner: Akim (backend and frontend zones). No task of this change is in Egor's zones.
 
-Branches: three features, each merged into `develop` only when every task assigned to it is
-checked off, the `tester` has declared GO for it and the review has passed (`AGENTS.md`,
-Branching rules):
+Branches: existing backend and frontend branches. Akim explicitly directed on 2026-11-06
+that the format extension and phase-1b data continuation reuse the existing backend branch,
+with no separate phase-1b branch. This is an authorized exception to one branch per feature.
 
-- `feature/interim-normatives/backend` (Akim, from `develop`): sections 2-5, tasks 7.1-7.4c
-  (the R data files) and section 8.
-- `feature/interim-normatives/frontend` (Akim, from `develop` after the backend feature is
-  merged, or from the backend branch if it is still open): section 6.
-- `feature/interim-normatives-phase1b-data/backend` (Akim, from `develop` after the backend
-  feature is merged): task 7.5, the data phase 1b needs. It merges on its own; the change is
-  archived when all three features are merged.
+- `feature/interim-normatives/backend` (Akim): sections 2-5, tasks 7.1-7.4c
+  (the R data files) and section 8 belong to the original backend acceptance. Task 7.5 and
+  its code subtasks 7.5b-7.5c now continue on this same existing branch. The original
+  task 9.3 acceptance and merge remain complete for their reviewed revisions. Task 9.3a
+  requires a new tester GO, review and integration for the continuation.
+- `feature/interim-normatives/frontend` (Akim): section 6 and its original acceptance
+  remain unchanged.
 
-Spec work (section 1, tasks 9.4-9.5) is committed directly to `develop`. Section 7 is a
+The change is archived after the accepted features and backend continuation are integrated.
+
+Spec work (section 1, task 7.5a, tasks 9.4-9.5) is committed directly to `develop`. Section 7 is a
 working process with the verifier; its data commits go to the branch that owns each task. Checkboxes are ticked in `develop` as tasks are done on the feature branches.
 
 Code journal: `docs/akim/reports/interim-normatives-source-code-journal.md` (untracked, Akim's
@@ -22,8 +24,8 @@ zone), created before task 2.1.
 
 Order: 1 → 2 → 3 → 4 → 5 → 6. Section 7 starts after task 2.2, so the schema exists, and runs
 in parallel with 3-6. Task 8.1 needs 3, 5 and the R portions of 7 (7.1-7.4) plus open
-question 1 of `design.md` (the tolerances of `ex1`). Task 7.5 (phase-1b data) is on its own
-feature and does not gate the backend feature or section 8.
+question 1 of `design.md` (the tolerances of `ex1`). Task 7.5 (phase-1b data) continues on the existing backend branch under Akim's
+2026-11-06 instruction; it does not reopen the original backend acceptance or section 8.
 
 ## 1. Spec readiness
 
@@ -183,19 +185,37 @@ feature and does not gate the backend feature or section 8.
   `rejected` with all its fields
 - [x] 7.4 Re-check every correction (portion P4); verify: no R record is `pending` or
   `rejected`, and the `strict` startup warning lists no R record
-- [ ] 7.5 (feature `interim-normatives-phase1b-data/backend`) Extract and check the data that
+- [ ] 7.5 (continuation `interim-normatives/backend`) Extract and check the data that
   phase 1b needs (`design.md`, decision 11) into the file of its future type, by the same
   protocol, with its own portion ids (P1b for formulas and limits, P2b for re-checks) and a
   listed verifier (`design.md`, open question 3), every record `human-verified` at the end; verify: the file validates and is
   skipped as an unregistered type ("File of an unregistered type"), and `backend/check.sh`
   passes
-  (2026-11-03: A has 8 pending target records, independent image-only B has 45;
-  structural comparison 115 matches/9 unavailable units/0 differences. Akim approved
-  numeric settings; 3 x 1000 samples passed, max difference 0.0 kPa. Human verification,
-  future-type YAML and feature acceptance remain pending; see readiness.
-  Unsigned sheets prepared: P1b-1 has 8 source records; P1b-2 has 9 control-point
-  placeholders without selected values; P2b-1 is an empty correction re-check template
-  to populate only after actual corrections. No verifier verdicts were entered.)
+  (P1b-1 is signed and committed at `582ea84`; P1b-2 is signed and committed at
+  `1c580fd`. P2b-1 remains an empty re-check template. Runtime packaging, checked
+  promotion mapping and feature acceptance remain open; see readiness.)
+- [x] 7.5a (spec, directly on `develop`) Record the approved storage-only extension in
+  proposal, design and delta specs, then obtain a current `spec-reviewer` report with no
+  blocker or major finding before code; verify: strict change/all validation passes and
+  the report is in the paired readiness record (2026-11-06: current review READY,
+  0 blocker/0 major/0 minor; strict change/all validation passed). The historical
+  task 1.2 review does not approve this extension
+- [x] 7.5b (continuation `interim-normatives/backend`) Add the optional applicability
+  and diagram models and their validation, iteration, verification and digest participation;
+  preserve legacy digests and refuse registered extended types in both profiles
+  (`design.md`, decision 14); verify: the scenarios of "Stored applicability and diagram
+  conditions", "Legacy digest preserved", "Extended digest covers the stored content" and
+  "Verification-only change preserves the record digest" pass, `backend/check.sh` passes with at least 95% branch coverage, and existing pilot
+  checks select its named file and still pass with unchanged pilot record digests
+- [x] 7.5c (continuation `interim-normatives/backend`) Prepare the future-type YAML
+  with all eight source records, preserving the signed source content in three formulas,
+  three table values, one applicability condition and one diagram record, each `pending`;
+  verify: the extended schema validates it, the unregistered type is logged and receives
+  no source, and existing pilot data and signed sheets are byte-for-byte unchanged.
+  (2026-11-06: 8 pending records validated; tester GO for preparation; backend check
+  PASS, 1430 passed/11 skipped, 100% branch coverage; see paired readiness record.)
+  Keep source-to-runtime mapping and status promotion as the remaining part of task 7.5;
+  do not mark 7.5 complete merely because this pending file exists
 
 Deferred portion D-1 (Akim, 2026-10-27): the checks of six records that the pilot's type file
 does not hold (the cap d_b = 2 m, the h_n allowances, b = √A, note 5 on d_1 > d, formula
@@ -233,15 +253,18 @@ structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. T
   re-review APPROVE/tester GO; backend merge `2d0f7db`, frontend merge `cbfb634`;
   both develop check.sh PASS: backend 1351 passed/11 skipped, frontend 496 passed,
   branch coverage 100% in both; see readiness integration entry)
-- [ ] 9.3a `tester` GO, review and merge of `feature/interim-normatives-phase1b-data/backend`;
-  verify: recorded in the readiness file
+- [ ] 9.3a `tester` GO, review and integration of the phase-1b format/data continuation
+  on existing `feature/interim-normatives/backend`, as explicitly directed by Akim on
+  2026-11-06; verify: recorded in the readiness file. The original task 9.3 acceptance
+  and integration remain complete for their reviewed revisions
 - [x] 9.4 (spec) Record in the plan file and in Akim's PM record that the interim base is in
   use, with the oral consent of 2026-10-18 (`design.md`, decision 9, open question 6); verify:
   the dated line exists in `docs/decisions/product/2026-11-01-interim-normatives-consent.md`
   and the local action plan. Consent is attributed to Akim; use is on the feature branch,
   not a release on `develop`
 - [ ] 9.5 (spec) `spec-keeper` syncs the deltas into `openspec/specs/` and archives this
-  change after all three features are merged and task 1.4 is resolved; verify:
+  change after the original features and the backend continuation are integrated and
+  task 1.4 is resolved; verify:
   `openspec validate --all --strict` passes after the archive
 
 ## Requirement coverage
@@ -249,10 +272,11 @@ structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. T
 | Requirement | Verified by |
 |---|---|
 | `interim-normatives` Interim normative data files | tasks 2.1, 2.2 |
+| `interim-normatives` Stored applicability and diagram conditions | tasks 7.5a-7.5c |
 | `interim-normatives` Verification record | task 2.3 (process part: 7.3a-7.3c, 7.4) |
 | `interim-normatives` Interim source profiles | tasks 3.3, 2.3 (startup warning) |
 | `interim-normatives` Interim parameter source contract | task 3.4 |
-| `interim-normatives` Interim data digest | tasks 2.4, 5.1 |
+| `interim-normatives` Interim data digest | tasks 2.4, 5.1, 7.5b |
 | `interim-normatives` Parameter source selection | tasks 4.1, 4.2 |
 | `interim-normatives` Interim source sunset | tasks 2.5, 7.1 |
 | `interim-normatives` Scoped exception to the normative-database rule | tasks 4.1, 4.3, 1.4 |
@@ -301,8 +325,12 @@ structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. T
   - section 6 done;
   - `frontend/check.sh` and Playwright pass with branch coverage at least 95%;
   - `ui-ux-tester` confirms the label (text, not colour alone; axe clean).
-- **GO for `feature/interim-normatives-phase1b-data/backend`:** task 7.5 done; every record
-  of the file `human-verified`; `backend/check.sh` passes.
+- **GO for the phase-1b continuation on `feature/interim-normatives/backend`:**
+  tasks 7.5 and 7.5a-7.5c
+  done; every runtime record in the file `human-verified` through the checked promotion
+  mapping; `backend/check.sh` passes with at least 95% branch coverage; the current extension
+  spec review is recorded. UI/UX: N/A for this storage-only
+  feature, which changes no interface. Only the tester declares GO.
 - **NO-GO:**
   - any failing test;
   - coverage below 95%;
@@ -312,4 +340,5 @@ structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. T
   - a `strict` result computed from a `pending` or `rejected` record;
   - a result from interim data without its source label;
   - an unvalidated OpenSpec artifact.
-- **Archive:** all three features merged with their GO, task 1.4 resolved, specs synced.
+- **Archive:** original features and backend continuation integrated with their GO,
+  task 1.4 resolved, specs synced.
