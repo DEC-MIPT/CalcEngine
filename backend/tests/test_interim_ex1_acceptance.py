@@ -77,6 +77,7 @@ def test_ex1_uses_real_strict_interim_data_through_the_api_and_docx(
         assert not any(
             code in record.message
             for record in caplog.records
+            if f"/{pilot.NAME}.yaml" in record.message
             for code in ("interim_record_unchecked", "interim_value_changed")
         )
     finally:

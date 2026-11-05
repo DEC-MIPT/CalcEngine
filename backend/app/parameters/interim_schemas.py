@@ -182,23 +182,60 @@ class InterimMethodBound(_Record):
     inclusive: bool
 
 
-InterimRecord = InterimFormula | InterimTableValue | InterimThreshold | InterimCheck | InterimMethodBound
+class ExactFraction(_Strict):
+    numerator: int = Field(strict=True)
+    denominator: int = Field(strict=True, gt=0)
+
+
+class InterimApplicabilityCondition(_Record):
+    parameter: Identifier
+    quantity: Identifier
+    applies_to: Identifier
+    latex: Latex
+    unit: Identifier
+    relation: Literal["lt", "le", "eq", "ge", "gt"]
+    value_fraction: ExactFraction
+
+
+class DiagramCase(_Strict):
+    figure_case: Identifier
+    diagram: Identifier
+    condition_latex: Latex
+    edge_ordinate_latex: Latex | None = None
+
+
+class InterimDiagramCases(_Record):
+    parameter: Identifier
+    units: dict[Identifier, Identifier]
+    cases: tuple[DiagramCase, ...] = Field(min_length=1)
+    caption_forms_as_printed: tuple[Latex, ...] = Field(min_length=1)
+
+
+InterimRecord = (
+    InterimFormula | InterimTableValue | InterimThreshold | InterimCheck | InterimMethodBound
+    | InterimApplicabilityCondition | InterimDiagramCases
+)
 
 
 class InterimTypeFile(_Strict):
-    """``<calculation-type>.yaml``: пять списков, как пять представлений каталога (решение 2)."""
+    """Пять списков каталога и необязательные условия, хранимые без исполнения."""
 
     formulas: tuple[InterimFormula, ...]
     table_values: tuple[InterimTableValue, ...]
     thresholds: tuple[InterimThreshold, ...]
     checks: tuple[InterimCheck, ...]
     method_bounds: tuple[InterimMethodBound, ...]
+    applicability_conditions: tuple[InterimApplicabilityCondition, ...] = ()
+    diagram_cases: tuple[InterimDiagramCases, ...] = ()
 
     def records(self) -> tuple[tuple[str, InterimRecord], ...]:
         """Записи файла с их путём в файле, например ``formulas[0]``, в порядке файла."""
         return tuple(
             (f"{name}[{index}]", record)
-            for name in ("formulas", "table_values", "thresholds", "checks", "method_bounds")
+            for name in (
+                "formulas", "table_values", "thresholds", "checks", "method_bounds",
+                "applicability_conditions", "diagram_cases",
+            )
             for index, record in enumerate(getattr(self, name))
         )
 
