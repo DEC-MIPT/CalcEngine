@@ -781,3 +781,15 @@ Task 1.4 remains open until `calculation-api` and `normative-catalog-backend` ar
 also archived. The API/core/retarget chain still awaits the scoped PM record and
 its remaining gates. The four exception requirements remain drafts; no active
 CH1 delta or base requirement is changed by this checkpoint.
+
+## Catalog follow-up prerequisite delivered (2026-11-08)
+
+Catalog fix `bc34063` is integrated into local `develop` at `8d1c70e`.
+Its task 7.4 is complete with current independent APPROVE and post-merge tester GO;
+the paired catalog readiness owns the counts, skips and verification limits.
+Architecture synchronization/archive is committed at `dc75a2f`.
+
+Task 1.4 remains open. The remaining named archives are `normative-catalog-backend`
+and `calculation-api`; the latter still depends on core/retarget archive and the
+scoped PM record. No other change was archived, no exception draft was activated,
+and no push was performed. Task 9.5 remains open.

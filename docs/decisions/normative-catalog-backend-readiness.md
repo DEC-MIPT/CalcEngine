@@ -1154,3 +1154,28 @@ advanced with `git pull --ff-only origin develop` before commit, retaining exact
 the reviewed two-line patch. Commit `bc34063` records that patch; its secret-scan
 hook passed, with no applicable settings-hook files. No baseline findings changed.
 Integration and its actual-tree check remain pending; task 7.4 is not yet closed.
+
+## Task 7.4 integrated and accepted (2026-11-08)
+
+Task 7.4 is **complete**. Akim authorized the prepared commits and merge. Reviewed
+fix `bc34063` is merged into local `develop` as `8d1c70e`, without conflicts.
+Its backend tree equals the reviewed fix revision. The existing independent
+APPROVE applies to the integrated two-line change.
+
+The `tester` declared **GO** after inspecting the actual merged tree and its full
+backend check log: Ruff, mypy (171 files), five import contracts, 1430 tests passed,
+11 skipped and one existing Starlette warning. Statement and branch coverage is
+100% (3178 statements, 584 branches, no missing or partial branches).
+Hypothesis seed: 1593273572. UI/UX: N/A, no UI changes.
+
+The skips cover three PostgreSQL collection modules, one catalog fixture test and
+seven ingested-catalog property tests. Test database URLs are absent; no live
+snapshot/concurrency, fresh catalog or migration verification is claimed.
+The actual-tree log is `/tmp/dec-catalog-74-postmerge/backend-check.log`.
+
+Architecture synchronization/archive is recorded in `dc75a2f`. Current artifact
+consistency review is READY with 0 blockers, 0 major and 0 minor findings.
+Strict all-artifact validation passed (23/23), including the new architecture main
+spec; hooks and whitespace passed without changing the secrets baseline.
+No push, migration or live-process restart was performed. Catalog task 8.2 remains
+open for its separate sync/archive workflow; CH1 task 1.4 is not closed by this fix.
