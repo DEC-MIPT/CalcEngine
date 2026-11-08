@@ -39,5 +39,6 @@ format is defined by the planned change `norm-source-traceability` (`NormRef
 
 #### Scenario: Reference checked
 - **WHEN** Egor's normative pipeline confirms a reference against the source text
-- **THEN** the reference records the checked edition and clause and is no longer marked
-  `unverified`
+- **THEN** a new reference version records the checked edition and clause for new
+  runs and is no longer marked `unverified`; references already pinned in stored
+  results retain their original edition, status and provenance

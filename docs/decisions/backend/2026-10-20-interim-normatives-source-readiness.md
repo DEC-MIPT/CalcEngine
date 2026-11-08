@@ -805,3 +805,41 @@ Two named prerequisites of CH1 task 1.4 are now archived: architecture and catal
 `calculation-api` remains active and waits for core/retarget archive, including
 the scoped PM record. Task 1.4 and final CH1 sync/archive 9.5 remain open.
 No interim exception draft was activated and no other change was archived here.
+
+## PM input received for the retarget prerequisite (2026-11-08)
+
+Akim supplied the missing PM account: approval on 2026-10-19 during a meeting or
+call, with the product boundaries clarified in this conversation. The paired
+[product decision](../product/2026-11-08-mvp-scope-and-b2c-consent.md) owns the scope,
+non-goals, B2C limit and attribution. It requires the full second-limit-state
+foundation workflow within the MVP and places internal water supply after the MVP.
+
+The external PM information is received. The current R-only retarget text still
+requires a coherent revision, review and current-version acknowledgement before
+its closure. No retarget archive, API archive, CH1 exception activation or Git
+operation follows from recording the decision. CH1 tasks 1.4 and 9.5 remain open.
+
+## Confirmed retarget revision applied (2026-11-08)
+
+Akim approved application of the proposed scope revision. The actual retargeting
+artifacts and OpenSpec context now state the clarified MVP boundary; PM input task
+1.4 in `retarget-mvp-domain` is checked. Current validation, spec review, normative
+traceability and placeholder-sweep results are recorded in
+[the retarget review](../retarget-mvp-domain-akim-review.md).
+
+Retarget still requires current-version acknowledgement, final tester GO and archive.
+CH1's own task 1.4 remains open until the core/API archive chain and the scoped
+exception deltas are complete. No CH1 exception draft was activated; no commit,
+merge, push or archive was performed by this application step.
+
+## Oral acknowledgement and final tester gate (2026-11-08)
+
+Akim reports Egor's oral confirmation of the current retarget revision. The final
+tester check passed all content/document checks but returned **NO-GO** because
+the document revision and subsequent acknowledgement record are not committed.
+The existing process requires the durable acknowledgement after the document commit.
+The paired retarget review records the oral attribution, exact gate and N/A fields.
+
+No further oral confirmation is required solely to formalize the unchanged revision.
+Task 5.6 and final tester task 5.5 in retarget remain open until the required written
+record is in place and the tester rechecks it. CH1's archive chain remains open.

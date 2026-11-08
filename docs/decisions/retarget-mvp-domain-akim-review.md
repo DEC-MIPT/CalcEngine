@@ -104,3 +104,77 @@ Answers section 6.
 
 These are WP1 edits, which I lead; I apply them in WP1 (tasks 3.3 and 5.6) rather than
 leaving them as open findings.
+
+## PM scope revision applied and checked (2026-11-08)
+
+Akim approved the prepared eight-file revision in this conversation. It is applied
+to the actual `develop` worktree based on `be22290`, with the paired
+[PM decision record](product/2026-11-08-mvp-scope-and-b2c-consent.md). The required
+MVP outcome is the full second-limit-state shallow-foundation workflow; R remains
+the delivered stage, and water supply follows after MVP. The natural-base boundary
+is preserved. Engineering methods and verification contracts remain separate work.
+
+Current selected and all strict OpenSpec validation passed (22/22). The current
+spec-reviewer report is READY with 0 blockers, 0 major and 0 minor findings.
+The norm-traceability checker passed task 5.3: no concrete normative formula,
+coefficient or engineering limit was introduced. The two reference examples remain
+synthetic and explicitly unverified; product limits are outside that check.
+
+The fresh sweep used `rg -n -i 'beam|балк|SP\s*16|СП\s*16' openspec --glob '!**/archive/**'`.
+It found six normative placeholder hits, all owned by archive cleanup task 4.3:
+
+| Main spec | Lines at this checkpoint | Hits |
+|---|---|---:|
+| `product-vision/spec.md` | 39, 44 | 2 |
+| `calculation-engine/spec.md` | 15, 16 | 2 |
+| `normatives-catalog/spec.md` | 33 | 1 |
+| `transparent-output/spec.md` | 17 | 1 |
+
+Paths above are under `openspec/specs/`. A seventh hit is the historical audit row
+at `openspec/changes/codex-context-navigation/verification.md:33`; it records an
+earlier finding and is preserved. The DOD now explicitly separates historical audit
+mentions from requirement/scenario placeholders. Task 4.3 must still remove all
+six placeholders from synchronized main contracts; this clarification waives none.
+The sweep and ownership record complete task 5.4a.
+
+PM input task 1.4, current validation 5.1a, review 5.2, traceability 5.3 and sweep
+5.4a are complete. Current Egor acknowledgement 5.6, final tester GO 5.5, sync/archive
+5.7 and its cleanup check 4.3 remain open. The old Egor review does not acknowledge
+this amendment. No implementation, commit, merge, push or archive was performed.
+
+## Oral acknowledgement reported by Akim (2026-11-08)
+
+Akim reports in the current conversation that Egor orally confirmed the current
+`retarget-mvp-domain` revision and requested the final tester check. The revision
+is the applied scope amendment based on `be22290`: the full second-limit-state
+foundation workflow is required for MVP, R is the delivered stage, water supply
+is post-MVP, and the confirmed non-goals and B2C limit remain in force.
+
+This records Akim's account of Egor's oral acknowledgement. It is not a direct
+written comment from Egor or a committed acknowledgement of this revision.
+The working-tree record is not yet committed. Task 5.6 remains unchecked until
+the tester assesses the written-record requirement in AGENTS.md section 4.
+No acknowledgement authorship, final GO or Git consent is inferred.
+
+## Final tester check before document commits (2026-11-08)
+
+The `tester` issued **NO-GO** for final task 5.5 at the current uncommitted state.
+The sole missing gate is the durable current-version acknowledgement required by
+AGENTS.md section 4 and `development-process` "Review before merge".
+The latter places acknowledgement after the document commit.
+The amendment and its acknowledgement record are still uncommitted.
+
+Passed checks: selected strict validation, all-artifact strict validation (22/22),
+whitespace and the classified placeholder sweep. Current spec review is READY
+with 0 blockers, 0 major and 0 minor findings; normative traceability passed.
+
+- tests: N/A, because this change has no code.
+- coverage: N/A, because this change has no code.
+- UI/UX: N/A, because this change has no code.
+
+An attributed record of Akim's report of Egor's oral confirmation can document
+the acknowledgement; no rule requires inventing a direct Egor-authored comment.
+The record must name `retarget-mvp-domain`, identify the approved document revision
+and be committed or recorded as a tracked comment after that document commit.
+After the written-record gate is satisfied, the tester must issue a fresh verdict.
+Tasks 5.6 and 5.5 remain open. No commit, merge, push or archive was performed.

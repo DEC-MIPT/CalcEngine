@@ -9,26 +9,35 @@ clause number.
 ## ADDED Requirements
 
 ### Requirement: In-scope calculation types
-The system SHALL support only the calculation types listed as in scope for shallow
-foundations. The list is: design soil resistance of the base (R) of a shallow foundation
-on a natural base, registered as `foundations_shallow_r`. Egor and the PM confirmed this
-type on 2026-09-27 (`docs/decisions/first-calculation-type-egor-pm.md`, questions 1-2).
+The system SHALL support the full shallow-foundation calculation by the second group
+of limit states on a natural base as the required MVP outcome. The registered
+`foundations_shallow_r` calculation provides the delivered design-resistance R pilot
+stage. It SHALL NOT be treated as completion of the full MVP workflow.
+
+Separate reviewed implementation changes SHALL define the engineering workflow and
+its executable component contracts before further calculation code is implemented.
+Those contracts SHALL identify applicability, inputs, outputs, normative sources and
+independent verification cases. This product-scope requirement SHALL NOT supply
+unapproved methods, soil cases, coefficients, tolerances or future calculator ids.
 
 #### Scenario: In-scope type runs
 - **WHEN** a user selects a calculation type from the in-scope list
-- **THEN** the type is available end-to-end in the MVP, and its norm references are
-  either verified or marked `status: unverified`
+- **THEN** the type is part of the required first-domain workflow and its completed
+  implementation must meet its reviewed end-to-end contract before MVP release;
+  its norm references are verified or marked `status: unverified`
 
 #### Scenario: List is complete before apply
 - **WHEN** the change is proposed for apply
-- **THEN** the in-scope list names at least one calculation type, and the placeholder
-  "TBD" is gone
+- **THEN** the scope names the full second-limit-state MVP outcome and identifies
+  `foundations_shallow_r` as the delivered pilot, without a placeholder scope or
+  invented identifiers for the remaining implementation components
 
 ### Requirement: Out-of-scope cases
-The system SHALL treat the cases on the out-of-scope list as unsupported for shallow
-foundations. The list is: every calculation of shallow foundations other than the
-in-scope type, and every foundation type other than a shallow foundation on a natural
-base. This is the complement of the in-scope list; the PM confirms it with that list.
+The system SHALL treat calculations outside the required second-limit-state
+shallow-foundation workflow, and foundation types other than shallow foundations on
+a natural base, as out of scope for this capability. The scope revision SHALL NOT
+broaden the existing natural-base restriction. Unsupported applicability cases SHALL
+remain refused until their reviewed engineering contracts and implementations exist.
 
 #### Scenario: Out-of-scope case requested
 - **WHEN** a user asks for a case on the out-of-scope list
@@ -47,3 +56,25 @@ change that also references the MVP scope in `product-vision`.
 - **WHEN** a change adds a calculation type to the in-scope list
 - **THEN** the change is validated and reviewed against `product-vision` before it is
   accepted
+
+### Requirement: Foundation MVP release gate
+The system SHALL declare the foundation MVP complete only when reviewed engineering
+contracts identify the full required second-limit-state workflow and all required
+components pass their recorded end-to-end acceptance checks. Approval or archive of
+this scope-only change SHALL NOT serve as evidence that those components are delivered.
+
+#### Scenario: R-only implementation
+- **WHEN** the registered R pilot is available but the remaining required workflow
+  components have no completed acceptance records
+- **THEN** the R stage can be identified as delivered, but the foundation MVP remains
+  incomplete
+
+#### Scenario: Full workflow evidenced
+- **WHEN** an MVP release is proposed
+- **THEN** its evidence identifies the reviewed full-workflow contracts and completed
+  acceptance of every required component, beyond the R pilot alone
+
+#### Scenario: Method contract before implementation
+- **WHEN** further foundation calculation functionality is proposed for implementation
+- **THEN** its separate change defines and reviews the engineering contract and
+  independent verification cases before code is written

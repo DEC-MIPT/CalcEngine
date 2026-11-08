@@ -19,9 +19,11 @@ context: |
     Playwright (E2E), >= 95% branch coverage
 
   Domain: design engineering. Users are structural/design engineers (novice and
-  experienced), norm-control specialists, and expert reviewers. The MVP domains are
-  shallow foundations first and internal water supply second. Norm editions for both
-  are unverified until checked against the source texts.
+  experienced), norm-control specialists, and expert reviewers. The MVP requires the
+  full shallow-foundation calculation by the second group of limit states; the existing
+  R calculation is its delivered pilot stage. Internal water supply follows at the
+  separate post-MVP water-supply-internal milestone. Norm editions remain unverified
+  until checked against the source texts.
 
   Conventions:
   - Language: English for all specs, agents, skills, and commit messages.

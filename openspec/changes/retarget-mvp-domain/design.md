@@ -50,7 +50,41 @@ See `proposal.md` (Non-goals).
    `normatives-catalog`, `openspec/config.yaml`, `AGENTS.md`, and both `data-engineer.md`
    mirrors.
 
+## PM scope amendment (2026-11-08)
+
+The [product decision record](../../../docs/decisions/product/2026-11-08-mvp-scope-and-b2c-consent.md) records Akim's account of PM
+approval dated 2026-10-19 and the scope clarification made in the current conversation.
+It supersedes the R-only release boundary of decision 5 and resolves the pending
+PM approval described in assumptions A1-A3. The earlier decisions and review note
+remain historical records; they do not acknowledge this amended scope.
+
+The required MVP outcome is a full shallow-foundation calculation by the second
+group of limit states. `foundations_shallow_r` identifies the delivered R pilot.
+That stage alone is insufficient to declare the MVP complete. The existing
+restriction to shallow foundations on a natural base remains in force.
+
+Internal water supply follows the foundation MVP at `water-supply-internal`, a
+post-MVP milestone. This clarifies the domain-order wording of decisions 1 and 2.
+No water-supply capability or implementation is added here.
+
+This change defines a product release gate. Separate implementation changes must
+identify the complete engineering workflow, component contracts, applicability,
+inputs and outputs, normative sources, and independently derived verification
+cases before further calculation code is written. This revision supplies no new
+method, coefficient, tolerance, calculator identifier or unsupported soil case.
+A release candidate needs those reviewed contracts and their completed acceptance
+records to demonstrate the full required workflow; the R pilot cannot substitute
+for that evidence.
+
+The non-goals and B2C limit are confirmed in the product record. `user-accounts`
+remains the sole specification owner of tier limits. Current-version spec review,
+traceability review and second-developer acknowledgement remain separate closure
+gates. The old review is not reused as acknowledgement of this amendment.
+
 ## Assumptions
+
+A1-A3 below describe the earlier draft and are resolved by the dated amendment.
+A4 remains the structural rule for the delta merge.
 
 - A1: the kickoff file with the Decision section does not exist in the repository; the
   domain order comes from Akim's answer in the session.

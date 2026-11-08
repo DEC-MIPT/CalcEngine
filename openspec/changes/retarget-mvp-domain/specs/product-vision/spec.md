@@ -8,23 +8,25 @@ MODIFIED block cannot drop its scenario.
 ## ADDED Requirements
 
 ### Requirement: MVP domains and their order
-The system SHALL target two MVP domains in a fixed order: shallow foundations first,
-internal water supply second. The scope of the first domain is owned by the
-`foundations-shallow` capability. The scope of the second domain (internal water supply)
-is fixed by a later change at the `water-supply-internal` milestone, not inside the MVP.
+The system SHALL deliver the full shallow-foundation calculation by the second group
+of limit states as the MVP outcome. Its scope is owned by `foundations-shallow`.
+The R calculation is the delivered pilot stage and SHALL NOT be sufficient to declare
+that MVP outcome complete. Internal water supply SHALL follow at the separate
+post-MVP `water-supply-internal` milestone, with its scope defined by a later change.
 Calculation types are swappable and must not hard-code the selection of the normative
 method.
 
 #### Scenario: MVP delivered
 - **WHEN** the MVP is delivered
-- **THEN** every in-scope calculation type of the first domain runs end-to-end, and the
-  second domain follows at a named milestone, not inside the MVP
+- **THEN** the full first-domain workflow meets the release gate in
+  `foundations-shallow`, with completed end-to-end acceptance against its reviewed
+  engineering contracts; the second domain follows at its named post-MVP milestone
 
 #### Scenario: Both domains and their order are stated
 - **WHEN** a reader looks for the MVP scope
-- **THEN** it names both domains, states that shallow foundations come first and
-  internal water supply second, and points to `foundations-shallow` for the first
-  domain's scope
+- **THEN** it states the full second-limit-state foundation workflow as the required
+  MVP outcome, names R as the pilot stage, places internal water supply after MVP,
+  and points to `foundations-shallow` for first-domain scope
 
 ### Requirement: Non-goals before the defense
 The system SHALL treat the following as non-goals before the defense: billing or
@@ -45,9 +47,9 @@ database; no ML runs in the calculation path.
 ## MODIFIED Requirements
 
 ### Requirement: Subscription monetization
-The system SHALL support B2B and B2C subscription tiers and a 14-day free trial. The
-tier limits, the trial rules, and the enforcement are owned by the `user-accounts`
-capability and are not restated here.
+The system SHALL support B2B and B2C subscription tiers and the free trial defined by
+`user-accounts` "Free trial". The tier limits, trial rules and enforcement are owned
+by `user-accounts` and are not restated here.
 
 #### Scenario: Tiered access
 - **WHEN** a customer subscribes to a B2B or B2C plan

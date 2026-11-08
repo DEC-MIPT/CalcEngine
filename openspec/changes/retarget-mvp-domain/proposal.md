@@ -1,5 +1,8 @@
 # Proposal
 
+The current scope revision is described below. The following dated review note
+records the earlier R-only draft and does not acknowledge this revision.
+
 > Reviewed by Egor (2026-10-05): the data-zone parts (`normatives-catalog` delta,
 > `foundations-shallow` lists, the domain-order and milestone decision) are his. Akim
 > drafted the change and wrote the engine-facing scenarios. The PM still approves the
@@ -7,30 +10,25 @@
 
 ## Why
 
-The specs and the AI context (`openspec/config.yaml`) still target a placeholder domain,
-while the confirmed MVP domains are shallow foundations and internal water supply.
-The verified roadmap (`docs/reports/verified-roadmap.md`, section 3.1) records this as:
+The MVP must deliver a full shallow-foundation calculation by the second group of
+limit states. The current registered R calculation is the delivered pilot stage;
+R alone does not satisfy the approved MVP outcome. Internal water supply follows
+at a separate post-MVP milestone.
 
-- **A1 (Critical, confirmed):** the placeholder domain appears in more places than the
-  audit reported: the `product-vision` MVP scope, the `config.yaml` context, an engine
-  scenario, a catalog scenario, the transparent-output example, and the pilot tasks and
-  design of `backend-layered-architecture`.
-- **A2 (Critical, confirmed; C7 and C8 merged into it):** no requirement, scope, or
-  out-of-scope statement exists for either MVP domain. A keyword sweep over
-  `openspec/**` for the real domains returns no hits.
-- **E3 (High, needs data):** the scope facts hold, but whether the scope fits 38 weeks
-  depends on team capacity, which is not in the repository. This change therefore fixes
-  the scope and the non-goals in writing and leaves the capacity question to the PM.
+Akim reported PM approval dated 2026-10-19 and clarified its scope in the
+2026-11-08 conversation. The [product decision record](../../../docs/decisions/product/2026-11-08-mvp-scope-and-b2c-consent.md) owns
+that attribution, the confirmed non-goals and the B2C calculation limit.
 
-Duplicated rules also block a single owner per requirement: the B2B/B2C limits are
-stated in both `product-vision` and `user-accounts`, and single authorization is stated
-in both `web-platform` and `user-accounts`.
+The main specs still contain placeholder-domain examples. This documentation change
+replaces those examples, states the target scope and keeps one owner for each
+subscription and authorization rule. It does not define or implement the remaining
+engineering contracts needed to deliver the full foundation workflow.
 
 ## What Changes
 
-- `product-vision`: the MVP scope names both domains and their order (shallow
-  foundations first, internal water supply second); a new requirement lists the
-  non-goals before the defense; the subscription requirement stops restating limits.
+- `product-vision`: the MVP requires the full second-limit-state shallow-foundation
+  workflow; internal water supply remains at a separate post-MVP milestone. A new
+  requirement lists the non-goals; the subscription requirement stops restating limits.
 - `calculation-engine`: the deterministic-calculation scenario no longer names the
   placeholder domain and runs a first-domain calculation type instead.
 - `normatives-catalog`: the binding scenario uses a first-domain calculation type; a new
@@ -38,9 +36,11 @@ in both `web-platform` and `user-accounts`.
 - `transparent-output`: the example reference becomes a synthetic placeholder.
 - `web-platform`: the input form is domain-neutral; single authorization becomes a
   reference to `user-accounts`.
-- `user-accounts`: becomes the only owner of the subscription limits and of
-  authorization.
-- New capability `foundations-shallow`: scope only (what is in, what is out).
+- `user-accounts`: becomes the only owner of subscription limits and authorization;
+  the confirmed B2C limit is no longer marked as awaiting PM approval.
+- New capability `foundations-shallow`: scope only. It distinguishes the delivered
+  R pilot from the full required MVP workflow, preserves the natural-base boundary,
+  and requires reviewed engineering contracts before further implementation.
 - `openspec/config.yaml`: the domain sentence in the context is retargeted, and
   "NLP/RAG auto-parsing = future" is replaced with ML-in-MVP.
 - `AGENTS.md` and both `data-engineer.md` mirrors (non-OpenSpec files): drop
@@ -60,22 +60,24 @@ Before the defense the project does not deliver:
 
 This change also does not:
 
-- Write an engineering method, a formula, a coefficient, a limit, or a clause number for
-  any domain. Every norm reference stays `status: unverified` until checked against the
-  primary source text.
+- Define the full foundation workflow's engineering methods, applicability cases,
+  future calculator identifiers, formulas, coefficients, limits or source clauses.
+  These belong to separately reviewed implementation changes before code is written.
+  No engineering-method implementation is authorized by this scope revision. Every
+  norm reference stays `status: unverified` until checked against the primary source text.
 - Specify internal water supply as a capability. It is named as the second domain only;
   its scope change follows at the `water-supply-internal` milestone.
 - Edit anything under `openspec/changes/archive/`.
 - Edit `openspec/specs/` directly; the deltas apply at archive.
 - Edit `backend-layered-architecture`; its cleanup is a task (see `tasks.md`).
-- Decide whether the scope fits 38 weeks (E3); that is the PM's decision.
+- Decide the delivery schedule or team capacity for the expanded scope; these remain PM decisions.
 
 ## Capabilities
 
 ### New Capabilities
 
-- `foundations-shallow`: scope of the first domain (in-scope calculation types,
-  out-of-scope cases, refusal behavior).
+- `foundations-shallow`: first-domain product scope, the full-workflow MVP release
+  gate, the delivered pilot, and out-of-scope refusal behavior.
 
 ### Modified Capabilities
 
