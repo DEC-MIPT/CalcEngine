@@ -1,5 +1,10 @@
 # Порции верификатора: оглавление
 
+Current Phase-1b evidence: [promotion mapping and review](P1b-promotion.md).
+P1b-1 and P1b-2 are signed on `develop`; eight runtime records have been promoted
+on the backend continuation working tree. The preparation section below is historical.
+The paired CH1 readiness record owns acceptance and integration status.
+
 Дата: 2026-10-27. Порций: 6, проверок: 90, оценка: 236 мин ≈ 3.9 ч (гипотеза).
 
 | Порция | Содержание | Проверок | Оценка, мин |

@@ -185,15 +185,18 @@ question 1 of `design.md` (the tolerances of `ex1`). Task 7.5 (phase-1b data) co
   `rejected` with all its fields
 - [x] 7.4 Re-check every correction (portion P4); verify: no R record is `pending` or
   `rejected`, and the `strict` startup warning lists no R record
-- [ ] 7.5 (continuation `interim-normatives/backend`) Extract and check the data that
+- [x] 7.5 (continuation `interim-normatives/backend`) Extract and check the data that
   phase 1b needs (`design.md`, decision 11) into the file of its future type, by the same
   protocol, with its own portion ids (P1b for formulas and limits, P2b for re-checks) and a
   listed verifier (`design.md`, open question 3), every record `human-verified` at the end; verify: the file validates and is
   skipped as an unregistered type ("File of an unregistered type"), and `backend/check.sh`
   passes
   (P1b-1 is signed and committed at `582ea84`; P1b-2 is signed and committed at
-  `1c580fd`. P2b-1 remains an empty re-check template. Runtime packaging, checked
-  promotion mapping and feature acceptance remain open; see readiness.)
+  `1c580fd`. On 2026-11-08, all eight runtime records were promoted through the
+  independently reviewed mapping; tester GO and continuation review APPROVE are
+  recorded in readiness. Backend check passed: 1430 passed/11 skipped, 100% branches.
+  P2b-1 remains an unsigned empty re-check template. Runtime promotion is committed
+  at `dd0fd15`; integration remains open under task 9.3a.)
 - [x] 7.5a (spec, directly on `develop`) Record the approved storage-only extension in
   proposal, design and delta specs, then obtain a current `spec-reviewer` report with no
   blocker or major finding before code; verify: strict change/all validation passes and
@@ -257,6 +260,9 @@ structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. T
   on existing `feature/interim-normatives/backend`, as explicitly directed by Akim on
   2026-11-06; verify: recorded in the readiness file. The original task 9.3 acceptance
   and integration remain complete for their reviewed revisions
+  (2026-11-08: tester GO and independent review APPROVE for the continuation working
+  tree, committed at `dd0fd15`; frontend integration-preview check passed. Awaiting approved merge
+  and both checks on the actual integrated `develop`; see readiness.)
 - [x] 9.4 (spec) Record in the plan file and in Akim's PM record that the interim base is in
   use, with the oral consent of 2026-10-18 (`design.md`, decision 9, open question 6); verify:
   the dated line exists in `docs/decisions/product/2026-11-01-interim-normatives-consent.md`

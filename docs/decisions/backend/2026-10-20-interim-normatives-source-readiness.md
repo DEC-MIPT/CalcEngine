@@ -629,3 +629,66 @@ Commit 014467f on feature/interim-normatives/backend records the reviewed storag
 extension, tests and eight pending records described above. Both commit hooks passed
 or skipped with no applicable files. The backend tree is clean. This commit does not
 promote data, merge the continuation or close task 7.5. No push was performed.
+
+## Phase-1b promotion and acceptance, task 7.5 (2026-11-08)
+
+Task 7.5 is complete in the backend continuation working tree based on `014467f`.
+The existing promotion CLI transferred signed P1b-1 verdicts to all eight runtime
+records after independent mapping review. P1b-2 remains separate control evidence.
+The portable payloads, mapping, field projections and reproduction recipe are in
+[the promotion record](../../verification/interim-normatives-source/P1b-promotion.md).
+
+Independent mapping and final continuation review (`phase1b_review`): **APPROVE**,
+0 blockers, 0 major and 0 minor findings. Both signed sheets retain valid signatures
+and clean Git provenance. Reproduction yields the exact parsed runtime file;
+only verification fields changed. All pilot bytes and 146 record digests are unchanged.
+The future type remains unregistered, with no parameter source in either profile.
+Its conditions are stored without execution, and reference statuses remain unchanged.
+
+The `tester` declared **GO** for task 7.5 and the format/data continuation before
+integration. Full `backend/check.sh` passed: Ruff, mypy (171 files), five import
+contracts, 1430 tests passed, 11 skipped and one existing Starlette warning.
+Statement and branch coverage of app/scripts is 100% (3178 statements, 584 branches,
+no missing or partial branches). Strict ex1 API/DOCX and registered stored-condition
+refusal in both profiles pass. The existing promotion suite passed all 12 tests.
+
+The independent acceptance harness passed exact CLI reproduction, all effective
+verification statuses, unchanged record digests and the changed document digest.
+It also confirmed that modified signatures, changed runtime content, wrong shown
+hashes and incomplete mapping fail acceptance. UI/UX: N/A, because no UI changes.
+
+The PostgreSQL/catalog skips cover three collection modules, one PostgreSQL fixture
+test and seven ingested-catalog property tests. Their test database URLs are absent;
+these runs do not verify real databases or the real catalog.
+
+On an exported integration preview of `develop` plus the final backend changes,
+`frontend/check.sh` passed API drift, ESLint, TypeScript and 496 tests in 46 files.
+Frontend branch coverage is 100% (634/634); statement coverage is 99.88%.
+The preview is a compatibility check, not evidence of a merge or post-merge acceptance.
+
+The initial sandbox backend run stalled in TestClient and was interrupted (exit 130).
+The frontend preview initially failed with Python spawn `EPERM`. Clean escalated
+runs of both checks passed. Temporary logs and the independent acceptance harness
+are under `/tmp/dec-phase1b-evidence/`; the portable inputs and review are prepared
+alongside this record. Backend pre-commit checks passed without changing the baseline.
+
+The current artifact recheck (`phase1b_spec_review`) is **READY**, with 0 blockers,
+0 major and 0 minor findings after clarifying the recorded tester GO. Requirements
+and design are unchanged. Strict selected/all OpenSpec validation passed (23/23);
+the existing unrelated formula-extractor-fix archive-target notice remains.
+Document links, whitespace checks and pre-commit checks passed, including an explicit
+check of the new evidence files. The secrets baseline is unchanged.
+
+No commit, merge, push, migration or live-process restart was performed.
+Task 9.3a awaits explicit Git consent and both checks on the actual integrated
+`develop`. Task 1.4 still depends on the three named changes being archived;
+final specification sync and archive (9.5) remain open.
+
+## Verified runtime data committed (2026-11-08)
+
+Akim explicitly requested the prepared commits. Backend commit `dd0fd15` contains
+the reviewed promotion and acceptance-test update described above. The commit hook
+passed its secret scan; the settings check had no applicable files. The secrets
+baseline is unchanged. This documentation commit records the evidence and task status.
+No merge or push is authorized by this request or performed. Task 9.3a still requires
+approved integration and checks on the actual integrated `develop`; 1.4 and 9.5 remain open.

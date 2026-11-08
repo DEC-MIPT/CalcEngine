@@ -1,0 +1,1436 @@
+portion: P1b-1
+source_manifest: docs/akim/digitization/phase1b-2026-11-03/sheets/items.json
+source_pdf:
+  document: СП 22.13330.2016
+  edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+  pdf: docs/akim/sources/sp22.pdf
+  sha256: 289dc6844340d0177dd01761af4b2adef075d567a16a9685d360b29a79700ecf
+  pdf_pages:
+  - 42
+  - 43
+  - 44
+  - 45
+  page_numbering: 1-based PDF pages; matches printed page header
+shown_digest_algorithm: SHA256 of UTF-8 json.dumps([shown_payload], sort_keys=True, ensure_ascii=False,
+  separators=(',', ':'))
+items:
+  P1B-A01:
+    record: P1B-A01
+    kind: record
+    shown_digest: 4007be9b9c2068d14a755c8131641de2c23a022968b7294cf341cab31511133e
+    shown_payload:
+      display:
+        item_id: P1B-A01
+        record: P1B-A01
+        group: P1
+        kind: record
+        title: 'gamma_mt: значение, единица и определение'
+        page: '45'
+        region: см. страницы источника и пояснения
+        flags:
+        - исходные записи pending
+        - сопоставимые поля совпали
+        a: 'parameter: "gamma_mt"; symbol: "\\gamma_{mt}"; value: 20.0; unit: "kN/m3"; definition_summary:
+          "Weighted mean unit weights of the foundation body, soil and floor above the foundation base."'
+        b: 'B45-528-def: γ_mt - средневзвешенное значение удельных весов тела фундамента, грунта и пола,
+          расположенных над подошвой фундамента; принимают равным 20 кН/м³; d - толщина фундамента, м;
+          M - момент от равнодействующей всех нагрузок, действующих по подошве фундамента, найденных с
+          учетом заглубления фундамента в грунте и перераспределяющего влияния верхних конструкций или
+          без этого учета, кН·м; W - момент сопротивления площади подошвы фундамента, м³;'
+        notes:
+        - 'Источник: СП 22.13330.2016, 2016 (с Изменениями N 1, 2, 3, 4, 5); 5.6.28, explanation of formula
+          (5.11).'
+        - Все исходные записи pending. Совпадение извлечений и 3000 численных сравнений не заменяют вердикт
+          верификатора.
+        priority: 2
+        minutes: 0.0
+      evidence:
+        a:
+          id: P1B-A01
+          kind: table_value
+          page: 45
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.28, explanation of formula (5.11)
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: gamma_mt
+          symbol: \gamma_{mt}
+          value: 20.0
+          unit: kN/m3
+          text_layer_status: value and unit base found; exponent/symbol require raster
+          raster_supplement: true
+          definition_summary: Weighted mean unit weights of the foundation body, soil and floor above
+            the foundation base.
+          as_printed_value: 20 кН/м³
+          context_pages:
+          - 44
+          - 45
+        b:
+        - id: B45-528-def
+          kind: symbol_definitions
+          page: 45
+          clause: 5.6.28 continuation
+          raw_transcription: γ_mt - средневзвешенное значение удельных весов тела фундамента, грунта и
+            пола, расположенных над подошвой фундамента; принимают равным 20 кН/м³; d - толщина фундамента,
+            м; M - момент от равнодействующей всех нагрузок, действующих по подошве фундамента, найденных
+            с учетом заглубления фундамента в грунте и перераспределяющего влияния верхних конструкций
+            или без этого учета, кН·м; W - момент сопротивления площади подошвы фундамента, м³;
+          units_as_printed:
+            γ_mt: кН/м³
+            d: м
+            M: кН·м
+            W: м³
+          uncertainties: []
+          verification:
+            status: pending
+          constants:
+          - name: γ_mt
+            value: 20
+            unit: кН/м³
+            basis: Printed принимают равным in 5.6.28 continuation.
+  P1B-A02:
+    record: P1B-A02
+    kind: record
+    shown_digest: 04b6a761ee0851111d803137820f961c382dfc26532bb26ce960e5e569978b0e
+    shown_payload:
+      display:
+        item_id: P1B-A02
+        record: P1B-A02
+        group: P1
+        kind: record
+        title: Формула (5.11), ветвь «плюс»
+        page: '44'
+        region: см. страницы источника и пояснения
+        flags:
+        - исходные записи pending
+        - сопоставимые поля совпали
+        a: 'parameter: "p_edge_plus"; result_symbol: "p_plus"; source_result_symbol: "p"; latex: "p_{+}=\\frac{N}{A}+\\gamma_{mt}d+\\frac{M}{W}";
+          source_combined_latex: "p=\\frac{N}{A}+\\gamma_{mt}d\\pm\\frac{M}{W}"; units: {"N": "kN", "A":
+          "m2", "gamma_mt": "kN/m3", "d": "m", "M": "kN*m", "W": "m3", "p_plus": "kPa"}; applicability_as_printed:
+          "e/l\\leq1/6"'
+        b: 'B44-511: Краевые давления p, кПа, вычисляют по формулам: - при относительном эксцентриситете
+          e/l ≤ 1/6*: p = N/A + γ_mt d ± M/W,
+
+          Дерево B: {"kind": "add", "left": {"kind": "add", "left": {"kind": "div", "left": {"kind": "symbol",
+          "name": "N"}, "right": {"kind": "symbol", "name": "A"}}, "right": {"kind": "mul", "left": {"kind":
+          "symbol", "name": "gamma_mt"}, "right": {"kind": "symbol", "name": "d"}}}, "right": {"kind":
+          "div", "left": {"kind": "symbol", "name": "M"}, "right": {"kind": "symbol", "name": "W"}}}
+
+          Единицы/основания B: {"p": {"unit": "кПа", "unit_basis": "5.6.28, page 44", "unit_inferred":
+          false}, "N": {"unit": "кН", "unit_basis": "5.6.28, page 44", "unit_inferred": false}, "A": {"unit":
+          "м²", "unit_basis": "5.6.28, page 44", "unit_inferred": false}, "gamma_mt": {"unit": "кН/м³",
+          "unit_basis": "5.6.28, page 45", "unit_inferred": false}, "d": {"unit": "м", "unit_basis": "5.6.28,
+          page 45", "unit_inferred": false}, "M": {"unit": "кН·м", "unit_basis": "5.6.28, page 45", "unit_inferred":
+          false}, "W": {"unit": "м³", "unit_basis": "5.6.28, page 45", "unit_inferred": false}}'
+        notes:
+        - 'Источник: СП 22.13330.2016, 2016 (с Изменениями N 1, 2, 3, 4, 5); 5.6.28, formula (5.11).'
+        - Все исходные записи pending. Совпадение извлечений и 3000 численных сравнений не заменяют вердикт
+          верификатора.
+        - Plus branch of the printed plus/minus formula. Alias is provisional; maximum pressure for signed
+          M is not inferred.
+        priority: 2
+        minutes: 0.0
+      evidence:
+        a:
+          id: P1B-A02
+          kind: formula
+          page: 44
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.28, formula (5.11)
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: p_edge_plus
+          result_symbol: p_plus
+          source_result_symbol: p
+          latex: p_{+}=\frac{N}{A}+\gamma_{mt}d+\frac{M}{W}
+          tree:
+            kind: add
+            left:
+              kind: add
+              left:
+                kind: div
+                left:
+                  kind: symbol
+                  name: N
+                right:
+                  kind: symbol
+                  name: A
+              right:
+                kind: mul
+                left:
+                  kind: symbol
+                  name: gamma_mt
+                right:
+                  kind: symbol
+                  name: d
+            right:
+              kind: div
+              left:
+                kind: symbol
+                name: M
+              right:
+                kind: symbol
+                name: W
+          units:
+            N: kN
+            A: m2
+            gamma_mt: kN/m3
+            d: m
+            M: kN*m
+            W: m3
+            p_plus: kPa
+          text_layer_status: formula image only
+          raster_supplement: true
+          source_combined_latex: p=\frac{N}{A}+\gamma_{mt}d\pm\frac{M}{W}
+          applicability_as_printed: e/l\leq1/6
+          context_pages:
+          - 44
+          - 45
+          normalization_note: Plus branch of the printed plus/minus formula. Alias is provisional; maximum
+            pressure for signed M is not inferred.
+        b:
+        - id: B44-511
+          kind: formula
+          page: 44
+          clause: 5.6.28, (5.11)
+          raw_transcription: 'Краевые давления p, кПа, вычисляют по формулам: - при относительном эксцентриситете
+            e/l ≤ 1/6*: p = N/A + γ_mt d ± M/W,'
+          units_as_printed:
+            p: кПа
+          uncertainties: []
+          verification:
+            status: pending
+          latex: \frac{e}{l}\le\frac16:\quad p=\frac NA+\gamma_{mt}d\pm\frac MW
+          trees:
+            plus:
+              kind: add
+              left:
+                kind: add
+                left:
+                  kind: div
+                  left:
+                    kind: symbol
+                    name: N
+                  right:
+                    kind: symbol
+                    name: A
+                right:
+                  kind: mul
+                  left:
+                    kind: symbol
+                    name: gamma_mt
+                  right:
+                    kind: symbol
+                    name: d
+              right:
+                kind: div
+                left:
+                  kind: symbol
+                  name: M
+                right:
+                  kind: symbol
+                  name: W
+            minus:
+              kind: sub
+              left:
+                kind: add
+                left:
+                  kind: div
+                  left:
+                    kind: symbol
+                    name: N
+                  right:
+                    kind: symbol
+                    name: A
+                right:
+                  kind: mul
+                  left:
+                    kind: symbol
+                    name: gamma_mt
+                  right:
+                    kind: symbol
+                    name: d
+              right:
+                kind: div
+                left:
+                  kind: symbol
+                  name: M
+                right:
+                  kind: symbol
+                  name: W
+          conditions:
+          - lhs:
+              kind: fraction
+              numerator:
+                kind: symbol
+                name: e
+              denominator:
+                kind: symbol
+                name: l
+            relation: ≤
+            rhs:
+              kind: fraction
+              numerator:
+                kind: number
+                value: 1
+              denominator:
+                kind: number
+                value: 6
+          symbols:
+            p:
+              unit: кПа
+              unit_basis: 5.6.28, page 44
+              unit_inferred: false
+            N:
+              unit: кН
+              unit_basis: 5.6.28, page 44
+              unit_inferred: false
+            A:
+              unit: м²
+              unit_basis: 5.6.28, page 44
+              unit_inferred: false
+            gamma_mt:
+              unit: кН/м³
+              unit_basis: 5.6.28, page 45
+              unit_inferred: false
+            d:
+              unit: м
+              unit_basis: 5.6.28, page 45
+              unit_inferred: false
+            M:
+              unit: кН·м
+              unit_basis: 5.6.28, page 45
+              unit_inferred: false
+            W:
+              unit: м³
+              unit_basis: 5.6.28, page 45
+              unit_inferred: false
+  P1B-A03:
+    record: P1B-A03
+    kind: record
+    shown_digest: 7168e291c5d50fd0fd81347bbccfba36782cfa3d5638c1f29bac739d36f39d04
+    shown_payload:
+      display:
+        item_id: P1B-A03
+        record: P1B-A03
+        group: P1
+        kind: record
+        title: Формула (5.11), ветвь «минус»
+        page: '44'
+        region: см. страницы источника и пояснения
+        flags:
+        - исходные записи pending
+        - сопоставимые поля совпали
+        a: 'parameter: "p_edge_minus"; result_symbol: "p_minus"; source_result_symbol: "p"; latex: "p_{-}=\\frac{N}{A}+\\gamma_{mt}d-\\frac{M}{W}";
+          source_combined_latex: "p=\\frac{N}{A}+\\gamma_{mt}d\\pm\\frac{M}{W}"; units: {"N": "kN", "A":
+          "m2", "gamma_mt": "kN/m3", "d": "m", "M": "kN*m", "W": "m3", "p_minus": "kPa"}; applicability_as_printed:
+          "e/l\\leq1/6"'
+        b: 'B44-511: Краевые давления p, кПа, вычисляют по формулам: - при относительном эксцентриситете
+          e/l ≤ 1/6*: p = N/A + γ_mt d ± M/W,
+
+          Дерево B: {"kind": "sub", "left": {"kind": "add", "left": {"kind": "div", "left": {"kind": "symbol",
+          "name": "N"}, "right": {"kind": "symbol", "name": "A"}}, "right": {"kind": "mul", "left": {"kind":
+          "symbol", "name": "gamma_mt"}, "right": {"kind": "symbol", "name": "d"}}}, "right": {"kind":
+          "div", "left": {"kind": "symbol", "name": "M"}, "right": {"kind": "symbol", "name": "W"}}}
+
+          Единицы/основания B: {"p": {"unit": "кПа", "unit_basis": "5.6.28, page 44", "unit_inferred":
+          false}, "N": {"unit": "кН", "unit_basis": "5.6.28, page 44", "unit_inferred": false}, "A": {"unit":
+          "м²", "unit_basis": "5.6.28, page 44", "unit_inferred": false}, "gamma_mt": {"unit": "кН/м³",
+          "unit_basis": "5.6.28, page 45", "unit_inferred": false}, "d": {"unit": "м", "unit_basis": "5.6.28,
+          page 45", "unit_inferred": false}, "M": {"unit": "кН·м", "unit_basis": "5.6.28, page 45", "unit_inferred":
+          false}, "W": {"unit": "м³", "unit_basis": "5.6.28, page 45", "unit_inferred": false}}'
+        notes:
+        - 'Источник: СП 22.13330.2016, 2016 (с Изменениями N 1, 2, 3, 4, 5); 5.6.28, formula (5.11).'
+        - Все исходные записи pending. Совпадение извлечений и 3000 численных сравнений не заменяют вердикт
+          верификатора.
+        - Minus branch of the same printed formula. Minimum pressure for signed M is not inferred.
+        priority: 2
+        minutes: 0.0
+      evidence:
+        a:
+          id: P1B-A03
+          kind: formula
+          page: 44
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.28, formula (5.11)
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: p_edge_minus
+          result_symbol: p_minus
+          source_result_symbol: p
+          latex: p_{-}=\frac{N}{A}+\gamma_{mt}d-\frac{M}{W}
+          tree:
+            kind: sub
+            left:
+              kind: add
+              left:
+                kind: div
+                left:
+                  kind: symbol
+                  name: N
+                right:
+                  kind: symbol
+                  name: A
+              right:
+                kind: mul
+                left:
+                  kind: symbol
+                  name: gamma_mt
+                right:
+                  kind: symbol
+                  name: d
+            right:
+              kind: div
+              left:
+                kind: symbol
+                name: M
+              right:
+                kind: symbol
+                name: W
+          units:
+            N: kN
+            A: m2
+            gamma_mt: kN/m3
+            d: m
+            M: kN*m
+            W: m3
+            p_minus: kPa
+          text_layer_status: formula image only
+          raster_supplement: true
+          source_combined_latex: p=\frac{N}{A}+\gamma_{mt}d\pm\frac{M}{W}
+          applicability_as_printed: e/l\leq1/6
+          context_pages:
+          - 44
+          - 45
+          normalization_note: Minus branch of the same printed formula. Minimum pressure for signed M
+            is not inferred.
+        b:
+        - id: B44-511
+          kind: formula
+          page: 44
+          clause: 5.6.28, (5.11)
+          raw_transcription: 'Краевые давления p, кПа, вычисляют по формулам: - при относительном эксцентриситете
+            e/l ≤ 1/6*: p = N/A + γ_mt d ± M/W,'
+          units_as_printed:
+            p: кПа
+          uncertainties: []
+          verification:
+            status: pending
+          latex: \frac{e}{l}\le\frac16:\quad p=\frac NA+\gamma_{mt}d\pm\frac MW
+          trees:
+            plus:
+              kind: add
+              left:
+                kind: add
+                left:
+                  kind: div
+                  left:
+                    kind: symbol
+                    name: N
+                  right:
+                    kind: symbol
+                    name: A
+                right:
+                  kind: mul
+                  left:
+                    kind: symbol
+                    name: gamma_mt
+                  right:
+                    kind: symbol
+                    name: d
+              right:
+                kind: div
+                left:
+                  kind: symbol
+                  name: M
+                right:
+                  kind: symbol
+                  name: W
+            minus:
+              kind: sub
+              left:
+                kind: add
+                left:
+                  kind: div
+                  left:
+                    kind: symbol
+                    name: N
+                  right:
+                    kind: symbol
+                    name: A
+                right:
+                  kind: mul
+                  left:
+                    kind: symbol
+                    name: gamma_mt
+                  right:
+                    kind: symbol
+                    name: d
+              right:
+                kind: div
+                left:
+                  kind: symbol
+                  name: M
+                right:
+                  kind: symbol
+                  name: W
+          conditions:
+          - lhs:
+              kind: fraction
+              numerator:
+                kind: symbol
+                name: e
+              denominator:
+                kind: symbol
+                name: l
+            relation: ≤
+            rhs:
+              kind: fraction
+              numerator:
+                kind: number
+                value: 1
+              denominator:
+                kind: number
+                value: 6
+          symbols:
+            p:
+              unit: кПа
+              unit_basis: 5.6.28, page 44
+              unit_inferred: false
+            N:
+              unit: кН
+              unit_basis: 5.6.28, page 44
+              unit_inferred: false
+            A:
+              unit: м²
+              unit_basis: 5.6.28, page 44
+              unit_inferred: false
+            gamma_mt:
+              unit: кН/м³
+              unit_basis: 5.6.28, page 45
+              unit_inferred: false
+            d:
+              unit: м
+              unit_basis: 5.6.28, page 45
+              unit_inferred: false
+            M:
+              unit: кН·м
+              unit_basis: 5.6.28, page 45
+              unit_inferred: false
+            W:
+              unit: м³
+              unit_basis: 5.6.28, page 45
+              unit_inferred: false
+  P1B-A04:
+    record: P1B-A04
+    kind: record
+    shown_digest: 0cfe37cebc120e8a0745a929784d0fe85b55f7574039bae6ab7db42923556828
+    shown_payload:
+      display:
+        item_id: P1B-A04
+        record: P1B-A04
+        group: P1
+        kind: record
+        title: Формула (5.15), угловое давление
+        page: '45'
+        region: см. страницы источника и пояснения
+        flags:
+        - исходные записи pending
+        - единицы требуют решения
+        a: 'parameter: "p_corner"; result_symbol: "P_max"; source_result_symbol: "P_max"; latex: "P_{\\max}=\\frac{N}{A}+\\gamma_{mt}d+\\frac{M_x}{W_x}+\\frac{M_y}{W_y}";
+          units: {"N": "kN", "A": "m2", "gamma_mt": "kN/m3", "d": "m", "M_x": "kN*m", "W_x": "m3", "M_y":
+          "kN*m", "W_y": "m3", "P_max": "kPa"}; unit_basis_note: "Units of subscripted M/W follow the
+          printed unsubscripted definitions; confirm mapping with the verifier."; applicability_summary:
+          "Rectangular foundation; moments in two directions parallel to x and y axes."'
+        b: 'B45-515: При наличии моментов M_x и M_y, действующих в двух направлениях, параллельных осям
+          x и y прямоугольного фундамента, наибольшее давление в угловой точке P_max, кПа, вычисляют по
+          формуле P_max = N/A + γ_mt d + M_x/W_x + M_y/W_y, где N, A, γ_mt, W - то же, что и в формуле
+          (5.11).
+
+          Дерево B: {"kind": "add", "left": {"kind": "add", "left": {"kind": "add", "left": {"kind": "div",
+          "left": {"kind": "symbol", "name": "N"}, "right": {"kind": "symbol", "name": "A"}}, "right":
+          {"kind": "mul", "left": {"kind": "symbol", "name": "gamma_mt"}, "right": {"kind": "symbol",
+          "name": "d"}}}, "right": {"kind": "div", "left": {"kind": "symbol", "name": "M_x"}, "right":
+          {"kind": "symbol", "name": "W_x"}}}, "right": {"kind": "div", "left": {"kind": "symbol", "name":
+          "M_y"}, "right": {"kind": "symbol", "name": "W_y"}}}
+
+          Единицы/основания B: {"P_max": {"unit": "кПа", "unit_basis": "5.6.29, page 45", "unit_inferred":
+          false}, "N": {"unit": "кН", "unit_basis": "5.6.28, page 44", "unit_inferred": false}, "A": {"unit":
+          "м²", "unit_basis": "5.6.28, page 44", "unit_inferred": false}, "gamma_mt": {"unit": "кН/м³",
+          "unit_basis": "5.6.28, page 45", "unit_inferred": false}, "d": {"unit": "м", "unit_basis": "5.6.28,
+          page 45", "unit_inferred": false}, "M_x": {"unit": null, "unit_basis": "No explicit unit for
+          this symbol in the inspected local text; no inference made.", "unit_inferred": false}, "W_x":
+          {"unit": null, "unit_basis": "No explicit unit for this symbol in the inspected local text;
+          no inference made.", "unit_inferred": false}, "M_y": {"unit": null, "unit_basis": "No explicit
+          unit for this symbol in the inspected local text; no inference made.", "unit_inferred": false},
+          "W_y": {"unit": null, "unit_basis": "No explicit unit for this symbol in the inspected local
+          text; no inference made.", "unit_inferred": false}}'
+        notes:
+        - 'Источник: СП 22.13330.2016, 2016 (с Изменениями N 1, 2, 3, 4, 5); 5.6.29, formula (5.15).'
+        - Все исходные записи pending. Совпадение извлечений и 3000 численных сравнений не заменяют вердикт
+          верификатора.
+        - Printed additive expression retained. No absolute values, axis reassignment or Q-to-base-moment
+          rule introduced.
+        - Units of subscripted M/W follow the printed unsubscripted definitions; confirm mapping with
+          the verifier.
+        - 'Отдельно подтвердить единицы из контекста и записать решение в comment: unit.M_x, unit.W_x,
+          unit.M_y, unit.W_y. B не содержит отдельного подтверждения этих единиц.'
+        - 'B45-515: The printed formula uses a capital-looking P in P_max, unlike lower-case p in (5.11)/(5.12);
+          retained as seen.'
+        priority: 2
+        minutes: 0.0
+      evidence:
+        a:
+          id: P1B-A04
+          kind: formula
+          page: 45
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.29, formula (5.15)
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: p_corner
+          result_symbol: P_max
+          source_result_symbol: P_max
+          latex: P_{\max}=\frac{N}{A}+\gamma_{mt}d+\frac{M_x}{W_x}+\frac{M_y}{W_y}
+          tree:
+            kind: add
+            left:
+              kind: add
+              left:
+                kind: add
+                left:
+                  kind: div
+                  left:
+                    kind: symbol
+                    name: N
+                  right:
+                    kind: symbol
+                    name: A
+                right:
+                  kind: mul
+                  left:
+                    kind: symbol
+                    name: gamma_mt
+                  right:
+                    kind: symbol
+                    name: d
+              right:
+                kind: div
+                left:
+                  kind: symbol
+                  name: M_x
+                right:
+                  kind: symbol
+                  name: W_x
+            right:
+              kind: div
+              left:
+                kind: symbol
+                name: M_y
+              right:
+                kind: symbol
+                name: W_y
+          units:
+            N: kN
+            A: m2
+            gamma_mt: kN/m3
+            d: m
+            M_x: kN*m
+            W_x: m3
+            M_y: kN*m
+            W_y: m3
+            P_max: kPa
+          text_layer_status: formula image only
+          raster_supplement: true
+          applicability_summary: Rectangular foundation; moments in two directions parallel to x and y
+            axes.
+          normalization_note: Printed additive expression retained. No absolute values, axis reassignment
+            or Q-to-base-moment rule introduced.
+          unit_basis_note: Units of subscripted M/W follow the printed unsubscripted definitions; confirm
+            mapping with the verifier.
+        b:
+        - id: B45-515
+          kind: formula
+          page: 45
+          clause: 5.6.29, (5.15)
+          raw_transcription: При наличии моментов M_x и M_y, действующих в двух направлениях, параллельных
+            осям x и y прямоугольного фундамента, наибольшее давление в угловой точке P_max, кПа, вычисляют
+            по формуле P_max = N/A + γ_mt d + M_x/W_x + M_y/W_y, где N, A, γ_mt, W - то же, что и в формуле
+            (5.11).
+          units_as_printed:
+            P_max: кПа
+          uncertainties:
+          - The printed formula uses a capital-looking P in P_max, unlike lower-case p in (5.11)/(5.12);
+            retained as seen.
+          verification:
+            status: pending
+          latex: P_{max}=\frac NA+\gamma_{mt}d+\frac{M_x}{W_x}+\frac{M_y}{W_y}
+          tree:
+            kind: add
+            left:
+              kind: add
+              left:
+                kind: add
+                left:
+                  kind: div
+                  left:
+                    kind: symbol
+                    name: N
+                  right:
+                    kind: symbol
+                    name: A
+                right:
+                  kind: mul
+                  left:
+                    kind: symbol
+                    name: gamma_mt
+                  right:
+                    kind: symbol
+                    name: d
+              right:
+                kind: div
+                left:
+                  kind: symbol
+                  name: M_x
+                right:
+                  kind: symbol
+                  name: W_x
+            right:
+              kind: div
+              left:
+                kind: symbol
+                name: M_y
+              right:
+                kind: symbol
+                name: W_y
+          symbols:
+            P_max:
+              unit: кПа
+              unit_basis: 5.6.29, page 45
+              unit_inferred: false
+            N:
+              unit: кН
+              unit_basis: 5.6.28, page 44
+              unit_inferred: false
+            A:
+              unit: м²
+              unit_basis: 5.6.28, page 44
+              unit_inferred: false
+            gamma_mt:
+              unit: кН/м³
+              unit_basis: 5.6.28, page 45
+              unit_inferred: false
+            d:
+              unit: м
+              unit_basis: 5.6.28, page 45
+              unit_inferred: false
+            M_x:
+              unit: null
+              unit_basis: No explicit unit for this symbol in the inspected local text; no inference made.
+              unit_inferred: false
+            W_x:
+              unit: null
+              unit_basis: No explicit unit for this symbol in the inspected local text; no inference made.
+              unit_inferred: false
+            M_y:
+              unit: null
+              unit_basis: No explicit unit for this symbol in the inspected local text; no inference made.
+              unit_inferred: false
+            W_y:
+              unit: null
+              unit_basis: No explicit unit for this symbol in the inspected local text; no inference made.
+              unit_inferred: false
+  P1B-A05:
+    record: P1B-A05
+    kind: record
+    shown_digest: 7894c7eeda26d7b22f40e12a34e6bab3ff1f2868bfc4196bf8f6c6575cd7feb4
+    shown_payload:
+      display:
+        item_id: P1B-A05
+        record: P1B-A05
+        group: P1
+        kind: record
+        title: Множитель предела краевого давления
+        page: '42'
+        region: см. страницы источника и пояснения
+        flags:
+        - исходные записи pending
+        - единицы требуют решения
+        a: 'parameter: "edge_pressure_limit_multiplier"; symbol: "edge_limit_multiplier"; value: 1.2;
+          unit: "1"; applicability_summary: "Edge pressure under bending moment along each foundation
+          axis; deformation-design loads; linear pressure assumption and source qualifications apply.";
+          condition_latex: "p_{edge}\\leq1.2R"'
+        b: 'B42-526: Давление на грунт у края подошвы внецентренно нагруженного фундамента (вычисленное
+          в предположении линейного распределения давления под подошвой фундамента при нагрузках, принимаемых
+          для расчета оснований по деформациям) следует определять с учетом заглубления фундамента в грунт
+          и жесткости надфундаментных конструкций. Краевое давление при действии изгибающего момента вдоль
+          каждой оси фундамента не должно превышать 1,2R и в угловой точке - 1,5R (здесь R - расчетное
+          сопротивление грунта основания, определяемое в соответствии с требованиями 5.6.7-5.6.25).'
+        notes:
+        - 'Источник: СП 22.13330.2016, 2016 (с Изменениями N 1, 2, 3, 4, 5); 5.6.26.'
+        - Все исходные записи pending. Совпадение извлечений и 3000 численных сравнений не заменяют вердикт
+          верификатора.
+        - 'Отдельно подтвердить единицы из контекста и записать решение в comment: unit. B не содержит
+          отдельного подтверждения этих единиц.'
+        - 'B42-526: p_edge and p_corner are descriptive LaTeX labels only; these names are not printed
+          symbols in this paragraph.'
+        priority: 2
+        minutes: 0.0
+      evidence:
+        a:
+          id: P1B-A05
+          kind: table_value
+          page: 42
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.26
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: edge_pressure_limit_multiplier
+          symbol: edge_limit_multiplier
+          value: 1.2
+          unit: '1'
+          text_layer_status: value and comparison found
+          raster_supplement: true
+          condition_latex: p_{edge}\leq1.2R
+          applicability_summary: Edge pressure under bending moment along each foundation axis; deformation-design
+            loads; linear pressure assumption and source qualifications apply.
+          R_reference: 5.6.7-5.6.25
+        b:
+        - id: B42-526
+          kind: requirement
+          page: 42
+          clause: 5.6.26
+          raw_transcription: Давление на грунт у края подошвы внецентренно нагруженного фундамента (вычисленное
+            в предположении линейного распределения давления под подошвой фундамента при нагрузках, принимаемых
+            для расчета оснований по деформациям) следует определять с учетом заглубления фундамента в
+            грунт и жесткости надфундаментных конструкций. Краевое давление при действии изгибающего момента
+            вдоль каждой оси фундамента не должно превышать 1,2R и в угловой точке - 1,5R (здесь R - расчетное
+            сопротивление грунта основания, определяемое в соответствии с требованиями 5.6.7-5.6.25).
+          units_as_printed: {}
+          uncertainties:
+          - p_edge and p_corner are descriptive LaTeX labels only; these names are not printed symbols
+            in this paragraph.
+          verification:
+            status: pending
+          latex: p_{edge}\le1.2R;\quad p_{corner}\le1.5R
+          conditions:
+          - lhs:
+              kind: symbol
+              name: краевое давление при действии изгибающего момента вдоль каждой оси
+            relation: ≤
+            rhs:
+              kind: mul
+              left:
+                kind: number
+                value: 1.2
+              right:
+                kind: symbol
+                name: R
+          - lhs:
+              kind: symbol
+              name: давление в угловой точке
+            relation: ≤
+            rhs:
+              kind: mul
+              left:
+                kind: number
+                value: 1.5
+              right:
+                kind: symbol
+                name: R
+  P1B-A06:
+    record: P1B-A06
+    kind: record
+    shown_digest: b237e46a88e3ff6233c0393d05d67a88db5c542b74366de0a82997f2112652e4
+    shown_payload:
+      display:
+        item_id: P1B-A06
+        record: P1B-A06
+        group: P1
+        kind: record
+        title: Множитель предела углового давления
+        page: '42'
+        region: см. страницы источника и пояснения
+        flags:
+        - исходные записи pending
+        - единицы требуют решения
+        a: 'parameter: "corner_pressure_limit_multiplier"; symbol: "corner_limit_multiplier"; value: 1.5;
+          unit: "1"; applicability_summary: "Pressure at a corner point, within the same source context
+          as the edge limit."; condition_latex: "p_{corner}\\leq1.5R"'
+        b: 'B42-526: Давление на грунт у края подошвы внецентренно нагруженного фундамента (вычисленное
+          в предположении линейного распределения давления под подошвой фундамента при нагрузках, принимаемых
+          для расчета оснований по деформациям) следует определять с учетом заглубления фундамента в грунт
+          и жесткости надфундаментных конструкций. Краевое давление при действии изгибающего момента вдоль
+          каждой оси фундамента не должно превышать 1,2R и в угловой точке - 1,5R (здесь R - расчетное
+          сопротивление грунта основания, определяемое в соответствии с требованиями 5.6.7-5.6.25).'
+        notes:
+        - 'Источник: СП 22.13330.2016, 2016 (с Изменениями N 1, 2, 3, 4, 5); 5.6.26.'
+        - Все исходные записи pending. Совпадение извлечений и 3000 численных сравнений не заменяют вердикт
+          верификатора.
+        - 'Отдельно подтвердить единицы из контекста и записать решение в comment: unit. B не содержит
+          отдельного подтверждения этих единиц.'
+        - 'B42-526: p_edge and p_corner are descriptive LaTeX labels only; these names are not printed
+          symbols in this paragraph.'
+        priority: 2
+        minutes: 0.0
+      evidence:
+        a:
+          id: P1B-A06
+          kind: table_value
+          page: 42
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.26
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: corner_pressure_limit_multiplier
+          symbol: corner_limit_multiplier
+          value: 1.5
+          unit: '1'
+          text_layer_status: value and comparison found
+          raster_supplement: true
+          condition_latex: p_{corner}\leq1.5R
+          applicability_summary: Pressure at a corner point, within the same source context as the edge
+            limit.
+          R_reference: 5.6.7-5.6.25
+        b:
+        - id: B42-526
+          kind: requirement
+          page: 42
+          clause: 5.6.26
+          raw_transcription: Давление на грунт у края подошвы внецентренно нагруженного фундамента (вычисленное
+            в предположении линейного распределения давления под подошвой фундамента при нагрузках, принимаемых
+            для расчета оснований по деформациям) следует определять с учетом заглубления фундамента в
+            грунт и жесткости надфундаментных конструкций. Краевое давление при действии изгибающего момента
+            вдоль каждой оси фундамента не должно превышать 1,2R и в угловой точке - 1,5R (здесь R - расчетное
+            сопротивление грунта основания, определяемое в соответствии с требованиями 5.6.7-5.6.25).
+          units_as_printed: {}
+          uncertainties:
+          - p_edge and p_corner are descriptive LaTeX labels only; these names are not printed symbols
+            in this paragraph.
+          verification:
+            status: pending
+          latex: p_{edge}\le1.2R;\quad p_{corner}\le1.5R
+          conditions:
+          - lhs:
+              kind: symbol
+              name: краевое давление при действии изгибающего момента вдоль каждой оси
+            relation: ≤
+            rhs:
+              kind: mul
+              left:
+                kind: number
+                value: 1.2
+              right:
+                kind: symbol
+                name: R
+          - lhs:
+              kind: symbol
+              name: давление в угловой точке
+            relation: ≤
+            rhs:
+              kind: mul
+              left:
+                kind: number
+                value: 1.5
+              right:
+                kind: symbol
+                name: R
+  P1B-A07:
+    record: P1B-A07
+    kind: record
+    shown_digest: e2897b79f46f2eccd19547ea7370fa85a482a9dbcc17ccda0671f5e400c6f7d1
+    shown_payload:
+      display:
+        item_id: P1B-A07
+        record: P1B-A07
+        group: P1
+        kind: record
+        title: Порог применимости (5.11)
+        page: '44'
+        region: см. страницы источника и пояснения
+        flags:
+        - исходные записи pending
+        - единицы требуют решения
+        a: 'parameter: "relative_eccentricity_formula_5_11_limit"; unit: "1"; latex: "e/l\\leq1/6"; value_fraction:
+          {"numerator": 1, "denominator": 6}; relation: "le"'
+        b: 'B44-511: Краевые давления p, кПа, вычисляют по формулам: - при относительном эксцентриситете
+          e/l ≤ 1/6*: p = N/A + γ_mt d ± M/W,'
+        notes:
+        - 'Источник: СП 22.13330.2016, 2016 (с Изменениями N 1, 2, 3, 4, 5); 5.6.28, applicability of
+          formula (5.11).'
+        - Все исходные записи pending. Совпадение извлечений и 3000 численных сравнений не заменяют вердикт
+          верификатора.
+        - Exact fraction retained; no numeric tolerance or global method bound chosen.
+        - Database manufacturer marks the printed expression as corresponding to the original.
+        - 'Отдельно подтвердить единицы из контекста и записать решение в comment: unit. B не содержит
+          отдельного подтверждения этих единиц.'
+        priority: 2
+        minutes: 0.0
+      evidence:
+        a:
+          id: P1B-A07
+          kind: applicability_threshold
+          page: 44
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.28, applicability of formula (5.11)
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: relative_eccentricity_formula_5_11_limit
+          quantity: e/l
+          relation: le
+          value_fraction:
+            numerator: 1
+            denominator: 6
+          unit: '1'
+          latex: e/l\leq1/6
+          text_layer_status: symbols and inequality image only
+          raster_supplement: true
+          source_editorial_note: Database manufacturer marks the printed expression as corresponding to
+            the original.
+          normalization_note: Exact fraction retained; no numeric tolerance or global method bound chosen.
+        b:
+        - id: B44-511
+          kind: formula
+          page: 44
+          clause: 5.6.28, (5.11)
+          raw_transcription: 'Краевые давления p, кПа, вычисляют по формулам: - при относительном эксцентриситете
+            e/l ≤ 1/6*: p = N/A + γ_mt d ± M/W,'
+          units_as_printed:
+            p: кПа
+          uncertainties: []
+          verification:
+            status: pending
+          latex: \frac{e}{l}\le\frac16:\quad p=\frac NA+\gamma_{mt}d\pm\frac MW
+          trees:
+            plus:
+              kind: add
+              left:
+                kind: add
+                left:
+                  kind: div
+                  left:
+                    kind: symbol
+                    name: N
+                  right:
+                    kind: symbol
+                    name: A
+                right:
+                  kind: mul
+                  left:
+                    kind: symbol
+                    name: gamma_mt
+                  right:
+                    kind: symbol
+                    name: d
+              right:
+                kind: div
+                left:
+                  kind: symbol
+                  name: M
+                right:
+                  kind: symbol
+                  name: W
+            minus:
+              kind: sub
+              left:
+                kind: add
+                left:
+                  kind: div
+                  left:
+                    kind: symbol
+                    name: N
+                  right:
+                    kind: symbol
+                    name: A
+                right:
+                  kind: mul
+                  left:
+                    kind: symbol
+                    name: gamma_mt
+                  right:
+                    kind: symbol
+                    name: d
+              right:
+                kind: div
+                left:
+                  kind: symbol
+                  name: M
+                right:
+                  kind: symbol
+                  name: W
+          conditions:
+          - lhs:
+              kind: fraction
+              numerator:
+                kind: symbol
+                name: e
+              denominator:
+                kind: symbol
+                name: l
+            relation: ≤
+            rhs:
+              kind: fraction
+              numerator:
+                kind: number
+                value: 1
+              denominator:
+                kind: number
+                value: 6
+          symbols:
+            p:
+              unit: кПа
+              unit_basis: 5.6.28, page 44
+              unit_inferred: false
+            N:
+              unit: кН
+              unit_basis: 5.6.28, page 44
+              unit_inferred: false
+            A:
+              unit: м²
+              unit_basis: 5.6.28, page 44
+              unit_inferred: false
+            gamma_mt:
+              unit: кН/м³
+              unit_basis: 5.6.28, page 45
+              unit_inferred: false
+            d:
+              unit: м
+              unit_basis: 5.6.28, page 45
+              unit_inferred: false
+            M:
+              unit: кН·м
+              unit_basis: 5.6.28, page 45
+              unit_inferred: false
+            W:
+              unit: м³
+              unit_basis: 5.6.28, page 45
+              unit_inferred: false
+  P1B-A08:
+    record: P1B-A08
+    kind: record
+    shown_digest: 3f07bd504eb7706266cc0a8289646453789be5841f43e24b905a9add1dd25e19
+    shown_payload:
+      display:
+        item_id: P1B-A08
+        record: P1B-A08
+        group: P1
+        kind: record
+        title: Случаи эпюр и различие подписи/рисунка
+        page: '43'
+        region: см. страницы источника и пояснения
+        flags:
+        - исходные записи pending
+        - единицы требуют решения
+        a: 'parameter: "pressure_diagram_cases"; units: {"e": "m", "l": "m", "p_min": "kPa"}; unit_basis:
+          {"e": "Printed definition of e in5.6.28, page45.", "l": "Inferred length dimension from e/l
+          and diagram context; no separate figure unit label.", "p_min": "Inferred from printed pressure
+          unit kPa in5.6.28, page44; no separate figure unit label."}; cases: [{"figure_case": "б", "diagram":
+          "trapezoidal", "condition_latex": "e<l/6"}, {"figure_case": "в", "diagram": "triangular with
+          zero edge ordinate", "condition_latex": "e=l/6", "edge_ordinate_latex": "p_{min}=0"}, {"figure_case":
+          "г", "diagram": "shortened triangular, partial detachment", "condition_latex_as_printed": "l/4\\geq
+          e>l/6"}]; caption_forms_as_printed: ["e<1/6", "e=1/6", "e>1/6"]'
+        b: 'B43-panel-б: P; e < l/6; p_max; p_min. Трапециевидная эпюра.
+
+          B43-panel-в: P; e = l/6; p_max; p_min = 0. Треугольная эпюра.
+
+          B43-panel-г: P; l/4 ≥ e > l/6; C₀; p_max; 3C₀; ≤ l/4; l. Укороченная треугольная эпюра.
+
+          B43-figure-caption: а-г - при отсутствии нагрузок на полы; д-з - при сплошной равномерно распределенной
+          нагрузке интенсивностью q; а и д - при центральной нагрузке; б и е - при эксцентриситете нагрузки
+          e<1/6*; в и ж - при e=1/6*; г и з - при e>1/6* (с частичным отрывом фундамента от грунта)
+
+          B42-527: При расчете внецентренно нагруженных фундаментов эпюры давлений допускается принимать
+          трапециевидными и треугольными, в том числе укороченной длины, обозначающие краевой отрыв подошвы
+          фундамента от грунта при относительном эксцентриситете равнодействующей e более l/6 (рисунок
+          5.1).'
+        notes:
+        - 'Источник: СП 22.13330.2016, 2016 (с Изменениями N 1, 2, 3, 4, 5); 5.6.27, figure 5.1.'
+        - Все исходные записи pending. Совпадение извлечений и 3000 численных сравнений не заменяют вердикт
+          верификатора.
+        - The source permits several diagrams. A phase-1b p_min>=0 fail rule is a scope/methodology choice
+          still awaiting engineer answer 12; it is not a universal prohibition in 5.6.27.
+        - Pages 43-44 contain further structure-specific eccentricity/edge-pressure-ratio conditions;
+          they are context, not generalized or encoded as method bounds.
+        - Caption abbreviates the expressions differently from dimensioned e<l/6 annotations in the figure;
+          preserve both, do not silently correct the source.
+        - 'Отдельно подтвердить единицы из контекста и записать решение в comment: unit.l, unit.p_min.
+          B не содержит отдельного подтверждения этих единиц.'
+        - 'B43-panel-б: Diagram line and arrow descriptions are visual descriptions; labels before the
+          sentence are the transcription. No units printed in the diagram.'
+        - 'B43-panel-в: Diagram line and arrow descriptions are visual descriptions; labels before the
+          sentence are the transcription. No units printed in the diagram.'
+        - 'B43-panel-г: Diagram line and arrow descriptions are visual descriptions; labels before the
+          sentence are the transcription. No units printed in the diagram.'
+        - 'B43-panel-г: The ≤ l/4 label marks the right-hand remaining interval alongside 3C₀; no algebraic
+          combination beyond the printed labels is inferred.'
+        - 'B43-figure-caption: Caption prints numeric 1/6, whereas the embedded figure labels use l/6.
+          The difference is preserved.'
+        - 'B42-527: Prose calls e relative eccentricity while the printed comparison is to l/6. Preserved
+          without reinterpretation.'
+        priority: 2
+        minutes: 0.0
+      evidence:
+        a:
+          id: P1B-A08
+          kind: diagram_condition
+          page: 43
+          norm_refs:
+          - document: СП 22.13330.2016
+            edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+            clause: 5.6.27, figure 5.1
+            status: unverified
+            provenance: machine-extracted
+          verification:
+            status: pending
+          parameter: pressure_diagram_cases
+          text_layer_status: diagram image; caption text lacks some symbols
+          raster_supplement: true
+          context_pages:
+          - 42
+          - 43
+          - 44
+          cases:
+          - figure_case: б
+            diagram: trapezoidal
+            condition_latex: e<l/6
+          - figure_case: в
+            diagram: triangular with zero edge ordinate
+            condition_latex: e=l/6
+            edge_ordinate_latex: p_{min}=0
+          - figure_case: г
+            diagram: shortened triangular, partial detachment
+            condition_latex_as_printed: l/4\geq e>l/6
+          normalization_note: The source permits several diagrams. A phase-1b p_min>=0 fail rule is a
+            scope/methodology choice still awaiting engineer answer 12; it is not a universal prohibition
+            in 5.6.27.
+          special_cases_note: Pages 43-44 contain further structure-specific eccentricity/edge-pressure-ratio
+            conditions; they are context, not generalized or encoded as method bounds.
+          caption_forms_as_printed:
+          - e<1/6
+          - e=1/6
+          - e>1/6
+          caption_uncertainty: Caption abbreviates the expressions differently from dimensioned e<l/6
+            annotations in the figure; preserve both, do not silently correct the source.
+          units:
+            e: m
+            l: m
+            p_min: kPa
+          unit_basis:
+            e: Printed definition of e in5.6.28, page45.
+            l: Inferred length dimension from e/l and diagram context; no separate figure unit label.
+            p_min: Inferred from printed pressure unit kPa in5.6.28, page44; no separate figure unit label.
+        b:
+        - id: B43-panel-б
+          kind: diagram_labels
+          page: 43
+          clause: Figure 5.1, panel б
+          raw_transcription: P; e < l/6; p_max; p_min. Трапециевидная эпюра.
+          units_as_printed: {}
+          uncertainties:
+          - Diagram line and arrow descriptions are visual descriptions; labels before the sentence are
+            the transcription. No units printed in the diagram.
+          verification:
+            status: pending
+          conditions:
+          - lhs:
+              kind: symbol
+              name: e
+            relation: <
+            rhs:
+              kind: fraction
+              numerator:
+                kind: symbol
+                name: l
+              denominator:
+                kind: number
+                value: 6
+        - id: B43-panel-в
+          kind: diagram_labels
+          page: 43
+          clause: Figure 5.1, panel в
+          raw_transcription: P; e = l/6; p_max; p_min = 0. Треугольная эпюра.
+          units_as_printed: {}
+          uncertainties:
+          - Diagram line and arrow descriptions are visual descriptions; labels before the sentence are
+            the transcription. No units printed in the diagram.
+          verification:
+            status: pending
+          conditions:
+          - lhs:
+              kind: symbol
+              name: e
+            relation: '='
+            rhs:
+              kind: fraction
+              numerator:
+                kind: symbol
+                name: l
+              denominator:
+                kind: number
+                value: 6
+          - lhs:
+              kind: symbol
+              name: p_min
+            relation: '='
+            rhs:
+              kind: number
+              value: 0
+        - id: B43-panel-г
+          kind: diagram_labels
+          page: 43
+          clause: Figure 5.1, panel г
+          raw_transcription: P; l/4 ≥ e > l/6; C₀; p_max; 3C₀; ≤ l/4; l. Укороченная треугольная эпюра.
+          units_as_printed: {}
+          uncertainties:
+          - Diagram line and arrow descriptions are visual descriptions; labels before the sentence are
+            the transcription. No units printed in the diagram.
+          - The ≤ l/4 label marks the right-hand remaining interval alongside 3C₀; no algebraic combination
+            beyond the printed labels is inferred.
+          verification:
+            status: pending
+          conditions:
+          - lhs:
+              kind: fraction
+              numerator:
+                kind: symbol
+                name: l
+              denominator:
+                kind: number
+                value: 4
+            relation: ≥
+            rhs:
+              kind: symbol
+              name: e
+          - lhs:
+              kind: symbol
+              name: e
+            relation: '>'
+            rhs:
+              kind: fraction
+              numerator:
+                kind: symbol
+                name: l
+              denominator:
+                kind: number
+                value: 6
+          - lhs:
+              kind: symbol
+              name: right-hand interval, not named in figure
+            relation: ≤
+            rhs:
+              kind: fraction
+              numerator:
+                kind: symbol
+                name: l
+              denominator:
+                kind: number
+                value: 4
+        - id: B43-figure-caption
+          kind: figure_caption
+          page: 43
+          clause: Figure 5.1 explanatory caption
+          raw_transcription: а-г - при отсутствии нагрузок на полы; д-з - при сплошной равномерно распределенной
+            нагрузке интенсивностью q; а и д - при центральной нагрузке; б и е - при эксцентриситете нагрузки
+            e<1/6*; в и ж - при e=1/6*; г и з - при e>1/6* (с частичным отрывом фундамента от грунта)
+          units_as_printed: {}
+          uncertainties:
+          - Caption prints numeric 1/6, whereas the embedded figure labels use l/6. The difference is
+            preserved.
+          verification:
+            status: pending
+          conditions:
+          - lhs:
+              kind: symbol
+              name: e
+            relation: <
+            rhs:
+              kind: fraction
+              numerator:
+                kind: number
+                value: 1
+              denominator:
+                kind: number
+                value: 6
+            label: б и е
+          - lhs:
+              kind: symbol
+              name: e
+            relation: '='
+            rhs:
+              kind: fraction
+              numerator:
+                kind: number
+                value: 1
+              denominator:
+                kind: number
+                value: 6
+            label: в и ж
+          - lhs:
+              kind: symbol
+              name: e
+            relation: '>'
+            rhs:
+              kind: fraction
+              numerator:
+                kind: number
+                value: 1
+              denominator:
+                kind: number
+                value: 6
+            label: г и з
+        - id: B42-527
+          kind: applicability
+          page: 42
+          clause: 5.6.27
+          raw_transcription: При расчете внецентренно нагруженных фундаментов эпюры давлений допускается
+            принимать трапециевидными и треугольными, в том числе укороченной длины, обозначающие краевой
+            отрыв подошвы фундамента от грунта при относительном эксцентриситете равнодействующей e более
+            l/6 (рисунок 5.1).
+          units_as_printed: {}
+          uncertainties:
+          - Prose calls e relative eccentricity while the printed comparison is to l/6. Preserved without
+            reinterpretation.
+          verification:
+            status: pending
+          latex: e>l/6
+          conditions:
+          - lhs:
+              kind: symbol
+              name: e
+            relation: '>'
+            rhs:
+              kind: fraction
+              numerator:
+                kind: symbol
+                name: l
+              denominator:
+                kind: number
+                value: 6
