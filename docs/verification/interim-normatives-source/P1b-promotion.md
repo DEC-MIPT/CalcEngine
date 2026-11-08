@@ -88,5 +88,6 @@ The extension and promotion introduce no API, engine or UI changes. The updated
 real-data test checks effective status, signer, portion, digest and reference status.
 
 The tester's GO is recorded in the paired CH1 readiness record. Commit `dd0fd15`
-contains the promoted file and its acceptance test. Task 9.3a still requires
-approved integration and checks on the actual integrated `develop`.
+contains the promoted file and its acceptance test. Merge `427946d` integrates
+the continuation on `develop` and is published to origin. Task 9.3a is complete;
+the paired readiness record holds the post-merge acceptance and remaining archive gates.

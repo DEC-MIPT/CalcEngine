@@ -256,13 +256,14 @@ structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. T
   re-review APPROVE/tester GO; backend merge `2d0f7db`, frontend merge `cbfb634`;
   both develop check.sh PASS: backend 1351 passed/11 skipped, frontend 496 passed,
   branch coverage 100% in both; see readiness integration entry)
-- [ ] 9.3a `tester` GO, review and integration of the phase-1b format/data continuation
+- [x] 9.3a `tester` GO, review and integration of the phase-1b format/data continuation
   on existing `feature/interim-normatives/backend`, as explicitly directed by Akim on
   2026-11-06; verify: recorded in the readiness file. The original task 9.3 acceptance
   and integration remain complete for their reviewed revisions
-  (2026-11-08: tester GO and independent review APPROVE for the continuation working
-  tree, committed at `dd0fd15`; frontend integration-preview check passed. Awaiting approved merge
-  and both checks on the actual integrated `develop`; see readiness.)
+  (2026-11-08: reviewed continuation `dd0fd15` merged and published at `427946d`.
+  Tester post-merge GO on actual `develop`: backend 1430 passed/11 skipped,
+  frontend 496 passed; branch coverage 100% in both. See paired readiness for
+  the exact checks, database skips and unchanged-data assertions.)
 - [x] 9.4 (spec) Record in the plan file and in Akim's PM record that the interim base is in
   use, with the oral consent of 2026-10-18 (`design.md`, decision 9, open question 6); verify:
   the dated line exists in `docs/decisions/product/2026-11-01-interim-normatives-consent.md`

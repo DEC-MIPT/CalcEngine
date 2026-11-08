@@ -692,3 +692,50 @@ passed its secret scan; the settings check had no applicable files. The secrets
 baseline is unchanged. This documentation commit records the evidence and task status.
 No merge or push is authorized by this request or performed. Task 9.3a still requires
 approved integration and checks on the actual integrated `develop`; 1.4 and 9.5 remain open.
+
+## Phase-1b post-merge acceptance, task 9.3a (2026-11-08)
+
+Task 9.3a is **complete**. Akim authorized integration and publication under plan
+step 1, then requested actual post-merge checks and the acceptance record under
+step 2. Backend `dd0fd15` is published. Merge `427946d` integrates the reviewed
+continuation into `develop` without conflicts and is published to `origin/develop`.
+Its backend tree equals the reviewed revision; the earlier independent APPROVE
+therefore applies to the integrated code and data.
+
+The `tester` declared **GO** for post-merge acceptance on actual `develop` at
+`427946d`, after inspecting both completed check logs and independently checking
+the tree invariants. Full `backend/check.sh` passed: Ruff, mypy (171 files), five
+import contracts, 1430 tests passed, 11 skipped and one existing Starlette warning.
+Statement and branch coverage of app/scripts is 100% (3178 statements, 584 branches,
+no missing or partial branches). Hypothesis seed: 4263065529.
+
+Full `frontend/check.sh` passed API schema drift, ESLint, TypeScript and 496 tests
+in 46 files. Branch coverage is 100% (634/634); statement coverage is 99.88%
+(835/836). These checks ran in the actual merged `develop` worktree, independently
+of the earlier integration preview.
+
+The database skips cover three modules at collection, one PostgreSQL fixture test
+and seven ingested-catalog property tests. The corresponding `DEC_TEST_*DATABASE_URL`
+variables are absent. Real databases and the real catalog remain unverified.
+UI/UX: N/A for this continuation because no UI changes were introduced.
+
+Independent checks confirmed eight effective `human-verified` runtime records with
+Akim/P1b-1/current digests, unchanged normative-reference status and provenance,
+and byte-identical pilot data with 146 records compared with `479172e`. The future
+type receives no source in either profile. The test runs changed no tracked code
+or tests. Temporary dependency symlinks were removed after the checks.
+
+The scripts were executed with escalation because earlier runs established sandbox
+TestClient hangs and Python spawn `EPERM`. Both completed with exit 0. Logs are
+`/tmp/dec-phase1b-postmerge/backend-check.log` and `frontend-check.log` in the same
+directory. Strict selected/all OpenSpec validation passed (23/23); both pre-commit
+hooks passed without changing the secrets baseline. The unrelated
+formula-extractor-fix archive-target notice remains.
+
+No migration or live-process restart was performed. Task 1.4 still depends on
+archiving the three named upstream changes. Specification sync and archive (9.5)
+remain open; this acceptance closes the data continuation, not the whole CH1 change.
+
+The current artifact/status review (`phase1b_spec_review`) is **READY**, with
+0 blockers, 0 major and 0 minor findings. Requirements and design are unchanged;
+the record preserves the open 1.4 and 9.5 gates. Document links and whitespace pass.
