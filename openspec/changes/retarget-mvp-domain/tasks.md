@@ -61,7 +61,7 @@ Found by the grep sweep on 2026-09-26. Not edited by this draft; the owner decid
 - [x] 5.4 [Akim] Run the keyword grep over `openspec/` excluding `archive/`; expected hits only in files listed in section 4 (2026-09-27: nine hits, all in files of tasks 4.1-4.3; see `docs/decisions/retarget-mvp-domain-akim-review.md`)
 - [x] 5.4a [Akim] Repeat the placeholder-domain sweep for the current revision;
   verify: expected remaining hits and their owners are recorded before final GO.
-- [ ] 5.6 [Egor] After 1.4 and current-version 5.1a, 5.2, 5.3 and 5.4a pass, record
+- [x] 5.6 [Egor] After 1.4 and current-version 5.1a, 5.2, 5.3 and 5.4a pass, record
   acknowledgement of this revision by the developer who did not author the amendment,
   in a tracked commit or comment naming `retarget-mvp-domain`. The earlier review is
   historical and does not acknowledge this amendment. This acknowledgement precedes

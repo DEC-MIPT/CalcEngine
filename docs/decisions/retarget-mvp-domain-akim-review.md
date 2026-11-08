@@ -178,3 +178,16 @@ The record must name `retarget-mvp-domain`, identify the approved document revis
 and be committed or recorded as a tracked comment after that document commit.
 After the written-record gate is satisfied, the tester must issue a fresh verdict.
 Tasks 5.6 and 5.5 remain open. No commit, merge, push or archive was performed.
+
+## Current-version acknowledgement recorded after the document commit (2026-11-08)
+
+The approved document revision of `retarget-mvp-domain` is commit `8f9d187`
+(`docs: record approved MVP scope and PM decision`). This acknowledgement record
+is added after that commit. Akim reports that Egor orally confirmed this current
+revision in the conversation recorded above. The substantive approved scope has
+not changed since that confirmation. This is Akim's attributed record, not a
+direct written statement or a commit authored by Egor.
+
+This subsequent commit records the acknowledgement required by AGENTS.md section 4
+and `development-process` "Review before merge", and completes task 5.6.
+Task 5.5 remains open pending the tester's fresh verdict on the committed record.
