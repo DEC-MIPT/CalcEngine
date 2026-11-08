@@ -49,9 +49,13 @@ def document_digest(document: InterimDocument) -> str:
     Returns:
         Шестнадцатеричная строка из 64 символов.
     """
-    contents = {MANIFEST: document.manifest.model_dump(mode="json")} | {
-        data_file.path.rsplit("/", 1)[-1]: data_file.content.model_dump(mode="json") for data_file in document.files
-    }
+    contents = {MANIFEST: document.manifest.model_dump(mode="json")}
+    for data_file in document.files:
+        content = data_file.content.model_dump(mode="json")
+        for name in ("applicability_conditions", "diagram_cases"):
+            if not content[name]:
+                content.pop(name)
+        contents[data_file.path.rsplit("/", 1)[-1]] = content
     return _sha256([{"path": path, "content": contents[path]} for path in sorted(contents)])
 
 

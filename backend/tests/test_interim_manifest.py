@@ -16,7 +16,9 @@ def test_the_loader_accepts_the_real_manifest() -> None:
     assert document.manifest.document == "СП 22.13330.2016"
     assert document.manifest.verifiers == ("Akim",)
     assert document.manifest.sunset.date == date(2026, 12, 1)
-    assert [file.calculation_type for file in document.files] == ["foundations_shallow_r"]
+    assert {file.calculation_type for file in document.files} == {
+        "foundations_shallow_r", "foundations_pressure_from_loads",
+    }
 
 
 def test_the_real_sunset_has_not_passed() -> None:

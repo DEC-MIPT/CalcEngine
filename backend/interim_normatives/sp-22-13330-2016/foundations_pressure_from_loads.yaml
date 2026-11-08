@@ -1,0 +1,302 @@
+formulas:
+- norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.28, formula (5.11)
+    status: unverified
+    provenance: machine-extracted
+  page: 44
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: 9d6bcd13649646aca8e1ba3974bab0486ba90a83e12a73560e41e136a9decb7f
+  parameter: p_edge_plus
+  result_symbol: p_plus
+  latex: p_{+}=\frac{N}{A}+\gamma_{mt}d+\frac{M}{W}
+  tree:
+    kind: add
+    left:
+      kind: add
+      left:
+        kind: div
+        left:
+          kind: symbol
+          name: N
+        right:
+          kind: symbol
+          name: A
+      right:
+        kind: mul
+        left:
+          kind: symbol
+          name: gamma_mt
+        right:
+          kind: symbol
+          name: d
+    right:
+      kind: div
+      left:
+        kind: symbol
+        name: M
+      right:
+        kind: symbol
+        name: W
+  units:
+    N: kN
+    A: m2
+    gamma_mt: kN/m3
+    d: m
+    M: kN*m
+    W: m3
+    p_plus: kPa
+- norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.28, formula (5.11)
+    status: unverified
+    provenance: machine-extracted
+  page: 44
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: aa6ee9f6e2a0d9feeab1d0e9f0b4fe912bf0c166b8297d67da01a8d809c12de3
+  parameter: p_edge_minus
+  result_symbol: p_minus
+  latex: p_{-}=\frac{N}{A}+\gamma_{mt}d-\frac{M}{W}
+  tree:
+    kind: sub
+    left:
+      kind: add
+      left:
+        kind: div
+        left:
+          kind: symbol
+          name: N
+        right:
+          kind: symbol
+          name: A
+      right:
+        kind: mul
+        left:
+          kind: symbol
+          name: gamma_mt
+        right:
+          kind: symbol
+          name: d
+    right:
+      kind: div
+      left:
+        kind: symbol
+        name: M
+      right:
+        kind: symbol
+        name: W
+  units:
+    N: kN
+    A: m2
+    gamma_mt: kN/m3
+    d: m
+    M: kN*m
+    W: m3
+    p_minus: kPa
+- norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.29, formula (5.15)
+    status: unverified
+    provenance: machine-extracted
+  page: 45
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: 8058acd9afa79b6d9ea06c117c0cd0ed1e2184b363272872141d81dbed49bd98
+    comment: 'Единицы из контекста подтверждены: unit.M_x = кН·м; unit.W_x = м³; unit.M_y = кН·м; unit.W_y
+      = м³.'
+  parameter: p_corner
+  result_symbol: P_max
+  latex: P_{\max}=\frac{N}{A}+\gamma_{mt}d+\frac{M_x}{W_x}+\frac{M_y}{W_y}
+  tree:
+    kind: add
+    left:
+      kind: add
+      left:
+        kind: add
+        left:
+          kind: div
+          left:
+            kind: symbol
+            name: N
+          right:
+            kind: symbol
+            name: A
+        right:
+          kind: mul
+          left:
+            kind: symbol
+            name: gamma_mt
+          right:
+            kind: symbol
+            name: d
+      right:
+        kind: div
+        left:
+          kind: symbol
+          name: M_x
+        right:
+          kind: symbol
+          name: W_x
+    right:
+      kind: div
+      left:
+        kind: symbol
+        name: M_y
+      right:
+        kind: symbol
+        name: W_y
+  units:
+    N: kN
+    A: m2
+    gamma_mt: kN/m3
+    d: m
+    M_x: kN*m
+    W_x: m3
+    M_y: kN*m
+    W_y: m3
+    P_max: kPa
+table_values:
+- norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.28, explanation of formula (5.11)
+    status: unverified
+    provenance: machine-extracted
+  page: 45
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: 64bfc15ec5339f13986319c1c5818a7006f16cc73b252a10c2a1ed3c62ed7153
+  parameter: gamma_mt
+  symbol: \gamma_{mt}
+  latex: \gamma_{mt}
+  value: 20.0
+  unit: kN/m3
+  heading_symbol: null
+  heading_value: null
+  heading_unit: null
+- norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.26
+    status: unverified
+    provenance: machine-extracted
+  page: 42
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: 6fa2e78939d15f270d4acab773fc381db00160a8dc290eb1b61e4bc2fa41e4e1
+    comment: 'Безразмерность множителя подтверждена: unit = 1.'
+  parameter: edge_pressure_limit_multiplier
+  symbol: edge_limit_multiplier
+  latex: edge_limit_multiplier
+  value: 1.2
+  unit: '1'
+  heading_symbol: null
+  heading_value: null
+  heading_unit: null
+- norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.26
+    status: unverified
+    provenance: machine-extracted
+  page: 42
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: 939524dcf7f852a660d86500a21eb4e912581d1cad627f067249cac89ee5b3f4
+    comment: 'Безразмерность множителя подтверждена: unit = 1.'
+  parameter: corner_pressure_limit_multiplier
+  symbol: corner_limit_multiplier
+  latex: corner_limit_multiplier
+  value: 1.5
+  unit: '1'
+  heading_symbol: null
+  heading_value: null
+  heading_unit: null
+thresholds: []
+checks: []
+method_bounds: []
+applicability_conditions:
+- norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.28, applicability of formula (5.11)
+    status: unverified
+    provenance: machine-extracted
+  page: 44
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: 8b8b505f26aaf582f93fca2ad33da47797b03dbab446ee554f4e291536af1858
+    comment: 'Безразмерность отношения e/l и порога 1/6 подтверждена: unit = 1.'
+  parameter: relative_eccentricity_formula_5_11_limit
+  quantity: e/l
+  applies_to: '5.11'
+  latex: e/l\leq1/6
+  unit: '1'
+  relation: le
+  value_fraction:
+    numerator: 1
+    denominator: 6
+diagram_cases:
+- norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.27, figure 5.1
+    status: unverified
+    provenance: machine-extracted
+  page: 43
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: c66b9c5d7f7f28a4da48ad0d4a0b169dcfc42b7d23483e22f46b60cd11840c12
+    comment: 'Единицы подтверждены: e = м; unit.l = м; unit.p_min = кПа. Различие форм e < 1/6, e = 1/6,
+      e > 1/6 в подписи и обозначений с l/6 на рисунке сохраняем.'
+  parameter: pressure_diagram_cases
+  units:
+    e: m
+    l: m
+    p_min: kPa
+  cases:
+  - figure_case: б
+    diagram: trapezoidal
+    condition_latex: e<l/6
+    edge_ordinate_latex: null
+  - figure_case: в
+    diagram: triangular with zero edge ordinate
+    condition_latex: e=l/6
+    edge_ordinate_latex: p_{min}=0
+  - figure_case: г
+    diagram: shortened triangular, partial detachment
+    condition_latex: l/4\geq e>l/6
+    edge_ordinate_latex: null
+  caption_forms_as_printed:
+  - e<1/6
+  - e=1/6
+  - e>1/6

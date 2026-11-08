@@ -37,7 +37,7 @@ def raw_records() -> list[tuple[str, dict]]:
 
 def test_the_loader_accepts_the_pilot_file_and_every_record_has_its_page() -> None:
     (document,) = load_interim_root(INTERIM_ROOT, {pilot.NAME})
-    (file,) = document.files
+    file = next(file for file in document.files if file.calculation_type == pilot.NAME)
 
     assert file.calculation_type == pilot.NAME
     assert all(record.page is not None for _, record in file.content.records())
@@ -47,7 +47,7 @@ def test_the_loader_accepts_the_pilot_file_and_every_record_has_its_page() -> No
 
 def test_portion_p1_1_verified_the_pilot_formulas_and_k_and_no_checked_value_changed() -> None:
     (document,) = load_interim_root(INTERIM_ROOT, {pilot.NAME})
-    (file,) = document.files
+    file = next(file for file in document.files if file.calculation_type == pilot.NAME)
     records = list(file.content.records())
 
     verified = {
@@ -65,7 +65,7 @@ def test_portion_p1_1_verified_the_pilot_formulas_and_k_and_no_checked_value_cha
 
 def test_the_file_is_written_in_the_form_the_loader_digests() -> None:
     (document,) = load_interim_root(INTERIM_ROOT, {pilot.NAME})
-    (file,) = document.files
+    file = next(file for file in document.files if file.calculation_type == pilot.NAME)
     parsed = [record for _, record in file.content.records()]
 
     for record, (_, raw) in zip(parsed, raw_records(), strict=True):
@@ -87,13 +87,14 @@ def test_both_profiles_use_every_record_and_resolve_the_pilot(
     assert not any(
         code in record.message
         for record in caplog.records
+        if f"/{pilot.NAME}.yaml" in record.message
         for code in ("interim_record_unchecked", "interim_value_changed")
     )
 
 
 def test_every_real_record_is_verified_with_its_current_digest() -> None:
     (document,) = load_interim_root(INTERIM_ROOT, {pilot.NAME})
-    (file,) = document.files
+    file = next(file for file in document.files if file.calculation_type == pilot.NAME)
     records = [record for _, record in file.content.records()]
 
     assert len(records) == 146
@@ -105,7 +106,7 @@ def test_every_real_record_is_verified_with_its_current_digest() -> None:
         assert record.verification.value_digest == record_digest(record)
 
 
-def test_the_checked_data_cover_the_pilot_type_only() -> None:
+def test_the_checked_data_include_the_pilot_and_unregistered_future_type() -> None:
     found = check_documents(load_interim_root(INTERIM_ROOT, {pilot.NAME}), "draft")
 
-    assert set(found) == {pilot.NAME}
+    assert set(found) == {pilot.NAME, "foundations_pressure_from_loads"}

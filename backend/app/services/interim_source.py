@@ -11,7 +11,9 @@ from app.engine.boundary import inputs_to_base_units
 from app.engine.registry import CalculatorRegistry
 from app.parameters.interim_loader import load_interim_root
 from app.parameters.interim_schemas import (
+    InterimApplicabilityCondition,
     InterimCheck,
+    InterimDiagramCases,
     InterimFormula,
     InterimMethodBound,
     InterimRecord,
@@ -89,7 +91,11 @@ def _rows(data: InterimTypeData, profile: Profile) -> _TypeRows:
     for checked in data.records:
         groups.setdefault(_group(checked.record), []).append(checked)
     kept: list[InterimRecord] = []
-    unusable: list[str] = []
+    unusable: list[str] = [
+        checked.record.parameter
+        for checked in data.records
+        if isinstance(checked.record, InterimApplicabilityCondition | InterimDiagramCases)
+    ]
     for group, members in groups.items():
         live = [member for member in members if member.status != "rejected"]
         if not live or any(member.status not in USABLE[profile] for member in live):
