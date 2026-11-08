@@ -739,3 +739,45 @@ remain open; this acceptance closes the data continuation, not the whole CH1 cha
 The current artifact/status review (`phase1b_spec_review`) is **READY**, with
 0 blockers, 0 major and 0 minor findings. Requirements and design are unchanged;
 the record preserves the open 1.4 and 9.5 gates. Document links and whitespace pass.
+
+## Task 1.4 prerequisite audit and preparation (2026-11-08)
+
+Task 1.4 remains **open**. None of its three named prerequisites is archived.
+The archive order extends through `retarget-mvp-domain`, then
+`calculation-core-contract`, then `calculation-api`. The first change still needs
+its scoped PM decision and later review/acknowledgement gates. Akim reports that
+PM approval existed and will supply its date and wording. This is not yet a
+record of the PM's words or approval of the specific pending scope.
+
+Independent checks identified and prepared two other prerequisites:
+
+- `backend-layered-architecture`: current tester GO and orchestrator APPROVE are
+  recorded in its paired readiness. Its configuration scenario is reconciled with
+  the approved separate settings classes; current spec review is READY with no
+  findings. All 21 tasks are checked. A main-spec preview preserves 12 requirements;
+  synchronization and archive remain pending.
+- `normative-catalog-backend`: the approved task 7.4 fix is restored on its existing
+  fix branch, with tester GO and independent APPROVE. It still needs explicit Git
+  consent, delivery and integration before its archive task 8.2 can complete.
+
+Four exception requirements are drafted outside active OpenSpec deltas. The current
+spec reviewer found no blocker, major or minor finding and confirmed preservation
+of all 11 scenario names. The drafts preserve the engineer-set loader restriction
+and global source selection. They must be regenerated against synchronized main
+specs after the named prerequisites are archived; they do not complete task 1.4.
+
+No archive, commit, merge or push was performed during this preparation. The interim
+source remains in use, so removal of its scoped exception is not applicable.
+
+## First archive prerequisite completed (2026-11-08)
+
+Akim authorized architecture synchronization/archive and the prepared commits and
+catalog-fix merge. `backend-layered-architecture` is synchronized and archived;
+its two target requirements now exist in `openspec/specs/backend-architecture/`.
+Catalog task 7.4 is committed at `bc34063` and awaits the authorized integration.
+The preceding audit remains historical evidence of the preparation stage.
+
+Task 1.4 remains open until `calculation-api` and `normative-catalog-backend` are
+also archived. The API/core/retarget chain still awaits the scoped PM record and
+its remaining gates. The four exception requirements remain drafts; no active
+CH1 delta or base requirement is changed by this checkpoint.

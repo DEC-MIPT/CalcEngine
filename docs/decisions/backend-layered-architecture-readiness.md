@@ -343,3 +343,43 @@ are Egor's pipeline; the "Moves with" marker wording; the DOR line records these
 Left as is (optional): the wording of the spec clause above.
 
 `openspec validate --all --strict`: 19/19.
+
+## Current implementation and archive preparation (2026-11-08)
+
+CH1 task 1.4 requires this change to be archived. All 21 tasks are checked and
+the backend-core feature, including corrective commit `3f79a0b`, is an ancestor
+of current `develop` at `e21a9f6`. Historical local execution notes contain early
+implementation verdicts; this entry records current verification instead of
+inventing a historical final GO or review.
+
+The `tester` reconfirmed **GO** for the current architecture implementation.
+Its backend tree matches actual merged `develop` `427946d`, whose full check
+passed: 1430 tests passed, 11 skipped, 100% statement and branch coverage
+(3178 statements, 584 branches), Ruff, mypy and five import contracts passed.
+Current tests cover malformed YAML handling, duplicate registration preserving
+the first calculator, logging idempotence and independent database settings.
+The orchestrator's current re-review is **APPROVE**, with 0 blockers, 0 major
+and 0 minor findings. UI/UX: N/A, no UI changes. Real database/migration behavior
+was not re-exercised; the database test URLs remain absent.
+
+The configuration scenario is reconciled with the settings split already approved
+in `normative-catalog-backend` task 3.1 and design decision 4. Application settings
+and normative settings expose their own URLs independently. Both scenario names
+are preserved; runtime behavior is unchanged. The current spec review is **READY**,
+with 0 blockers, 0 major and 0 minor findings. Selected and all strict OpenSpec
+validation passed (23/23). A preview preserves all 12 requirements for the new
+`backend-architecture` main spec. Main-spec sync and archive have not been performed.
+
+## Synchronized and archived (2026-11-08)
+
+Akim explicitly authorized synchronization and archive. The `spec-keeper` created
+`openspec/specs/backend-architecture/spec.md`, preserving Purpose, all 12 requirements
+and all 19 scenarios. Main-spec validation passed before moving the change (11/11).
+The change is archived at
+`openspec/changes/archive/2026-11-08-backend-layered-architecture/`; all five files,
+including `.openspec.yaml`, match the reviewed source bytes.
+
+Post-archive strict validation passed (23/23), as did the whitespace check.
+No synchronization remains in flight. The earlier preparation entry is superseded
+for archive status. This closes one CH1 task 1.4 prerequisite; the API and catalog
+prerequisites remain separate. No application code changed during the archive.

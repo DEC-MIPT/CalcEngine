@@ -1,4 +1,4 @@
-# Spec Delta
+# backend-architecture Specification
 
 ## Purpose
 Defines the layered backend architecture for DEC: the separation into ORM models,
@@ -7,7 +7,7 @@ core, db, and worker layers, the dependency direction between them, and the mini
 runnable backend (health endpoint, configuration, errors, calculator registry). The
 normative document database and the ML model storage are specified by later changes.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Layered architecture
 The system SHALL organize the backend into distinct layers — ORM models, schemas,
@@ -101,16 +101,19 @@ The system SHALL expose `GET /health` that returns HTTP 200 with the JSON body
 - **THEN** the response is `200` with body `{"status": "ok"}`
 
 ### Requirement: Fail-fast configuration
-The system SHALL read the application database URL from `DEC_APP_DATABASE_URL`, and the
-normative database URL from `DEC_NORMATIVES_DATABASE_URL`, from environment variables
-only. Construction of the settings SHALL fail when `DEC_APP_DATABASE_URL` is unset, with
-no silent default. `DEC_NORMATIVES_DATABASE_URL` is optional until a later change reads
-the normative database, and is read when set.
+The system SHALL read the application database URL from `DEC_APP_DATABASE_URL` through
+`Settings`, and the normative database URL from `DEC_NORMATIVES_DATABASE_URL` through
+the separate `NormativesSettings`, from environment variables only. Construction of
+`Settings` SHALL fail when `DEC_APP_DATABASE_URL` is unset, with no silent default.
+`NormativesSettings` SHALL allow an absent normative database URL and SHALL NOT require
+the application database URL. A configured normative database URL SHALL be read by
+`NormativesSettings`, independently of `Settings`.
 
 #### Scenario: Settings read from the environment
 - **WHEN** `DEC_APP_DATABASE_URL` is set, with or without
-  `DEC_NORMATIVES_DATABASE_URL`, and `Settings` is instantiated
-- **THEN** it exposes the values that are set as read
+  `DEC_NORMATIVES_DATABASE_URL`, and `Settings` and `NormativesSettings` are instantiated
+- **THEN** `Settings` exposes the application URL and `NormativesSettings` exposes
+  the normative URL when set, or `None` when absent; neither class exposes the other URL
 
 #### Scenario: Missing application URL
 - **WHEN** `DEC_APP_DATABASE_URL` is unset and `Settings` is instantiated

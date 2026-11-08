@@ -1123,3 +1123,34 @@ check above and independent inspection of the changed module's coverage (39 stat
 8 branches, 100%). Code review found no findings; installed Uvicorn supports
 `--no-access-log`. UI/UX: N/A, no UI changes. This GO does not assert live PostgreSQL
 snapshot behavior and does not authorize commit, merge or archive.
+
+## Task 7.4 preparation restored (2026-11-08)
+
+The earlier temporary worktree was absent. The approved fix is restored on the
+existing `fix/normative-catalog/backend` branch at `34eb49a`, with exactly two added
+lines: catalog-engine `REPEATABLE READ` and its assertion in the existing test.
+The two baseline files equal those on current `develop` `e21a9f6`. Documented
+Uvicorn commands in README and AGENTS already include `--no-access-log`.
+Custom server/proxy logging was not assessed.
+
+The `tester` declared **GO** for the prepared fix before integration. Full fix-branch
+check: 1169 passed, 11 skipped, 100% branch coverage (2771 statements, 506 branches).
+An export of current `develop` with only this patch also passed: 1430 passed,
+11 skipped, 100% branch coverage (3178 statements, 584 branches). Ruff, mypy and
+all five import contracts passed on both trees. One existing Starlette warning
+remains. UI/UX: N/A, no UI changes. The missing test database URLs leave real
+catalog concurrency and snapshot behavior unverified.
+
+Independent orchestrator review: **APPROVE**, 0 blockers, 0 major, 0 minor.
+Read-only connections, hidden query parameters and the transaction boundary are
+preserved. Logs are in `/tmp/dec-catalog-74-checks/`. No commit, merge or push
+was performed. Task 7.4 remains open for delivery and integration; task 8.2 still
+waits for it. This prepared GO does not close the catalog or CH1 archive gates.
+
+## Task 7.4 fix committed (2026-11-08)
+
+Akim authorized the prepared commits and integration. The existing fix branch was
+advanced with `git pull --ff-only origin develop` before commit, retaining exactly
+the reviewed two-line patch. Commit `bc34063` records that patch; its secret-scan
+hook passed, with no applicable settings-hook files. No baseline findings changed.
+Integration and its actual-tree check remain pending; task 7.4 is not yet closed.
