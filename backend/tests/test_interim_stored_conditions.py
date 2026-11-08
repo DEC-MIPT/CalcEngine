@@ -240,13 +240,18 @@ def test_registered_types_refuse_stored_conditions_before_filtering(
     assert found[COPY].resolve(COPY, inputs()).parameters is not None
 
 
-def test_real_future_type_is_pending_unregistered_and_keeps_exact_applicability(caplog: pytest.LogCaptureFixture) -> None:
+def test_real_future_type_is_verified_unregistered_and_keeps_exact_applicability(caplog: pytest.LogCaptureFixture) -> None:
     (document,) = load_interim_root(INTERIM_ROOT, {PILOT})
     file = next(file for file in document.files if file.calculation_type == FUTURE_TYPE)
     assert Counter(path.split("[")[0] for path, _ in file.content.records()) == {
         "formulas": 3, "table_values": 3, "applicability_conditions": 1, "diagram_cases": 1,
     }
-    assert all(record.verification.status == "pending" for _, record in file.content.records())
+    for _, record in file.content.records():
+        assert effective_status(record) == "human-verified"
+        assert record.verification.by == "Akim"
+        assert record.verification.portion == "P1b-1"
+        assert record.verification.value_digest == record_digest(record)
+        assert all(ref.status == "unverified" and ref.provenance == "machine-extracted" for ref in record.norm_refs)
     (rule,) = file.content.applicability_conditions
     assert rule.value_fraction.model_dump() == {"numerator": 1, "denominator": 6}
     assert rule.relation == "le"

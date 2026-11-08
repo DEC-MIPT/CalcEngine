@@ -7,12 +7,11 @@ formulas:
     provenance: machine-extracted
   page: 44
   verification:
-    status: pending
-    by: null
-    at: null
-    portion: null
-    comment: null
-    value_digest: null
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: 9d6bcd13649646aca8e1ba3974bab0486ba90a83e12a73560e41e136a9decb7f
   parameter: p_edge_plus
   result_symbol: p_plus
   latex: p_{+}=\frac{N}{A}+\gamma_{mt}d+\frac{M}{W}
@@ -60,12 +59,11 @@ formulas:
     provenance: machine-extracted
   page: 44
   verification:
-    status: pending
-    by: null
-    at: null
-    portion: null
-    comment: null
-    value_digest: null
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: aa6ee9f6e2a0d9feeab1d0e9f0b4fe912bf0c166b8297d67da01a8d809c12de3
   parameter: p_edge_minus
   result_symbol: p_minus
   latex: p_{-}=\frac{N}{A}+\gamma_{mt}d-\frac{M}{W}
@@ -113,12 +111,13 @@ formulas:
     provenance: machine-extracted
   page: 45
   verification:
-    status: pending
-    by: null
-    at: null
-    portion: null
-    comment: null
-    value_digest: null
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: 8058acd9afa79b6d9ea06c117c0cd0ed1e2184b363272872141d81dbed49bd98
+    comment: 'Единицы из контекста подтверждены: unit.M_x = кН·м; unit.W_x = м³; unit.M_y = кН·м; unit.W_y
+      = м³.'
   parameter: p_corner
   result_symbol: P_max
   latex: P_{\max}=\frac{N}{A}+\gamma_{mt}d+\frac{M_x}{W_x}+\frac{M_y}{W_y}
@@ -179,12 +178,11 @@ table_values:
     provenance: machine-extracted
   page: 45
   verification:
-    status: pending
-    by: null
-    at: null
-    portion: null
-    comment: null
-    value_digest: null
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: 64bfc15ec5339f13986319c1c5818a7006f16cc73b252a10c2a1ed3c62ed7153
   parameter: gamma_mt
   symbol: \gamma_{mt}
   latex: \gamma_{mt}
@@ -201,12 +199,12 @@ table_values:
     provenance: machine-extracted
   page: 42
   verification:
-    status: pending
-    by: null
-    at: null
-    portion: null
-    comment: null
-    value_digest: null
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: 6fa2e78939d15f270d4acab773fc381db00160a8dc290eb1b61e4bc2fa41e4e1
+    comment: 'Безразмерность множителя подтверждена: unit = 1.'
   parameter: edge_pressure_limit_multiplier
   symbol: edge_limit_multiplier
   latex: edge_limit_multiplier
@@ -223,12 +221,12 @@ table_values:
     provenance: machine-extracted
   page: 42
   verification:
-    status: pending
-    by: null
-    at: null
-    portion: null
-    comment: null
-    value_digest: null
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: 939524dcf7f852a660d86500a21eb4e912581d1cad627f067249cac89ee5b3f4
+    comment: 'Безразмерность множителя подтверждена: unit = 1.'
   parameter: corner_pressure_limit_multiplier
   symbol: corner_limit_multiplier
   latex: corner_limit_multiplier
@@ -249,12 +247,12 @@ applicability_conditions:
     provenance: machine-extracted
   page: 44
   verification:
-    status: pending
-    by: null
-    at: null
-    portion: null
-    comment: null
-    value_digest: null
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: 8b8b505f26aaf582f93fca2ad33da47797b03dbab446ee554f4e291536af1858
+    comment: 'Безразмерность отношения e/l и порога 1/6 подтверждена: unit = 1.'
   parameter: relative_eccentricity_formula_5_11_limit
   quantity: e/l
   applies_to: '5.11'
@@ -273,12 +271,13 @@ diagram_cases:
     provenance: machine-extracted
   page: 43
   verification:
-    status: pending
-    by: null
-    at: null
-    portion: null
-    comment: null
-    value_digest: null
+    status: human-verified
+    by: Akim
+    at: '2026-11-04'
+    portion: P1b-1
+    value_digest: c66b9c5d7f7f28a4da48ad0d4a0b169dcfc42b7d23483e22f46b60cd11840c12
+    comment: 'Единицы подтверждены: e = м; unit.l = м; unit.p_min = кПа. Различие форм e < 1/6, e = 1/6,
+      e > 1/6 в подписи и обозначений с l/6 на рисунке сохраняем.'
   parameter: pressure_diagram_cases
   units:
     e: m
