@@ -13,10 +13,10 @@ items:
   kind: record
   page: '36'
   shown_digest: 0a6c08ee9a2f1fdd94081ac12f7febc1f6478e054863e3384b3e872f1563411f
-  verdict: null
+  verdict: верно
   corrected: null
-  by: null
-  at: null
+  by: Akim
+  at: '2026-11-08'
   comment: null
 - item: D-1/h_n_allowances
   record: h_n_allowances

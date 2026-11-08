@@ -1,0 +1,24 @@
+portion: LOADS-DB-1
+generated: '2026-11-09'
+sources:
+  a: docs/akim/digitization/extract-a.yaml
+  b: docs/akim/digitization/extract-b.yaml
+verdicts_allowed:
+- верно
+- исправить
+- отклонить
+items:
+- item: LOADS-DB-1/d_b_cap_2m
+  record: d_b_cap_2m
+  kind: record
+  page: '36'
+  shown_digest: 0a6c08ee9a2f1fdd94081ac12f7febc1f6478e054863e3384b3e872f1563411f
+  verdict: верно
+  corrected: null
+  by: Akim
+  at: '2026-11-08'
+  comment: null
+signature:
+  by: Akim
+  at: '2026-11-09'
+  digest: ee2babe0ae3995656379ecca7520c2c7b9c7007a2f058d21741112e5ce803d97
