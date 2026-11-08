@@ -793,3 +793,15 @@ Task 1.4 remains open. The remaining named archives are `normative-catalog-backe
 and `calculation-api`; the latter still depends on core/retarget archive and the
 scoped PM record. No other change was archived, no exception draft was activated,
 and no push was performed. Task 9.5 remains open.
+
+## Catalog archive prerequisite completed (2026-11-08)
+
+Task 8.2 of `normative-catalog-backend` is complete. Both of its deltas are
+synchronized, and the change is archived under
+`openspec/changes/archive/2026-11-08-normative-catalog-backend/`.
+Its paired readiness owns synchronization counts and verification limitations.
+
+Two named prerequisites of CH1 task 1.4 are now archived: architecture and catalog.
+`calculation-api` remains active and waits for core/retarget archive, including
+the scoped PM record. Task 1.4 and final CH1 sync/archive 9.5 remain open.
+No interim exception draft was activated and no other change was archived here.

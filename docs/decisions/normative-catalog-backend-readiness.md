@@ -1179,3 +1179,41 @@ Strict all-artifact validation passed (23/23), including the new architecture ma
 spec; hooks and whitespace passed without changing the secrets baseline.
 No push, migration or live-process restart was performed. Catalog task 8.2 remains
 open for its separate sync/archive workflow; CH1 task 1.4 is not closed by this fix.
+
+## Synchronized and archived, task 8.2 (2026-11-08)
+
+Akim requested archive task 8.2 after reviewing its synchronization and closure
+steps. The `spec-keeper` synchronized both deltas and archived the change at
+`openspec/changes/archive/2026-11-08-normative-catalog-backend/`. All 44 tasks,
+including 8.2, are complete. Both original feature merges and corrective commits
+are ancestors of current `develop`; their recorded acceptance and current 7.4
+post-merge GO remain the code evidence.
+
+The sync appended 11 catalog requirements and the engine's table-selector requirement.
+Both existing Purpose sections and all legacy content are byte-for-byte preserved.
+The resulting engine spec has 7 requirements and 12 scenarios; the catalog spec
+has 28 requirements and 67 scenarios. All 12 added requirements and 40 added
+scenarios match the reviewed deltas exactly. Existing domain examples remain
+owned by the separate retargeting change.
+
+The previously accepted f4 design follow-up is applied: clause/formula ranking uses
+Russian FTS `ts_rank`, while document designation ranking uses trigram `similarity`.
+Columns, ordering, code and requirements were unchanged by that editorial correction.
+Current spec review is **READY**, with 0 blockers, 0 major and 0 minor findings.
+
+Main-spec validation passed before moving the change (11/11). All six change files,
+including `.openspec.yaml`, were preserved during the move. Strict post-archive
+validation passed (22/22), as did the whitespace check. No sync remains in flight.
+The unrelated formula-extractor-fix archive-target notice remains.
+
+This archive changes documentation only. The latest actual backend run remains
+1430 passed, 11 PostgreSQL/catalog skips and 100% branch coverage at `8d1c70e`.
+No new live catalog, concurrent snapshot or migration verification is claimed.
+No runtime code, normative data, API, database or live process was changed.
+CH1 task 1.4 still waits for the API/core/retarget archive chain and its remaining gates.
+
+The `tester` independently accepted archive task 8.2: **GO**. Its read-only audit
+confirmed all 44 checked tasks, all six archive hashes, exact legacy preservation,
+all added requirement bodies and unchanged code/tests/normative data against accepted
+`8d1c70e`. The original change retains its recorded code-test and coverage evidence;
+the documentation-only archive operation required no repeated application suite.

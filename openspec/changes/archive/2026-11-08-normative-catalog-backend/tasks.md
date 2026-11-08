@@ -284,9 +284,12 @@ Egor may split these tasks further on his branch; each one stays in his zone.
   WP5 `design.md` decision 2, WP8 `design.md` error table; 2026-10-11: Egor agreed to
   all three as written, `docs/decisions/backend/2026-10-07-pipeline-branch-and-process-to-egor.md`,
   answer 8)
-- [ ] 8.2 (spec) After both features are merged and task 7.4 is done, `spec-keeper` syncs
+- [x] 8.2 (spec) After both features are merged and task 7.4 is done, `spec-keeper` syncs
   `normatives-catalog` and archives this change; verify: `openspec validate --all --strict` passes after the
   archive
+  (2026-11-08: synchronized both `normatives-catalog` and `calculation-engine`,
+  preserving their existing Purpose and requirements; archived under
+  `2026-11-08-normative-catalog-backend`. See the paired readiness record.)
 
 ## Dependencies
 
