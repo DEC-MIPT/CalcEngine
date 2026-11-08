@@ -54,6 +54,7 @@ def test_the_engine_reads_only_and_hides_parameters(monkeypatch: pytest.MonkeyPa
     assert call["url"].drivername == "postgresql+psycopg"
     assert call["connect_args"] == {"options": READ_ONLY_OPTIONS}
     assert READ_ONLY_OPTIONS == "-c default_transaction_read_only=on"
+    assert call["isolation_level"] == "REPEATABLE READ"
     assert call["hide_parameters"] is True and call["pool_pre_ping"] is True
     assert engine.hide_parameters is True
     engine.dispose()

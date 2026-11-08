@@ -44,6 +44,7 @@ def get_catalog_engine(url: str) -> Engine:
         as_psycopg_url(url),
         hide_parameters=True,
         pool_pre_ping=True,
+        isolation_level="REPEATABLE READ",
         connect_args={"options": READ_ONLY_OPTIONS},
     )
 
