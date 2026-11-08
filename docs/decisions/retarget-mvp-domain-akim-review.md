@@ -191,3 +191,29 @@ direct written statement or a commit authored by Egor.
 This subsequent commit records the acknowledgement required by AGENTS.md section 4
 and `development-process` "Review before merge", and completes task 5.6.
 Task 5.5 remains open pending the tester's fresh verdict on the committed record.
+
+## Final tester GO on the committed revision (2026-11-08)
+
+The `tester` issued **GO** for `retarget-mvp-domain` task 5.5 at `830159b`.
+It verified that approved document/PM revision `8f9d187` precedes acknowledgement
+commit `830159b`, which names the change and exact revision and truthfully
+attributes Egor's oral confirmation to Akim's report. The substantive approved
+artifacts have not changed. This resolves the earlier uncommitted-state NO-GO.
+
+Fresh checks passed: selected strict validation, all strict validation (22/22),
+committed-diff whitespace and documentation-only scope (14 paths against
+`be22290`). Current spec review is READY with 0 blockers, 0 major and 0 minor
+findings; normative traceability passed and the PM decision is committed.
+The sweep still has six normative placeholders assigned to cleanup task 4.3
+and one preserved historical audit mention.
+
+- tests: N/A, because this change has no code.
+- coverage: N/A, because this change has no code.
+- UI/UX: N/A, because this change has no code.
+
+No application tests were required or run. The existing unrelated
+`formula-extractor-fix` archive-target information does not fail validation.
+Tasks 5.6 and 5.5 are complete. Tasks 4.3 (cleanup verification during sync)
+and 5.7 (sync/archive) remain open. This GO covers the documentation change;
+it does not verify delivery of the expanded MVP calculations. No archive or push
+was performed.

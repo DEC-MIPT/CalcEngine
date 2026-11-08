@@ -66,7 +66,7 @@ Found by the grep sweep on 2026-09-26. Not edited by this draft; the owner decid
   in a tracked commit or comment naming `retarget-mvp-domain`. The earlier review is
   historical and does not acknowledge this amendment. This acknowledgement precedes
   final tester GO 5.5; no document merge is required.
-- [ ] 5.5 [Agent: tester] After 5.6, issue the current-version verdict (see DOD), with
+- [x] 5.5 [Agent: tester] After 5.6, issue the current-version verdict (see DOD), with
   explicit `tests: N/A`, `coverage: N/A` and `UI/UX: N/A`, each because this change has no code.
 - [ ] 5.7 [Agent: spec-keeper] Sync the deltas into `openspec/specs/` and archive the change
 
