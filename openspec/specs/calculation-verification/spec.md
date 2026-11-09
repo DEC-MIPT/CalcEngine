@@ -1,11 +1,12 @@
-# Calculation Verification
+# calculation-verification Specification
 
 ## Purpose
+
 A gate on the correctness of calculations, not only on code coverage. Results are
 checked against named reference examples, a frozen regression corpus, and invariants,
 and each run reports metrics.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Reference examples
 The system SHALL ship every calculation type of the first domain (`foundations-shallow`)
@@ -21,8 +22,7 @@ requirement fixes the fields, not a value. An output is within its tolerance whe
 absolute difference between the computed and the expected value is not more than the
 `tolerance` (`absolute`), or not more than the `tolerance` times the absolute expected
 value (`relative`). The calculation types are those listed in the requirement "In-scope
-calculation types" of the capability `foundations-shallow` (delta of
-`retarget-mvp-domain`, not yet archived). For `foundations-shallow` the `origin` of every
+calculation types" of the canonical capability `foundations-shallow`. For `foundations-shallow` the `origin` of every
 example is `textbook`, and the source is a methodical guide for students on the design of
 shallow foundations that contains worked calculation examples.
 

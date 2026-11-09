@@ -168,3 +168,65 @@ docstrings.
 After the fixes (`361aa97`): each new test fails when its fix is reverted (9 of 9
 mutations caught); `check.sh`: ruff, mypy, lint-imports clean, 1169 passed, 11 skipped,
 100% branch coverage. Next: the merge of the feature into `develop`, then 6.1-6.2.
+
+## Final revision and synchronization readiness (2026-11-09)
+
+Task 6.1 is complete. The accepted final verification revision 361aa97 is the exact
+second parent of merge 38f9185, an ancestor of current develop at 5a59fcc. All
+tracked verification application/test files, including pilot_invariants.py, remain
+byte-identical to that revision. The change artifacts and readiness record were
+unchanged since integration before this closure assessment.
+
+Acceptance evidence remains tester GO at 7271240, followed by the orchestrator's
+explicit permission to merge after the required fix without another tester round.
+The fixes at 361aa97 and the recorded full check (1169 passed, 11 skipped, 100%
+branch coverage) are preserved in section 6. No later or fresh tester GO is inferred.
+UI/UX remains N/A because this feature changes no UI. The skipped database checks
+are not represented as fresh checks; the historical catalog test runs in section 5
+remain evidence for their recorded revision.
+
+A three-main-spec preview applies seven ADDED and one REMOVED requirement to
+calculation-engine, calculation-verification (new main spec) and development-process.
+It preserves existing Purposes and untouched requirements/scenarios. The one
+active-delta lifecycle correction references the canonical foundations-shallow
+capability rather than a not-yet-archived retarget delta; origin, tolerance and
+correctness policies are unchanged. Read-only current review reports 0 blockers,
+0 major and 0 minor findings and readiness for the sync/archive choice.
+
+Selected strict validation passed; all actual specs/active changes passed 21/21.
+An isolated main-spec tree with the candidates passed 15/15. The existing unrelated
+formula-extractor-fix archive-target message remains informational. Main specs and
+the active change directory are unchanged; task 6.2 remains open pending the
+archive workflow's synchronization/archive choice. No commit, merge or push was
+performed for this assessment, and application tests were not rerun.
+
+The real references, real frozen corpus/build integration and typical-calculation
+latency definition remain accepted follow-ups in tasks section 5. Framework archive
+does not establish correctness of a calculation type or supply the three admitted
+reference examples required for the future loads type's GO.
+
+## Main specs synchronized and framework change archived (2026-11-09)
+
+Akim explicitly authorized synchronization and archive in the user conversation.
+Three canonical specs now match their reviewed preview SHA-256 values: calculation-engine,
+calculation-verification and development-process. All seven ADDED requirements and
+the one REMOVED requirement were verified against the active deltas before moving
+the change. Existing main Purposes, unaffected requirements and scenarios remain
+preserved; the new capability Purpose matches its delta. The previously fetched
+specs instruction snapshot was reused.
+
+Selected change strict validation passed with explicit --type change; actual main
+specs passed 15/15. The whole directory, including .openspec.yaml, was moved to
+`openspec/changes/archive/2026-11-09-calculation-verification/`. All strict
+validation after archive passed 21/21. Task 6.2 is complete; no task checkbox remains
+open. The total is unchanged because one main spec was added and one active change
+was archived. The unrelated formula-extractor-fix archive-target information remains.
+
+The existing framework acceptance evidence cited above remains the basis for
+closure; no new tester GO or application/database/catalog test execution is claimed.
+This operation changed documentation only. Real references, the real regression
+corpus/build integration and typical-calculation latency definition remain the
+explicit accepted follow-ups in task section 5. Archive does not establish
+calculation correctness or the future loads type's three-reference GO gate.
+No commit, merge or push was performed. The remaining upstream canonical owner
+to assess for the loads contract is frontend-app.

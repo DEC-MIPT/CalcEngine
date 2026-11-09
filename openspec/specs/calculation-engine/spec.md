@@ -64,14 +64,6 @@ trace, and conclusion), validated by schemas at the engine boundary.
 - **THEN** its inputs and outputs are defined as typed schemas so callers validate
   inputs before the engine runs and read outputs without reaching into engine internals
 
-### Requirement: Non-functional — performance and accuracy
-The system SHALL complete a typical calculation in under 30 seconds and SHALL achieve
-99.9% accuracy for correct inputs.
-
-#### Scenario: Fast and accurate
-- **WHEN** a typical calculation runs with correct inputs
-- **THEN** it completes in under 30 seconds with 99.9% accuracy
-
 ### Requirement: Table value selectors
 The system SHALL give each table value that the engine receives the heading value that
 selected it, with the heading's symbol and unit, or no heading value when the table
@@ -398,3 +390,24 @@ order of the method's steps.
 - **WHEN** evaluating a formula gives a value that is not a finite number, such as a
   division by zero
 - **THEN** the evaluation fails with a `DECError` that names the step
+
+### Requirement: Calculation accuracy
+The system SHALL express the accuracy of a calculation as its deviation from named
+reference examples, as defined by the requirement "Reference examples" of
+`calculation-verification`. An accuracy claim SHALL name the calculation type, the
+quantity, and the reference examples it refers to. An abstract percentage without those
+SHALL NOT be used as an accuracy claim.
+
+#### Scenario: Accuracy is stated against references
+- **WHEN** accuracy is claimed for a calculation type
+- **THEN** the claim is stated as the deviation of named quantities from named reference
+  examples, within the `tolerance` each example records
+
+### Requirement: Calculation latency
+The system SHALL complete a typical calculation in under 30 seconds. This target is
+independent of accuracy. What counts as a typical calculation and where the time is
+measured are not yet defined.
+
+#### Scenario: Calculation completes in time
+- **WHEN** a typical calculation runs
+- **THEN** it completes in under 30 seconds

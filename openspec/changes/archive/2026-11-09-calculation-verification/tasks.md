@@ -72,8 +72,8 @@ Depends on `retarget-mvp-domain` for the list of calculation types of `foundatio
 
 ## 6. Close
 
-- [ ] 6.1 After 1.1-1.5 pass, confirm the final version of the change is on `develop`
-- [ ] 6.2 `spec-keeper` syncs the deltas and archives the change after GO; the open items in section 3 must be done or moved to a follow-up change first
+- [x] 6.1 After 1.1-1.5 pass, confirm the final version of the change is on `develop`
+- [x] 6.2 `spec-keeper` syncs the deltas and archives the change after GO; the open items in section 3 must be done or moved to a follow-up change first
 
 ## Dependencies
 
