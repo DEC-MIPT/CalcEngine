@@ -1,12 +1,13 @@
-# Spec Delta
+# calculation-api Specification
 
 ## Purpose
+
 Defines the HTTP contract through which clients list calculation types, run a
 calculation, read a stored result, and download its `.docx` report. It also defines the
 error responses, how results are stored for reproducibility, and where a calculation's
 parameters come from.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Calculation types listing
 The system SHALL expose `GET /calculation-types`, which returns every registered
@@ -40,8 +41,7 @@ stores its result envelope, and returns that envelope with status `201` and a `L
 header naming the stored result. A calculation that the method's range refuses
 (`calculation-engine` "Applicability check with three outcomes") SHALL be stored and
 returned the same way, with the verdict `refused`; a refusal is a result, not an error.
-That requirement is part of the `calculation-engine` delta of the active change
-`calculation-core-contract`, which is archived before this one.
+That requirement is defined in the canonical `calculation-engine` capability.
 
 #### Scenario: Calculation completes
 - **WHEN** a client posts a valid request for a registered type whose inputs are inside
@@ -156,7 +156,7 @@ requirement adds only its delivery.
 - **THEN** the response is `200` with the `.docx` media type and an attachment file name
   ending in `.docx`, and the document read back holds the stored result's inputs, trace and
   conclusion, and the accountability block while `ACCOUNTABILITY_SECTION` is on
-  (`calculation-core-contract` `report-generator` "Result accountability block")
+  (`report-generator` "Result accountability block")
 
 #### Scenario: Report of a refused result
 - **WHEN** a client posts a valid report request for a stored result whose verdict is

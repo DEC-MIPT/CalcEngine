@@ -158,3 +158,51 @@ docstrings, and this branch's merge brings the translation for all three.
 
 Open in this change: task 6.5 (sync and archive) after `calculation-core-contract` is
 archived.
+
+## Synchronization readiness after core archive (2026-11-09)
+
+The calculation-core-contract prerequisite is synchronized, archived and committed
+at 1c4f829. Only API task 6.5 remains open. Read-only closure review verified
+the accepted API GO and orchestrator approval at 8bdf261, integrated as the exact
+second parent of 23318c1, and the shared fixes accepted at 57aacc4, integrated
+as the exact second parent of 1027627. Both are ancestors of current develop.
+Recorded branch coverage is 100%; UI/UX is explicitly N/A because this feature
+changed no UI. These existing records are not a fresh tester verdict or test run.
+
+The new-main-spec preview preserves the approved Purpose and all eleven ADDED
+requirements and their scenarios. Two lifecycle references were updated in the
+active delta and preview to canonical calculation-engine and report-generator
+capabilities; no behavior changed. The interim-source exception remains owned
+by interim-normatives-source task 1.4 and was not silently added to this sync.
+
+The spec-reviewer reports 0 blockers, 0 major and 0 minor findings and readiness
+for the synchronization/archive choice. Selected strict validation passed; all
+actual specs and active changes passed 21/21; an isolated main-spec tree with
+the candidate passed 13/13. The unrelated formula-extractor-fix archive-target
+message remains informational. No application tests, database or catalog checks
+were rerun for this documentation preparation step.
+
+The main calculation-api spec has not been created and the change has not moved
+to archive. Task 6.5 awaits the archive workflow's synchronization/archive choice.
+No API commit, merge or push was performed.
+
+## Main spec synchronized and change archived (2026-11-09)
+
+Akim explicitly authorized synchronization and archive in the user conversation.
+The new canonical `openspec/specs/calculation-api/spec.md` matches the reviewed
+preview SHA-256. Its Purpose and all eleven ADDED requirements, including every
+scenario, were compared with the active delta before archive and match exactly.
+The existing specs instruction snapshot was reused without another lookup.
+
+Selected change strict validation passed with explicit `--type change`, because
+the new spec shares the change name. Actual main-spec strict validation passed
+13/13. The complete change directory, including .openspec.yaml, was moved to
+`openspec/changes/archive/2026-11-09-calculation-api/`; all strict validation
+after archive passed 21/21. Adding one main spec and archiving one active change
+leaves the total count unchanged. Task 6.5 is complete; no task checkbox remains open.
+
+Existing implementation GO, review, integration and coverage records remain the
+acceptance evidence. No new tester GO, application tests, database or catalog
+checks are claimed for this documentation operation. No commit, merge or push
+was performed. The next prerequisite in the loads contract chain is
+interim-normatives-source, including its outstanding scoped contract exception.
