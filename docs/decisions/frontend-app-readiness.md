@@ -274,3 +274,59 @@ UI/UX and Playwright: N/A, because no executable file changed. Review: Akim conf
 (no executable change, so no `orchestrator` round). Not blocking: an unchanged sentence says
 `fixtures.ts` was generated from the backend; the refused and warning envelopes were added later
 (`cd73b2f`, tasks 6.4a-6.4c) and their origin is not stated.
+
+## Synchronization readiness after core and API archives (2026-11-09)
+
+Only task 8.11 remains open. The required core and API archives exist, committed
+at 1c4f829 and fd41cd6. Source proposal/design/deltas are unchanged since frontend
+integration c252375. Read-only closure review verified exact-tip integrations:
+backend dd3870f is the second parent of 57abe06 and frontend 8fc6d40 is the second
+parent of c252375; both merges are ancestors of current develop.
+
+Existing backend tester GO records 971 passed, 4 PostgreSQL skips and 100% branch
+coverage. Existing final frontend GO records 478 tests and 100% branch coverage.
+The UI/UX confirmation at b538708, subsequent fixes checked at 320/375/1280 px
+with zero axe violations, and the confirmation retained at 8fc6d40 remain
+recorded. Akim's manual Edge/Safari acceptance is recorded in task 8.8. Later
+interim UI changes have their own acceptance records; current frontend code is
+not claimed byte-identical to 8fc6d40. This is no new tester GO or browser run.
+
+The three-main-spec preview adds sixteen requirements and modifies Expandable
+steps. Existing Purposes, untouched requirements, all original scenarios and
+the interim-source labels are preserved. The spec-reviewer reports 0 blockers,
+0 major and 0 minor findings and readiness for the synchronization/archive choice.
+Selected strict validation passed; all actual specs/active changes passed 21/21;
+the isolated main-spec tree with candidates passed 15/15. The existing unrelated
+formula-extractor-fix archive-target information remains informational.
+
+Task 8.11 stays open pending the workflow choice. No frontend source artifacts,
+main specs or archive were changed. No application, database or browser checks
+were rerun. Activation of pilot settings before an external demonstration remains
+the separate accepted follow-up, not an archive gate. The preceding verification
+sync/archive remains uncommitted and was preserved. No commit, merge or push
+was performed for this assessment.
+
+## Main specs synchronized and change archived (2026-11-09)
+
+Akim explicitly authorized synchronization and archive in the user conversation.
+Three canonical specs now match their reviewed preview SHA-256 values: calculation-api,
+transparent-output and web-platform. All sixteen ADDED requirements and the one
+MODIFIED requirement were compared with the active deltas before moving the change.
+Existing Purposes, unaffected requirements/scenarios and interim-source labels remain
+preserved. The fetched specs instruction snapshot was reused without another lookup.
+
+Selected strict validation passed before archive; actual main specs passed 15/15.
+The entire directory, including .openspec.yaml, was moved to
+`openspec/changes/archive/2026-11-09-frontend-app/`. All strict validation after
+archive passed 20/20. Task 8.11 is complete; no task checkbox remains open. The
+count decreases by one because an active change was archived without adding a new
+main capability. The unrelated formula-extractor-fix archive-target information remains.
+
+Existing feature GO/review/integration and UI/UX acceptance records cited above
+remain the closure basis. No new tester GO, application tests, database or browser
+checks are claimed for this documentation-only operation. Pilot-setting activation
+before external demonstration remains the accepted follow-up. The preceding
+verification synchronization/archive is preserved and also remains uncommitted.
+No commit, merge or push was performed. The next loads-contract work is reconciliation
+against the synchronized canonical specs and a current DOR review; archive completion
+alone does not declare the new calculation ready or verified.

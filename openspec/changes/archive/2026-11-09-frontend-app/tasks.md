@@ -253,7 +253,7 @@ before task 2.1.
   and `npm run test:e2e` with the one-time Playwright install, and its status names the merge;
   `AGENTS.md` has no command list, and its section 7 already names Vitest and Playwright, so it is
   unchanged)
-- [ ] 8.11 (spec) Archive this change after both features are merged and after `calculation-api`
+- [x] 8.11 (spec) Archive this change after both features are merged and after `calculation-api`
   and `calculation-core-contract` are archived
 
 ## 9. UX iteration (feature `frontend-app/frontend`)
