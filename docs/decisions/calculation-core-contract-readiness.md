@@ -441,3 +441,62 @@ Of the 18 follow-ups of sections 12-14, item 3 was fixed in `cc70f7d`, item 6 wa
 follow-up in `tasks.md` "Dependencies"; all others are done. Open in this change: the
 frontend feature (3.4, 3.5, 5.4), task 7.2, and the archive (8.3) after
 `retarget-mvp-domain`.
+
+## 17. Synchronization readiness after retarget archive (2026-11-09)
+
+The prerequisite retarget-mvp-domain is synchronized and archived in commit
+3f58917. Task 7.1 is complete as an aggregate of accepted tasks 7.1a and 7.1b;
+7.1c explicitly moved to normative-catalog-backend, now archived. No new
+calculation or normative-source verification is claimed by closing this checkbox.
+
+Read-only closure review verified these accepted feature tips and their exact
+second-parent integration commits as ancestors of current develop:
+
+| Feature | Accepted tip | Integration |
+|---|---|---|
+| Engine | ae9d486 | 8c001b9 |
+| Report | 035c640 | 9642d8d |
+| Engine/report fixes | 57aacc4 | 1027627 |
+| Frontend support backend | dd3870f | 57abe06 |
+| Frontend | 8fc6d40 | c252375 |
+
+Recorded branch coverage is 100%; frontend UI/UX confirmation is recorded at
+its final GO. These are existing acceptance records, not fresh test executions
+or a new tester GO. First-iteration amendments were accepted through frontend
+records 4f395de/f67b716; core deltas have not changed since integration c252375.
+The existing GOST base-edition mismatch remains the previously recorded WP3
+handoff. The internal-pilot status exception retains its accepted narrow scope.
+
+A preview for calculation-engine, report-generator, security and transparent-output
+applies nine ADDED and six MODIFIED requirements. All four main Purposes and
+untouched requirements are preserved, and no existing scenario is lost. The
+spec-reviewer reports 0 blockers, 0 major and 0 minor findings and readiness
+for synchronization/archive subject to validation and the archive workflow choice.
+
+Fresh selected strict validation passed; all actual specs/active changes passed
+22/22; an isolated main-spec tree with the four candidates passed 12/12. The
+unrelated formula-extractor-fix archive-target message remains informational.
+Task 8.3 remains open pending the explicit synchronization/archive choice.
+Main specs and the active change directory are unchanged; no commit, merge or push
+was performed for this dependency assessment. Application tests were not rerun
+because this step only prepares documentation synchronization.
+
+## 18. Main specs synchronized and change archived (2026-11-09)
+
+Akim accepted the proposed synchronization/archive in the user conversation.
+The four canonical specs now contain all nine ADDED and six MODIFIED requirements.
+Every resulting file matches its reviewed preview SHA-256, and every operation
+was compared against the active delta before the directory was moved. Existing
+Purposes and untouched requirements/scenarios remain preserved. The fetched specs
+instruction snapshot was reused for this merge.
+
+Selected strict validation passed before archive; actual main-spec strict
+validation passed 12/12. After the full directory, including .openspec.yaml, was
+moved to `openspec/changes/archive/2026-11-09-calculation-core-contract/`,
+all strict validation passed 21/21. The count decreases by one because this change
+is now archived. Task 8.3 is complete and no task checkbox remains open.
+
+Existing feature GO, review and integration evidence in section 17 remains the
+acceptance basis; no new tester GO, engineering verification or application-test
+run is claimed. This step changed documentation only. No commit, merge or push
+was performed. The next prerequisite in the loads contract chain is calculation-api.
