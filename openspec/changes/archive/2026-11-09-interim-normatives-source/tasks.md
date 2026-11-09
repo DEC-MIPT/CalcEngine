@@ -38,7 +38,7 @@ question 1 of `design.md` (the tolerances of `ex1`). Task 7.5 (phase-1b data) co
 - [x] 1.3 (spec) Run `norm-traceability-checker`; verify: it confirms that no requirement
   fixes a norm value and that every norm reference is marked as data or `unverified`; recorded
   in the readiness file (2026-10-20: no norm value, 4 attribution minors fixed)
-- [ ] 1.4 (spec) After `backend-layered-architecture`, `calculation-api` and
+- [x] 1.4 (spec) After `backend-layered-architecture`, `calculation-api` and
   `normative-catalog-backend` are archived, add MODIFIED deltas of "No hardcoding",
   "Engineer-set parameters stored in YAML", "Calculation parameter source" and "Catalog
   parameter source" that name the exception of "Scoped exception to the normative-database
@@ -269,7 +269,7 @@ structured inputs (C2); if phase 1b needs formula (5.8), it moves to task 7.5. T
   the dated line exists in `docs/decisions/product/2026-11-01-interim-normatives-consent.md`
   and the local action plan. Consent is attributed to Akim; use is on the feature branch,
   not a release on `develop`
-- [ ] 9.5 (spec) `spec-keeper` syncs the deltas into `openspec/specs/` and archives this
+- [x] 9.5 (spec) `spec-keeper` syncs the deltas into `openspec/specs/` and archives this
   change after the original features and the backend continuation are integrated and
   task 1.4 is resolved; verify:
   `openspec validate --all --strict` passes after the archive

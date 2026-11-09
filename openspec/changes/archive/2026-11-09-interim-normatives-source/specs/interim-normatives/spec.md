@@ -1,3 +1,10 @@
+# Spec Delta
+
+## Purpose
+
+Defines the temporary normative parameter source, its verification and provenance
+controls, source selection and sunset, and its scoped exception to the catalog-only rule.
+
 ## ADDED Requirements
 
 ### Requirement: Interim normative data files
@@ -293,8 +300,8 @@ switches the service back to the catalog, which deletes the data directory.
 
 ### Requirement: Scoped exception to the normative-database rule
 The rule that norm-given values come only from the normative catalog — stated in
-`backend-layered-architecture` "No hardcoding" and "Engineer-set parameters stored in YAML",
-`calculation-api` "Calculation parameter source" and `normative-catalog-backend` "Catalog
+`backend-architecture` "No hardcoding" and "Engineer-set parameters stored in YAML",
+`calculation-api` "Calculation parameter source" and `normatives-catalog` "Catalog
 parameter source" — SHALL have one temporary exception: norm-given formulas, table values, thresholds,
 checks and method bounds MAY be read from YAML only while `DEC_PARAMETER_SOURCE=interim`,
 only from the interim data root, only from records that carry `norm_refs`, `page` and a

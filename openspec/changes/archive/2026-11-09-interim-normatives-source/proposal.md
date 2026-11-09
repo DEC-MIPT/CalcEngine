@@ -66,28 +66,21 @@ profile.
 
 ### Modified Capabilities
 
-- `transparent-output`: ADDED requirement "Parameter source label on the result screen".
-- `report-generator`: ADDED requirement "Parameter source line in the report".
-- `calculation-api`: ADDED requirement "Parameter source in the result envelope".
+- `backend-architecture`: MODIFIED requirements "No hardcoding" and
+  "Engineer-set parameters stored in YAML" reference the scoped interim exception.
+- `normatives-catalog`: MODIFIED "Catalog parameter source" retains the catalog path
+  when selected and references the explicitly selected interim alternative.
+- `calculation-api`: ADDED "Parameter source in the result envelope" and MODIFIED
+  "Calculation parameter source" reference the same scoped exception.
+- `transparent-output`: ADDED "Parameter source label on the result screen".
+- `report-generator`: ADDED "Parameter source line in the report".
 
-These are ADDED, not modifications, because the requirements they sit next to are still in the
-active changes `calculation-core-contract` and `calculation-api`, not in `openspec/specs/`;
-they add an optional field and its display and do not contradict them.
-
-The rule that norm-given values come only from the normative catalog is stated in four
-requirements of three active changes:
-- `backend-layered-architecture`: "No hardcoding" and "Engineer-set parameters stored in
-  YAML" (`specs/backend-architecture/spec.md:63-93`; its decision 3, `design.md:104-129`);
-- `calculation-api`: "Calculation parameter source" (`specs/calculation-api/spec.md:231-262`);
-- `normative-catalog-backend`: "Catalog parameter source"
-  (`specs/normatives-catalog/spec.md:208-217`).
-
-A trial MODIFIED delta of "No hardcoding" passes `openspec validate --strict`, but OpenSpec
-reports that archive would refuse it, since `backend-architecture` is not in `openspec/specs/`
-yet; the other three requirements are likewise not in `openspec/specs/`. The exception is
-therefore an ADDED requirement of `interim-normatives` that names the four requirements it
-bounds; task 1.4 adds the MODIFIED deltas once those changes are archived (`design.md`,
-decision 9).
+The four source restrictions now exist in canonical specs after their owner changes
+were archived. Task 1.4 adds full MODIFIED requirements from those current versions,
+preserving every scenario and retaining rejection of norm data in engineer-set files.
+The exception remains defined once by `interim-normatives` "Scoped exception to the
+normative-database rule". It does not permit norm literals in code or client parameters,
+change catalog mode, promote NormRef status, or execute stored phase-1b conditions.
 
 ## Non-goals
 

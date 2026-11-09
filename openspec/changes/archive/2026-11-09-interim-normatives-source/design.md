@@ -222,6 +222,13 @@
    - Agreement: Egor and the PM agreed orally to the interim base on 2026-10-18 (Akim's
      words).
 
+Task 1.4 reconciliation (2026-11-09): the three owner changes are now archived.
+The four restrictions are canonical requirements of `backend-architecture`,
+`calculation-api` and `normatives-catalog`. Full MODIFIED deltas reference the existing
+scoped exception; their unaffected scenarios remain intact. The original deferral
+above records the state of 2026-10-19, not a remaining dependency. The exception,
+source selection, verification profiles and sunset event are unchanged.
+
 10. **Who may set `human-verified`.**
     - Only a person named in `verifiers`, by a commit whose message cites the portion id
       (decision 11, portions). An agent writes records only as `pending` and never edits a

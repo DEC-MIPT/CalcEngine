@@ -853,3 +853,75 @@ and UI/UX are each N/A because the change has no code. The paired retarget revie
 records the evidence. Retarget tasks 4.3 and 5.7 still require cleanup and
 sync/archive. CH1 tasks 1.4 and 9.5 remain open pending the existing closure chain.
 No archive or push was performed.
+
+## Canonical exception and archive preview after owner closure (2026-11-09)
+
+All three named prerequisites of task 1.4 are now archived: architecture and
+catalog on 2026-11-08, and API on 2026-11-09. The preceding core and API
+synchronizations are committed at 1c4f829 and fd41cd6 respectively.
+
+Drafts regenerated from current canonical requirements implement the four planned
+MODIFIED deltas: No hardcoding and Engineer-set parameters stored in YAML
+(backend-architecture), Calculation parameter source (calculation-api), and
+Catalog parameter source (normatives-catalog). Proposal/design drafts explain
+the reconciliation, the new interim capability has an explicit Purpose, and owner
+references use canonical capability names. The six-main-spec preview contains
+13 ADDED and 4 MODIFIED requirements. Every original scenario, existing main
+Purpose and untouched requirement is preserved.
+
+The exception still requires explicit interim selection, the interim root,
+reference/page/verification records and the existing sunset event. It permits
+no norm literals in code, client parameters or normative values in engineer-set
+files. Catalog mode, verification profiles and reference status are unchanged.
+The date remains a reminder; the CH3 event retires the source. Phase-1b stored
+conditions remain non-executable. No runtime data or signatures were edited.
+
+Read-only current review reports 0 blockers, 0 major and 0 minor findings.
+Original backend 479172e, frontend a8fb64e and continuation dd0fd15 are exact
+second parents of integration commits 2d0f7db, cbfb634 and 427946d; all are
+ancestors of current develop. Existing post-merge tester GO at 427946d records
+1430 backend tests, 11 skips, 496 frontend tests and 100% branch coverage for
+both. Original frontend UI/UX acceptance remains recorded; the continuation
+changed no UI. Interim runtime and frontend files remain unchanged since that
+acceptance. The later two-line catalog isolation fix has its own accepted
+post-merge GO at 8d1c70e. This review does not claim a new tester GO or test run.
+Real database/catalog checks skipped in the acceptance records remain unverified.
+
+Isolated validation of the amended change passed; all specs/active changes before
+main overlay passed 21/21. With six candidate main specs, main strict passed
+14/14 and all strict passed 22/22. There is no archive refusal for this change;
+the unrelated formula-extractor-fix archive-target message remains informational.
+These counts describe isolated previews, not an applied main-spec sync.
+
+Tasks 1.4 and 9.5 remain open until actual application/validation and sync/archive.
+Drafts have not been applied to active artifacts or canonical main specs, and the
+change is not archived. No interim commit, merge or push was performed.
+
+## Canonical exception applied, specs synchronized and change archived (2026-11-09)
+
+Akim explicitly confirmed application of the prepared artifact changes, task 1.4,
+synchronization and archive in the user conversation. The approved proposal/design
+reconciliation, new capability Purpose and canonical owner references were applied.
+All four MODIFIED requirements were installed as active deltas and passed selected
+and all strict validation (21/21) with no archive refusal for this change. Task 1.4
+is complete.
+
+Six canonical specs now match the reviewed preview SHA-256 values exactly. Every
+one of the 13 ADDED and 4 MODIFIED requirement blocks matches the approved delta;
+untouched requirements, existing Purposes and all scenarios were preserved. The
+fetched specs instruction snapshot was reused. Actual main-spec strict validation
+passed 14/14 and selected change validation passed before archive.
+
+The full change directory, including .openspec.yaml, was moved to
+`openspec/changes/archive/2026-11-09-interim-normatives-source/`. All strict
+validation after archive passed 21/21. Task 9.5 is complete; no task checkbox
+remains open. The unrelated formula-extractor-fix archive-target information
+remains informational.
+
+The existing feature and continuation GO/review/integration evidence cited above
+remains the acceptance basis. This operation changed documentation only; runtime
+data, source signatures, reference statuses, code and tests were not edited. No
+new tester GO, application tests, database or real-catalog checks are claimed.
+Previously recorded database/catalog skips remain unverified. No commit, merge
+or push was performed. Remaining canonical ownership work for the loads contract
+includes calculation-verification and frontend-app.
