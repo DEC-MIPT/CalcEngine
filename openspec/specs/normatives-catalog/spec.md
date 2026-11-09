@@ -30,7 +30,7 @@ The system SHALL bind each calculation type to the relevant normative document a
 automatically load the applicable formulas and coefficients.
 
 #### Scenario: Select a calculation type
-- **WHEN** a user selects a calculation type (for example a beam check)
+- **WHEN** a user selects an in-scope calculation type of the first domain
 - **THEN** the system loads the bound normative document, its current revision, and the
   required formulas and coefficients
 
@@ -41,14 +41,6 @@ document is outdated or will soon become outdated.
 #### Scenario: Outdated normative
 - **WHEN** a normative document bound to a calculation is not the current revision
 - **THEN** the system warns the user that the document is outdated
-
-### Requirement: Manual normative maintenance for MVP
-The system SHALL allow normative data to be maintained manually for the MVP (one pilot
-file), without requiring automated NLP/RAG parsing.
-
-#### Scenario: Pilot normative file
-- **WHEN** the MVP uses a single pilot normative file
-- **THEN** calculations reference the manually maintained normative data
 
 ### Requirement: Non-functional — performance
 The system SHALL load a normative document and its formulas in under 2 seconds, and
@@ -586,3 +578,27 @@ holding the pipeline's ingested pilot document. The time limits come from
 - **WHEN** a statement that writes is run through the backend's catalog session
 - **THEN** the database refuses it, because the transaction is read-only and the role
   has no write privilege
+
+### Requirement: Norm reference status
+The system SHALL mark every norm reference held in a spec, a catalog entry, or a
+calculation step as either verified against the primary source text or
+`status: unverified`. A specification example SHALL use a synthetic placeholder
+(document `<NORM-DOC-PLACEHOLDER>`, edition `unverified`, clause `<CLAUSE-PLACEHOLDER>`)
+and SHALL NOT use a real clause number that nobody has checked. The reference field
+format is defined by the planned change `norm-source-traceability` (`NormRef
+{document, edition, clause, status, provenance}`).
+
+#### Scenario: Reference not checked
+- **WHEN** a norm reference has not been checked against the primary source text
+- **THEN** it carries `status: unverified` and no clause number is invented
+
+#### Scenario: Example reference in a spec
+- **WHEN** a spec gives an example norm reference
+- **THEN** the example uses the synthetic placeholder, not a real document number or
+  clause
+
+#### Scenario: Reference checked
+- **WHEN** Egor's normative pipeline confirms a reference against the source text
+- **THEN** a new reference version records the checked edition and clause for new
+  runs and is no longer marked `unverified`; references already pinned in stored
+  results retain their original edition, status and provenance

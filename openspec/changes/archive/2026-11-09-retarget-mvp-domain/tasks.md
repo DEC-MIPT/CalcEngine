@@ -47,7 +47,7 @@ Found by the grep sweep on 2026-09-26. Not edited by this draft; the owner decid
 
 - [x] 4.1 [Egor] `openspec/changes/backend-layered-architecture/tasks.md` lines 21, 27, 32 (pilot source, pilot parameter file, reference implementation of the placeholder domain): retarget or replace by domain-neutral wording. Shared area, owned by the backend-layered-architecture change (2026-10-05: closed — the placeholder-domain wording is already gone from that file; the pilot tasks moved to `calculation-core-contract` task 7.1, and its "Follow-ups outside this change" note says to close or update these citations)
 - [x] 4.2 [Egor] `openspec/changes/backend-layered-architecture/design.md` lines 62-63: reference-implementation wording. Same owner as 4.1 (2026-10-05: closed together with 4.1 — the referenced lines no longer hold placeholder wording)
-- [ ] 4.3 [Agent: spec-keeper] At archive, confirm the sync removed the placeholder-domain text from `openspec/specs/product-vision`, `calculation-engine`, `normatives-catalog`, and `transparent-output`, and that `openspec/config.yaml` is clean
+- [x] 4.3 [Agent: spec-keeper] At archive, confirm the sync removed the placeholder-domain text from `openspec/specs/product-vision`, `calculation-engine`, `normatives-catalog`, and `transparent-output`, and that `openspec/config.yaml` is clean
 
 ## 5. Validate and close
 
@@ -68,7 +68,7 @@ Found by the grep sweep on 2026-09-26. Not edited by this draft; the owner decid
   final tester GO 5.5; no document merge is required.
 - [x] 5.5 [Agent: tester] After 5.6, issue the current-version verdict (see DOD), with
   explicit `tests: N/A`, `coverage: N/A` and `UI/UX: N/A`, each because this change has no code.
-- [ ] 5.7 [Agent: spec-keeper] Sync the deltas into `openspec/specs/` and archive the change
+- [x] 5.7 [Agent: spec-keeper] Sync the deltas into `openspec/specs/` and archive the change
 
 ## Dependencies
 

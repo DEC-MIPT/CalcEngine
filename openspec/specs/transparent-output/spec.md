@@ -13,8 +13,13 @@ substituted values, intermediate results, and references to normative clauses.
 
 #### Scenario: Inspect a calculation step
 - **WHEN** a user expands a calculation step
-- **THEN** the formula (MathJax), substitution, and result are shown with the normative
-  clause reference (for example SP 16.13330.2024, clause 8.2.2)
+- **THEN** the formula (MathJax), substitution, and result are shown with each normative
+  reference the step rests on, for example `<NORM-DOC-PLACEHOLDER>`, edition
+  `unverified`, clause `<CLAUSE-PLACEHOLDER>`, `status: unverified`
+
+#### Scenario: Unverified reference is visible
+- **WHEN** any reference of a step is marked `status: unverified`
+- **THEN** the display shows that mark next to that reference
 
 ### Requirement: Expandable steps
 The system SHALL allow each calculation step to be expanded and collapsed on demand.

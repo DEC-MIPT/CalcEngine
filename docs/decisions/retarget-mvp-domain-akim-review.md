@@ -217,3 +217,34 @@ Tasks 5.6 and 5.5 are complete. Tasks 4.3 (cleanup verification during sync)
 and 5.7 (sync/archive) remain open. This GO covers the documentation change;
 it does not verify delivery of the expanded MVP calculations. No archive or push
 was performed.
+
+## Spec synchronization and archive completed (2026-11-09)
+
+Akim explicitly authorized synchronization, task 4.3 verification and archive,
+then requested a commit. Seven canonical specs contain the approved eight added,
+nine modified and three removed requirements. Existing Purposes and unaffected
+requirements/scenarios are preserved; the new foundations-shallow Purpose comes
+from its approved delta. The applied-sync reviewer reported 0 blockers, 0 major
+and 0 minor findings.
+
+Task 4.3 passed on the actual product-vision, calculation-engine, normatives-catalog
+and transparent-output main specs plus openspec/config.yaml: case-insensitive
+`beam|балк|16\.13330` search returned zero matches. Tasks 4.3 and 5.7 are complete.
+The entire change, including .openspec.yaml, is archived at
+`openspec/changes/archive/2026-11-09-retarget-mvp-domain/`.
+
+Before the requested commit, the temporary worktree from the preceding operation
+was unavailable. The seven approved main specs were reconstructed from committed
+deltas. Every SHA-256 matches the previously reviewed and applied file exactly.
+No substantive change to the accepted scope was introduced. The pending, untracked
+foundations-pressure-from-loads planning artifacts were also absent; they are not
+part of this commit or of the fresh validation count.
+
+Fresh checks on the restored content: selected strict validation passed before
+archive; main specs strict validation passed 12/12; all strict validation after
+archive passed 22/22. The earlier 23/23 included the untracked loads change.
+The existing unrelated formula-extractor-fix archive-target message is informational.
+The committed tester GO at 830159b remains the no-code acceptance evidence; this
+procedural completion does not claim a new tester GO or delivery of the expanded
+foundation calculations. Tests, coverage and UI/UX: N/A, each because this change
+has no code. No merge or push is part of the authorized commit.
