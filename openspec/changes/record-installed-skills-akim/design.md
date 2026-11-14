@@ -57,6 +57,36 @@ See `proposal.md` (Non-goals).
    so `tester` issues an explicit verdict "no code, no tests, coverage not applicable"
    once the inputs are met (see `tasks.md`). This is not an exception to section 4.
 
+## Additional Codex installation
+
+The additional `ub-mode` entry records a global Codex installation made with the
+Codex skill installer from `unclebob/ub-mode`, branch `master`, repository root.
+Verification uses the installer's successful result and the installed `SKILL.md`
+with `name: ub-mode`; this installation does not create a skills CLI lock entry.
+The original fifteen entries retain their existing verification method.
+
+## Companion tool installation
+
+Akim's requested `ub-mode` companion tools are installed in one dedicated user
+Python environment, with commands available on `PATH`. Editable installations
+retain sibling source checkouts, which also satisfy `mutator`'s dependency on
+`crapper`. Python 3.12.3 meets the tools' Python 3.11 minimum. Each tool reports
+package version 0.1.0; the source revisions identify this installation:
+
+| Tool | Source | Installed revision |
+| --- | --- | --- |
+| `crapper` | `unclebob/crapper` | `6fd92c4c9bcc56efb64a2f8743d5a2993bcfd42d` |
+| `dryer` | `unclebob/dryer` | `66ff6d21a42c04afcad89c78a80066176d1294b0` |
+| `mutator` | `unclebob/mutator` | `a5a0cb803b66e0cdb8bf471b3b08af701d424a41` |
+
+Verification on temporary Python and TypeScript fixtures passed: each command's
+help, complexity analysis without coverage, duplicate detection at threshold 0.8,
+and mutation-site scanning. A Python mutation run with a passing unittest baseline
+killed all 12 selected mutants, with no survivors. `pip check` found no broken
+requirements. These checks verify tool installation, not DEC calculation behavior.
+The DEC application checks and dependencies are unchanged. The tools are optional
+local aids; project gates and Git approval rules still follow `AGENTS.md`.
+
 ## Component boundary
 
 Not applicable. No code is written, so there is no calculation hot path and no C/C++

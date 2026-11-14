@@ -19,13 +19,22 @@ not stored in the repository, so the specs are the only shared record.
   `AGENTS.md` section 9. It is verified against the skills CLI lock file.
 - Adds a non-functional requirement: the record holds only public identifiers, never
   local paths, tokens, or credentials.
+- Records Akim's user-requested installation of `ub-mode` from `unclebob/ub-mode`
+  on 2026-11-05 at global Codex scope. This entry is verified from the installed
+  skill file rather than the skills CLI lock file.
+- Records the user-requested companion tools `crapper`, `dryer`, and `mutator`
+  installed for Akim on 2026-11-05 from their respective `unclebob` repositories.
+  Installation uses a separate user environment; repository application dependencies
+  and checks are unchanged.
 
 ## Non-goals
 
-- Installing or removing any skill.
+- Installing or removing any skill as part of the original September record.
+  The November entries record explicitly requested user-environment installations.
 - Recording Egor's skills; he records his own in a separate change.
 - Recording skills that were not installed with `npx skills` (for example the
-  `docx` and `skill-creator` skills provided by the claude.ai sync).
+  `docx` and `skill-creator` skills provided by the claude.ai sync), except the
+  explicitly requested Codex installation recorded above.
 - Recording the eight optional skills that were not installed: `code-architecture-review`,
   `code-reviewer`, `devops-cicd`, `devops-engineer`, `docs-generator`, `flask-python`,
   `sqlite-database-expert`, `ui-ux-design`.

@@ -18,6 +18,20 @@ Branch: there is no code and no branch; the documents are committed directly to 
 - [ ] 2.1 After 1.3-1.7 pass, confirm the final version of the change is on `develop`
 - [ ] 2.2 `spec-keeper` syncs the delta into `openspec/specs/development-process/spec.md` and archives the change
 
+## Additional Codex installation, 2026-11-05
+
+- [x] Install Akim's requested `ub-mode` from `unclebob/ub-mode` at global Codex scope and verify the installed skill name.
+- [x] Record the installation in the delta spec, with verification independent of the skills CLI lock file.
+- [x] Validate the updated change with `openspec validate record-installed-skills-akim --strict` (passed 2026-11-05).
+
+## Companion tools, 2026-11-05
+
+- [x] Install Akim's requested `crapper`, `dryer`, and `mutator` in a separate user Python environment and expose commands on `PATH`.
+- [x] Verify all three help commands, Python/TypeScript parsing, duplicate detection, and mutation-site scanning on temporary fixtures.
+- [x] Verify a full Python mutation run: 12 killed, zero survived; verify dependencies with `pip check`.
+- [x] Record tool sources and installed revisions in the design and record the installation in the delta spec.
+- [x] Validate the updated OpenSpec change and check whitespace (strict validation and `git diff --check` passed).
+
 ## Dependencies
 
 None. Task 2.1 needs 1.3-1.7; task 2.2 needs 2.1.

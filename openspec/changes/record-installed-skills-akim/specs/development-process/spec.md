@@ -59,3 +59,31 @@ and date.
 - **WHEN** a reviewer reads a skill record
 - **THEN** it contains no home-directory path, token, or credential, and no field
   other than developer, skill, source repository, scope, and date
+
+### Requirement: Codex skill installed by Akim
+The system SHALL record Akim's installation of `ub-mode`, source repository
+`unclebob/ub-mode`, global Codex scope, installation date 2026-11-05.
+
+#### Scenario: Verify the Codex installation
+- **WHEN** Akim checks the installed Codex skill
+- **THEN** its `SKILL.md` exists and declares `name: ub-mode`
+- **AND** verification uses the installed file and the successful Codex installer result
+  without requiring a skills CLI lock entry
+
+### Requirement: ub-mode companion tools installed by Akim
+The system SHALL record Akim's user-scope installation on 2026-11-05 of `crapper`
+from `unclebob/crapper`, `dryer` from `unclebob/dryer`, and `mutator` from
+`unclebob/mutator`. The tools SHALL use a dedicated Python environment and SHALL
+be available as commands on `PATH` without changing DEC application dependencies.
+
+#### Scenario: Verify companion tool availability
+- **WHEN** Akim invokes `crapper --help`, `dryer --help`, and `mutator --help`
+- **THEN** each command exits successfully and displays its usage
+- **AND** the tool environment passes `pip check`
+
+#### Scenario: Verify analysis and mutation execution
+- **WHEN** the tools analyze temporary Python and TypeScript fixtures
+- **THEN** complexity analysis, duplicate detection, and mutation scanning complete
+- **AND** a Python mutation run executes against a passing unittest baseline and
+  reports killed and surviving mutants
+- **AND** these installation checks do not claim verification of DEC calculations
