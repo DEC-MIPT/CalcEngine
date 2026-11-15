@@ -36,7 +36,7 @@ schema/rendering extensions belong to `foundations-pressure-from-loads`.
 - [x] 3.1 Obtain independent review after tester GO; verify all section-2 tasks complete, no blocker/major/security finding, exact pilot compatibility evidence and no public-schema or frontend scope expansion.
 - [x] 3.2 With separate explicit Git consent, integrate the accepted feature into develop; verify actual integrated backend and API schema checks, compatibility evidence and accurate database/catalog skips.
 - [x] 3.3 Record accepted contract integration in the pressure readiness record; verify both its backend/frontend dependencies name the actual integrated contract and pressure implementation may start without executor edits.
-- [ ] 3.4 After accepted integration, synchronize specs and archive this change; verify no unchecked task remains, the delta matches implementation and strict selected/main/all validation passes.
+- [x] 3.4 After accepted integration, synchronize specs and archive this change; verify no unchecked task remains, the delta matches implementation and strict selected/main/all validation passes.
 
 ## Dependencies
 

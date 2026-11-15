@@ -233,3 +233,50 @@ renewed pressure DOR, task states, local index and journal are consistent with t
 actual merged revision and tester GO. Targeted document hooks PASS (detect-secrets);
 settings-example hook skipped because no matching file changed. Post-record
 selected strict validation and whitespace checks PASS. No source edits followed GO.
+
+
+## Specification synchronization and archive, 2026-11-15
+
+The calculation-module-contract change is complete: all 16 tasks are checked,
+including task 3.4. Spec-keeper synchronized its three deltas, verified their
+canonical equivalents, and moved the change to
+`openspec/changes/archive/2026-11-15-calculation-module-contract/` under Akim's
+explicit instruction. No other change was archived.
+
+Current requirements are in openspec/specs/calculation-engine/spec.md,
+openspec/specs/calculation-module-contract/spec.md and
+openspec/specs/calculation-verification/spec.md. Eight MODIFIED blocks and seven
+ADDED blocks match the accepted deltas. All 32 original scenarios in the modified
+blocks, ten unrelated requirement blocks and existing Purpose sections are
+preserved. The new module-contract Purpose is copied from its delta. Canonical
+counts are engine 14 requirements/56 scenarios, module contract 7/21 and
+verification 4/13; no new pressure implementation is specified as delivered.
+
+Current independent sync review: 0 blocker, 0 major, 0 minor. Tester GO to archive
+followed successful semantic/preservation checks, selected change and canonical
+strict validation, all-artifact validation and targeted secret-scan hooks. The
+settings-example hook skipped because no matching file changed. Pre-archive all
+validation was 24/24; after archiving, canonical validation is 16/16 and all
+validation 23/23. Selected change validation passed before the move. The CLI
+cannot select archived changes for individual change validation; all seven moved
+artifacts retain their prevalidated bytes except the completed task 3.4 checkbox.
+
+No application files changed relative to accepted integration at ae4695b. The
+1518-test, 674/674-branch integration GO and its 11 DB/catalog skips remain the
+code acceptance evidence; the application suite was not rerun for this document
+operation. Tests, coverage and UI/UX for the sync/archive operation are each N/A
+because it changes documentation only. This does not waive the retained code
+acceptance or verify real DB/catalog behavior.
+
+The separate pressure change remains active with its renewed DOR and independent
+implementation/acceptance obligations. No source status, formula, coefficient,
+reference value or tolerance changed. This closure does not complete the full
+pressure plan. The archive and canonical updates are uncommitted working changes;
+no commit or push was performed in this step.
+
+Final post-archive tester verdict: GO for documentation closure and archive.
+Final independent review: 0 blocker, 0 major, 0 minor. Archive preservation,
+16/16 tasks, canonical equivalence, paired evidence, current navigation links,
+final targeted secret-scan and whitespace checks all passed. Tests: N/A;
+coverage: N/A; UI/UX: N/A for this documentation-only operation, with each reason
+being that no application code or interface changed.
