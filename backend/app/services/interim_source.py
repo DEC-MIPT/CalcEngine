@@ -1,12 +1,15 @@
+import hashlib
+import json
 import logging
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date
 from pathlib import Path
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, ValidationError
 
 from app.core.exceptions import ParameterSourceUnavailableError
+from app.engine import foundations_shallow_r
 from app.engine.boundary import inputs_to_base_units
 from app.engine.registry import CalculatorRegistry
 from app.parameters.interim_loader import load_interim_root
@@ -21,13 +24,24 @@ from app.parameters.interim_schemas import (
     InterimThreshold,
     VerificationStatus,
 )
-from app.schemas.calculation import ParameterSourceInfo, QuantityValue
+from app.schemas.calculation import (
+    ParameterSourceInfo,
+    QuantityValue,
+    validate_loads_domains,
+)
+from app.schemas.expression import BinaryNode, SymbolNode
 from app.schemas.normatives import (
     CheckRow,
     FormulaRow,
     MethodBoundRow,
     TableValueRow,
     ThresholdRow,
+)
+from app.schemas.resolved import (
+    ApplicabilityCondition,
+    DiagramCases,
+    Formula,
+    TableValue,
 )
 from app.services.catalog import PARAMETER_MODELS, TABLE_SELECTORS
 from app.services.interim_data import (
@@ -47,6 +61,48 @@ USABLE: Mapping[Profile, frozenset[VerificationStatus]] = {
     "draft": frozenset({"human-verified", "pending"}),
 }
 """Статусы, которые профиль использует; ``rejected`` не использует ни один (design.md, решение 4)."""
+
+LOADS_TYPE = "foundations_shallow_loads"
+LOADS_DOCUMENT = "sp-22-13330-2016"
+LOADS_SUPPLEMENT = "sp-22-13330-2016-loads-scope"
+LOADS_FILES = {
+    "resistance": f"{LOADS_DOCUMENT}/foundations_shallow_r.yaml",
+    "pressure": f"{LOADS_DOCUMENT}/foundations_pressure_from_loads.yaml",
+    "scope": f"{LOADS_SUPPLEMENT}/{LOADS_TYPE}.yaml",
+}
+
+
+def loads_source_digest(documents: Mapping[str, str]) -> str:
+    if set(documents) != {LOADS_DOCUMENT, LOADS_SUPPLEMENT}:
+        raise ParameterDataError()
+    payload = {
+        "format": "foundations-shallow-loads-source-v1",
+        "documents": [{"name": name, "data_sha256": documents[name]} for name in sorted(documents)],
+    }
+    serialized = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+
+class _PressureParameters(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    p_edge_plus: Formula
+    p_edge_minus: Formula
+    p_corner: Formula
+    gamma_mt: TableValue
+    edge_pressure_limit_multiplier: TableValue
+    corner_pressure_limit_multiplier: TableValue
+
+
+def _loads_limit(name: str, multiplier: TableValue) -> Formula:
+    side = "edge" if name == "edge_limit" else "corner"
+    coefficient = r"\lambda_e" if name == "edge_limit" else r"\lambda_c"
+    return Formula(
+        latex=rf"p_{{{side},lim}}={coefficient} R",
+        tree=BinaryNode(kind="mul", left=SymbolNode(name=multiplier.symbol), right=SymbolNode(name="R")),
+        result_symbol=name, units={multiplier.symbol: "1", "R": "kPa", name: "kPa"},
+        norm_refs=multiplier.norm_refs,
+    )
 
 
 def _group(record: InterimRecord) -> tuple[str, ...]:
@@ -219,6 +275,110 @@ class InterimParameterSource:
             ) from None
 
 
+class LoadsInterimParameterSource:
+    def __init__(
+        self, registry: CalculatorRegistry, found: Mapping[str, InterimTypeData], profile: Profile,
+        model: type[BaseModel],
+    ) -> None:
+        self._registry = registry
+        self._profile = profile
+        self._model = model
+        by_path = {data.file: data for data in found.values()}
+        self._data = {name: by_path[path] for name, path in LOADS_FILES.items() if path in by_path}
+
+    def _records(self, name: str) -> InterimTypeData:
+        data = self._data[name]
+        groups: dict[tuple[str, ...], list[CheckedRecord]] = {}
+        for record in data.records:
+            groups.setdefault(_group(record.record), []).append(record)
+        for members in groups.values():
+            live = [member for member in members if member.status != "rejected"]
+            if not live or any(member.status not in USABLE[self._profile] for member in live):
+                raise ParameterDataError(name)
+        return replace(data, records=tuple(record for record in data.records if record.status != "rejected"))
+
+    def resolve(self, calculation_type: str, inputs: Mapping[str, QuantityValue]) -> ResolvedParameters:
+        contract = self._registry.contract(calculation_type)
+        normalized = inputs_to_base_units(contract, inputs)
+        validate_loads_domains(dict(normalized))
+        base_units = {quantity.name: quantity.base_unit for quantity in contract.inputs}
+        quantities = (*contract.inputs, *contract.outputs)
+        try:
+            if calculation_type != LOADS_TYPE or set(self._data) != set(LOADS_FILES):
+                raise ParameterDataError()
+            resistance = self._records("resistance")
+            pressure = self._records("pressure")
+            scope = self._records("scope")
+            scope_rows = _rows(scope, self._profile)
+            if (
+                scope_rows.formulas or scope_rows.table_values or scope_rows.thresholds or scope_rows.checks
+                or scope_rows.unusable or len(scope_rows.bounds) != 1
+                or (scope_rows.bounds[0].quantity, scope_rows.bounds[0].kind, scope_rows.bounds[0].unit,
+                    scope_rows.bounds[0].inclusive) != ("d_b", "max", "m", True)
+            ):
+                raise ParameterDataError("scope")
+            conditions = [
+                entry.record for entry in pressure.records
+                if isinstance(entry.record, InterimApplicabilityCondition)
+            ]
+            diagrams = [entry.record for entry in pressure.records if isinstance(entry.record, InterimDiagramCases)]
+            if len(conditions) != 1 or len(diagrams) != 1:
+                raise ParameterDataError("pressure_conditions")
+            condition, diagram = conditions[0], diagrams[0]
+            if (
+                condition.parameter != "relative_eccentricity_formula_5_11_limit"
+                or (condition.quantity, condition.applies_to, condition.unit, condition.relation)
+                != ("e/l", "5.11", "1", "le")
+                or diagram.parameter != "pressure_diagram_cases"
+                or tuple(case.figure_case for case in diagram.cases) != ("б", "в", "г")
+                or diagram.units != {"e": "m", "l": "m", "p_min": "kPa"}
+            ):
+                raise ParameterDataError("pressure_conditions")
+            pressure_rows = _rows(replace(pressure, records=tuple(
+                entry for entry in pressure.records
+                if not isinstance(entry.record, InterimApplicabilityCondition | InterimDiagramCases)
+            )), self._profile)
+            resistance_rows = _rows(resistance, self._profile)
+            if resistance_rows.unusable or pressure_rows.unusable or pressure_rows.bounds:
+                raise ParameterDataError()
+            source = ParameterSourceInfo(
+                kind="interim", profile=self._profile,
+                data_sha256=loads_source_digest({
+                    LOADS_DOCUMENT: pressure.data_sha256,
+                    LOADS_SUPPLEMENT: scope.data_sha256,
+                }),
+            )
+            resolved_r = assemble(
+                foundations_shallow_r.Parameters, foundations_shallow_r.SELECTORS, normalized, base_units, quantities,
+                resistance_rows.formulas, resistance_rows.table_values, resistance_rows.thresholds,
+                resistance_rows.checks, (*resistance_rows.bounds, *scope_rows.bounds), source,
+            )
+            resolved_pressure = assemble(
+                _PressureParameters, {}, normalized, base_units, quantities,
+                pressure_rows.formulas, pressure_rows.table_values, pressure_rows.thresholds,
+                pressure_rows.checks, (), source,
+            )
+            pressure_parameters = _PressureParameters.model_validate(resolved_pressure.parameters)
+            parameters = self._model.model_validate({
+                "resistance": resolved_r.parameters,
+                **pressure_parameters.model_dump(),
+                "edge_limit": _loads_limit("edge_limit", pressure_parameters.edge_pressure_limit_multiplier),
+                "corner_limit": _loads_limit("corner_limit", pressure_parameters.corner_pressure_limit_multiplier),
+                "applicability_condition": ApplicabilityCondition.model_validate(
+                    condition.model_dump(exclude={"parameter", "page", "verification"}),
+                ),
+                "diagram_cases": DiagramCases.model_validate(
+                    diagram.model_dump(exclude={"parameter", "page", "verification"}),
+                ),
+            })
+            return ResolvedParameters(parameters, resolved_r.method_range, source)
+        except (KeyError, ParameterDataError, ValidationError):
+            logger.warning("code=interim_data_invalid type=%s", calculation_type)
+            raise ParameterSourceUnavailableError(
+                f"The interim data of the calculation type {calculation_type!r} are not usable."
+            ) from None
+
+
 def interim_sources(
     registry: CalculatorRegistry,
     root: Path,
@@ -251,6 +411,9 @@ def interim_sources(
     documents = load_interim_root(root, registered)
     warn_passed_sunsets(documents, today)
     found = check_documents(documents, profile)
-    served: Sequence[str] = [name for name in found if name in registered and name in models]
+    served: Sequence[str] = [name for name in found if name in registered and name in models and name != LOADS_TYPE]
     source = InterimParameterSource(registry, {name: found[name] for name in served}, profile, models, selectors)
-    return {name: source for name in served}
+    result: dict[str, ParameterSource] = {name: source for name in served}
+    if LOADS_TYPE in registered and LOADS_TYPE in models:
+        result[LOADS_TYPE] = LoadsInterimParameterSource(registry, found, profile, models[LOADS_TYPE])
+    return result

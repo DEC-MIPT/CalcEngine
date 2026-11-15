@@ -14,7 +14,7 @@ from test_services_submit import CONTRACT, FixedSource, SyntheticCalculator, req
 from app.api.dependencies import get_service
 from app.core.config import PARAMS_ROOT, ApiSettings
 from app.core.exceptions import DECError
-from app.engine import foundations_shallow_r
+from app.engine import foundations_shallow_loads, foundations_shallow_r
 from app.engine.registry import CalculatorRegistry
 from app.main import create_app
 from app.models import Base
@@ -45,7 +45,9 @@ def test_the_registered_types_are_listed_in_contract_order() -> None:
 
     assert status == 200
     assert body == [view.model_dump(mode="json") for view in calculation_types(registry)]
-    (pilot,) = body
+    pilot, loads = body
+    assert loads["name"] == foundations_shallow_loads.NAME
+    assert len(loads["inputs"]) == 15 and len(loads["outputs"]) == 10
     assert [item["name"] for item in pilot["inputs"]] == [q.name for q in foundations_shallow_r.INPUTS]
     assert pilot["inputs"][0] == {
         "name": "b",
@@ -85,7 +87,7 @@ def test_the_listing_answers_without_the_database_variable() -> None:
     status, body = get_types(create_app())
 
     assert status == 200
-    assert [entry["name"] for entry in body] == [foundations_shallow_r.NAME]
+    assert [entry["name"] for entry in body] == [foundations_shallow_r.NAME, foundations_shallow_loads.NAME]
 
 
 def test_the_start_up_loads_the_validated_range_of_each_type(tmp_path: Path) -> None:
@@ -104,12 +106,16 @@ validated_range:
 """,
         encoding="utf-8",
     )
+    (tmp_path / "foundations_shallow_loads.yaml").write_text(
+        (PARAMS_ROOT / "foundations_shallow_loads.yaml").read_text(encoding="utf-8"), encoding="utf-8"
+    )
     application = create_app(ApiSettings.model_validate({"DEC_PARAMS_ROOT": tmp_path}))
 
     with TestClient(application):
         ranges = application.state.validated_ranges
 
     assert ranges == {
+        foundations_shallow_loads.NAME: (),
         foundations_shallow_r.NAME: (
             EngineerBound(quantity="b", kind="max", value=3.0, inclusive=True, source=RULE),
         )
@@ -120,7 +126,7 @@ def test_the_pilot_parameter_file_has_an_empty_validated_range() -> None:
     application = create_app()
 
     with TestClient(application):
-        assert application.state.validated_ranges == {foundations_shallow_r.NAME: ()}
+        assert application.state.validated_ranges == {foundations_shallow_r.NAME: (), foundations_shallow_loads.NAME: ()}
 
 
 def test_a_given_registry_comes_with_the_given_ranges_or_none() -> None:
@@ -199,6 +205,9 @@ validated_range:
     source: {rationale: "<RATIONALE>"}
 """,
         encoding="utf-8",
+    )
+    (tmp_path / "foundations_shallow_loads.yaml").write_text(
+        (PARAMS_ROOT / "foundations_shallow_loads.yaml").read_text(encoding="utf-8"), encoding="utf-8"
     )
     application = create_app(ApiSettings.model_validate({"DEC_PARAMS_ROOT": tmp_path}))
 

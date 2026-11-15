@@ -9,6 +9,8 @@ from app.core.exceptions import (
 )
 from app.engine.base import Calculator
 from app.engine.legacy_module import LegacyQuantityModule
+from app.engine.module import ModuleRegistry
+from app.engine.module_adapter import ModuleCalculator
 from app.schemas.calculation import CalculationTypeContract
 
 
@@ -17,7 +19,7 @@ class CalculatorRegistry:
         self._entries: dict[
             str, tuple[CalculationTypeContract, Calculator[Any, Any, Any]]
         ] = {}
-        self._modules: dict[str, LegacyQuantityModule[Any]] = {}
+        self._modules: dict[str, Any] = {}
 
     def register(
         self, contract: CalculationTypeContract, calculator: Calculator[Any, Any, Any],
@@ -39,10 +41,24 @@ class CalculatorRegistry:
         self._entries[contract.name] = (contract, calculator)
         self._modules[contract.name] = module
 
+    def register_module(self, contract: CalculationTypeContract, module: Any) -> None:
+        if contract.name in self._entries:
+            raise AlreadyRegisteredError(f"calculation type {contract.name!r} is already registered")
+        problems = contract.metadata_problems()
+        if problems:
+            raise ContractMetadataError("; ".join(problems))
+        ModuleRegistry().register(module)
+        if module.metadata.identifier != contract.name:
+            raise ContractMetadataError("module identifier does not match its public contract")
+        if not callable(getattr(module, "execute_public", None)):
+            raise ContractMetadataError("a registered quantity module needs a public quantity adapter")
+        self._entries[contract.name] = (contract, ModuleCalculator(module))
+        self._modules[contract.name] = module
+
     def get(self, calculation_type: str) -> Calculator[Any, Any, Any]:
         return self._entry(calculation_type)[1]
 
-    def module(self, calculation_type: str) -> LegacyQuantityModule[Any]:
+    def module(self, calculation_type: str) -> Any:
         """Возвращает совместимый модуль зарегистрированного калькулятора."""
         self._entry(calculation_type)
         return self._modules[calculation_type]

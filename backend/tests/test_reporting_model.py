@@ -23,6 +23,7 @@ from app.reporting.model import (
 )
 from app.schemas.calculation import (
     CheckStep,
+    EngineerFormulaStep,
     MethodBound,
     NormRef,
     QuantityValue,
@@ -114,7 +115,7 @@ def test_each_norm_ref_of_a_step_is_carried_with_its_status() -> None:
     trace = report(verified_k=True).body[1]
 
     assert isinstance(trace, TraceSection)
-    statuses = {step.step_id: [ref.status for ref in step.norm_refs] for step in trace.steps}
+    statuses = {step.step_id: [ref.status for ref in step.norm_refs] for step in trace.steps if not isinstance(step, EngineerFormulaStep)}
     assert statuses["k"] == ["verified"]
     assert statuses["gamma_c1"] == ["unverified"]
     assert not trace.refused

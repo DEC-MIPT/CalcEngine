@@ -146,7 +146,10 @@ def run[ParametersT, ResultT](
     method_range: Sequence[MethodBound] = (),
     validated_range: Sequence[ValidatedBound] = (),
 ) -> Outcome[ResultT]:
-    """Переводит входы в базовые единицы, проверяет применимость и запускает калькулятор.
+    """Переводит входы, проверяет применимость и запускает совместимый legacy-калькулятор.
+
+    Типизированные модули исполняются через ``pipeline.calculate`` или ``execute_module``;
+    этот адаптер сохраняет legacy-контракт Outcome и отклоняет их до обработки входов.
 
     Единица вне словаря или другой размерности приводит к ``DECError`` до первого
     шага. Вход вне диапазона метода даёт отказ, и калькулятор не запускается
@@ -164,10 +167,14 @@ def run[ParametersT, ResultT](
         Исход запуска: результат или отказ, предупреждения и ``input_hash``.
 
     Raises:
-        CalculationError: если набор входов не совпадает с объявленным или диапазон
-            противоречив.
+        CalculationError: если передан типизированный модуль, набор входов не совпадает
+            с объявленным или диапазон противоречив.
         UnitError: если единицу входа нельзя перевести в базовую.
     """
+    from app.engine.module_adapter import ModuleCalculator
+
+    if isinstance(calculator, ModuleCalculator):
+        raise CalculationError("typed quantity modules must execute through pipeline.calculate")
     converted = inputs_to_base_units(contract, inputs)
     identity = input_hash(
         contract.name,

@@ -202,7 +202,10 @@ def test_references_of_verified_records_are_not_raised(tmp_path: Path, sqlite_se
 
     envelope = service.submit(CalculationRequest(calculation_type=PILOT, inputs=inputs()))
 
-    references = [*envelope.norm_refs, *(reference for step in envelope.trace for reference in step.norm_refs)]
+    references = list(envelope.norm_refs)
+    for step in envelope.trace:
+        assert step.kind != "engineer_formula"
+        references.extend(step.norm_refs)
     assert references
     assert {(reference.status, reference.provenance) for reference in references} == {("unverified", "machine-extracted")}
 

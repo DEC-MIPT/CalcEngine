@@ -1,0 +1,82 @@
+rounding_rules:
+  R:
+    rule:
+      decimals: 2
+      mode: half_up
+    source:
+      engineer: Аким
+      rationale: Округление выходов до 0.01 кПа, half_up; решение инженера 2026-11-08.
+        Промежуточные значения и сравнения не округляются.
+  p:
+    rule:
+      decimals: 2
+      mode: half_up
+    source:
+      engineer: Аким
+      rationale: Округление выходов до 0.01 кПа, half_up; решение инженера 2026-11-08.
+        Промежуточные значения и сравнения не округляются.
+  p_x_min:
+    rule:
+      decimals: 2
+      mode: half_up
+    source:
+      engineer: Аким
+      rationale: Округление выходов до 0.01 кПа, half_up; решение инженера 2026-11-08.
+        Промежуточные значения и сравнения не округляются.
+  p_x_max:
+    rule:
+      decimals: 2
+      mode: half_up
+    source:
+      engineer: Аким
+      rationale: Округление выходов до 0.01 кПа, half_up; решение инженера 2026-11-08.
+        Промежуточные значения и сравнения не округляются.
+  p_y_min:
+    rule:
+      decimals: 2
+      mode: half_up
+    source:
+      engineer: Аким
+      rationale: Округление выходов до 0.01 кПа, half_up; решение инженера 2026-11-08.
+        Промежуточные значения и сравнения не округляются.
+  p_y_max:
+    rule:
+      decimals: 2
+      mode: half_up
+    source:
+      engineer: Аким
+      rationale: Округление выходов до 0.01 кПа, half_up; решение инженера 2026-11-08.
+        Промежуточные значения и сравнения не округляются.
+  p_corner_pp:
+    rule:
+      decimals: 2
+      mode: half_up
+    source:
+      engineer: Аким
+      rationale: Округление выходов до 0.01 кПа, half_up; решение инженера 2026-11-08.
+        Промежуточные значения и сравнения не округляются.
+  p_corner_pm:
+    rule:
+      decimals: 2
+      mode: half_up
+    source:
+      engineer: Аким
+      rationale: Округление выходов до 0.01 кПа, half_up; решение инженера 2026-11-08.
+        Промежуточные значения и сравнения не округляются.
+  p_corner_mp:
+    rule:
+      decimals: 2
+      mode: half_up
+    source:
+      engineer: Аким
+      rationale: Округление выходов до 0.01 кПа, half_up; решение инженера 2026-11-08.
+        Промежуточные значения и сравнения не округляются.
+  p_corner_mm:
+    rule:
+      decimals: 2
+      mode: half_up
+    source:
+      engineer: Аким
+      rationale: Округление выходов до 0.01 кПа, half_up; решение инженера 2026-11-08.
+        Промежуточные значения и сравнения не округляются.
+validated_range: []

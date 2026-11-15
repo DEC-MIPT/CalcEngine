@@ -9,7 +9,7 @@ from app.schemas.calculation import CheckStep, FormulaStep, QuantityValue, Table
 
 
 def steps() -> dict[str, FormulaStep | TableStep | CheckStep]:
-    return {step.step_id: step for step in envelope().trace}
+    return {step.step_id: step for step in envelope().trace if isinstance(step, (FormulaStep, TableStep, CheckStep))}
 
 
 @pytest.mark.parametrize(

@@ -15,12 +15,14 @@ from app.engine.steps import (
 )
 from app.schemas.calculation import (
     CalculationTypeContract,
+    FormulaStep,
     NormRefs,
     OutputDeclaration,
     QuantityDeclaration,
     QuantityValue,
     RoundingRule,
     Source,
+    TableStep,
 )
 from app.schemas.resolved import Formula, TableValue, Threshold
 from app.schemas.text import LocalizedText
@@ -132,31 +134,36 @@ def _bind(values: dict[str, QuantityValue], symbol: str, value: QuantityValue) -
     values[symbol] = value
 
 
+def resistance_steps(inputs: Mapping[str, QuantityValue], parameters: Parameters) -> tuple[tuple[TableStep | FormulaStep, ...], FormulaStep]:
+    values = dict(inputs)
+    entries = (
+        ("gamma_c1", parameters.gamma_c1),
+        ("gamma_c2", parameters.gamma_c2),
+        ("k", parameters.k),
+        ("m_gamma", parameters.m_gamma),
+        ("m_q", parameters.m_q),
+        ("m_c", parameters.m_c),
+    )
+    for name, entry in entries:
+        confirm_selectors(entry, inputs, SELECTORS.get(name))
+    tables = tuple(table_step(entry.symbol, entry, INPUT_SYMBOLS) for _, entry in entries)
+    for step in tables:
+        _bind(values, step.step_id, step.result)
+    below = compare("k_z", inputs["b"], "lt", parameters.k_z_threshold.value)
+    k_z_formula = parameters.k_z_below if below else parameters.k_z_from
+    k_z = formula_step("k_z", k_z_formula, values)
+    _bind(values, k_z_formula.result_symbol, k_z.result)
+    r = formula_step("R", parameters.r, values)
+    return (*tables, k_z, r), r
+
+
 class FoundationsShallowR(Calculator[Mapping[str, QuantityValue], Parameters, CalculatorOutput]):
     """Порядок метода п. 5.6.7: коэффициенты, затем ``k_z``, затем R, затем p <= R."""
 
     def calculate(self, inputs: Mapping[str, QuantityValue], parameters: Parameters) -> CalculatorOutput:
-        values = dict(inputs)
-        entries = (
-            ("gamma_c1", parameters.gamma_c1),
-            ("gamma_c2", parameters.gamma_c2),
-            ("k", parameters.k),
-            ("m_gamma", parameters.m_gamma),
-            ("m_q", parameters.m_q),
-            ("m_c", parameters.m_c),
-        )
-        for name, entry in entries:
-            confirm_selectors(entry, inputs, SELECTORS.get(name))
-        tables = tuple(table_step(entry.symbol, entry, INPUT_SYMBOLS) for _, entry in entries)
-        for step in tables:
-            _bind(values, step.step_id, step.result)
-        below = compare("k_z", inputs["b"], "lt", parameters.k_z_threshold.value)
-        k_z_formula = parameters.k_z_below if below else parameters.k_z_from
-        k_z = formula_step("k_z", k_z_formula, values)
-        _bind(values, k_z_formula.result_symbol, k_z.result)
-        r = formula_step("R", parameters.r, values)
+        prefix, r = resistance_steps(inputs, parameters)
         check = check_step(CHECK, ("p", inputs["p"]), "le", ("R", r.result), parameters.check_norm_refs)
-        return CalculatorOutput(trace=(*tables, k_z, r, check), outputs={"R": r.result})
+        return CalculatorOutput(trace=(*prefix, check), outputs={"R": r.result})
 
 
 def contract(rounding_rule: RoundingRule, rounding_source: Source) -> CalculationTypeContract:

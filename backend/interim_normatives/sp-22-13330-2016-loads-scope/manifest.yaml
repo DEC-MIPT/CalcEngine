@@ -1,0 +1,7 @@
+document: СП 22.13330.2016
+edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+sunset:
+  date: 2026-12-01
+  event: the loads type is switched to the catalog
+verifiers:
+- Akim

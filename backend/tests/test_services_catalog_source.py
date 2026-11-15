@@ -137,7 +137,9 @@ def test_the_service_runs_the_pilot_on_catalog_data(catalog_sqlite: Engine, sqli
 
     assert envelope.verdict == "pass"
     assert envelope.outputs[0].value == 172.5
-    assert {ref.document for step in envelope.trace for ref in step.norm_refs} == {PLACEHOLDER_DOCUMENTS[0]}
+    for step in envelope.trace:
+        assert step.kind != "engineer_formula"
+        assert {ref.document for ref in step.norm_refs} == {PLACEHOLDER_DOCUMENTS[0]}
     assert [(s.symbol, s.value) for s in envelope.trace[4].substitutions] == [("phi_II", 20.0)]
 
 

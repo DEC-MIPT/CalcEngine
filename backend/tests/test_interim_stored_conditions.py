@@ -241,7 +241,8 @@ def test_registered_types_refuse_stored_conditions_before_filtering(
 
 
 def test_real_future_type_is_verified_unregistered_and_keeps_exact_applicability(caplog: pytest.LogCaptureFixture) -> None:
-    (document,) = load_interim_root(INTERIM_ROOT, {PILOT})
+    document = next(document for document in load_interim_root(INTERIM_ROOT, {PILOT})
+                    if document.name == "sp-22-13330-2016")
     file = next(file for file in document.files if file.calculation_type == FUTURE_TYPE)
     assert Counter(path.split("[")[0] for path, _ in file.content.records()) == {
         "formulas": 3, "table_values": 3, "applicability_conditions": 1, "diagram_cases": 1,

@@ -9,6 +9,7 @@ from app.schemas.calculation import (
     BoundViolation,
     CalculationTypeContract,
     CheckStep,
+    DerivedViolation,
     ParameterSourceInfo,
     QuantityValue,
     ResultEnvelope,
@@ -32,6 +33,7 @@ class InputRow(_Section):
 class InputSection(_Section):
     kind: Literal["inputs"] = "inputs"
     rows: tuple[InputRow, ...]
+    guidance: tuple[str, ...] = ()
 
 
 class TraceSection(_Section):
@@ -52,6 +54,7 @@ class ConclusionSection(_Section):
     verdict: Literal["pass", "fail", "refused"]
     deciding_check: CheckStep | None
     violation: BoundViolation | None
+    derived_violation: DerivedViolation | None = None
     parameter_source: ParameterSourceInfo | None = None
 
 
@@ -102,6 +105,14 @@ def _conclusion(envelope: ResultEnvelope) -> ConclusionSection:
             violation=reason,
             parameter_source=envelope.parameter_source,
         )
+    if isinstance(reason, DerivedViolation):
+        return ConclusionSection(
+            verdict=envelope.verdict,
+            deciding_check=None,
+            violation=None,
+            derived_violation=reason,
+            parameter_source=envelope.parameter_source,
+        )
     deciding = next(
         step
         for step in envelope.trace
@@ -141,7 +152,15 @@ def build_report(
     return Report(
         request=request,
         body=(
-            InputSection(rows=_input_rows(contract, inputs)),
+            InputSection(
+                rows=_input_rows(contract, inputs),
+                guidance=(
+                    "Направления изменения давления: x=b, y=l. Положительные Mx и Qx увеличивают давление в направлении +x; My и Qy в направлении +y.",
+                    "Моменты на подошве: Mx+Qx*h и My+Qy*h; знаки сохраняются, вклады могут компенсироваться.",
+                    "N не включает собственный вес фундамента и грунта. Этот вес учитывается один раз.",
+                    "d задаёт толщину для собственного веса, h расстояние до плоскости приложения нагрузок, d_1 подготовленную глубину для R. Эти величины независимы.",
+                ) if contract.name == "foundations_shallow_loads" else (),
+            ),
             TraceSection(refused=envelope.verdict == "refused", steps=envelope.trace),
             _conclusion(envelope),
             AccountabilitySection(envelope=envelope),

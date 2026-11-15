@@ -1,0 +1,527 @@
+[
+  {
+    "example_id": "foundations-loads-C",
+    "calculation_type": "foundations_shallow_loads",
+    "inputs": {
+      "b": {
+        "value": 2,
+        "unit": "m"
+      },
+      "d_1": {
+        "value": 1,
+        "unit": "m"
+      },
+      "d_b": {
+        "value": 0,
+        "unit": "m"
+      },
+      "gamma_II": {
+        "value": 20,
+        "unit": "kN/m3"
+      },
+      "gamma_II_prime": {
+        "value": 20,
+        "unit": "kN/m3"
+      },
+      "c_II": {
+        "value": 10,
+        "unit": "kPa"
+      },
+      "phi_II": {
+        "value": 20,
+        "unit": "deg"
+      },
+      "l": {
+        "value": 3,
+        "unit": "m"
+      },
+      "h": {
+        "value": 1,
+        "unit": "m"
+      },
+      "d": {
+        "value": 1,
+        "unit": "m"
+      },
+      "N": {
+        "value": 600,
+        "unit": "kN"
+      },
+      "Mx": {
+        "value": 0,
+        "unit": "kN*m"
+      },
+      "My": {
+        "value": 0,
+        "unit": "kN*m"
+      },
+      "Qx": {
+        "value": 0,
+        "unit": "kN"
+      },
+      "Qy": {
+        "value": 0,
+        "unit": "kN"
+      }
+    },
+    "expected_outputs": {
+      "R": {
+        "value": 152.02,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_x_min": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_x_max": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_y_min": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_y_max": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_corner_pp": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_corner_pm": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_corner_mp": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_corner_mm": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      }
+    },
+    "origin": "manual calculation",
+    "citation": {
+      "document": "Engineer-approved C/X/XY derivation, reference-candidates.md; checked by Akim 2026-11-14",
+      "year": 2026,
+      "locator": "Case C; reviewed derivation SHA-256 27258b6d18d3d928f26976e3c9876f78fa4640cba4ff26d83b04035d7dbc55ea"
+    },
+    "source_norm_edition": "СП 22.13330.2016, 2016 (с Изменениями N 1, 2, 3, 4, 5), unverified"
+  },
+  {
+    "example_id": "foundations-loads-X",
+    "calculation_type": "foundations_shallow_loads",
+    "inputs": {
+      "b": {
+        "value": 2,
+        "unit": "m"
+      },
+      "d_1": {
+        "value": 1,
+        "unit": "m"
+      },
+      "d_b": {
+        "value": 0,
+        "unit": "m"
+      },
+      "gamma_II": {
+        "value": 20,
+        "unit": "kN/m3"
+      },
+      "gamma_II_prime": {
+        "value": 20,
+        "unit": "kN/m3"
+      },
+      "c_II": {
+        "value": 10,
+        "unit": "kPa"
+      },
+      "phi_II": {
+        "value": 20,
+        "unit": "deg"
+      },
+      "l": {
+        "value": 3,
+        "unit": "m"
+      },
+      "h": {
+        "value": 1,
+        "unit": "m"
+      },
+      "d": {
+        "value": 1,
+        "unit": "m"
+      },
+      "N": {
+        "value": 600,
+        "unit": "kN"
+      },
+      "Mx": {
+        "value": 40,
+        "unit": "kN*m"
+      },
+      "My": {
+        "value": 0,
+        "unit": "kN*m"
+      },
+      "Qx": {
+        "value": 20,
+        "unit": "kN"
+      },
+      "Qy": {
+        "value": 0,
+        "unit": "kN"
+      }
+    },
+    "expected_outputs": {
+      "R": {
+        "value": 152.02,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_x_min": {
+        "value": 90,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_x_max": {
+        "value": 150,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_y_min": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_y_max": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_corner_pp": {
+        "value": 150,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_corner_pm": {
+        "value": 150,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_corner_mp": {
+        "value": 90,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_corner_mm": {
+        "value": 90,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      }
+    },
+    "origin": "manual calculation",
+    "citation": {
+      "document": "Engineer-approved C/X/XY derivation, reference-candidates.md; checked by Akim 2026-11-14",
+      "year": 2026,
+      "locator": "Case X; reviewed derivation SHA-256 27258b6d18d3d928f26976e3c9876f78fa4640cba4ff26d83b04035d7dbc55ea"
+    },
+    "source_norm_edition": "СП 22.13330.2016, 2016 (с Изменениями N 1, 2, 3, 4, 5), unverified"
+  },
+  {
+    "example_id": "foundations-loads-XY",
+    "calculation_type": "foundations_shallow_loads",
+    "inputs": {
+      "b": {
+        "value": 2,
+        "unit": "m"
+      },
+      "d_1": {
+        "value": 1,
+        "unit": "m"
+      },
+      "d_b": {
+        "value": 0,
+        "unit": "m"
+      },
+      "gamma_II": {
+        "value": 20,
+        "unit": "kN/m3"
+      },
+      "gamma_II_prime": {
+        "value": 20,
+        "unit": "kN/m3"
+      },
+      "c_II": {
+        "value": 10,
+        "unit": "kPa"
+      },
+      "phi_II": {
+        "value": 20,
+        "unit": "deg"
+      },
+      "l": {
+        "value": 3,
+        "unit": "m"
+      },
+      "h": {
+        "value": 1,
+        "unit": "m"
+      },
+      "d": {
+        "value": 1,
+        "unit": "m"
+      },
+      "N": {
+        "value": 600,
+        "unit": "kN"
+      },
+      "Mx": {
+        "value": 40,
+        "unit": "kN*m"
+      },
+      "My": {
+        "value": -30,
+        "unit": "kN*m"
+      },
+      "Qx": {
+        "value": 20,
+        "unit": "kN"
+      },
+      "Qy": {
+        "value": -15,
+        "unit": "kN"
+      }
+    },
+    "expected_outputs": {
+      "R": {
+        "value": 152.02,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_x_min": {
+        "value": 90,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_x_max": {
+        "value": 150,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_y_min": {
+        "value": 105,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_y_max": {
+        "value": 135,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_corner_pp": {
+        "value": 135,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_corner_pm": {
+        "value": 165,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_corner_mp": {
+        "value": 75,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      },
+      "p_corner_mm": {
+        "value": 105,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-14: absolute 0.005 kPa for each R and pressure output; reference-candidates.md approval record."
+        }
+      }
+    },
+    "origin": "manual calculation",
+    "citation": {
+      "document": "Engineer-approved C/X/XY derivation, reference-candidates.md; checked by Akim 2026-11-14",
+      "year": 2026,
+      "locator": "Case XY; reviewed derivation SHA-256 27258b6d18d3d928f26976e3c9876f78fa4640cba4ff26d83b04035d7dbc55ea"
+    },
+    "source_norm_edition": "СП 22.13330.2016, 2016 (с Изменениями N 1, 2, 3, 4, 5), unverified"
+  }
+]

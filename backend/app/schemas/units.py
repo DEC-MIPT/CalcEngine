@@ -10,6 +10,8 @@ class Dimension(StrEnum):
     DIMENSIONLESS = "dimensionless"
     LENGTH = "length"
     AREA = "area"
+    VOLUME = "volume"
+    MOMENT = "moment"
     FORCE = "force"
     PRESSURE = "pressure"
     SPECIFIC_WEIGHT = "specific_weight"
@@ -38,6 +40,10 @@ UNITS: MappingProxyType[str, Unit] = MappingProxyType(
             Unit(symbol="cm", dimension=Dimension.LENGTH, factor=1e-2),
             Unit(symbol="mm", dimension=Dimension.LENGTH, factor=1e-3),
             Unit(symbol="m2", dimension=Dimension.AREA, factor=1.0),
+            Unit(symbol="m3", dimension=Dimension.VOLUME, factor=1.0),
+            Unit(symbol="N*m", dimension=Dimension.MOMENT, factor=1.0),
+            Unit(symbol="kN*m", dimension=Dimension.MOMENT, factor=1e3),
+            Unit(symbol="MN*m", dimension=Dimension.MOMENT, factor=1e6),
             Unit(symbol="N", dimension=Dimension.FORCE, factor=1.0),
             Unit(symbol="kN", dimension=Dimension.FORCE, factor=1e3),
             Unit(symbol="MN", dimension=Dimension.FORCE, factor=1e6),

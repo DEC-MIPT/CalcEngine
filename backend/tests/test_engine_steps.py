@@ -314,6 +314,7 @@ def test_every_step_of_a_completed_calculation_has_all_fields_of_its_kind_none_n
         dumped = step.model_dump()
         assert set(dumped) == FIELDS_OF_KIND[type(step)], step.step_id
         assert not has_none(dumped), step.step_id
+        assert isinstance(step, (FormulaStep, TableStep, CheckStep))
         assert step.norm_refs
         assert all(s.symbol and s.unit for s in step.substitutions)
         assert step.result.unit

@@ -13,6 +13,7 @@ from app.reporting.format import (
     check_rounding,
     format_bound,
     format_norm_ref,
+    format_source,
     latex_quantity,
     parameter_source_lines,
 )
@@ -30,6 +31,8 @@ from app.reporting.title_block import add_title_blocks
 from app.schemas.calculation import (
     BoundViolation,
     CheckStep,
+    DerivedViolation,
+    EngineerFormulaStep,
     NormRef,
     RoundingRule,
     TraceStep,
@@ -41,7 +44,7 @@ SECTION_TITLES = {
     "conclusion": "Заключение",
     "accountability": "Подотчётность результата",
 }
-STEP_KINDS = {"formula": "Формула", "table": "Табличное значение", "check": "Проверка"}
+STEP_KINDS = {"formula": "Формула", "table": "Табличное значение", "check": "Проверка", "engineer_formula": "Инженерная формула"}
 REFUSED_TRACE = "Расчёт не выполнялся: входное значение вне области применения метода."
 
 TRACE_NORM_STATUS = False
@@ -118,6 +121,8 @@ def step_lines(
         lines.append(("Сравнение: ", *_comparison(step, rounding)))
     else:
         lines.append(("Результат: ", Math(latex_quantity(step.result, rounding.get(step.step_id)))))
+    if isinstance(step, EngineerFormulaStep):
+        return lines + [(f"Источник: {format_source(step.source)}",)]
     return lines + _sources(step.norm_refs, status=TRACE_NORM_STATUS)
 
 
@@ -135,6 +140,20 @@ def _violation_lines(violation: BoundViolation, symbols: Mapping[str, str]) -> l
     ]
 
 
+def derived_violation_lines(violation: DerivedViolation, symbols: Mapping[str, str]) -> list[Line]:
+    return [
+        ("Расчёт отклонён: условие полного контакта подошвы не выполнено. Проверки несущей способности не выполнялись.",),
+        (f"Условие: {violation.check_id}; диагностический шаг: {violation.step_id}; определяющий угол: {violation.limiting_corner}.",),
+        (
+            "Получено: ", *equation(violation.quantity, violation.value, symbols),
+            "; требуется ", Math(LATEX_OPERATORS[violation.operator]), " ",
+            Math(latex_quantity(violation.limit)), ".",
+        ),
+        (f"Источник: {format_source(violation.source)}",),
+        (f"Связанные входы: {', '.join(violation.related_inputs)}.",),
+    ]
+
+
 def conclusion_lines(
     section: ConclusionSection, symbols: Mapping[str, str], rounding: Mapping[str, RoundingRule]
 ) -> list[Line]:
@@ -148,6 +167,8 @@ def conclusion_lines(
     Returns:
         Строки заключения по порядку.
     """
+    if section.derived_violation is not None:
+        return derived_violation_lines(section.derived_violation, symbols)
     lines: list[Line] = [(VERDICT_TEXTS[section.verdict][1],)]
     if section.deciding_check is not None:
         check = section.deciding_check
@@ -200,11 +221,16 @@ def _write_inputs(document: DocumentObject, section: InputSection, symbols: Mapp
         write_line(cells[0].paragraphs[0], (named(row.quantity, symbols),))
         write_line(cells[1].paragraphs[0], (Math(latex_quantity(row.value)),))
     fit_table(table)
+    for text in section.guidance:
+        document.add_paragraph(text)
 
 
 def _write_trace(document: DocumentObject, section: TraceSection, report: Report) -> None:
     if section.refused:
-        document.add_paragraph(REFUSED_TRACE)
+        document.add_paragraph(
+            "Диагностическая трасса до отказа по условию полного контакта."
+            if section.steps else REFUSED_TRACE
+        )
     for number, step in enumerate(section.steps, start=1):
         _write_lines(document, step_lines(number, step, report.symbols, report.rounding))
 

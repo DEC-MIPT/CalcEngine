@@ -15,9 +15,10 @@ from app.schemas.calculation import (
     CalculationResult,
     CalculationTypeContract,
     CheckStep,
+    FormulaStep,
     MethodBound,
     QuantityValue,
-    Step,
+    TableStep,
     ValidatedBound,
 )
 from app.schemas.module import (
@@ -40,7 +41,7 @@ class CalculatorOutput:
         outputs: неокруглённые выходы по именам величин.
     """
 
-    trace: tuple[Step, ...]
+    trace: tuple[FormulaStep | TableStep | CheckStep, ...]
     outputs: Mapping[str, QuantityValue]
 
 
