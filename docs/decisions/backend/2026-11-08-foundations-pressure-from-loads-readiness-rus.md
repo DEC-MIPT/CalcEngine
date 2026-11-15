@@ -163,3 +163,179 @@ C/X/XY и абсолютный допуск 0,005 кПа на каждый вы�
 прогоны эталонов через runner/API/DOCX, подтверждённый диапазон или публикацию
 локального merge. Инженерные проверки, производительность, UI/UX и покрытие
 сохраняются как условия приёмки.
+
+
+## Приёмка backend, 2026-11-15
+
+Tester выдал GO, независимое ревью APPROVE, открытых blocker/major/minor/security
+замечаний нет. Принято незакоммиченное рабочее дерево
+`feature/foundations-loads/backend` от develop `fb6bcf8`. Задачи раздела 2 и 4.1
+завершены. Интеграция 4.2 требует отдельного разрешения на Git; frontend,
+интеграционная приёмка, sync и archive остаются открытыми.
+
+Добавлены типизированный loads-модуль, публичные engineer_formula/derived,
+единицы, общий R, отдельный supplement/digest, API-хранение и DOCX.
+Исправлены точное сравнение нормативной дроби, сборка limit-выражений в source
+adapter и сравнение эталонов по неокруглённым значениям. Root проверил source
+adapter, backend peer проверил движок, схемы, отчёты, catalog и verification.
+
+Проверки рабочего дерева:
+
+- `backend/check.sh` с seed `20261115`: 1638 passed, 11 skipped, 88,90 с.
+  Фактические ветви 769/770 (99,87%), объединённая метрика 99,9571%.
+  Loads-модуль, registry и interim source имеют 100% покрытия ветвей.
+- После добавления только тестов независимых force/moment-конверсий и R=0 на
+  подготовленном источнике финальные 32 acceptance-теста прошли за 6,37 с.
+  Производственные файлы после полного прогона не менялись. Ruff и mypy
+  (180 файлов) прошли; пять import-контрактов сохранены.
+- C/X/XY через runner/API/DOCX: все 30 неокруглённых отклонений равны нулю,
+  воспроизводимость 3/3. Инварианты: seed `20261115`, 32 набора входов.
+  Нормативная прослеживаемость 0/90, 15 записей engineer_rules отдельно.
+  NormRef остаются unverified; validated_range пуст.
+- Исходные pilot/source/golden проверки на неизменённом develop: 63 passed.
+  Шесть замороженных SHA-256 совпадают: исполнитель, внутренняя схема модуля,
+  pilot golden, исходный manifest и два нормативных YAML. Digest пилота:
+  `446d4d36d47342f73ddfec50938520f30b2a0b1333114bf4a2d93659646f1b7e`.
+- Selected strict PASS, all strict 23/23, whitespace PASS. DOCX pass/refused
+  отрендерены и осмотрены. UI/UX для backend N/A, frontend проверяется отдельно.
+
+Пропуски: один application PostgreSQL-тест без `DEC_TEST_APP_DATABASE_URL`,
+два normative PostgreSQL-теста без `DEC_TEST_NORMATIVES_DATABASE_URL`, восемь
+ingested-catalog проверок без `DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL`.
+Реальная БД и каталог этим прогоном не подтверждены. Предупреждение
+Starlette/httpx о deprecation сохранено.
+
+Финальный manifest 35 файлов: `/tmp/dec-loads-backend-final-files.json`, SHA-256
+`74c5ee22fbf370c852818682ec13434db21dc0a68076c2a4590e7e61d5a6084e`.
+Это идентификатор локальных проверенных файлов, а не коммит.
+Коммитов, merge и push нет. Русский журнал кода ведётся в develop worktree:
+`docs/akim/reports/foundations-pressure-from-loads-code-journal.md`.
+
+
+## Итоговое ревью orchestrator, 2026-11-16
+
+REQUEST CHANGES. Отдельное итоговое ревью orchestrator выявило одно замечание
+major M1; дополнительных blocker, minor и security-замечаний нет. Интеграция
+backend заблокирована. Задачи 2.6, 2.13 и 4.1 открыты повторно. Предыдущие
+результаты tester GO и peer APPROVE сохраняются как история выполненных проверок,
+но не закрывают новое замечание. Остальные завершённые задачи расчёта,
+источников, API и отчёта сохраняют отметки.
+
+M1: зарегистрированный loads-модуль не работает через существующие regression
+и shared-invariant helpers. В проверенном рабочем дереве feature
+`backend/app/engine/registry.py:52` сохраняет `FoundationsLoadsModule` как calculator,
+а `backend/app/engine/pipeline.py:60` выбирает модульный путь только при явной
+передаче `module`. Reference runner обновлён, но
+`backend/app/verification/regression.py:228` и
+`backend/app/verification/invariants.py:191,220` его не передают. Legacy-путь
+вызывает модуль без обязательного аргумента options.
+
+Orchestrator воспроизвёл ошибку на утверждённом центральном примере C со strict
+подготовленными источниками: сервис успешно рассчитывает результат, но его
+немедленная заморозка и `run_regression` с теми же входами и данными дают NO-GO,
+outcome=error, error=CalculationError. `determinism_holds` и `unit_change_holds`
+также завершаются ошибкой:
+
+```text
+CalculationError: invalid calculation module execution:
+FoundationsLoadsModule.calculate() missing 1 required positional argument: 'options'
+```
+
+Ожидается успешная проверка неизменённого frozen entry и True для обоих
+инвариантов. Основная спецификация calculation-verification, требования
+Regression corpus и Invariant tests, распространяет проверки на
+зарегистрированные типы. Нужно исправить registration/adapter dispatch и добавить
+тесты через существующие entry points, сохранив пилот и общий исполнитель.
+После исправления требуются новый вердикт tester и повторное ревью orchestrator.
+
+Независимые проверки ревью: 143 адресных теста прошли за 6,76 с; selected strict
+и all strict 23/23 прошли; whitespace прошёл. Все 35 файлов кода, данных и тестов
+совпадают с manifest SHA-256
+`74c5ee22fbf370c852818682ec13434db21dc0a68076c2a4590e7e61d5a6084e`;
+шесть замороженных хешей сохранены. Полные application/API/browser suites
+в этом ревью не повторялись. Прежние 11 пропусков DB/catalog сохраняются.
+Код не исправлялся. Коммитов, merge и push нет.
+
+Review commands (from `backend/`):
+
+```bash
+.venv/bin/pytest tests/test_engine_loads.py tests/test_loads_interim_source.py tests/test_verification_regression.py tests/test_reporting_model.py tests/test_reporting_docx.py -q --hypothesis-seed=20261115
+PYTHONPATH=. .venv/bin/python /tmp/dec-loads-orchestrator-m1-repro.py
+```
+
+The local reproduction script is an auxiliary review artifact. M1's inputs,
+expected behavior, actual failure and owning code paths are recorded above.
+
+
+## Исправление M1 и повторная приёмка backend, 2026-11-16
+
+M1 ЗАКРЫТО. Свежий tester GO и итоговое orchestrator APPROVE относятся к
+исправленному рабочему дереву backend. Открытых blocker, major, minor и
+security-замечаний нет. Задачи 2.6, 2.13 и 4.1 снова завершены. Предыдущий
+REQUEST CHANGES сохраняется как история; блокировка по нему снята.
+Для задачи 4.2 по-прежнему нужны отдельное разрешение на Git и проверки
+фактически интегрированного кода.
+
+Новый `backend/app/engine/module_adapter.py` предоставляет двухаргументный
+ModuleCalculator с привязкой к зарегистрированному модулю. Registry проверяет
+публичный адаптер и возвращает эту привязку; pipeline восстанавливает её при
+отсутствии явного module, сохраняя переданные диапазоны и versioned identity.
+Общие regression и invariant helpers не содержат специальных ветвей для loads.
+Legacy boundary.run отклоняет typed-привязку до конверсии, legacy-хеширования
+и preflight; его прежний Outcome и legacy-клиенты сохранены.
+
+Исходное воспроизведение стало GREEN: C даёт service pass, frozen regression
+GO/unchanged, determinism_holds=True и unit_change_holds=True. Независимые тесты
+проверяют оба зарегистрированных типа, pass/fail, оба отказа, совпадение хешей
+с сервисом и передачу диапазонов. Все шесть защищённых SHA-256 совпадают.
+Общий исполнитель, внутренняя схема модуля, pilot golden и исходные нормативные
+файлы сохранены. Нормативные значения, ссылки, утверждённые ожидания эталонов
+и статусы источников в исправлении не менялись.
+
+Свежие проверки:
+
+- Полный backend/check.sh, seed `20261115`: 1659 passed, 11 skipped за 97,44 с.
+  Фактические ветви 775/776 (99,8711%), изменённый production-код 303/304
+  (99,6711%). Включены C/X/XY через runner/API/DOCX и регрессии пилота.
+- Ruff, mypy на 183 файлах и пять import-контрактов прошли.
+  Selected strict и all strict 23/23 прошли; whitespace прошёл.
+- Orchestrator независимо повторил воспроизведение M1 и прошёл 100 адресных
+  тестов за 2,47 с с seed `20261115`. Команда записана в английской парной версии.
+
+После полного прогона изменился только test_loads_common_verifiers.py:
+синтетическая граница ширины в тесте получила явную TEST-ONLY NormRef вместо
+приписывания тестовой границы реальному СП. Все восемь общих helper-тестов
+повторно прошли за 1,45 с, Ruff/mypy прошли. Код и данные оставались заморожены.
+Финальный manifest 39 файлов: `/tmp/dec-loads-m1-reviewed-files.json`, SHA-256
+`e948082867db9e892c57b17f9207f2679175e42e867f5147cbd67a055eee285d`.
+Tester и orchestrator проверили отсутствие расхождений. Логи:
+`/tmp/dec-loads-m1-backend-check.log`, `/tmp/dec-loads-m1-coverage.json`.
+
+Сохраняются 11 пропусков без test database variables: один application PostgreSQL,
+два normative PostgreSQL и восемь ingested-catalog. Реальные БД/каталог остаются
+непроверенными; NormRef остаются unverified, validated_range пуст.
+Frontend проверяется отдельно. Коммитов, merge и push нет. Интеграция в develop,
+интегрированные проверки, frontend, sync и archive остаются открытыми.
+
+
+## Публикация backend-кода, 2026-11-16
+
+Коммит `d3818f1`, `feat: calculate foundation pressures from loads`, содержит
+ровно 39 принятых файлов backend-кода, данных и тестов и отправлен в
+`origin/feature/foundations-loads/backend`. Хеши закоммиченных файлов совпадают
+с final commit manifest SHA-256
+`3aef4243e1e10584d8a5dcf2ee9149c3f47039fcb0847af4f50fedafc6d225f9`.
+
+Первая попытка коммита остановилась на detect-secrets: два публичных хеша
+в тестах, digest пилотного документа и утверждённого эталонного вывода.
+Добавлены две точечные пометки `pragma: allowlist secret`, значения и assertions
+не менялись. Без этих комментариев воспроизводятся принятые хеши файлов;
+Python AST совпадают. Tester GO и orchestrator APPROVE отдельно подтверждены
+для этого изменения только комментариев. Ruff прошёл; 35 проверок источника
+и эталонов прошли с seed `20261115` за 5,15 с. Secret-scan успешного коммита
+прошёл; settings-example hook не имел подходящих файлов. Новых записей
+baseline нет.
+
+Перед коммитом и push выполнены fetch и pull --ff-only; удалённых обновлений
+develop/main не было. Backend не влит в develop. Задача 4.2, интегрированные
+проверки, frontend и завершение change остаются открытыми.

@@ -29,20 +29,20 @@ consent; completing a checkbox is not Git consent.
 
 ## 2. Backend feature
 
-- [ ] 2.1 Add loads moment/volume units and public foundation adapter/schema variants for engineer_formula and kind=derived using the integrated internal primitives; verify module detail validation, unit conversions, API round trips, historical steps/envelopes/input-bound refusal shapes and internal volume separately from actual force/moment API inputs. Do not change the shared executor.
-- [ ] 2.2 Extract reusable R and reconnect the pilot; verify unchanged step order/IDs, deciding check, numeric result, saved envelope and original golden fixture without rewriting it.
-- [ ] 2.3 Implement pure geometry and signed transfer with engineer rules; verify A/Wx/Wy, M+Q*h signs, cancellation, h=0, equivalent units and pressure-module axis interchange.
-- [ ] 2.4 Implement mean, axial extrema and four signed corner pressures from resolved data; verify central equality, biaxial sign patterns, deterministic unrounded results and existing typed error handling for non-finite intermediates.
-- [ ] 2.5 Implement contact refusal before four ordered bearing checks; verify p_min=0 allowed, negative corner with nonnegative axial minima, diagnostic prefix without final outputs/bearing conclusions, each isolated check failure, limiting_corner first-tie selection and first-fail/last-pass reason.
-- [ ] 2.6 Register the fifteen-input/ten-output typed module, its diagnostic-detail validator, versioned run identity, engineer parameters, validated_range=[] and explicit prepared-record alias; verify b<=l, all approved ranges, exact degree rows, independent d/h/d_1, no swapping/interpolation and unchanged catalog/pilot selection.
-- [ ] 2.7a Install the separate loads-only prepared d_b-bound supplement from signed LOADS-DB-1; verify inclusive bound loaded from data, source/evidence digest match, rejection rather than clamping and unchanged original document records/statuses.
-- [ ] 2.7b Bind the supplement only to this type and implement its allowlisted aggregate source digest; verify canonical constituent order, change on either constituent, fail-closed missing/unusable components, unchanged envelope label shape and pilot digest.
-- [ ] 2.8 Connect existing API routes and immutable storage; verify metadata order, complete/derived-refused POST and GET envelopes, source kind/profile/digest, old result retrieval and no new endpoint.
-- [ ] 2.9 Render loads DOCX inputs, directions, sources, diagnostic/calculation traces and checks; verify pass/fail/refused document content and unchanged meaning of historical pilot reports.
-- [ ] 2.10 Import approved central reference C and its recorded per-output tolerance provenance into runner/API/DOCX fixtures; verify the 2026-11-14 approval and immutable independent derivation rather than values captured from this implementation.
-- [ ] 2.11 Import approved one-axis reference X and its recorded per-output tolerance provenance into runner/API/DOCX fixtures; verify the 2026-11-14 approval, signed transfer, every expected output/check and origin evidence.
-- [ ] 2.12 Import approved two-axis reference XY and its recorded per-output tolerance provenance into runner/API/DOCX fixtures; verify the 2026-11-14 approval, corner signs/minimum, every expected output/check and origin evidence.
-- [ ] 2.13 Run backend feature acceptance with tester; verify three admitted references through runner/API/DOCX, invariants with recorded seeds, metrics/reproducibility, frozen regression including unchanged pilot, backend/check.sh and >=95% branch coverage. Record actual DB/catalog checks or skips separately; only tester declares GO.
+- [x] 2.1 Add loads moment/volume units and public foundation adapter/schema variants for engineer_formula and kind=derived using the integrated internal primitives; verify module detail validation, unit conversions, API round trips, historical steps/envelopes/input-bound refusal shapes and internal volume separately from actual force/moment API inputs. Do not change the shared executor.
+- [x] 2.2 Extract reusable R and reconnect the pilot; verify unchanged step order/IDs, deciding check, numeric result, saved envelope and original golden fixture without rewriting it.
+- [x] 2.3 Implement pure geometry and signed transfer with engineer rules; verify A/Wx/Wy, M+Q*h signs, cancellation, h=0, equivalent units and pressure-module axis interchange.
+- [x] 2.4 Implement mean, axial extrema and four signed corner pressures from resolved data; verify central equality, biaxial sign patterns, deterministic unrounded results and existing typed error handling for non-finite intermediates.
+- [x] 2.5 Implement contact refusal before four ordered bearing checks; verify p_min=0 allowed, negative corner with nonnegative axial minima, diagnostic prefix without final outputs/bearing conclusions, each isolated check failure, limiting_corner first-tie selection and first-fail/last-pass reason.
+- [x] 2.6 Register the fifteen-input/ten-output typed module, its diagnostic-detail validator, versioned run identity, engineer parameters, validated_range=[] and explicit prepared-record alias; verify b<=l, all approved ranges, exact degree rows, independent d/h/d_1, no swapping/interpolation and unchanged catalog/pilot selection.
+- [x] 2.7a Install the separate loads-only prepared d_b-bound supplement from signed LOADS-DB-1; verify inclusive bound loaded from data, source/evidence digest match, rejection rather than clamping and unchanged original document records/statuses.
+- [x] 2.7b Bind the supplement only to this type and implement its allowlisted aggregate source digest; verify canonical constituent order, change on either constituent, fail-closed missing/unusable components, unchanged envelope label shape and pilot digest.
+- [x] 2.8 Connect existing API routes and immutable storage; verify metadata order, complete/derived-refused POST and GET envelopes, source kind/profile/digest, old result retrieval and no new endpoint.
+- [x] 2.9 Render loads DOCX inputs, directions, sources, diagnostic/calculation traces and checks; verify pass/fail/refused document content and unchanged meaning of historical pilot reports.
+- [x] 2.10 Import approved central reference C and its recorded per-output tolerance provenance into runner/API/DOCX fixtures; verify the 2026-11-14 approval and immutable independent derivation rather than values captured from this implementation.
+- [x] 2.11 Import approved one-axis reference X and its recorded per-output tolerance provenance into runner/API/DOCX fixtures; verify the 2026-11-14 approval, signed transfer, every expected output/check and origin evidence.
+- [x] 2.12 Import approved two-axis reference XY and its recorded per-output tolerance provenance into runner/API/DOCX fixtures; verify the 2026-11-14 approval, corner signs/minimum, every expected output/check and origin evidence.
+- [x] 2.13 Run backend feature acceptance with tester; verify three admitted references through runner/API/DOCX, invariants with recorded seeds, metrics/reproducibility, frozen regression including unchanged pilot, backend/check.sh and >=95% branch coverage. Record actual DB/catalog checks or skips separately; only tester declares GO.
 
 ## 3. Frontend feature
 
@@ -55,7 +55,7 @@ consent; completing a checkbox is not Git consent.
 
 ## 4. Review, integration and closure
 
-- [ ] 4.1 Review complete backend after tester GO; verify all section-2 tasks complete, three admitted references, unchanged-pilot evidence and no open blocker/major/security finding.
+- [x] 4.1 Review complete backend after tester GO; verify all section-2 tasks complete, three admitted references, unchanged-pilot evidence and no open blocker/major/security finding.
 - [ ] 4.2 With explicit consent, integrate reviewed backend into develop; verify actual integrated backend checks and source/pilot invariants with DB/catalog skips recorded separately; verify shared executor hashes match the integrated contract revision.
 - [ ] 4.3 Review complete frontend after tester GO and UI/UX confirmation; verify all section-3 tasks complete and compatibility with integrated backend.
 - [ ] 4.4 With explicit consent, integrate reviewed frontend after backend; verify actual integrated frontend/browser checks and both type journeys without claiming skipped checks passed.

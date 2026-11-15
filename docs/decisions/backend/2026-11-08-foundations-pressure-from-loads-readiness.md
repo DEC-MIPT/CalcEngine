@@ -161,3 +161,187 @@ executor; a required executor edit exposes a contract gap and stops integration.
 Sections 2 and 3 remain unimplemented. This DOR is not pressure feature GO, actual
 reference execution through runner/API/DOCX, a validated range, or publication of
 the local merge. Existing performance, engineering, UI/UX and coverage gates remain.
+
+
+## Backend feature acceptance, 2026-11-15
+
+Tester GO and peer review APPROVE apply to the uncommitted backend working tree
+on `feature/foundations-loads/backend`, based on develop `fb6bcf8`. Tasks 2.1-2.13
+(including 2.7a/2.7b) and 4.1 are complete. Integration under 4.2 requires separate
+Git consent; frontend, integrated acceptance, synchronization and archive remain open.
+
+The reviewed implementation adds `backend/app/engine/foundations_shallow_loads.py`,
+the public engineer/derived adapter, units, reusable R, source supplement/aggregate,
+API storage compatibility and DOCX rendering. No generic executor or original norm
+file was changed. The exact-fraction comparison, source-assembled multiplier limits
+and unrounded reference-runner issues found during review are closed. Root reviewed
+the source adapter; the backend peer reviewed engine, schemas, reports, catalog and
+verification. No open blocker, major, minor or security finding remains.
+
+Actual checks on the feature working tree:
+
+- Activated backend environment and `backend/check.sh`, with explicit pytest seed
+  `20261115` and skip reporting: 1,638 passed, 11 skipped, 88.90 seconds.
+- Actual branch coverage: 769/770 (99.87%); combined statement/branch coverage
+  99.9571%. Loads module, registry and interim source each have 100% branch coverage.
+- Final test-only additions: independent force/moment conversions and prepared-source
+  R=0. Final `.venv/bin/pytest tests/test_loads_acceptance.py -q --hypothesis-seed=20261115`:
+  32 passed in 6.37 seconds. Only that test file differs from the full-run freeze.
+  Final Ruff and mypy pass (180 files); all five import contracts remain kept.
+- C/X/XY through runner/API/DOCX: all 30 unrounded output deviations are zero;
+  reproducibility 3/3. Seeded invariants use 32 samples with seed `20261115`.
+  Normative traceability is 0/90; 15 engineer-rule entries are counted separately.
+  Existing unverified NormRef status and empty validated_range are preserved.
+- Baseline pilot/source/golden suite in the untouched develop worktree: 63 passed.
+  Six frozen-file hashes match: executor, internal module schema, pilot golden,
+  original manifest and both original normative YAML files. Pilot source digest
+  remains `446d4d36d47342f73ddfec50938520f30b2a0b1333114bf4a2d93659646f1b7e`.
+- Selected strict validation passes; all strict validation passes 23/23; whitespace
+  passes. Generated pass/refusal DOCX reports were rendered and visually inspected.
+  UI/UX: N/A for this backend feature; frontend acceptance is separate.
+
+Skipped checks: one application PostgreSQL persistence test because
+`DEC_TEST_APP_DATABASE_URL` is absent; two normative PostgreSQL tests because
+`DEC_TEST_NORMATIVES_DATABASE_URL` is absent; eight ingested-catalog checks because
+`DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL` is absent. Real database/catalog behavior
+is not verified by these local results. Existing Starlette/httpx deprecation remains.
+
+The final 35-file SHA-256 manifest is `/tmp/dec-loads-backend-final-files.json`,
+manifest SHA-256 `74c5ee22fbf370c852818682ec13434db21dc0a68076c2a4590e7e61d5a6084e`.
+It identifies reviewed local files, not a commit. No commit, merge or push occurred.
+The Russian code journal is maintained in the develop worktree under
+`docs/akim/reports/foundations-pressure-from-loads-code-journal.md`.
+
+
+## Orchestrator review, 2026-11-16
+
+REQUEST CHANGES. The separate final orchestrator review found one major, M1,
+and no additional blocker, minor or security finding. Backend integration is blocked.
+Tasks 2.6, 2.13 and 4.1 are reopened. Previous tester GO and peer APPROVE remain
+historical evidence of their recorded checks; they do not clear this new finding.
+The other completed calculation, source, API and report tasks remain complete.
+
+M1: the registered loads module does not execute through the existing regression
+and shared-invariant helpers. In the reviewed feature working tree,
+`backend/app/engine/registry.py:52` stores `FoundationsLoadsModule` as a calculator,
+while `backend/app/engine/pipeline.py:60` selects module execution only when the
+caller supplies `module`. The reference runner supplies it, but
+`backend/app/verification/regression.py:228` and
+`backend/app/verification/invariants.py:191,220` do not. The resulting legacy
+execution calls the module without its required options argument.
+
+The orchestrator independently reproduced this with approved central reference C
+and strict prepared sources: service calculation succeeds; freezing that result
+and running `run_regression` immediately with identical inputs and resolved data
+returns NO-GO with outcome=error and error=CalculationError. Both
+`determinism_holds` and `unit_change_holds` raise:
+
+```text
+CalculationError: invalid calculation module execution:
+FoundationsLoadsModule.calculate() missing 1 required positional argument: 'options'
+```
+
+An unchanged frozen entry must pass, and both shared invariants must return True.
+Canonical `calculation-verification/spec.md`, Regression corpus and Invariant tests,
+applies these checks to registered calculation types. Correct the registration/adapter
+dispatch integration and add tests through those existing helper entry points,
+including preservation of the pilot. Keep the common executor unchanged. Acceptance
+requires a fresh tester verdict and orchestrator review after the correction.
+
+Independent review checks: 143 focused tests passed in 6.76 seconds; selected strict
+validation and all strict validation (23/23) passed; whitespace passed. All 35 code,
+data and test files still match the previously reviewed manifest SHA-256
+`74c5ee22fbf370c852818682ec13434db21dc0a68076c2a4590e7e61d5a6084e`;
+all six frozen hashes match. Full application, API and browser suites were not
+repeated in this review. The 11 recorded DB/catalog skips remain limitations.
+No implementation fix, commit, merge or push was performed.
+
+Review commands (from `backend/`):
+
+```bash
+.venv/bin/pytest tests/test_engine_loads.py tests/test_loads_interim_source.py tests/test_verification_regression.py tests/test_reporting_model.py tests/test_reporting_docx.py -q --hypothesis-seed=20261115
+PYTHONPATH=. .venv/bin/python /tmp/dec-loads-orchestrator-m1-repro.py
+```
+
+The local reproduction script is an auxiliary review artifact. M1's inputs,
+expected behavior, actual failure and owning code paths are recorded above.
+
+
+## M1 correction and renewed backend acceptance, 2026-11-16
+
+M1 CLOSED. Fresh tester GO and final orchestrator APPROVE apply to the corrected
+backend feature working tree. No open blocker, major, minor or security finding
+remains. Tasks 2.6, 2.13 and 4.1 are complete again. The earlier REQUEST CHANGES
+is historical; this acceptance supersedes its integration block. Task 4.2 still
+requires separate Git consent and actual integration checks.
+
+`backend/app/engine/module_adapter.py` supplies a two-argument `ModuleCalculator`
+bound to the registered public quantity module. Registry validates its public
+adapter and returns that binding; pipeline recovers it when callers omit `module`,
+preserving supplied ranges and the module's versioned identity. The existing
+regression and shared-invariant callers therefore require no type-specific branch.
+The legacy low-level `boundary.run` rejects typed bindings before conversion,
+legacy hashing or preflight, with an explicit typed error; its legacy Outcome
+contract and existing legacy clients remain supported.
+
+The original reproduction is GREEN: prepared central C produces service pass,
+frozen regression GO/unchanged, determinism_holds=True and unit_change_holds=True.
+Independent tests cover both registered types, pass/fail and both refusal states,
+identity parity with the service and range forwarding. Original module executor,
+internal schema, pilot golden and normative files match all six baseline hashes.
+No normative values, citations, approved reference expectations or source statuses
+were changed by the correction.
+
+Actual checks on the frozen feature working tree:
+
+- Tester `backend/check.sh`, seed `20261115`, skip reporting: 1,659 passed,
+  11 skipped in 97.44 seconds. Actual branch coverage 775/776 (99.8711%);
+  changed production files 303/304 (99.6711%). The full suite includes the
+  admitted C/X/XY runner/API/DOCX checks and unchanged-pilot regressions.
+- Ruff passes, mypy passes on 183 files, all five import contracts pass.
+  Selected strict and all strict validation pass (23/23); whitespace passes.
+- Orchestrator independently reproduces the corrected M1 behavior and runs
+  100 focused tests in 2.47 seconds with seed `20261115`:
+
+```bash
+.venv/bin/pytest tests/test_engine_loads_binding.py tests/test_loads_common_verifiers.py tests/test_engine_boundary.py tests/test_verification_regression.py tests/test_verification_invariants.py -q --hypothesis-seed=20261115
+```
+
+After the full run, only `test_loads_common_verifiers.py` changed: its synthetic
+width-bound test now uses an explicit TEST-ONLY NormRef instead of attributing the
+test bound to a real SP source. All eight common-helper tests passed again in
+1.45 seconds, with Ruff/mypy passing. Production code and data stayed frozen.
+The final 39-file manifest `/tmp/dec-loads-m1-reviewed-files.json` has SHA-256
+`e948082867db9e892c57b17f9207f2679175e42e867f5147cbd67a055eee285d`;
+tester and orchestrator verified it without drift. Logs are
+`/tmp/dec-loads-m1-backend-check.log` and `/tmp/dec-loads-m1-coverage.json`.
+
+The 11 skips remain: one application PostgreSQL test, two normative PostgreSQL
+tests and eight ingested-catalog checks, with their test database variables absent.
+Real DB/catalog behavior remains unverified; existing unverified NormRefs and the
+empty validated_range remain unchanged. Frontend acceptance is separate.
+No commit, merge or push occurred. Actual develop integration, integrated checks,
+frontend implementation/acceptance, synchronization and archive remain open.
+
+
+## Backend code publication, 2026-11-16
+
+Commit `d3818f1` (`feat: calculate foundation pressures from loads`) contains exactly
+39 accepted backend code, data and test files and is published to
+`origin/feature/foundations-loads/backend`. All committed blobs match the final
+commit manifest SHA-256
+`3aef4243e1e10584d8a5dcf2ee9149c3f47039fcb0847af4f50fedafc6d225f9`.
+
+The first commit attempt stopped at detect-secrets on two public test hashes:
+the unchanged pilot document digest and approved reference-derivation digest.
+Two same-line `pragma: allowlist secret` comments identify those false positives;
+no value or assertion changed. Removing these comments reproduces the prior
+accepted hashes, and the Python ASTs are identical. Tester GO and orchestrator
+APPROVE were explicitly reconfirmed for this comment-only delta. Ruff passes;
+35 source/reference checks pass with seed `20261115` in 5.15 seconds. The
+successful commit's secret scan passes; the settings-example hook has no matching
+files. No new baseline finding was added.
+
+Fetch and fast-forward pull preceded the commit and push; no develop/main remote
+updates arrived. Backend has not been merged into develop. Task 4.2, actual-develop
+checks, frontend work and change closure retain their separate outstanding gates.
