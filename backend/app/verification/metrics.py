@@ -1,5 +1,9 @@
 from dataclasses import dataclass
 
+from pydantic import TypeAdapter
+
+from app.engine.module import module_traceability
+from app.schemas.module import ModuleStep
 from app.verification.models import ToleranceKind
 from app.verification.runner import SuiteReport, Verdict
 
@@ -67,7 +71,7 @@ class Traceability:
 
     Attributes:
         verified_steps: число проверенных шагов.
-        steps: число шагов трассы.
+        steps: число нормативных шагов трассы; инженерные формулы не входят.
         engineer_rules: число записей ``engineer_rules`` в конвертах.
     """
 
@@ -134,8 +138,10 @@ def traceability(report: SuiteReport) -> Traceability:
         Прослеживаемость набора.
     """
     envelopes = [run.result for run in report.runs if run.result is not None and run.result.verdict != "refused"]
-    steps = sum(len(result.trace) for result in envelopes)
-    unverified = sum(result.unverified_step_count for result in envelopes)
+    adapter: TypeAdapter[ModuleStep] = TypeAdapter(ModuleStep)
+    measured = [module_traceability(tuple(adapter.validate_python(step.model_dump()) for step in result.trace)) for result in envelopes]
+    steps = sum(item.normative_steps for item in measured)
+    unverified = sum(item.unverified_steps for item in measured)
     return Traceability(
         verified_steps=steps - unverified,
         steps=steps,

@@ -12,7 +12,7 @@ from app.reporting.format import (
 from app.reporting.formula import Line
 from app.reporting.model import AccountabilitySection
 from app.reporting.symbols import equation, named
-from app.schemas.calculation import BoundViolation, ResultEnvelope
+from app.schemas.calculation import BoundViolation, DerivedViolation, ResultEnvelope
 
 RESPONSIBILITY = (
     "Ответственность за результат расчёта и за его применение в проектной документации"
@@ -32,6 +32,12 @@ def _reason(envelope: ResultEnvelope, symbols: Mapping[str, str]) -> Line:
             ", ",
             *format_bound(reason.bound, reason.value.unit),
             f"; источник: {format_source(reason.bound.source)}",
+        )
+    if isinstance(reason, DerivedViolation):
+        return (
+            f"условие полного контакта {reason.check_id}; угол {reason.limiting_corner}; ",
+            *equation(reason.quantity, reason.value, symbols),
+            f"; источник: {format_source(reason.source)}",
         )
     return ("определяющая проверка ", named(reason.step_id, symbols))
 

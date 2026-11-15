@@ -1,9 +1,10 @@
 from pathlib import Path
 
 import pytest
+import yaml
 
 from app.core.exceptions import DECError
-from app.engine import foundations_shallow_r
+from app.engine import foundations_shallow_loads, foundations_shallow_r
 from app.engine.base import Calculator
 from app.engine.registry import CalculatorRegistry
 from app.parameters.loader import load_parameters
@@ -66,6 +67,9 @@ def synthetic_contract(name: str) -> CalculationTypeContract:
 def write_params(root: Path, text: str) -> Path:
     path = root / FILE_NAME
     path.write_text(text, encoding="utf-8")
+    (root / "foundations_shallow_loads.yaml").write_text(
+        (PARAMS_ROOT / "foundations_shallow_loads.yaml").read_text(encoding="utf-8"), encoding="utf-8"
+    )
     return path
 
 
@@ -130,7 +134,7 @@ def test_a_valid_file_in_another_root_is_used(tmp_path: Path) -> None:
 
 
 def test_the_pilot_view_lists_inputs_and_outputs_in_contract_order() -> None:
-    (view,) = calculation_types(build_registry(PARAMS_ROOT))
+    view = calculation_types(build_registry(PARAMS_ROOT))[0]
 
     assert view.name == foundations_shallow_r.NAME
     assert [item.name for item in view.inputs] == [q.name for q in foundations_shallow_r.INPUTS]
@@ -148,7 +152,7 @@ def test_the_pilot_view_lists_inputs_and_outputs_in_contract_order() -> None:
 
 
 def test_the_view_takes_each_dimension_from_the_unit_vocabulary() -> None:
-    (view,) = calculation_types(build_registry(PARAMS_ROOT))
+    view = calculation_types(build_registry(PARAMS_ROOT))[0]
 
     dimensions = {item.name: item.dimension for item in view.inputs}
     assert dimensions["b"] is Dimension.LENGTH
@@ -158,7 +162,7 @@ def test_the_view_takes_each_dimension_from_the_unit_vocabulary() -> None:
 
 
 def test_the_view_leaves_out_rounding_checks_and_sources() -> None:
-    (view,) = calculation_types(build_registry(PARAMS_ROOT))
+    view = calculation_types(build_registry(PARAMS_ROOT))[0]
 
     assert set(view.model_dump()) == {"name", "inputs", "outputs"}
     assert set(view.outputs[0].model_dump()) == {"name", "base_unit", "label", "symbol"}
@@ -197,7 +201,7 @@ def test_validated_ranges_are_read_for_every_registered_type(tmp_path: Path) -> 
     write_params(tmp_path, VALID_RULE)
     registry = build_registry(tmp_path)
 
-    assert load_validated_ranges(registry, tmp_path) == {foundations_shallow_r.NAME: ()}
+    assert load_validated_ranges(registry, tmp_path) == {foundations_shallow_r.NAME: (), foundations_shallow_loads.NAME: ()}
     assert load_validated_ranges(CalculatorRegistry(), tmp_path) == {}
 
 
@@ -210,7 +214,7 @@ def test_a_registered_type_without_a_parameter_file_has_no_range(tmp_path: Path)
 
 
 def test_each_input_lists_the_units_of_its_dimension() -> None:
-    (view,) = calculation_types(build_registry(PARAMS_ROOT))
+    view = calculation_types(build_registry(PARAMS_ROOT))[0]
 
     units = {item.name: item.units for item in view.inputs}
     assert units["b"] == ("m", "cm", "mm")
@@ -239,5 +243,33 @@ def test_a_blank_engineer_rule_field_in_the_parameter_file_stops_the_start_up(
 
 
 def test_each_registration_names_its_parameters_model() -> None:
-    assert PARAMETER_MODELS == {foundations_shallow_r.NAME: foundations_shallow_r.Parameters}
+    assert PARAMETER_MODELS == {
+        foundations_shallow_r.NAME: foundations_shallow_r.Parameters,
+        foundations_shallow_loads.NAME: foundations_shallow_loads.Parameters,
+    }
     assert [registration.name for registration in REGISTRATIONS] == list(PARAMETER_MODELS)
+
+
+def test_loads_registration_requires_each_output_rounding_rule(tmp_path: Path) -> None:
+    write_params(tmp_path, VALID_RULE)
+    path = tmp_path / "foundations_shallow_loads.yaml"
+    content = yaml.safe_load(path.read_text(encoding="utf-8"))
+    del content["rounding_rules"]["p_corner_mm"]
+    path.write_text(yaml.safe_dump(content), encoding="utf-8")
+    with pytest.raises(DECError, match="no rounding rule for the output 'p_corner_mm'"):
+        build_registry(tmp_path)
+
+
+def test_loads_metadata_and_output_rules_follow_its_parameter_file() -> None:
+    registry = build_registry(PARAMS_ROOT)
+    declared = registry.contract(foundations_shallow_loads.NAME)
+    values = load_parameters(foundations_shallow_loads.NAME, PARAMS_ROOT)
+    assert len(declared.inputs) == 15
+    assert len(declared.outputs) == 10
+    assert values.validated_range == ()
+    assert declared.metadata_problems() == ()
+    for output in declared.outputs:
+        entry = values.rounding_rules[output.name]
+        assert output.rounding_rule == entry.rule
+        assert output.rounding_source == entry.source
+        assert (entry.rule.decimals, entry.rule.mode) == (2, "half_up")

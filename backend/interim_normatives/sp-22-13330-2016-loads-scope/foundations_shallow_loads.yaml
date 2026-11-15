@@ -1,0 +1,25 @@
+formulas: []
+table_values: []
+thresholds: []
+checks: []
+method_bounds:
+- norm_refs:
+  - document: СП 22.13330.2016
+    edition: 2016 (с Изменениями N 1, 2, 3, 4, 5)
+    clause: 5.6.7, экспликация d_b
+    status: unverified
+    provenance: machine-extracted
+  page: 36
+  quantity: d_b
+  kind: max
+  value: 2.0
+  unit: m
+  inclusive: true
+  verification:
+    status: human-verified
+    by: Akim
+    at: '2026-11-08'
+    portion: LOADS-DB-1
+    value_digest: 360f27aa1ade15f5d6436060fb0ecdb07cf41dbcb0219d83642ea9b373abdac9
+    comment: Prepared inclusive bound from signed LOADS-DB-1/d_b_cap_2m; source shown_digest
+      0a6c08ee9a2f1fdd94081ac12f7febc1f6478e054863e3384b3e872f1563411f.

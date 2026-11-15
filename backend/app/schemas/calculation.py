@@ -160,7 +160,18 @@ class CheckStep(_TraceStep):
     passed: bool
 
 
-Step = FormulaStep | TableStep | CheckStep
+class EngineerFormulaStep(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    kind: Literal["engineer_formula"] = "engineer_formula"
+    step_id: str = Field(min_length=1)
+    expression: str = Field(min_length=1)
+    substitutions: tuple[Substitution, ...]
+    result: QuantityValue
+    source: EngineerRule
+
+
+Step = FormulaStep | TableStep | CheckStep | EngineerFormulaStep
 """Любой шаг трассы."""
 
 TraceStep = Annotated[Step, Field(discriminator="kind")]
@@ -175,7 +186,7 @@ def unverified_steps(trace: Sequence[Step]) -> int:
     Returns:
         Число непроверенных шагов.
     """
-    return sum(not step.verified for step in trace)
+    return sum(not step.verified for step in trace if not isinstance(step, EngineerFormulaStep))
 
 
 def verdict_of(
@@ -376,12 +387,42 @@ class BoundViolation(BaseModel):
     bound: MethodBound
 
 
-VerdictReason = Annotated[CheckReason | BoundViolation, Field(discriminator="kind")]
+CONTACT_INPUTS = ("N", "Mx", "My", "Qx", "Qy", "h", "b", "l", "d")
+CONTACT_RULE = EngineerRule(
+    engineer="Аким",
+    rationale="Полный контакт прямоугольной подошвы: минимум четырёх подписанных угловых давлений неотрицателен; решение инженера 2026-11-08.",
+)
+
+
+class DerivedViolation(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    kind: Literal["derived"] = "derived"
+    check_id: Literal["full_contact"] = "full_contact"
+    step_id: Literal["p_corner_min"] = "p_corner_min"
+    quantity: Literal["p_corner_min"] = "p_corner_min"
+    value: QuantityValue
+    operator: Literal["ge"] = "ge"
+    limit: QuantityValue
+    source: EngineerRule
+    related_inputs: tuple[str, ...]
+    limiting_corner: Literal["pp", "pm", "mp", "mm"]
+
+    @model_validator(mode="after")
+    def _valid_contact(self) -> "DerivedViolation":
+        if (self.value.unit != "kPa" or self.value.value >= 0
+            or self.limit != QuantityValue(value=0, unit="kPa")
+            or self.source != CONTACT_RULE or self.related_inputs != CONTACT_INPUTS):
+            raise ValueError("invalid full-contact diagnostic")
+        return self
+
+
+VerdictReason = Annotated[CheckReason | BoundViolation | DerivedViolation, Field(discriminator="kind")]
 
 
 def ordered_sources(
     trace: Sequence[Step],
-    refusal: BoundViolation | None,
+    refusal: BoundViolation | DerivedViolation | None,
     outputs: Sequence[OutputValue],
     warnings: Sequence[ApplicabilityWarning],
 ) -> tuple[tuple[NormRef, ...], tuple[EngineerRule, ...]]:
@@ -399,9 +440,11 @@ def ordered_sources(
     Returns:
         Ссылки на нормы и правила инженера, без повторов.
     """
-    sources: list[NormRefs | EngineerRule] = [step.norm_refs for step in trace]
+    sources: list[NormRefs | EngineerRule] = [
+        step.source if isinstance(step, EngineerFormulaStep) else step.norm_refs for step in trace
+    ]
     if refusal is not None:
-        sources.append(refusal.bound.source)
+        sources.append(refusal.source if isinstance(refusal, DerivedViolation) else refusal.bound.source)
     sources.extend(output.rounding_source for output in outputs)
     sources.extend(warning.bound.source for warning in warnings)
     norm_refs: list[NormRef] = []
@@ -445,6 +488,26 @@ class CalculationResult(BaseModel):
         return self
 
     def _check_refusal(self) -> None:
+        if isinstance(self.verdict_reason, DerivedViolation):
+            reason = self.verdict_reason
+            if self.outputs or any(isinstance(step, CheckStep) for step in self.trace):
+                raise ValueError("a diagnostic refusal has no outputs or bearing checks")
+            names = [step.step_id for step in self.trace]
+            if len(names) != len(set(names)) or reason.step_id not in names:
+                raise ValueError("diagnostic trace must contain its unique guard step")
+            corners = []
+            for suffix in ("pp", "pm", "mp", "mm"):
+                found = [step for step in self.trace if step.step_id == f"p_corner_{suffix}"]
+                if len(found) != 1 or found[0].result.unit != "kPa":
+                    raise ValueError("diagnostic trace requires four corner pressures")
+                corners.append((suffix, found[0].result))
+            corner, minimum = min(corners, key=lambda item: item[1].value)
+            guard = next(step for step in self.trace if step.step_id == reason.step_id)
+            if (corner != reason.limiting_corner or minimum != reason.value
+                or guard.result != minimum or not isinstance(guard, EngineerFormulaStep)
+                or guard.source != reason.source):
+                raise ValueError("diagnostic does not match its minimum corner or guard")
+            return
         if self.verdict_reason.kind != "bound":
             raise ValueError("a refused calculation names the violated bound")
         if self.trace or self.outputs or self.unverified_step_count:
@@ -465,7 +528,7 @@ class CalculationResult(BaseModel):
             )
 
     def _check_sources_are_listed(self) -> None:
-        refusal = self.verdict_reason if isinstance(self.verdict_reason, BoundViolation) else None
+        refusal = self.verdict_reason if isinstance(self.verdict_reason, BoundViolation | DerivedViolation) else None
         norm_refs, engineer_rules = ordered_sources(
             self.trace, refusal, self.outputs, self.warnings
         )
@@ -575,3 +638,24 @@ class CalculationRequest(BaseModel):
                     for name, _, message in problems
                 ),
             )
+        if contract.name == "foundations_shallow_loads":
+            validate_loads_domains(self.inputs)
+
+
+def validate_loads_domains(inputs: dict[str, QuantityValue]) -> None:
+    units = {"N": "kN", "Mx": "kN*m", "My": "kN*m", "Qx": "kN", "Qy": "kN",
+             "phi_II": "deg", "gamma_II": "kN/m3", "gamma_II_prime": "kN/m3", "c_II": "kPa"}
+    values = {name: item.value if item.unit == units.get(name, "m") else
+              item.value * UNITS[item.unit].factor / UNITS[units.get(name, "m")].factor
+              for name, item in inputs.items()}
+    invalid = [name for name in ("b", "l", "d", "gamma_II", "gamma_II_prime") if values[name] <= 0]
+    invalid.extend(name for name in ("h", "d_1", "d_b", "N", "c_II") if values[name] < 0)
+    if values["b"] > values["l"]:
+        invalid.extend(("b", "l"))
+    angle = values["phi_II"]
+    if not 0 <= angle <= 45 or not angle.is_integer():
+        invalid.append("phi_II")
+    if invalid:
+        raise InputValidationError("inputs are outside the loads engineering domain", fields=tuple(
+            FieldError(location=("body", "inputs", name), message="Outside the supported engineering domain.")
+            for name in dict.fromkeys(invalid)))

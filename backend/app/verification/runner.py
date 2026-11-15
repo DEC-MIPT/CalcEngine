@@ -6,6 +6,7 @@ from typing import Literal
 
 from app.core.exceptions import DECError, UnitError
 from app.engine.boundary import convert
+from app.engine.foundations_shallow_loads import NAME as LOADS_TYPE
 from app.engine.pipeline import calculate
 from app.engine.registry import CalculatorRegistry
 from app.schemas.calculation import CalculationResult, MethodBound, QuantityValue
@@ -188,12 +189,15 @@ def within_tolerance(computed: float, expected: ExpectedOutput) -> bool:
     return abs(computed - expected.value) <= limit + slack
 
 
-def _check(quantity: str, expected: ExpectedOutput, result: CalculationResult) -> QuantityCheck:
+def _check(
+    quantity: str, expected: ExpectedOutput, result: CalculationResult, unrounded: QuantityValue | None = None,
+    *, require_unrounded: bool = False,
+) -> QuantityCheck:
     output = next((output for output in result.outputs if output.quantity == quantity), None)
-    if output is None:
+    if output is None or (require_unrounded and unrounded is None):
         return QuantityCheck(quantity=quantity, expected=expected, computed=None, outcome="missing")
     try:
-        computed = convert(QuantityValue(value=output.value, unit=output.unit), expected.unit)
+        computed = convert(unrounded or QuantityValue(value=output.value, unit=output.unit), expected.unit)
     except UnitError:
         return QuantityCheck(quantity=quantity, expected=expected, computed=None, outcome="incompatible_unit")
     outcome: CheckOutcome = "within" if within_tolerance(computed.value, expected) else "outside"
@@ -221,12 +225,17 @@ def run_example(example: ReferenceExample, registry: CalculatorRegistry, resolve
         contract = registry.contract(example.calculation_type)
         calculator = registry.get(example.calculation_type)
         result, repeat = (
-            calculate(contract, calculator, example.inputs, resolved.parameters, method_range=resolved.method_range)
+            calculate(contract, calculator, example.inputs, resolved.parameters, method_range=resolved.method_range,
+                      module=registry.module(example.calculation_type))
             for _ in range(2)
         )
     except DECError as error:
         return ExampleRun(example.example_id, example.calculation_type, "error", error=type(error).__name__)
-    checks = tuple(_check(quantity, expected, result) for quantity, expected in example.expected_outputs.items())
+    unrounded = {step.step_id: step.result for step in result.trace} if example.calculation_type == LOADS_TYPE else {}
+    checks = tuple(
+        _check(quantity, expected, result, unrounded.get(quantity), require_unrounded=example.calculation_type == LOADS_TYPE)
+        for quantity, expected in example.expected_outputs.items()
+    )
     reproduced = result == repeat
     if result.verdict == "refused":
         return ExampleRun(

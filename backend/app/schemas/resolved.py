@@ -1,8 +1,47 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.schemas.calculation import NormRefs, QuantityValue
 from app.schemas.expression import ExpressionNode, symbols
 from app.schemas.units import UnitSymbol
+
+
+class ExactFraction(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    numerator: int = Field(strict=True)
+    denominator: int = Field(strict=True, gt=0)
+
+
+class ApplicabilityCondition(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    quantity: str = Field(min_length=1)
+    applies_to: str = Field(min_length=1)
+    latex: str = Field(min_length=1)
+    unit: UnitSymbol
+    relation: Literal["lt", "le", "eq", "ge", "gt"]
+    value_fraction: ExactFraction
+    norm_refs: NormRefs
+
+
+class DiagramCase(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    figure_case: str = Field(min_length=1)
+    diagram: str = Field(min_length=1)
+    condition_latex: str = Field(min_length=1)
+    edge_ordinate_latex: str | None = None
+
+
+class DiagramCases(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    units: dict[str, UnitSymbol]
+    cases: tuple[DiagramCase, ...] = Field(min_length=1)
+    caption_forms_as_printed: tuple[str, ...] = Field(min_length=1)
+    norm_refs: NormRefs
 
 
 class Formula(BaseModel):

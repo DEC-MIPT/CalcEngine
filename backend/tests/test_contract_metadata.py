@@ -142,7 +142,7 @@ def test_only_phi_ii_takes_whole_values() -> None:
 
 
 def test_the_listing_carries_the_metadata_in_the_declared_order() -> None:
-    (view,) = calculation_types(build_registry(PARAMS_ROOT))
+    view = calculation_types(build_registry(PARAMS_ROOT))[0]
 
     by_name = {item.name: item for item in view.inputs}
     assert [item.name for item in view.inputs] == [quantity.name for quantity in pilot.INPUTS]
