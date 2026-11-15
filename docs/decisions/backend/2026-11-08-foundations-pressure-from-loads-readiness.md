@@ -136,3 +136,28 @@ seven UNVERIFIED requirements, no missing locators. Selected strict PASS; all
 strict 22/22. Tasks 1.7 and 1.8 complete; implementation remains NOT READY until
 task 1.9 records accepted contract integration. Approved examples and tolerances
 are unchanged. See the paired calculation-module-contract readiness record.
+
+
+## Integrated dependency and renewed DOR, 2026-11-15
+
+READY for pressure implementation on the current reviewed artifacts. Task 1.9 is
+complete: calculation-module-contract is integrated into develop at `cd204c5`,
+with fresh tester GO for the combined code and the retained orchestrator APPROVE
+on identical accepted source. See the paired module-contract readiness record
+for actual checks, coverage and DB/catalog limitations. Both backend and frontend
+now consume that integrated revision; frontend additionally depends on the reviewed
+pressure backend contract as specified in tasks.md.
+
+The pressure proposal, design, specifications and approved reference document are
+unchanged from the joint review recorded above. That clean spec review and the
+normative-attribution report still apply: seven UNVERIFIED requirements with
+complete locators, no new normative verification or source promotion. The approved
+C/X/XY references and absolute 0.005 kPa per-output tolerances are unchanged.
+Selected and all strict validation pass (23/23 overall).
+
+The available executor is backend/app/engine/module.py at integrated `cd204c5`.
+Pressure implementation must register its typed module without changing that shared
+executor; a required executor edit exposes a contract gap and stops integration.
+Sections 2 and 3 remain unimplemented. This DOR is not pressure feature GO, actual
+reference execution through runner/API/DOCX, a validated range, or publication of
+the local merge. Existing performance, engineering, UI/UX and coverage gates remain.

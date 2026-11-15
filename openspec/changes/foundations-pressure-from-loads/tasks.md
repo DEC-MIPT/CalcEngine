@@ -25,7 +25,7 @@ consent; completing a checkbox is not Git consent.
 
 - [x] 1.7 Reconcile the revised plan with calculation-module-contract; verify exclusive ownership of generic executor, internal trace/diagnostic/status/identity and metrics infrastructure, unchanged approved engineering inputs/sources/references/tolerances, and both strict validations.
 - [x] 1.8 Obtain fresh spec-reviewer and norm-traceability-checker reviews of the revised artifacts; verify no blocker/major and preserve the previous review as historical evidence only.
-- [ ] 1.9 Confirm tester GO, review and actual develop integration of calculation-module-contract, then record renewed DOR on the current pressure artifacts; verify the shared executor is available before starting section 2.
+- [x] 1.9 Confirm tester GO, review and actual develop integration of calculation-module-contract, then record renewed DOR on the current pressure artifacts; verify the shared executor is available before starting section 2.
 
 ## 2. Backend feature
 
@@ -65,8 +65,9 @@ consent; completing a checkbox is not Git consent.
 ## Dependencies
 
 The calculation-module-contract backend feature must first be accepted, reviewed
-and integrated into develop with explicit Git consent. This is an unsatisfied
-implementation dependency until the actual integrated revision is recorded. It owns
+and integrated into develop with explicit Git consent. This dependency is satisfied by accepted develop integration `cd204c5`, recorded
+in the 2026-11-08 pressure readiness file under "Integrated dependency and renewed
+DOR, 2026-11-15"; both feature rows above refer to this revision. It owns
 the common executor, typed module protocol, internal state/diagnostic/trace and
 versioned identity mechanisms, plus generic source metrics. This pressure change
 owns only domain implementation, public foundation adaptation and presentation.

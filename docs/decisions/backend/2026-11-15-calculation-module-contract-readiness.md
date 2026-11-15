@@ -189,3 +189,47 @@ accepted contract integration; no pressure implementation is claimed.
 - `backend/tests/test_engine_modules.py`: `b6cd720e9a190f6ad0ffcced1c62673f639b131c8775c478b1a319b1664f6a3d`
 
 The other eight source/test identities in the earlier acceptance record are unchanged.
+
+
+## Accepted develop integration, 2026-11-15
+
+Tester GO for actual integrated develop at `cd204c5`. Akim explicitly requested
+integration and verification in the conversation. Merge parents are `c686ad8`
+(develop) and `a081a0d` (feature, including accepted code `9bd6b45`); no conflicts.
+Required fetch and fast-forward pull completed before merge. The merge adds exactly
+the ten accepted backend files. Application directories are byte-identical to the
+accepted feature code, so the recorded orchestrator APPROVE covers this code.
+
+Fresh backend/check.sh PASS: Ruff, mypy (176 files), five import contracts,
+1518 passed, 11 skipped, one existing httpx deprecation warning, 55.89 seconds;
+Hypothesis seed 3475109852. Coverage with backend configuration: 674/674 actual
+branches and 3454/3454 lines covered, 100%. Changed-file branch counts remain
+60/22/10/2/4/6/6 for executor/schemas/legacy adapter/pipeline/registry/pilot/service.
+API schema drift PASS. Selected strict validation PASS; all strict validation
+23/23. Fixtures, parameters, interim sources, approved pressure references and
+generated API types are unchanged. Compatibility/reference and historical DOCX
+checks are included in the fresh suite; no new methodology is admitted.
+
+The same 11 DB/catalog skips remain: three module-level skips, one catalog-fixture
+check and seven catalog-property cases. All three DEC_TEST_*DATABASE_URL settings
+are unset. Real DB/catalog behavior and DB-backed API timing remain unverified.
+UI/UX: N/A because no UI or public schema changed.
+
+The initial API schema attempt hit sandbox spawnSync EPERM. The successful
+parent-run escalated retry returned exit 0 and is the execution evidence accepted
+by the tester; the earlier aborted approval-wait retry is not a passing check.
+Coverage JSON was exported from backend so its configured exclusions apply.
+Check log and configured coverage JSON are local temporary evidence; this record
+retains the verdict and totals independently of those temporary files.
+
+Tasks 3.2 and 3.3 are complete; progress 15/16. Accepted dependency and renewed
+pressure DOR are recorded in the paired pressure readiness files. Pressure
+implementation and its own GO are not claimed. Task 3.4, spec synchronization and
+archive, remains open. This local merge is not published to origin/develop;
+no additional documentation commit or push was performed in this integration step.
+
+Final integration-document review: 0 blocker, 0 major, 0 minor. Paired readiness,
+renewed pressure DOR, task states, local index and journal are consistent with the
+actual merged revision and tester GO. Targeted document hooks PASS (detect-secrets);
+settings-example hook skipped because no matching file changed. Post-record
+selected strict validation and whitespace checks PASS. No source edits followed GO.
