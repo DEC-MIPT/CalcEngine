@@ -7,6 +7,17 @@ what it does not say. Do not restate `AGENTS.md` here.
 @AGENTS.md
 @agent-docs/domain-constraints.md
 
+## Current operational authority
+
+Use the current roster, document branch rule and acceptance policy in `AGENTS.md`
+and the [recorded decision](docs/decisions/backend/2026-11-15-solo-developer-document-workflow.md).
+Akim is the sole active developer; Egor has left and no second developer is available.
+No second-human acknowledgement is required while this mode applies. Agent reviews,
+tester verdicts, engineering/source checks and explicit Git consent remain required.
+All document authoring, commits and pushes require the target checkout to be on
+`develop`, including ignored journals. The dated snapshot below preserves historical
+team assignments and delivery evidence; it does not override this current authority.
+
 ## Status (2026-10-21)
 
 - Code on `develop`: Akim's `backend/` — WP5 backend core (`53a4892`), WP6 backend
@@ -140,15 +151,12 @@ what it does not say. Do not restate `AGENTS.md` here.
 
 ## Who is working
 
-- Both Akim and Egor use Claude Code (Egor switched from Kilo Code in October 2026).
-  Akim: frontend/backend, engine, report generator.
-  Egor: normative pipeline, NLP/RAG, ML, DevOps (`ml/`, `infra/`).
-- Each developer's untracked `CLAUDE.local.md` names the developer of that checkout. If
-  it names none, ask which developer is working at the start of the session
-  (`AGENTS.md` section 5).
-- Akim's session: ask only when a task touches Egor's zones (data, ml, infra).
-  Egor's session: stay strictly within `ml/` and `infra/`; ask when a task touches
-  Akim's zones (backend, frontend, engine, report generator).
+- Akim is the sole active developer and current working contact for all development
+  zones. Preserve each zone's technical boundary and planned feature-branch suffix.
+- Do not ask whether Akim or Egor is working or wait for Egor's confirmation.
+  Akim will announce a replacement; record the new roster and applicable review rules
+  before relying on multi-developer assignments. PM scope and legal decisions remain
+  with the PM.
 
 ## SDD gate
 
@@ -168,6 +176,9 @@ what it does not say. Do not restate `AGENTS.md` here.
   written channel; that is `docs/decisions/`. It records execution, not planning: it
   does not replace `tasks.md`'s checklist, and does not gate anything by itself.
 - Create the file at the first implementation task of the WP, before starting it.
+- The journal is documentation: create and update it only in a checkout of `develop`.
+  While coding on a feature branch, use a separate `develop` worktree for journal
+  entries or safely switch with authorization; never author the journal on the code branch.
 - One row per `tasks.md` subtask (its own numbering, e.g. `2.1`), appended right after
   that subtask is finished, as a Markdown table with exactly these five columns, in
   Russian:
@@ -187,10 +198,12 @@ what it does not say. Do not restate `AGENTS.md` here.
 
 Edit these only when the user explicitly says so; otherwise show a diff.
 
-- `openspec/**` (specs and changes are shared with Egor; extend, never contradict).
+- `openspec/**` (shared specifications and changes; extend, never contradict).
 - `AGENTS.md`, `.gitignore`, `README.md`, `.kilo/**`, `.kilocode/**`,
   `.claude/agents/*` other than the two subagents added for Claude Code.
-- Anything in Egor's zones: normative pipeline, NLP/RAG, ML, DevOps (`ml/`, `infra/`).
+- A former developer's zone is not an approval dependency. Changes to normative
+  pipeline, NLP/RAG, ML or DevOps still require the user's task authorization and
+  applicable engineering/security gates.
 
 ## Language
 
@@ -244,10 +257,11 @@ Edit these only when the user explicitly says so; otherwise show a diff.
     `dev:mock` server on port 5179 (no server reuse); not part of `check.sh`.
 - Pre-commit: `pre-commit run --all-files` (`detect-secrets`, and a hook that
   `.env.example` lists every backend settings variable; see "Secrets baseline" above).
-- Egor's pipeline (his zone): `python -m normatives_pipeline.search --json "<query>"`
+- Normative pipeline: `python -m normatives_pipeline.search --json "<query>"`
   after `pip install -e "./ml[ml]"`, with `DEC_DATABASE_URL` set, as in `README.md`
   and `docs/decisions/normatives-pilot-usage-akim.md`. Its PostgreSQL is
-  `infra/docker-compose.yml`. Ingestion and the pipeline's `pytest` are Egor's to run.
+  `infra/docker-compose.yml`. Ingestion and the pipeline's `pytest` belong to the
+  explicitly authorized data/ML task; no former-developer confirmation is needed.
 
 Not set up yet: the frontend build for shipping (`npm run build` exists, but nothing
 deploys its output). Do not invent commands for it.

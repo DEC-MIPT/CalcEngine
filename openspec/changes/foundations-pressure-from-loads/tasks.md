@@ -1,13 +1,14 @@
 # Tasks
 
-Owner: Akim. Current work restores contracts and records DOR; it adds no code.
+Owner: Akim. The revised plan consumes calculation-module-contract before pressure
+implementation. The DOR recorded on 2026-11-14 is historical for the prior design.
 Planning documents belong on develop. Every later code task belongs to exactly one
 feature below; each has a bounded deliverable and verification for one session.
 
 | Feature | Branch | Owned tasks | Dependency |
 |---|---|---|---|
-| Backend | `feature/foundations-loads/backend` | Section 2: engine, parameters/data, schemas, API, DOCX and backend verification | Recorded DOR from section 1 |
-| Frontend | `feature/foundations-loads/frontend` | Section 3: form, diagram, results/trace/refusal UI, mocks, generated API types and browser tests | Backend's reviewed typed contract; branch from backend when its unmerged code is needed |
+| Backend | `feature/foundations-loads/backend` | Section 2: engine, parameters/data, schemas, API, DOCX and backend verification | Integrated calculation-module-contract and renewed DOR from section 1 |
+| Frontend | `feature/foundations-loads/frontend` | Section 3: form, diagram, results/trace/refusal UI, mocks, generated API types and browser tests | Integrated calculation-module-contract and backend's reviewed typed contract; branch from backend when its unmerged code is needed |
 
 Sections 1 and 4 are planning, review or execution of existing checks, with no code.
 Backend integrates before frontend. Commits, merges and pushes require explicit
@@ -22,21 +23,25 @@ consent; completing a checkbox is not Git consent.
 - [x] 1.5 Obtain current spec-reviewer and norm-traceability-checker reports; verify no blocker/major finding and no invented source, coefficient or tolerance.
 - [x] 1.6 Record DOR against actual final artifacts and current review; verify every criterion below before implementation branches or calculation code.
 
+- [x] 1.7 Reconcile the revised plan with calculation-module-contract; verify exclusive ownership of generic executor, internal trace/diagnostic/status/identity and metrics infrastructure, unchanged approved engineering inputs/sources/references/tolerances, and both strict validations.
+- [x] 1.8 Obtain fresh spec-reviewer and norm-traceability-checker reviews of the revised artifacts; verify no blocker/major and preserve the previous review as historical evidence only.
+- [ ] 1.9 Confirm tester GO, review and actual develop integration of calculation-module-contract, then record renewed DOR on the current pressure artifacts; verify the shared executor is available before starting section 2.
+
 ## 2. Backend feature
 
-- [ ] 2.1 Extend units and typed trace/refusal schemas with engineer_formula and kind=derived; verify unit conversions, API round trips and unchanged historical steps, envelopes and input-bound refusal shapes; validate internal volume units separately from actual force/moment API inputs.
+- [ ] 2.1 Add loads moment/volume units and public foundation adapter/schema variants for engineer_formula and kind=derived using the integrated internal primitives; verify module detail validation, unit conversions, API round trips, historical steps/envelopes/input-bound refusal shapes and internal volume separately from actual force/moment API inputs. Do not change the shared executor.
 - [ ] 2.2 Extract reusable R and reconnect the pilot; verify unchanged step order/IDs, deciding check, numeric result, saved envelope and original golden fixture without rewriting it.
 - [ ] 2.3 Implement pure geometry and signed transfer with engineer rules; verify A/Wx/Wy, M+Q*h signs, cancellation, h=0, equivalent units and pressure-module axis interchange.
 - [ ] 2.4 Implement mean, axial extrema and four signed corner pressures from resolved data; verify central equality, biaxial sign patterns, deterministic unrounded results and existing typed error handling for non-finite intermediates.
 - [ ] 2.5 Implement contact refusal before four ordered bearing checks; verify p_min=0 allowed, negative corner with nonnegative axial minima, diagnostic prefix without final outputs/bearing conclusions, each isolated check failure, limiting_corner first-tie selection and first-fail/last-pass reason.
-- [ ] 2.6 Register the fifteen-input/ten-output type, engineer parameters, validated_range=[] and explicit prepared-record alias; verify b<=l, all approved ranges, exact degree rows, independent d/h/d_1, no swapping/interpolation and unchanged catalog/pilot selection.
+- [ ] 2.6 Register the fifteen-input/ten-output typed module, its diagnostic-detail validator, versioned run identity, engineer parameters, validated_range=[] and explicit prepared-record alias; verify b<=l, all approved ranges, exact degree rows, independent d/h/d_1, no swapping/interpolation and unchanged catalog/pilot selection.
 - [ ] 2.7a Install the separate loads-only prepared d_b-bound supplement from signed LOADS-DB-1; verify inclusive bound loaded from data, source/evidence digest match, rejection rather than clamping and unchanged original document records/statuses.
 - [ ] 2.7b Bind the supplement only to this type and implement its allowlisted aggregate source digest; verify canonical constituent order, change on either constituent, fail-closed missing/unusable components, unchanged envelope label shape and pilot digest.
 - [ ] 2.8 Connect existing API routes and immutable storage; verify metadata order, complete/derived-refused POST and GET envelopes, source kind/profile/digest, old result retrieval and no new endpoint.
 - [ ] 2.9 Render loads DOCX inputs, directions, sources, diagnostic/calculation traces and checks; verify pass/fail/refused document content and unchanged meaning of historical pilot reports.
-- [ ] 2.10 Obtain engineer admission and per-output tolerance provenance for a full central reference and add its runner/API/DOCX fixture; verify immutable independent derivation rather than expected values captured from this implementation.
-- [ ] 2.11 Obtain engineer admission and per-output tolerance provenance for a full one-axis reference and add its runner/API/DOCX fixture; verify signed transfer, every expected output/check and origin evidence.
-- [ ] 2.12 Obtain engineer admission and per-output tolerance provenance for a full two-axis reference and add its runner/API/DOCX fixture; verify corner signs/minimum, every expected output/check and origin evidence.
+- [ ] 2.10 Import approved central reference C and its recorded per-output tolerance provenance into runner/API/DOCX fixtures; verify the 2026-11-14 approval and immutable independent derivation rather than values captured from this implementation.
+- [ ] 2.11 Import approved one-axis reference X and its recorded per-output tolerance provenance into runner/API/DOCX fixtures; verify the 2026-11-14 approval, signed transfer, every expected output/check and origin evidence.
+- [ ] 2.12 Import approved two-axis reference XY and its recorded per-output tolerance provenance into runner/API/DOCX fixtures; verify the 2026-11-14 approval, corner signs/minimum, every expected output/check and origin evidence.
 - [ ] 2.13 Run backend feature acceptance with tester; verify three admitted references through runner/API/DOCX, invariants with recorded seeds, metrics/reproducibility, frozen regression including unchanged pilot, backend/check.sh and >=95% branch coverage. Record actual DB/catalog checks or skips separately; only tester declares GO.
 
 ## 3. Frontend feature
@@ -51,7 +56,7 @@ consent; completing a checkbox is not Git consent.
 ## 4. Review, integration and closure
 
 - [ ] 4.1 Review complete backend after tester GO; verify all section-2 tasks complete, three admitted references, unchanged-pilot evidence and no open blocker/major/security finding.
-- [ ] 4.2 With explicit consent, integrate reviewed backend into develop; verify actual integrated backend checks and source/pilot invariants with DB/catalog skips recorded separately.
+- [ ] 4.2 With explicit consent, integrate reviewed backend into develop; verify actual integrated backend checks and source/pilot invariants with DB/catalog skips recorded separately; verify shared executor hashes match the integrated contract revision.
 - [ ] 4.3 Review complete frontend after tester GO and UI/UX confirmation; verify all section-3 tasks complete and compatibility with integrated backend.
 - [ ] 4.4 With explicit consent, integrate reviewed frontend after backend; verify actual integrated frontend/browser checks and both type journeys without claiming skipped checks passed.
 - [ ] 4.5 Complete actual-develop integrated acceptance; verify three admitted references through runner/API/DOCX, contact/sign/unit/rounding cases, unchanged pilot fixtures/reports, backend/frontend checks, Playwright and selected/all strict validation.
@@ -59,14 +64,22 @@ consent; completing a checkbox is not Git consent.
 
 ## Dependencies
 
-The six owner changes are archived and committed: retarget-mvp-domain,
+The calculation-module-contract backend feature must first be accepted, reviewed
+and integrated into develop with explicit Git consent. This is an unsatisfied
+implementation dependency until the actual integrated revision is recorded. It owns
+the common executor, typed module protocol, internal state/diagnostic/trace and
+versioned identity mechanisms, plus generic source metrics. This pressure change
+owns only domain implementation, public foundation adaptation and presentation.
+
+The six earlier owner changes are archived and committed: retarget-mvp-domain,
 calculation-core-contract, calculation-api, interim-normatives-source,
 calculation-verification and frontend-app. Prepared P1b data and signed LOADS-DB-1
 exist. No new data-pipeline feature or real-catalog promotion is required.
 
-DOR requires the engineering contract, source locators, reference admission process
-and current clean review. Actual admission of three full examples and numerical
-tolerances remains an implementation/GO gate. Generator intervals or sampled inputs
+Renewed DOR requires the engineering contract, source locators, reference approval
+provenance, current clean review and integrated module-contract dependency. C, X
+and XY and absolute 0.005 kPa per-output tolerances were approved on 2026-11-14;
+actual runner/API/DOCX execution remains an implementation/GO gate. Generator intervals or sampled inputs
 do not establish a validated application range; later bounds need a separate
 engineer decision supported by actual runs.
 
@@ -80,7 +93,7 @@ engineer decision supported by actual runs.
 | Reference policy | Manual origin only for this type after Akim's check; no candidate/tolerance admission inferred; pilot unchanged |
 | Explicit functional/non-functional scope | Pure deterministic unit-explicit engine; API/result compatibility; report/UI; existing applicable latency targets; safe formula execution; keyboard/text accessibility; >=95% branch coverage |
 | Ready plan | Session-sized tasks, each code task in exactly one feature, tester GO and UI/UX gates |
-| Dependencies | Canonical archives/source-evidence provenance and full MODIFIED reconciliation |
+| Dependencies | Integrated calculation-module-contract with tester GO/review; canonical archives/source-evidence provenance and full MODIFIED reconciliation |
 
 ## Acceptance and Go/No-Go
 
@@ -97,6 +110,10 @@ completeness with engineer sources counted separately, and a frozen corpus with 
 undeclared difference. NormRef status stays unchanged; human verification of a source
 record does not make its normative reference verified. Initially validated_range=[]
 and later bounds require an evidence-based engineer decision.
+
+Connecting the pressure module SHALL leave the shared executor unchanged, verified
+against the integrated module-contract revision. A necessary executor change exposes
+a contract gap and stops pressure integration until that contract is revised.
 
 Both features require appropriate lint/type/tests and >=95% branch coverage. Frontend
 also requires Playwright and ui-ux-tester confirmation. Existing applicable API/report

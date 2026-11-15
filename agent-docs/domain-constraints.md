@@ -25,7 +25,9 @@ specs, through a future OpenSpec change (see planned change `norm-source-traceab
 - A citation names the document, its edition or year, and the clause. If the source
   text is not available, write `source: unverified` and do not invent a clause number.
 - Norm editions named in the repository or by the team but not yet checked against the
-  source text are `unverified` until Egor's normative pipeline confirms them.
+  source text are `unverified` until checked through the recorded primary-source
+  verification process. The current developer roster does not promote source status
+  or remove engineering verification requirements.
 - Never change a norm value, coefficient, or limit without the source clause and the
   edition it comes from.
 

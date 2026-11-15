@@ -1,7 +1,8 @@
 # Proposal
 
-Owner: Akim. Two features are defined below. Current work restores the planning
-contract and obtains DOR review; it implements no calculation code.
+Owner: Akim. Two features are defined below. Implementation depends on the
+integrated calculation-module-contract and a current review of this revised plan.
+The DOR recorded on 2026-11-14 covers the previous design only.
 
 ## Why
 
@@ -19,9 +20,12 @@ loads, explains loss of applicability, and preserves existing pilot results.
 - Reuse R while preserving the pilot's step identifiers/order, deciding check, source
   identity, saved-result behavior and golden fixture. Compare unrounded quantities;
   round only output presentation under Akim's recorded rule.
-- Extend typed units, engineer-sourced geometry/transfer steps and computed-value
-  applicability refusals across schemas, engine, API, storage, DOCX and UI. Historical
-  norm-sourced steps and input-bound refusal shapes remain compatible.
+- Consume the typed module executor, engineer_formula variant and diagnostic-stop
+  infrastructure owned by calculation-module-contract. Add loads-specific moment/volume
+  units, input and diagnostic schemas, geometry/transfer rules, and the compatible
+  foundation adapter across API, storage, DOCX and UI. Historical norm-sourced steps
+  and input-bound refusal shapes remain compatible. The shared executor is unchanged
+  when this module is connected.
 - Resolve this type's prepared pressure records through the existing interim source
   in strict mode. A separate loads-only supplement supplies the signed prepared
   basement-depth bound; aggregate identity preserves the pilot document digest.
@@ -40,14 +44,16 @@ loads, explains loss of applicability, and preserves existing pilot results.
 
 ### Modified Capabilities
 
-- `calculation-engine`: units, engineer formula steps, diagnostic derived refusals,
-  envelope source accounting and pilot compatibility.
+- `calculation-engine`: source-assembled normative limit bindings using the integrated
+  calculation-module-contract protocol and trace primitives. The new contract owns
+  common units/source permissions, trace variants, state and result assembly.
 - `interim-normatives`: explicit public-type alias, executable loads-record selection,
   separate supplement and aggregate data identity.
 - `calculation-api`: additive input/output metadata and trace/refusal schemas for
   existing endpoints and immutable stored results.
-- `calculation-verification`: source-aware trace metrics and narrow reference-origin
-  admission for the new type, preserving the pilot's policy and oracle independence.
+- `calculation-verification`: narrow reference-origin admission for the new type,
+  preserving the pilot's policy and oracle independence. Common source-aware metrics
+  are owned by calculation-module-contract.
 - `transparent-output`: engineer sources, all pressure/check results and diagnostic
   refusal rendering without client recomputation.
 - `report-generator`: directions, load inputs, pressure/check trace and derived
@@ -72,7 +78,12 @@ mocks, generated API types and browser tests. Frontend branches from backend whe
 its unmerged contract is needed. Documents stay on develop; Git actions require
 separate explicit consent.
 
-The six prerequisite owner changes are synchronized, archived and committed:
+The additional calculation-module-contract dependency must have tester GO, review
+and consented integration into develop before this backend feature starts. Its
+feature is feature/calculation-module-contract/backend. This change does not implement
+that feature or duplicate its common executor/schema tasks.
+
+The six earlier prerequisite owner changes are synchronized, archived and committed:
 retarget, core, API, interim source, verification and frontend. Full MODIFIED
 requirements must reconcile the current canonical contracts rather than copy old
 active-owner drafts. Pressure data are already committed. Signed LOADS-DB-1
@@ -85,6 +96,8 @@ On 2026-11-09 Akim explicitly allowed manual references for this new type only,
 conditional on his check: "Да, разрешить после моей проверки". An admitted example
 must therefore have an independently engineer-checked full derivation, cited source
 and edition, approved per-output tolerance/provenance and an admission record.
-That policy consent approves no current candidate or numerical tolerance. Agent
-arithmetic is not an admitted oracle. The pilot retains its textbook-origin policy;
-three admitted full examples remain mandatory for the new type's GO.
+Policy consent alone admits no candidate or numerical tolerance. Akim subsequently
+approved C, X and XY and their absolute 0.005 kPa per-output tolerances on 2026-11-14;
+the immutable derivation and approval record is reference-candidates.md. Those
+references still require runner/API/DOCX execution before GO. The pilot retains
+its textbook-origin policy.
