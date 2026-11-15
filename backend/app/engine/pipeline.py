@@ -1,31 +1,26 @@
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import replace
 
-from app.core.exceptions import CalculationError
 from app.engine.base import Calculator
-from app.engine.boundary import make_outputs, run
-from app.engine.result import assemble_result
+from app.engine.legacy_module import (
+    CalculatorOutput,
+    LegacyOptions,
+    LegacyQuantityModule,
+    parameter_adapter,
+)
+from app.engine.module import execute_module
 from app.schemas.calculation import (
+    BoundViolation,
     CalculationResult,
     CalculationTypeContract,
     MethodBound,
     QuantityValue,
-    Step,
     ValidatedBound,
 )
+from app.schemas.module import ModuleExecution
+from app.schemas.normatives import CatalogSnapshot
 
-
-@dataclass(frozen=True)
-class CalculatorOutput:
-    """Что вычисляет тип расчёта: трассу и неокруглённые выходы.
-
-    Attributes:
-        trace: шаги трассы по порядку.
-        outputs: неокруглённые выходы по именам величин.
-    """
-
-    trace: tuple[Step, ...]
-    outputs: Mapping[str, QuantityValue]
+__all__ = ["CalculatorOutput", "calculate"]
 
 
 def calculate[ParametersT](
@@ -36,6 +31,7 @@ def calculate[ParametersT](
     *,
     method_range: Sequence[MethodBound] = (),
     validated_range: Sequence[ValidatedBound] = (),
+    module: LegacyQuantityModule[ParametersT] | None = None,
 ) -> CalculationResult:
     """Чистая функция расчёта: на входе типизированные входы и разрешённые параметры, на выходе результат.
 
@@ -50,6 +46,7 @@ def calculate[ParametersT](
         parameters: разрешённые параметры калькулятора.
         method_range: границы диапазона метода.
         validated_range: границы проверенного диапазона.
+        module: совместимый модуль, зарегистрированный при запуске приложения.
 
     Returns:
         Результат расчёта без ``result_id``.
@@ -59,34 +56,13 @@ def calculate[ParametersT](
             части не складываются в корректный результат.
         UnitError: если единицу входа нельзя перевести в базовую.
     """
-    outcome = run(
-        contract,
-        calculator,
+    adapter = module or LegacyQuantityModule(contract, calculator, parameter_adapter(parameters))
+    if adapter.infer_data_schema or isinstance(parameters, CatalogSnapshot):
+        adapter = replace(adapter, data_schema=parameter_adapter(parameters), infer_data_schema=False)
+    execution: ModuleExecution[Mapping[str, QuantityValue], BoundViolation] = execute_module(
+        adapter,
         inputs,
         parameters,
-        method_range=method_range,
-        validated_range=validated_range,
+        LegacyOptions(method_range=tuple(method_range), validated_range=tuple(validated_range)),
     )
-    if outcome.refusal is not None:
-        return assemble_result(
-            contract,
-            input_hash=outcome.input_hash,
-            trace=(),
-            outputs=(),
-            warnings=outcome.warnings,
-            validated_range=validated_range,
-            refusal=outcome.refusal,
-        )
-    if not isinstance(outcome.result, CalculatorOutput):
-        raise CalculationError(
-            f"calculator of {contract.name!r} returned {type(outcome.result).__name__},"
-            " not a CalculatorOutput"
-        )
-    return assemble_result(
-        contract,
-        input_hash=outcome.input_hash,
-        trace=outcome.result.trace,
-        outputs=make_outputs(contract, outcome.result.outputs),
-        warnings=outcome.warnings,
-        validated_range=validated_range,
-    )
+    return adapter.adapt_result(execution)

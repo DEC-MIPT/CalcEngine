@@ -217,6 +217,7 @@ class CalculationService:
             parameters,
             method_range=method_range,
             validated_range=validated_range,
+            module=self._registry.module(calculation_type),
         )
         return self.envelope(result, source)
 

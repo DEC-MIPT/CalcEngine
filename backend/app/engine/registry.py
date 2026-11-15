@@ -1,11 +1,14 @@
 from typing import Any
 
+from pydantic import TypeAdapter
+
 from app.core.exceptions import (
     AlreadyRegisteredError,
     ContractMetadataError,
     NotFoundError,
 )
 from app.engine.base import Calculator
+from app.engine.legacy_module import LegacyQuantityModule
 from app.schemas.calculation import CalculationTypeContract
 
 
@@ -14,9 +17,11 @@ class CalculatorRegistry:
         self._entries: dict[
             str, tuple[CalculationTypeContract, Calculator[Any, Any, Any]]
         ] = {}
+        self._modules: dict[str, LegacyQuantityModule[Any]] = {}
 
     def register(
-        self, contract: CalculationTypeContract, calculator: Calculator[Any, Any, Any]
+        self, contract: CalculationTypeContract, calculator: Calculator[Any, Any, Any],
+        *, parameter_schema: type[Any] | None = None,
     ) -> None:
         if contract.name in self._entries:
             raise AlreadyRegisteredError(
@@ -27,10 +32,20 @@ class CalculatorRegistry:
             raise ContractMetadataError(
                 f"calculation type {contract.name!r} is not registered: {'; '.join(problems)}"
             )
+        module = LegacyQuantityModule(
+            contract, calculator, TypeAdapter(parameter_schema or object),
+            infer_data_schema=parameter_schema is None,
+        )
         self._entries[contract.name] = (contract, calculator)
+        self._modules[contract.name] = module
 
     def get(self, calculation_type: str) -> Calculator[Any, Any, Any]:
         return self._entry(calculation_type)[1]
+
+    def module(self, calculation_type: str) -> LegacyQuantityModule[Any]:
+        """Возвращает совместимый модуль зарегистрированного калькулятора."""
+        self._entry(calculation_type)
+        return self._modules[calculation_type]
 
     def contract(self, calculation_type: str) -> CalculationTypeContract:
         return self._entry(calculation_type)[0]
