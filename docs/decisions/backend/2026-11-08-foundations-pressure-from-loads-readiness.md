@@ -100,3 +100,39 @@ match, and all current planning/readiness/reading-copy Markdown files pass white
 checks, including untracked files. Current reference document SHA-256: `0a303a6073c22da171d641cf95937b4a3ebfe793f77881724a33fd55d3c60879`.
 No fresh independent review is claimed; the existing clean reviews still cover
 the unchanged contract. Application checks and feature GO remain later work.
+
+## Module-contract dependency and renewed readiness (2026-11-15)
+
+The approved architecture plan introduces calculation-module-contract before this
+pressure feature. The 2026-11-14 DOR and artifact hashes above remain historical
+for the former design; they do not establish readiness of the revised artifacts.
+Current pressure implementation readiness is NOT READY until the new contract has
+tester GO, review and consented integration into develop, and the revised pressure
+artifacts have fresh clean spec/normative-attribution reviews and strict validation.
+Tasks 1.7-1.9 track those gates without rewriting the completed recovery tasks.
+
+Generic execution, typed module schemas/settings, internal engineer_formula and
+diagnostic stops, separate execution/applicability/check states, source accounting,
+versioned identity and generic verification metrics belong to calculation-module-contract.
+The pressure change retains foundation methodology, moment/volume units, prepared
+sources, signs/contact/checks, public foundation schema/adapter, API/storage/DOCX/UI
+and module-specific diagnostic-detail validation, including limiting_corner. The
+shared executor must stay unchanged when pressure is connected; any required change
+exposes a contract gap to resolve before integration.
+
+The feature names remain feature/foundations-loads/backend and
+feature/foundations-loads/frontend. The approved engineering inputs, source locators,
+C/X/XY reference derivations and absolute 0.005 kPa per-output tolerances are unchanged.
+Their approval is already recorded above; runner/API/DOCX execution remains pending.
+No new reference approval or normative status is inferred. No pressure code,
+application tests, DB/catalog checks, source edits or Git commit/merge/push is part
+of this planning revision. Current review and validation outcomes will be recorded
+when actually obtained.
+
+## Contract review, 2026-11-15
+
+Current joint spec review: 0 blocker, 0 major, 0 minor. Normative attribution:
+seven UNVERIFIED requirements, no missing locators. Selected strict PASS; all
+strict 22/22. Tasks 1.7 and 1.8 complete; implementation remains NOT READY until
+task 1.9 records accepted contract integration. Approved examples and tolerances
+are unchanged. See the paired calculation-module-contract readiness record.

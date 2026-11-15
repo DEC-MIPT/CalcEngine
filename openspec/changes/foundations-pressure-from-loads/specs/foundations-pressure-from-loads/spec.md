@@ -29,6 +29,14 @@ of formula (5.11). Runtime NormRefs retain their recorded unverified status.
 - **WHEN** the engineer supplies N without foundation and overlying soil weight
 - **THEN** pressure adds gamma_mt*d once and the form and report explain this convention
 
+#### Scenario: Moment input conversion
+- **WHEN** a loads request supplies a supported moment unit other than its kN*m base unit
+- **THEN** the API validates the moment dimension and the module boundary converts once to kN*m
+
+#### Scenario: Internal volume quantities
+- **WHEN** the geometry computes Wx or Wy
+- **THEN** its declared dimension is volume, its base unit is m3, and the closed unit vocabulary validates it without adding a volume input to the loads request
+
 #### Scenario: Independent depths
 - **WHEN** d, h and d_1 differ within their allowed domains
 - **THEN** each is used only for its declared purpose without automatic substitution
@@ -178,6 +186,41 @@ expected values to accommodate the refactor.
 #### Scenario: Frozen pilot remains valid
 - **WHEN** R is extracted for reuse
 - **THEN** the original golden fixture passes unchanged and old API results and reports retain their meaning
+
+### Requirement: Foundation module and external diagnostic adaptation
+The system SHALL execute foundations_shallow_loads through the integrated
+calculation-module-contract protocol and shared executor without modifying that
+executor or adding foundation names, including limiting_corner, to it. The module
+SHALL expose typed input/resolved-data/result and diagnostic-detail schemas, pure
+normalization/domain validation and explicit settings. The existing flat public
+request is translated by the foundation adapter. Its new run identity SHALL use
+the versioned normalized-input/resolved-data/methodology/schema/settings identity
+from the common contract; the R pilot retains its exact legacy hash algorithm.
+
+The public foundation adapter SHALL add the engineer_formula trace variant with
+step_id, expression, typed substitutions/result and source: EngineerRule, with
+norm_refs forbidden, using the shared internal variant. It SHALL translate the
+module's diagnostic stop into the public kind=derived reason defined by "Full
+contact before bearing checks", validating its module-specific details without
+adding them to the executor. A generic stop is not automatically a foundation
+contact refusal. Public input-bound refusal and historical result shapes remain
+valid without new mandatory fields or rewriting. Source summaries use the common
+first-use accounting and engineer_formula steps do not increase normative verified
+or unverified counts. Completed applicable module check results map to public
+pass/fail; pre-computation and diagnostic stops map to refused, with final outputs
+absent in either refused form.
+
+#### Scenario: Pressure connects without executor changes
+- **WHEN** the loads module and foundation adapter are installed after calculation-module-contract integration
+- **THEN** the shared executor files match their integrated hashes and all foundation-specific validation lives in the module/adapter
+
+#### Scenario: Invalid module diagnostic details rejected
+- **WHEN** a contact diagnostic names a nonexistent step/input/corner, a nonminimum value, a wrong first-tie corner, or an incorrect guard source
+- **THEN** the module and foundation adapter reject it before storage without silently dropping diagnostics or returning a bearing verdict
+
+#### Scenario: Public engineer trace sources
+- **WHEN** a completed or diagnostically stopped loads result contains engineer_formula steps
+- **THEN** those public steps retain their EngineerRule and have no norm_refs, source summaries remain deduplicated in first-use order and unverified_step_count counts only normative steps
 
 ### Requirement: Correctness and non-functional gates
 The system SHALL require three admitted independent full examples (central,

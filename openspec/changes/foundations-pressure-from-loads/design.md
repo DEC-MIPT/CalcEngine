@@ -7,20 +7,22 @@ foundations_shallow_r pilot evaluates R and checks supplied p. This change adds
 foundations_shallow_loads through the same registry, source protocol, API, result
 storage and report flow. See proposal.md for the outcome and non-goals.
 
-The current engine pipeline requires empty-trace refusals; trace steps require
-normative sources; the unit vocabulary lacks moment and volume. These contracts
-must be extended before the new calculator consumes them. Relevant boundaries are
-backend/app/engine/pipeline.py, schemas/calculation.py, schemas/units.py and
-services/interim_source.py. Runtime files are implementation targets, not edits
-performed by this planning change.
+The calculation-module-contract dependency owns the generic typed executor, module
+protocol, separate execution/applicability/check states, engineering trace variant
+and pre/post-computation diagnostic stops. It first reconnects the existing R pilot
+without changing its external result or identity. This change consumes that integrated
+contract; it does not alter the shared executor. Foundation-specific unit additions,
+input/diagnostic models and public adaptation remain here. Relevant boundaries are
+backend/app/engine/, schemas/calculation.py, schemas/units.py and
+services/interim_source.py. The 2026-11-14 DOR does not cover this revised design.
 
 ## Goals and non-goals
 
 Retain the modular monolith and its existing components: PostgreSQL catalog,
 pure Python engine, FastAPI/React platform, MathJax trace and python-docx reports.
 Resolve sources before calculation. Keep the pure Calculator.calculate interface
-as the future C/C++ replacement boundary: normalized typed inputs and resolved
-parameters produce deterministic typed results without I/O, clock, randomness or
+as the future C/C++ replacement boundary: normalized typed inputs, resolved
+parameters and explicit execution settings produce deterministic typed results without I/O, clock, randomness or
 ML. No queue, worker launch, new endpoint, database migration or new calculation
 service is needed. Existing engine/backend layers remain enforced.
 
@@ -132,44 +134,51 @@ Akim's output display rule is 0.01 kPa, half_up, for R and all pressure outputs.
 Only presentation rounds; intermediates, guards, comparisons and correctness
 metrics consume unrounded values. Display precision is not a reference tolerance.
 
-### 4. Additive trace and diagnostic refusal contracts
+### 4. Foundation module and compatible diagnostic adapter
 
-Keep formula, table and check variants unchanged. Add a disjoint engineer_formula
-variant with step_id, expression, typed substitutions/result and an EngineerRule
-source. It carries no fabricated norm_refs or normative verified flag. The same
-Source union permits an EngineerRule for a derived applicability guard, as well as
-for geometry, transfer and selection. Existing method bounds remain norm-sourced.
+Implement the module protocol from calculation-module-contract with typed loads
+inputs, resolved data, explicit settings, result and diagnostic details. The module
+owns engineering-domain validation, normalization and calculation. The current
+flat public quantity map is translated by its external adapter; it is not a generic
+executor requirement. Register trusted Python modules at application startup and
+resolve all external data before execution. No code/file/data loading occurs in the
+pure calculation.
 
-The new reason is an exact kind=derived variant with check_id, step_id, quantity,
-value (QuantityValue), operator, limit (QuantityValue), source (Source),
-related_inputs (a list of registered input names), and limiting_corner, an enum
-pp/pm/mp/mm. The full-contact reason uses the declared guard identifier, the
-computed diagnostic quantity and an actually violated minimum-pressure comparison.
+Use the integrated engineer_formula primitive for reviewed geometry, signed transfer,
+corner combination and selection. Its EngineerRule source and common source accounting
+are supplied by the dependency. Normative component formulas, coefficients and method
+bounds retain their resolved NormRefs. This change must not redefine generic trace
+or state invariants, source enumeration or the normative metric denominator.
+
+The module emits a generic diagnostic stop for failed full contact. Its private typed
+details and foundation adapter provide the existing public kind=derived reason with
+check_id, step_id, quantity, value (QuantityValue), operator, limit (QuantityValue),
+source (Source), related_inputs (a list of registered input names), and limiting_corner
+(pp/pm/mp/mm). The public full-contact reason uses the declared guard identifier,
+the computed diagnostic quantity and an actually violated minimum-pressure comparison.
 related_inputs names original inputs needed to explain/correct it; quantity is
 the derived quantity and need not itself be a registered input.
 
-limiting_corner identifies a corner attaining the minimum. Resolve ties by the
-fixed first occurrence in pp, pm, mp, mm order, using the unrounded values.
-The reported value must equal that corner and the minimum. step_id references a
-retained diagnostic step with matching quantity/value; operator and limit describe
-the failed applicability comparison, not a completed bearing check. Source is the
-approved guard rule; normative components remain separately visible in the prefix.
-Test malformed reasons, nonexistent steps/inputs/corners, mismatched minima and
-incorrect tie selection at schema and API persistence boundaries.
+The module validates limiting_corner, equal-minimum tie selection in pp, pm, mp, mm
+order, the matching unrounded minimum value and diagnostic step, the allowed related
+inputs and the declared guard source. Foundation schema/adapter validation enforces
+the same rules on stored/API representations. These are module-specific validations,
+never fields or branches of the shared executor. Test nonexistent steps/inputs/corners,
+mismatched minima, incorrect ties and invalid source/value combinations.
 
-Only kind=derived refusal retains a diagnostic prefix. It requires outputs=[] and
-verdict=refused, no bearing checks and no bearing deciding reason. Historical
-kind=bound refusal retains empty trace/outputs and its existing JSON shape.
-Pass/fail still requires a deciding check in the trace. Shared result assembly and
-API validation reject inconsistent combinations instead of dropping diagnostics.
+The external adapter maps the internal stopped/not-applicable state to verdict=refused
+and retains exactly the diagnostic prefix, with outputs=[] and no bearing checks or
+bearing deciding reason. Historical input-bound refusals keep empty trace/outputs and
+their existing JSON shape. Completed applicable results map engineering checks to the
+existing pass/fail verdict and first-failure/last-pass reason. Do not leak diagnostic
+intermediate values into final outputs.
 
-Source enumeration remains deduplicated and first-use ordered: trace, refusal,
-output rounding sources, then warnings. Norm-sourced steps form the normative
-traceability denominator; engineer_formula steps are separately counted, not
-counted as verified or unverified normative steps. unverified_step_count excludes
-engineer_formula and still counts every unverified normative step. EngineerRule
-sources, including derived guards, remain listed in engineer_rules. Old norm-only
-results keep their previous metric values and source order.
+New loads runs use the dependency's versioned identity over normalized inputs,
+resolved data, methodology/schema versions and significant settings. The R pilot keeps
+its legacy hashing algorithm and source identity; historical results are never rewritten.
+Before and after module registration compare the shared executor file hashes: they
+must be identical. If connecting loads requires a shared-executor change, stop at the
+identified contract gap and revise calculation-module-contract before integration.
 
 ### 5. Source adapter and a separate applicability supplement
 
@@ -231,11 +240,12 @@ digest and responsibility statement remain under the existing report rules.
 
 ### 7. Verification and performance boundaries
 
-The recorded manual-reference approval is conditional: Akim allowed the new type's
-manual references after his check. It does not admit current arithmetic candidates
-or approve tolerances. Each admitted example needs independent engineer review of
-the full derivation, cited source/edition and approved per-output tolerance with
-its origin and admission record. The pilot keeps its textbook-origin policy.
+Akim approved the C, X and XY manual derivations and the absolute 0.005 kPa
+per-output tolerance on 2026-11-14. Preserve their inputs, intermediate derivation,
+expected outputs/checks and approval provenance in reference-candidates.md. Import
+these independent references into the runner without recapturing implementation
+outputs or requesting new tolerance decisions. The pilot keeps its textbook-origin
+policy. Engineer approval is not successful runner/API/DOCX execution.
 
 Three admitted complete examples, central, one-axis and biaxial, must pass the
 verification runner, API and DOCX before new-type backend GO. Signed P1b points
@@ -275,7 +285,8 @@ UUID allocation, storage, HTTP, UI or report callers. No ML enters calculation.
 
 ## Migration plan
 
-Implement backend tasks after recorded DOR on feature/foundations-loads/backend.
+Implement backend tasks on feature/foundations-loads/backend only after consented
+integration of calculation-module-contract and current DOR for this revised change.
 The frontend feature uses feature/foundations-loads/frontend, branching from the
 unmerged backend feature when its contract is needed, otherwise from develop after
 backend integration. Regenerate API types and mocks from the agreed schema.
