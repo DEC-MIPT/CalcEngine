@@ -1,4 +1,5 @@
 fastapi>=0.141
+pydantic>=2.12,<3
 pydantic-settings
 sqlalchemy
 alembic

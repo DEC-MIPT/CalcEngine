@@ -189,4 +189,6 @@ def contract(rounding_rule: RoundingRule, rounding_source: Source) -> Calculatio
 
 
 def register(registry: CalculatorRegistry, rounding_rule: RoundingRule, rounding_source: Source) -> None:
-    registry.register(contract(rounding_rule, rounding_source), FoundationsShallowR())
+    registry.register(
+        contract(rounding_rule, rounding_source), FoundationsShallowR(), parameter_schema=Parameters
+    )
