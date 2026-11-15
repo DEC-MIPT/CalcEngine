@@ -25,12 +25,14 @@ See `proposal.md` (Non-goals).
 2. **One requirement per developer.** The general rule is one requirement; each
    developer's record is a separate requirement named "Installed skills of <developer>".
    In OpenSpec, extending an archived requirement needs a MODIFIED block that repeats
-   its full text. With one requirement per developer, Egor's change ADDS "Installed
-   skills of Egor" and never touches Akim's text. A later change by Akim to Akim's own
-   record uses MODIFIED on Akim's requirement only.
+   its full text. With one requirement per developer, a separately recorded developer's
+   change ADDS their own requirement and does not overwrite Akim's text. A later change
+   by Akim to Akim's own record uses MODIFIED on Akim's requirement only. Historical
+   contributor records stay intact; the current sole-developer roster does not create
+   or update another person's installation record.
 3. **One change per developer.** Each developer records their own installs in their own
-   change (`record-installed-skills-<developer>`), so zones do not overlap and the two
-   changes cannot contradict each other.
+   change (`record-installed-skills-<developer>`), so records do not overlap. Currently
+   Akim is the sole active developer; a new developer is recorded only after his announcement.
 4. **Scope is recorded.** `find-skills` was installed at project scope (`.agents/`,
    gitignored); the other fourteen globally in the user's home. Scope tells a reader
    whether a skill applies to every project on that machine or only to this one.

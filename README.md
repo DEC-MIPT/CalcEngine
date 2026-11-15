@@ -4,6 +4,15 @@ Cloud web service for automating engineering calculations with a verified normat
 base (SP/GOST/SNiP), a transparent ("white box") calculation engine, and GOST-compliant
 report generation.
 
+## Current development ownership
+
+Akim is the sole active developer. Egor has left the team; there is no replacement
+until Akim announces one. Second-human-developer confirmations are not required in
+this mode. Independent agent reviews, tester verdicts, engineering verification and
+the PM's product/legal authority remain in place. See
+[the recorded decision](docs/decisions/backend/2026-11-15-solo-developer-document-workflow.md)
+and [AGENTS.md](AGENTS.md) for the current workflow.
+
 ## Stack
 
 - Backend: Python 3.12, FastAPI, Pydantic
@@ -16,14 +25,14 @@ report generation.
 ## Repository layout
 
 ```
-backend/                       # Akim's zone: FastAPI app, calculation engine, report generator
+backend/                       # FastAPI app, calculation engine, report generator
 ├── app/                       # layers: api, services, engine, reporting, repositories, schemas
 ├── alembic/                   # migrations of the application database dec_app
 ├── params/                    # engineer-set values per calculation type (no norm values)
 ├── tests/                     # pytest
 └── check.sh                   # ruff, mypy, pytest with coverage, import contracts
-frontend/                      # Akim's zone: React + TypeScript app (see frontend/README.md)
-ml/                            # Egor's zone: normative pipeline + ML
+frontend/                      # React + TypeScript app (see frontend/README.md)
+ml/                            # normative pipeline + ML
 ├── pyproject.toml             # normatives-pipeline project
 ├── src/normatives_pipeline/   # ingestion, search, retrieval, DB access, collector
 │   ├── parser/                # PDF/structural text parsing
@@ -51,8 +60,8 @@ docker compose -f infra/docker-compose.yml up -d    # first time: creates dec-po
 docker start dec-postgres                           # later runs
 ```
 
-The container holds two databases: `dec` (the normative catalog, Egor's) and `dec_app`
-(calculation results, Akim's). `dec_app` is not created by the compose file; create it once:
+The container holds two databases: `dec` (the normative catalog) and `dec_app`
+(calculation results). `dec_app` is not created by the compose file; create it once:
 
 ```bash
 docker exec dec-postgres createdb -U dec dec_app
@@ -116,8 +125,12 @@ pre-commit run --all-files
 ## Development
 
 Spec-Driven Development via OpenSpec. See `AGENTS.md` for the operating manual and
-`openspec/` for specs and changes. All work happens on `develop` and its task
-sub-branches; `main` stays frozen until the MVP.
+`openspec/` for specs and changes. Documentation is edited, committed and pushed only
+in a checkout of `develop`, including local journals and instruction-only agent/skill
+definitions. Check the target checkout's branch before writing. Code stays on its
+planned feature branch; reading or importing committed documents does not permit
+authoring them there. Git delivery requires explicit consent; `main` stays frozen
+until the MVP.
 
 ### Setup
 

@@ -30,16 +30,23 @@ context: |
   - Commits: Conventional Commits.
   - Branching: develop (created from main, containing the former Specs/Specs-onboarding
     work) is the integration branch; main is frozen until the MVP. Documents (the
-    "no code" list in AGENTS.md) are committed directly to develop. Code goes only
-    through a feature branch feature/<feature>/<zone>, where zone is backend/frontend
-    (Akim) or data/ml/infra (Egor), merged into develop only when the whole feature
+    "no code" list in AGENTS.md) are edited, committed and pushed only in a checkout
+    of develop, including ignored local journals and instruction-only agent/skill
+    mirrors. Check the target checkout branch before writing; preserve dirty work
+    on a safe switch or use a develop worktree. Code goes only through a feature
+    branch feature/<feature>/<zone>, where zone is backend/frontend/data/ml/infra,
+    merged into develop only when the whole feature
     is done. Before a development session, check commits on develop and its remote
     (git fetch --all), warn about important changes, and remind the developer to run
     git pull.
-  - Team: three people. Two developers, Akim (frontend/backend, engine, report
-    generator) and Egor (normative pipeline, NLP/RAG, DevOps, ML), and a PM who owns
-    scope, pricing, and legal decisions and has no code zone. Ask which developer is
-    working before development. Developer zones do not overlap except specs.
+  - Team: Akim is the sole active developer; Egor has left and no replacement has
+    joined. Akim is the working contact for all development zones and will announce
+    a new second developer. No second-human-developer confirmation is required while
+    this mode applies, including for pending shared-document acknowledgement tasks.
+    Preserve independent agent reviews, tester verdicts, engineering/source checks,
+    applicable UI/UX and coverage gates and explicit Git consent. The PM still owns
+    scope, pricing, and legal decisions and has no code zone. Historical authorship,
+    source verification and acknowledgements are not rewritten.
   - Readiness: `openspec validate` checks structure only; a change is ready (DOR) only
     when a `spec-reviewer` report on its current version lists no blocker and no major
     finding.
@@ -60,14 +67,14 @@ rules:
     - "Name the component boundary where Python hot paths can later be swapped to C/C++."
   tasks:
     - "Each task must be completable in one session."
-    - "The change must name each feature, its branch and its tasks (every task with code in exactly one feature): feature/<feature>/backend or feature/<feature>/frontend (Akim), or feature/<feature>/data, feature/<feature>/ml, feature/<feature>/infra (Egor); a change with no code states that it has no branch."
+    - "The change must name each feature, its branch and its tasks (every task with code in exactly one feature): feature/<feature>/<zone>, where zone is backend, frontend, data, ml or infra; Akim is the sole active developer. A change with no code states that it has no branch."
     - "Include the DOR checklist and DOD/Go-No-Go criteria for the change."
 
 # Per-operation guidance
 operations:
   apply:
     guidance:
-      - "Implement code on its feature branch only, never on develop/main; documents are committed directly to develop."
+      - "Implement code on its feature branch only, never on develop/main; edit, commit and push documentation only in a develop checkout. Check the target branch before any document write."
       - "Run lint and type checks before marking tasks complete."
   archive:
     guidance:

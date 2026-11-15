@@ -88,3 +88,98 @@ the tester. No application suite was run.
 After a tracked second-developer acknowledgement, request tester reassessment under
 the existing no-code gate. No GO, spec sync or archive is claimed. Task 3.3 and archive
 task 4.1 remain open; this session does not commit, merge, push or publish.
+
+## Operational index lifecycle amendment, 2026-11-15
+
+Akim approved the clarified operational-index approach and explicitly authorized
+recording it in AGENTS.md, this existing change and the local index. This amendment
+codifies the rule only. It does not consolidate historical index text, remove any
+feature card, sync main specs, archive the change or authorize Git delivery.
+
+### Updated scope
+
+- AGENTS.md now owns the shared local-context-index lifecycle rule: durable routes
+  and working agreements, compact unfinished-work cards, evidence-backed removal,
+  preserved source history and outstanding obligations, and durable dependency links.
+- The proposal/design/tasks and development-process delta define the same policy.
+  One new requirement adds seven observable scenarios. Both original requirements
+  and all five original scenarios remain verbatim.
+- docs/akim/README.md contains a short linked reminder near the start. Its original
+  historical sections remain unchanged, with consolidation explicitly outside scope.
+- No numeric size limit or fixed template is introduced. Code-free work retains
+  its existing gates and needs a journal link only where one is required.
+- Preparation stays in the existing checkout to preserve user work. Any later
+  document commit belongs directly on develop under the existing consent rules;
+  no new branch, commit, merge or push was made for this amendment.
+
+### Checks and preservation
+
+- Selected strict validation PASS; all strict validation PASS, 22/22. Existing
+  informational notices do not establish archive eligibility for unrelated changes.
+- Whitespace and final-newline checks PASS for all seven scoped Markdown files,
+  including the ignored local index. git diff --check PASS.
+- Original AGENTS.md and local index contents are recovered byte-for-byte after
+  removing only the inserted policy sections. This verifies that no retrospective
+  cleanup or removal of existing user text occurred.
+- All 17 previously modified/untracked files retain their original content hashes.
+  No application, settings, Claude entry-point, OpenSpec configuration or generated
+  instruction changes were made.
+- The new local-index link resolves to the AGENTS lifecycle heading. Relative links
+  in the current change resolve. Historical links in retained old index snapshots
+  were not re-audited; the original 69-link audit above remains historical evidence.
+- Targeted pre-commit checks on the seven scoped documents PASS: Detect secrets
+  passed; the settings-example hook skipped because no matching file changed.
+- Document-case rehearsal PASS for all seven new scenarios: compact unfinished
+  routing; switched/paused work; GO/commit without integration; completed code
+  feature removal with preserved evidence; code-free gates; unfinished features
+  or change-level closure work; durable history and dependency routes.
+
+### Current reviews and no-code verdict
+
+Current independent spec-reviewer: 0 blockers, 0 major, 0 minor, READY for DOR.
+Final confirmation includes the conditional journal wording for code-free cards.
+The tester independently repeated strict validation, preservation, whitespace,
+link and scenario checks; targeted hooks are parent-run evidence.
+
+Tester amendment verification PASS. Change closure remains NO-GO because the
+other developer's acknowledgement naming codex-context-navigation is missing.
+Question 3 in the existing file to Egor still has a placeholder Answers section;
+Akim's approval of this amendment is not that acknowledgement.
+
+- tests: N/A, no application code changed; document checks were performed.
+- coverage: N/A, no application code changed.
+- UI/UX: N/A, no interface changed.
+
+Tasks 2.3-2.5 are complete. Task 3.3 and archive task 4.1 remain open. No change GO,
+spec sync or archive is claimed. The current policy is recorded in all three
+requested locations; applying it to the accumulated history remains separate work.
+
+## Sole-developer policy applicability, 2026-11-15
+
+Akim has confirmed that Egor left and no second developer is available. The
+[recorded decision](../../../docs/decisions/backend/2026-11-15-solo-developer-document-workflow.md)
+waives second-human confirmations while this mode applies and requires actual
+checkouts of develop for all documentation edits. The previous NO-GO entries for
+missing acknowledgement are historical; no Egor signature or acknowledgement is
+invented. Task 3.3 is now N/A under the policy. Task 3.5 requests fresh tester
+reassessment of remaining current checks; archive task 4.1 is still open.
+
+This record does not grant GO or archive by itself. Current governance edits to
+CLAUDE, OpenSpec context and instruction mirrors belong to the separate
+solo-developer-document-workflow change; prior preservation checks describe their
+own earlier scope. Index historical text has not been consolidated or deleted.
+
+
+### Current reassessment outcome
+
+Independent current spec review: zero blocker, major or minor findings. The tester
+issued **GO for documentation acceptance** on 2026-11-15 after strict validation,
+current policy/link/scope checks, mirror consistency checks and passing targeted
+secret-scan hooks. Task 3.5 is complete. The earlier human-confirmation NO-GO is
+superseded for current work by the recorded sole-developer policy, not by a new
+human acknowledgement. Archive task 4.1 remains open; no index cleanup, spec sync,
+archive or Git delivery occurred.
+
+- tests: N/A — no application code changed; document checks performed.
+- coverage: N/A — no application code changed.
+- UI/UX: N/A — no interface changed.

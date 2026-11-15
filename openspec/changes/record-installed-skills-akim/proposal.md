@@ -23,7 +23,7 @@ not stored in the repository, so the specs are the only shared record.
 ## Non-goals
 
 - Installing or removing any skill.
-- Recording Egor's skills; he records his own in a separate change.
+- Changing a former contributor's historical skills record or inferring their current installations.
 - Recording skills that were not installed with `npx skills` (for example the
   `docx` and `skill-creator` skills provided by the claude.ai sync).
 - Recording the eight optional skills that were not installed: `code-architecture-review`,
@@ -48,4 +48,6 @@ None.
 
 - Affects: `openspec/specs/development-process/spec.md` after archive. No code, no
   configuration, no other capability.
-- Egor should acknowledge it because `openspec/` is a shared area.
+- Current human-confirmation rules follow the recorded sole-developer policy;
+  no second developer's acknowledgement is required while Akim is the only active
+  developer. Historical contributor and installation records remain unchanged.

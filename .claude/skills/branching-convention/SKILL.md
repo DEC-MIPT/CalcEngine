@@ -1,6 +1,6 @@
 ---
 name: branching-convention
-description: Branching convention for DEC. Documents are committed directly to develop; code goes through one feature branch per feature, merged into develop only when the whole feature is done; main stays frozen until the MVP. Use when creating branches or deciding where a change goes.
+description: Branching convention for DEC. Documents are edited, committed and pushed only on develop; code goes through one feature branch per feature, merged into develop only when the whole feature is done; main stays frozen until the MVP. Use when creating branches or deciding where a change goes.
 ---
 
 # Branching Convention
@@ -10,10 +10,14 @@ description: Branching convention for DEC. Documents are committed directly to d
 - `develop` is the integration branch. It was created from `main` and contains the former
   `Specs` / `Specs-onboarding` work; the `Specs*` branches are historical and no longer
   used.
-- **Documents are committed directly to `develop`**, with no sub-branch and no merge
-  commit. A document is a file on the "no code" list: `openspec/**`, `docs/**`,
-  `agent-docs/**`, the agent and skill definitions under `.claude/`, `.kilo/`, and
-  `.kilocode/`, `AGENTS.md`, `CLAUDE.md`, `README.md`, `.editorconfig`.
+- **Documents are edited, committed and pushed only on `develop`**, with no
+  sub-branch and no merge commit. Before each documentation edit, commit or push,
+  verify `git branch --show-current` is `develop`. The document/no-code list is
+  defined in `AGENTS.md`; it includes instruction-only agent and skill mirrors.
+  If another branch is checked out, preserve all work and use an authorized safe
+  switch or a `develop` checkout before editing. Do not edit documents on a feature
+  branch with the intention of committing them to `develop` later. Stop if a switch
+  cannot preserve existing changes; never stash, reset or force checkout to clean it.
 - **Code goes only through a feature branch.** Every other file (source code, tests,
   package manifests, `.gitignore`, agent settings, pre-commit config,
   `docker-compose.yml`) is code for this rule.
@@ -40,15 +44,18 @@ Before every commit and every push to `develop`, run `git fetch --all` and
 
 A feature is a component or a stage of the plan (calculation engine, report generator,
 backend core, frontend, ...). Each feature gets one branch from `develop`, named
-`feature/<feature>/<zone>`, mapped to the developer responsibility zone:
+`feature/<feature>/<zone>`, with these technical zones:
 
-- Akim:
-  - `feature/<feature>/backend`
-  - `feature/<feature>/frontend`
-- Egor:
-  - `feature/<feature>/data` (normative pipeline)
-  - `feature/<feature>/ml` (NLP/RAG/ML)
-  - `feature/<feature>/infra` (DevOps)
+- `feature/<feature>/backend`
+- `feature/<feature>/frontend`
+- `feature/<feature>/data` (normative pipeline)
+- `feature/<feature>/ml` (NLP/RAG/ML)
+- `feature/<feature>/infra` (DevOps)
+
+Akim is the sole active developer. Human ownership follows the current roster in
+`AGENTS.md`; Egor's former ownership is historical. Existing branch names and
+technical boundaries stay unchanged. A replacement is recognized only after
+Akim announces one and the roster is updated.
 
 ## Fix branches
 
@@ -58,7 +65,9 @@ backend core, frontend, ...). Each feature gets one branch from `develop`, named
 
 - Create the branch from `develop`, or from the branch of an unmerged feature it depends on.
 - Push the branch to `origin` with the commit that finishes a subtask, so it stays visible.
-- Bring new documents into the branch with `git merge develop`.
+- With explicit consent, bring committed documents into a code branch with
+  `git merge develop`; do not edit them while on that branch. Journal updates and
+  OpenSpec task changes require a `develop` checkout even during a code feature.
 - Never implement code directly on `develop` or `main`.
 - The change's `tasks.md` names each feature, its branch and its tasks (every task with
   code belongs to exactly one feature), or states that the change has no code and no branch.
@@ -66,11 +75,15 @@ backend core, frontend, ...). Each feature gets one branch from `develop`, named
   needs code from an unmerged feature branches from it and merges after it. Subtasks are checked off in `develop` as they are
   done, so `tasks.md` may run ahead of the code in `develop` until the feature is merged.
 - Code MUST NOT overlap across zones so git branches merge without conflicts.
+- Workflow requirements do not grant Git delivery permission: commits, merges and
+  pushes require Akim's explicit consent.
+- While Akim is the sole active developer, second-human-developer acknowledgement
+  is not required; independent agent reviews and tester gates still apply.
 
 ## Examples
 
-- `feature/calculation-engine/backend` (Akim)
-- `feature/frontend-app/frontend` (Akim)
-- `feature/normative-collector/data` (Egor)
-- `feature/normative-parser/ml` (Egor)
-- `fix/docker-compose/infra` (Egor)
+- `feature/calculation-engine/backend`
+- `feature/frontend-app/frontend`
+- `feature/normative-collector/data`
+- `feature/normative-parser/ml`
+- `fix/docker-compose/infra`

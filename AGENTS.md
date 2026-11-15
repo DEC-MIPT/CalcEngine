@@ -47,8 +47,8 @@ initialization or update merely to refresh context.
 | Backend/API | `backend/app/api/`, `services/`, `schemas/`, `repositories/`, `backend/alembic/`, `backend/tests/` | changes `backend-layered-architecture`, `calculation-api`, `normative-catalog-backend` |
 | Frontend and trace | `frontend/src/`, colocated `*.test.ts(x)`, `frontend/e2e/` | `frontend/README.md`; change `frontend-app` |
 | DOCX reports | `backend/app/reporting/`, `backend/tests/test_reporting_*.py` | `calculation-core-contract/specs/report-generator/`, change `report-title-block-limits` |
-| Normative pipeline | `ml/src/normatives_pipeline/`, `ml/configs/`, `ml/tests/` (Egor) | `ml/research/PIPELINE.md`, catalog contract in `docs/decisions/` |
-| Local infrastructure | `infra/docker-compose.yml` (Egor) | `README.md` local setup |
+| Normative pipeline | `ml/src/normatives_pipeline/`, `ml/configs/`, `ml/tests/` | `ml/research/PIPELINE.md`, catalog contract in `docs/decisions/` |
+| Local infrastructure | `infra/docker-compose.yml` | `README.md` local setup |
 | Requirements and working context | `openspec/specs/`, `openspec/changes/`; `docs/decisions/`, `docs/verification/` | `docs/akim/` holds local plans, analysis and code journals |
 
 Backend-relative names in the table are under `backend/app/`; change names are under
@@ -114,9 +114,10 @@ Every task in this project MUST be recorded in specs through OpenSpec. There is 
 5. **Test** — the `tester` agent writes and runs automated tests (coverage >= 95%)
    and issues the GO / NO-GO verdict for each feature.
 6. **UI/UX check** — the `ui-ux-tester` agent verifies visuals and control behavior.
-7. **Review & merge** — after GO, each feature is reviewed (by the other developer or
+7. **Review & merge** — after GO, each feature is reviewed (by another active developer or
    the orchestrator) and its feature branch is merged to `develop`. For a change with no
-   code, the second developer's acknowledgement is the review.
+   code, use the applicable no-code review gate in section 4. While Akim is the sole
+   developer, no second-human-developer acknowledgement is required; agent reviews remain.
 8. **Archive** — the `spec-keeper` agent syncs specs and archives the change.
 
 ### Branching rules
@@ -126,12 +127,23 @@ Every task in this project MUST be recorded in specs through OpenSpec. There is 
   branches are historical and no longer used.
 - **`main` is frozen until MVP**: nothing is merged into `main` until there is a
   working prototype in `develop` (that prototype is the MVP).
-- **Documents are committed directly to `develop`.** A document is a file on the
+- **Documents are edited, committed and pushed only on `develop`.** Before any
+  documentation write, run `git branch --show-current` in the checkout that will
+  receive it and require `develop`. On another branch, stop documentation edits and
+  use a `develop` worktree or an authorized safe switch. This applies to ignored
+  local documents and code journals as well as tracked documents. Preserve dirty
+  work; do not force checkout, reset, stash or commit documents on a feature branch
+  to obtain the required branch. Reading documents or importing already committed
+  `develop` documents through an explicitly authorized merge is not new authoring.
+  Commit, merge and push still require the explicit consent in section 7.
+  A document is a file on the
   "no code" list (section 4): `openspec/**` (specs and changes), `docs/**`,
-  `agent-docs/**`, the agent and skill definitions under `.claude/`, `.kilo/`, and
+  `agent-docs/**`, instruction-only agent and skill definitions under `.claude/`,
+  `.codex/`, `.kilo/`, and
   `.kilocode/`, `AGENTS.md`, `CLAUDE.md`, `README.md`, and `.editorconfig`. There is no
-  sub-branch and no merge commit for them: the other developer reads `develop`, so a
-  document is current as soon as it is committed. Before every commit and every push run
+  sub-branch and no merge commit for document authoring. Codex definition Markdown
+  and instruction-only role TOML mirrors are included; permission settings, native
+  runtime configuration and rules are not. Before every commit and every push run
   `git fetch --all` and `git pull --ff-only`; if `develop` has diverged, stop and resolve
   it before going on. One exception for `.secrets.baseline`: when the pre-commit secret
   scan only rewrites line numbers in it or drops the entries of removed lines (exit 3,
@@ -157,9 +169,10 @@ Every task in this project MUST be recorded in specs through OpenSpec. There is 
   `origin` with the commit that finishes a subtask, so
   it stays visible, and bring new documents into it with `git merge develop`. The change
   is archived when all its features are merged.
-  - Akim: `feature/<feature>/backend`, `feature/<feature>/frontend`
-  - Egor: `feature/<feature>/data` (normative pipeline), `feature/<feature>/ml`
-    (NLP/RAG/ML), `feature/<feature>/infra` (DevOps)
+  - Domain zones: `feature/<feature>/backend`, `feature/<feature>/frontend`,
+    `feature/<feature>/data` (normative pipeline), `feature/<feature>/ml`
+    (NLP/RAG/ML), `feature/<feature>/infra` (DevOps). Akim is currently the sole
+    developer and working contact for all zones; keep each feature's domain explicit.
   - Fixes use `fix/<feature>/<zone>`.
 - Do not implement code directly on `develop`/`main`; implement it on the feature branch
   and merge that branch into `develop`.
@@ -209,6 +222,34 @@ each action or a second backlog. Shared decisions belong in `docs/decisions/`; l
 machine paths or personal settings into shared instructions. For technical prose use
 `technical-writing` when available; project conventions and explicit user scope prevail.
 
+### Local context index lifecycle
+
+`docs/akim/README.md` is an operational navigation index. Keep durable task routes,
+working agreements and brief current-state cards for unfinished features. A card
+identifies the feature and branch (or an explicit no-code marker), current stage,
+next action, blockers or dependencies, and links to its OpenSpec tasks and readiness
+record, plus its code journal where required. Keep other
+unfinished work discoverable when switching tasks or pausing work. Requirements,
+checklists, detailed execution history and approval evidence stay in their owning
+documents; do not duplicate them as a second backlog or action log in the index.
+
+Update affected cards and pointers when their current meaning changes. Remove a
+completed feature's operational card only after its assigned tasks, required tester
+GO and review (including UI/UX where applicable) are complete, actual integration
+into `develop` is confirmed and applicable integrated checks are recorded. A commit
+or feature GO alone is not completion. For a change with no code, use the existing
+no-code closure gates instead of code integration. Keep outstanding change-level
+sync/archive work and unresolved follow-ups visible under their owning active work;
+completion of one feature does not close a multi-feature change.
+
+Before removing historical index text, preserve any unique decisions, execution
+history, results and limitations in the existing journals, readiness records,
+decision files or applicable archive. Index cleanup must not delete those source
+documents or hide unresolved obligations. Retain short canonical links to contracts
+or limitations still needed by other work, and retain cross-feature agreements.
+Shared agreements belong in tracked instructions or decisions, not solely in the
+ignored index. No fixed template or numeric line, word or file-size limit is imposed.
+
 ## 3. DOR — Definition of Ready
 
 A task is ready for implementation only when ALL of the following hold:
@@ -248,42 +289,54 @@ takes the code-free path below instead.
   UI/UX check passed, validation passed. The change is archived when all its features
   are merged.
 - **GO for a change with no code** — `openspec validate --strict` passes, the
-  `spec-reviewer` report lists no blocker and no major finding, and the developer who
-  did not author the change has acknowledged it in a tracked commit or comment that
-  names the change. The `tester` records `tests: N/A`, `coverage: N/A`, and
+  `spec-reviewer` report lists no blocker and no major finding, and the `tester`
+  verifies the documentation checks. While Akim is the sole active developer,
+  acknowledgement by a second human developer is not required, including for shared
+  specifications and pending acknowledgement tasks. Do not fabricate an acknowledgement
+  or treat the waiver as completion of other checks. The `tester` records `tests: N/A`, `coverage: N/A`, and
   `UI/UX: N/A`, each with the reason that the change has no code.
 - **No code** means the change adds or edits no file outside `openspec/`, `docs/`,
-  `agent-docs/`, the agent and skill definitions under `.claude/`, `.kilo/`, and
+  `agent-docs/`, instruction-only agent and skill definitions under `.claude/`,
+  `.codex/`, `.kilo/`, and
   `.kilocode/`, and `AGENTS.md`, `CLAUDE.md`, `README.md`, `.editorconfig`. Agent
-  settings (for example `.claude/settings.json`) and `.gitignore` are not on the list. A
+  permission settings (for example `.claude/settings.json` or `.codex/settings.json`),
+  native runtime configuration/rules and `.gitignore` are not on the list. A
   refresh of `.secrets.baseline` that adds no finding, committed with a document under
   the exception of section 2, does not make a change a change with code.
 - **NO-GO** — any of: test failure, coverage < 95%, unvalidated OpenSpec artifacts,
   UI/UX defects blocking the user flow, or security findings; for a change with no
-  code, also a missing acknowledgement, an open blocker or major review finding, or a
+  code, also an open blocker or major review finding, a missing acknowledgement when
+  required by the recorded active-team policy, or a
   verdict without the N/A record.
 - Only the `tester` agent (with `ui-ux-tester` confirmation where UI changed) declares
   GO.
 
 ## 5. Team & responsibility zones
 
-The team is three people: two developers, **Akim** and **Egor**, and a product manager
-(**PM**). The PM owns scope, pricing, and legal decisions, has no code zone and no
+**Akim is the sole active developer. Egor has left the team and no replacement has
+joined.** Akim confirmed this in the working conversation recorded in
+[the team and document-workflow decision](docs/decisions/backend/2026-11-15-solo-developer-document-workflow.md).
+Do not wait for Egor or an unavailable second developer to confirm work. This waiver
+remains effective until Akim announces a new second developer; record that announcement
+and update the roster and applicable review rules before applying new team assumptions.
+Past authorship, acknowledgements and normative-verification provenance remain history.
+
+The product manager (**PM**) retains scope, pricing, and legal decisions, has no code zone and no
 branch, and has no agent unless a later change adds one. A PM decision is recorded by a
 developer as a dated entry in a tracked file under `docs/decisions/product/` (the
 decision, the PM's words, and where they were given; section 7, "Decision files").
 
-- Before starting any development, ask which developer is working: Akim or Egor,
-  unless the developer's own untracked instructions already name the developer (for
-  Claude Code, `CLAUDE.local.md` in that developer's checkout).
-- Responsibility zones MUST NOT overlap (the only shared artifact is SPECS).
+- The current developer is Akim; do not repeatedly ask whether Akim or Egor is working.
+- Akim coordinates all development zones. Preserve their technical boundaries and
+  assign each code feature one explicit domain zone. Additional developers and their
+  non-overlapping responsibility assignments require Akim's announcement.
 - Specs extended by developers MUST complement each other, never contradict.
 - Code MUST NOT overlap across zones, so git branches merge without conflicts.
 
 | Member | Responsibility zones |
 |---|---|
-| **Akim** | frontend/backend, calculation engine, report generator |
-| **Egor** | normative-document pipeline, NLP/RAG parsing of normatives into the DB, DevOps, ML/DL/NLP |
+| **Akim** | sole active developer and coordinator for frontend/backend, calculation engine, report generator, normative pipeline, NLP/RAG, DevOps and ML |
+| **Egor** | former developer; no current assignments or required confirmations |
 | **PM** | scope, pricing, and legal decisions; no code zone |
 
 Zone-to-agent mapping:
@@ -291,8 +344,8 @@ Zone-to-agent mapping:
 | Zone | Agent(s) |
 |---|---|
 | frontend/backend, engine, report generator | `frontend-developer`, `backend-developer` (Akim) |
-| normative pipeline, NLP/RAG, ML | `data-engineer` (Egor) |
-| DevOps | `devops-engineer` (Egor) |
+| normative pipeline, NLP/RAG, ML | `data-engineer` (Akim's coordination) |
+| DevOps | `devops-engineer` (Akim's coordination) |
 
 ## 6. Agent roster
 
@@ -321,8 +374,10 @@ Zone-to-agent mapping:
   asked (append an `## Answers` section), not into a separate file.
 - **Decision files** (`docs/decisions/`; agreed by Akim and Egor, section 2 of
   `docs/decisions/egor-open-points-akim.md` and Egor's reply of 2026-10-06):
-  - A new file goes into the folder of its direction: `data/`, `ml/`, `infra/` (Egor),
-    `backend/`, `frontend/` (Akim), `product/` (PM decisions, recorded by a developer).
+  - A new file goes into the folder of its direction: `data/`, `ml/`, `infra/`,
+    `backend/`, `frontend/`, or `product/` (PM decisions, recorded by a developer).
+    Use the current roster for ownership; historical folder usage does not assign
+    work or confirmation rights to a former developer.
   - Its name is `YYYY-MM-DD-<topic>.md`, the date the file is created; it is never
     renamed. Its Russian version is `YYYY-MM-DD-<topic>-rus.md` in the same folder.
   - A topic between zones goes into the folder of whoever writes first (asks the
@@ -411,7 +466,8 @@ software-architecture-design, sqlite-database-expert, technical-writing, ui-ux-d
 
 ### At the start of every iteration
 
-- Ask which developer is working: Akim or Egor (section 5 says when this is skipped).
+- Use the recorded current roster in section 5: Akim is the sole active developer
+  until he announces a replacement. Agent review and all other acceptance gates remain.
 - Verify that the required skills are present.
 - If a required skill is missing, print a warning with the exact install command and
   instruct the developer to install it.
