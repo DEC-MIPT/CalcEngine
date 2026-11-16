@@ -345,3 +345,64 @@ files. No new baseline finding was added.
 Fetch and fast-forward pull preceded the commit and push; no develop/main remote
 updates arrived. Backend has not been merged into develop. Task 4.2, actual-develop
 checks, frontend work and change closure retain their separate outstanding gates.
+
+
+## Actual develop integration and acceptance, 2026-11-16
+
+Task 4.2 COMPLETE. With Akim's explicit merge authorization, accepted backend
+commit `d3818f1` was integrated into develop as merge commit
+`2a401c535c6984d56f6d0fd78dc7ea78f8ba18ca`,
+`feat: integrate foundations loads backend`, with parents `b0e0bf7` and `d3818f1`.
+The ort merge had no conflicts. Fetch and fast-forward pull preceded integration.
+The implementation and prior orchestrator APPROVE were preserved.
+
+This integration record and the task checkbox are recovered from the earlier
+conversation and recorded tool/tester output. The temporary develop worktree and
+its uncommitted integration records no longer existed when commit/push was
+requested. The Git branch and merge commit survived. The test results below are
+historical results of the actual-develop acceptance run, not a new test execution.
+The earlier temporary logs and manifests are no longer available locally.
+
+Tester issued GO at the exact merge commit. The full `backend/check.sh` used the
+existing venv tools, with app, pipeline and source imports independently verified
+under the develop checkout, not the feature checkout. With seed `20261115` and
+skip reporting, 1,659 tests passed and 11 skipped in 97.95 seconds. Actual branch
+coverage was 775/776 (99.8711%); changed production coverage was 303/304 (99.6711%).
+Ruff, mypy on 183 files, all five import contracts, selected strict and all strict
+validation (23/23) passed.
+
+C/X/XY passed through runner/API/DOCX. All 30 unrounded output deviations were zero;
+reproducibility was 3/3; normative traceability was 0/90, with 15 engineer-rule
+entries counted separately. M1's independent reproduction and shared regression
+and invariant helpers passed. The strict loads source digest was
+`faaa0724af57ca6c8066f558c4e75c2785d099b34cbfb07c4a85892fdc3b68fe`;
+the pilot digest remained
+`446d4d36d47342f73ddfec50938520f30b2a0b1333114bf4a2d93659646f1b7e`.
+
+All 39 integrated files matched the accepted commit manifest SHA-256
+`3aef4243e1e10584d8a5dcf2ee9149c3f47039fcb0847af4f50fedafc6d225f9`.
+The executor, internal module schema, pilot golden and original normative files
+matched all six protected baseline hashes. During record recovery, the 39-file
+manifest was independently reconstructed from committed Git blobs and its SHA-256
+matched exactly; all six protected files again matched pre-feature develop
+`fb6bcf8`. No backend code, normative data, reference expectations or source status
+was changed during recovery.
+
+The 11 real DB/catalog checks remained skipped because their test database
+variables were absent: one application PostgreSQL test, two normative PostgreSQL
+tests and eight ingested-catalog checks. They were not verified by this integration
+run. Existing unverified NormRefs and the empty validated_range remain unchanged.
+
+The stale Git worktree registration for the missing temporary directory was removed
+after a dry run confirmed it was the only prunable entry. The clean main checkout
+was safely switched to develop to restore and commit these documents. No existing
+work was reset, stashed or overwritten. Current document validation is recorded by
+the commit checks; no new full backend-suite run is claimed for this recovery.
+Frontend section 3, frontend review/integration, change-level acceptance 4.5 and
+synchronization/archive 4.6 remain open.
+
+
+Tester checked this document recovery against the earlier recorded acceptance and
+Git merge: PASS, no findings. Recovery-operation tests: N/A; coverage: N/A;
+UI/UX: N/A, each because only documents were recovered and no application code
+changed. Current selected/all strict validation passed (23/23), as did whitespace.

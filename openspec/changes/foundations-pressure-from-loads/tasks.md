@@ -56,7 +56,7 @@ consent; completing a checkbox is not Git consent.
 ## 4. Review, integration and closure
 
 - [x] 4.1 Review complete backend after tester GO; verify all section-2 tasks complete, three admitted references, unchanged-pilot evidence and no open blocker/major/security finding.
-- [ ] 4.2 With explicit consent, integrate reviewed backend into develop; verify actual integrated backend checks and source/pilot invariants with DB/catalog skips recorded separately; verify shared executor hashes match the integrated contract revision.
+- [x] 4.2 With explicit consent, integrate reviewed backend into develop; verify actual integrated backend checks and source/pilot invariants with DB/catalog skips recorded separately; verify shared executor hashes match the integrated contract revision.
 - [ ] 4.3 Review complete frontend after tester GO and UI/UX confirmation; verify all section-3 tasks complete and compatibility with integrated backend.
 - [ ] 4.4 With explicit consent, integrate reviewed frontend after backend; verify actual integrated frontend/browser checks and both type journeys without claiming skipped checks passed.
 - [ ] 4.5 Complete actual-develop integrated acceptance; verify three admitted references through runner/API/DOCX, contact/sign/unit/rounding cases, unchanged pilot fixtures/reports, backend/frontend checks, Playwright and selected/all strict validation.
