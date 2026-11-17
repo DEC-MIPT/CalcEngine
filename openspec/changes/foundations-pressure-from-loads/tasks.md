@@ -46,7 +46,7 @@ consent; completing a checkbox is not Git consent.
 
 ## 3. Frontend feature
 
-- [ ] 3.1 Regenerate API types and extend fixtures/mocks for both types and refusal variants; verify schema drift checks, historical fixtures and source-label rendering.
+- [x] 3.1 Regenerate API types and extend fixtures/mocks for both types and refusal variants; verify schema drift checks, historical fixtures and source-label rendering.
 - [ ] 3.2 Add type selection, fifteen labeled inputs and accessible direction/sign diagram; verify d/h/d_1 and N explanations, whole-degree behavior, correction feedback and keyboard/small-screen use without changing entered values.
 - [ ] 3.3 Display ten outputs, four ordered checks and deciding verdict reason; verify rounded presentation, no recomputation and pass/fail/warning/source states.
 - [ ] 3.4 Render engineer_formula and derived diagnostic refusal prefixes; verify no final pressure/bearing-success display, historical bound-refusal behavior, draft eligibility, correction/reveal actions and text/keyboard/reduced-motion accessibility.

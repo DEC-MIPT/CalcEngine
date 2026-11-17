@@ -406,3 +406,64 @@ Tester checked this document recovery against the earlier recorded acceptance an
 Git merge: PASS, no findings. Recovery-operation tests: N/A; coverage: N/A;
 UI/UX: N/A, each because only documents were recovered and no application code
 changed. Current selected/all strict validation passed (23/23), as did whitespace.
+
+
+## Frontend task 3.1 scope clarification, 2026-11-16
+
+Akim authorized starting task 3.1 on `feature/foundations-loads/frontend` from
+published develop `09cffe9`. The task covers generated API types, backend-derived
+fixtures, mocks, schema/fixture drift checks, historical payload compatibility
+and source-label rendering. Code remains on the feature branch; documents and
+the frontend journal are authored in a persistent ignored develop worktree.
+
+Regenerated unions expose two existing consumer assumptions: Trace expects
+norm_refs on every step, and ResultScreen treats every non-bound reason as
+CheckReason. Akim explicitly approved minimal UI compatibility in task 3.1 in
+the working conversation: "Да, минимальная совместимость UI (рекомендуется)".
+That approval covers exhaustive engineer_formula/derived/check/bound handling,
+engineer attribution and basic derived-refusal information needed for a type-safe
+build. It does not close task 3.4: full diagnostic-prefix rendering, eligible
+edit-input/draft focus and playback behavior remain there. Tasks 3.2 and 3.3,
+full frontend/browser acceptance and UI/UX feature confirmation remain open.
+No engineering methodology, input/output contract or normative source is changed.
+
+
+## Frontend task 3.1 acceptance, 2026-11-16
+
+Tester verdict: task 3.1 PASS; scoped UI/UX PASS, with no open blocking findings.
+This is a subtask result, not frontend feature GO. Generated API types, reproducible
+backend-derived fixtures and mocks cover both calculation types, C/X/XY, bearing
+failure, bound refusal, derived contact refusal and admissible zero contact.
+All 12 historical fixture exports match develop `09cffe9`. New mock responses retain
+the backend wire JSON, including signed zero; unmatched requests return an explicit
+mock-fixture error. No pressure calculation was added to the frontend.
+
+The approved minimal UI compatibility renders engineer attribution and stored
+contact-refusal facts without outputs or a bearing verdict. Browser findings were
+fixed with keyboard-focusable formula scroll regions and narrow-screen containment
+in Trace, VerdictStamp and Outputs; data, formulas and labels were unchanged.
+
+Verification:
+
+- Full frontend/check.sh passed: 550 tests in 52 files, API and fixture drift checks,
+  ESLint and TypeScript; actual V8 branch coverage 689/689 (100%), including the
+  generator wrapper's 6/6 branches.
+- After the final class-only responsive patch, the tester independently reran all
+  four affected suites: 87/87 tests passed, as did whole-project ESLint/TypeScript.
+  The full suite was not rerun after that patch; no control flow or data changed.
+- The Python fixture exporter separately covered 30/30 statements and 2/2 branches,
+  with byte-exact generated output. These fixtures verify transport compatibility;
+  they are not an independent calculation-correctness oracle.
+- Chromium passed 15 scoped cases at 1280, 390 and 320 px, with zero axe violations,
+  page errors or horizontal page overflow. Engineer attribution, MathJax, keyboard
+  expansion/scrolling, refusal focus/facts and historical pilot/bound rendering
+  passed. Live screen-reader testing was not performed.
+- Selected and all strict OpenSpec validation passed, 23/23; whitespace passed.
+  Backend code and normative source status were unchanged; no database checks or
+  backend suite are claimed for this frontend-only subtask.
+
+The frontend journal retains the full-suite and final 23-file manifests, logs and
+browser evidence. Only task 3.1 is checked off (26/35 overall). Task 3.2 is next;
+3.3-3.6, full diagnostic trace/edit-input/draft focus/playback under 3.4, feature
+review/integration and change-level closure remain open. No commit, merge or push
+was performed for this work.
