@@ -64,14 +64,14 @@ describe('Outputs (6.2)', () => {
     expect(itemOf('B').getByText(/Округление:/).parentElement).toHaveTextContent('до ближайшего, половина к чётному; знаков после запятой: 0')
   })
 
-  it('keeps the trailing zeros of the rule and changes no digit of the value', () => {
+  it('keeps trailing zeros and rounds excess digits by the supplied rule', () => {
     show([
       { ...engineerSet, quantity: 'A', value: 172, rounding_rule: { decimals: 1, mode: 'half_up' } } as Output,
       { ...engineerSet, quantity: 'B', value: 172.456, rounding_rule: { decimals: 1, mode: 'half_up' } } as Output,
     ])
 
     expect(reading('A')).toBe('172,0 кПа')
-    expect(reading('B')).toBe('172,456 кПа')
+    expect(reading('B')).toBe('172,5 кПа')
   })
 
   it('shows every output of the envelope', () => {

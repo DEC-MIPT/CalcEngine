@@ -5,6 +5,7 @@ import { api, unwrap, type ApiError } from '@/api/client'
 import type { components } from '@/api/schema'
 import { useRequest } from '@/api/useRequest'
 import { Outputs } from '@/components/Outputs'
+import { StoredChecks } from '@/components/StoredChecks'
 import { DerivedRefusal, Refusal } from '@/components/Refusal'
 import { ErrorState, LoadingState, NotFoundState } from '@/components/RequestStates'
 import { Trace } from '@/components/Trace'
@@ -16,6 +17,7 @@ import { Warnings } from '@/components/Warnings'
 import { useDraft } from '@/form/draftContext'
 import { useI18n } from '@/i18n/context'
 import { outputRounding } from '@/lib/rounding'
+import { outputLabels } from '@/lib/outputLabels'
 import { symbolTable } from '@/lib/stepSymbol'
 import { useTracePlayback, type PlaybackPhase } from '@/lib/useTracePlayback'
 import { cn } from '@/lib/utils'
@@ -53,16 +55,19 @@ function CheckedResult({
   editType: string | null
   types: readonly CalculationType[] | undefined
 }) {
+  const { language } = useI18n()
   const playback = useTracePlayback(envelope.result_id, envelope.trace.length)
   const reveal = stampReveal(playback.phase, envelope)
   const symbols = useMemo(() => symbolTable(envelope.trace, types), [envelope.trace, types])
   const rounding = useMemo(() => outputRounding(envelope.outputs), [envelope.outputs])
+  const labels = useMemo(() => outputLabels(types ?? [], language), [types, language])
   return (
     <>
       <TraceRuler steps={envelope.trace} verdict={envelope.verdict} playback={playback} reveal={reveal} symbols={symbols} />
       <VerdictStamp envelope={envelope} reason={reason} editType={editType} reveal={reveal} />
-      <Outputs outputs={envelope.outputs} reveal={reveal} source={SHOW_ROUNDING_SOURCE} />
+      <Outputs outputs={envelope.outputs} reveal={reveal} source={SHOW_ROUNDING_SOURCE} symbols={symbols} labels={labels} />
       <Warnings warnings={envelope.warnings} />
+      <StoredChecks steps={envelope.trace} reason={reason} rounding={rounding} reveal={reveal} normStatus={SHOW_NORM_STATUS} labels={labels} />
       <Trace
         steps={envelope.trace}
         unverifiedStepCount={envelope.unverified_step_count}
