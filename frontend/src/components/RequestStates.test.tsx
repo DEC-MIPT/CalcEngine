@@ -43,7 +43,7 @@ describe('request states', () => {
     renderWithShell(<Types />)
 
     expect(screen.getByRole('status')).toHaveTextContent('Загрузка…')
-    expect(await screen.findByText('types: 1')).toBeInTheDocument()
+    expect(await screen.findByText('types: 2')).toBeInTheDocument()
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 

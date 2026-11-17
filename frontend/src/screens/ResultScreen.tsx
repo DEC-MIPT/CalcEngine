@@ -5,7 +5,7 @@ import { api, unwrap, type ApiError } from '@/api/client'
 import type { components } from '@/api/schema'
 import { useRequest } from '@/api/useRequest'
 import { Outputs } from '@/components/Outputs'
-import { Refusal } from '@/components/Refusal'
+import { DerivedRefusal, Refusal } from '@/components/Refusal'
 import { ErrorState, LoadingState, NotFoundState } from '@/components/RequestStates'
 import { Trace } from '@/components/Trace'
 import { TraceRuler } from '@/components/TraceRuler'
@@ -108,6 +108,16 @@ export function ResultScreen() {
                   to={`/calculations/${state.data.result_id}/report`}
                   className={cn(buttonClass, editType && secondaryButtonClass)}
                 >
+                  {t('result.toReport')}
+                  <ArrowRight aria-hidden="true" size={18} />
+                </Link>
+              </p>
+            </>
+          ) : state.data.verdict_reason.kind === 'derived' ? (
+            <>
+              <DerivedRefusal reason={state.data.verdict_reason} source={state.data.parameter_source} />
+              <p className="mt-4">
+                <Link to={`/calculations/${state.data.result_id}/report`} className={buttonClass}>
                   {t('result.toReport')}
                   <ArrowRight aria-hidden="true" size={18} />
                 </Link>

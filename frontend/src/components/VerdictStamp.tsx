@@ -32,7 +32,7 @@ const REVEAL_CLASS: Record<StampReveal, string> = {
 
 function Reading({ quantity, rounding }: { quantity: Quantity; rounding: RoundingRule | undefined }) {
   return (
-    <span className="whitespace-nowrap">
+    <span className="whitespace-nowrap max-sm:whitespace-normal">
       <QuantityText value={quantity.value} unit={quantity.unit} unitClassName="text-muted-foreground" rounding={rounding} />
     </span>
   )
@@ -83,7 +83,7 @@ export function VerdictStamp({
       className={`stamp-frame relative grid border-2 bg-card sm:grid-cols-[1fr_auto] ${tone}${entersShown ? ' stamp-enter' : ''}${REVEAL_CLASS[reveal]}`}
     >
       {reveal === 'pending' && <Checking marker="stamp" />}
-      <div className="relative grid gap-2 p-4">
+      <div className="relative grid min-w-0 gap-2 p-4">
         {reveal === 'celebrate' && <StampMark />}
         <h2 id={headingId} className={`flex items-center gap-2 text-verdict font-bold ${passed ? 'text-primary' : 'text-destructive'}`}>
           <Icon aria-hidden="true" weight="fill" size={26} className="shrink-0" />
@@ -94,21 +94,21 @@ export function VerdictStamp({
             <span className="text-xl">
               <Formula latex={check.expression} />
             </span>
-            <p className="font-mono text-verdict">
+            <p className="min-w-0 font-mono text-verdict">
               <Reading quantity={check.result} rounding={left} /> <span aria-hidden="true">{SYMBOLS[check.operator]}</span>
               <span className="sr-only">{t(`trace.op.${check.operator}`)}</span> <Reading quantity={check.right} rounding={right} />
             </p>
           </div>
         )}
       </div>
-      <div className={`grid content-center gap-2 border-t-2 p-4 sm:border-t-0 sm:border-l-2 ${tone}`}>
+      <div className={`grid min-w-0 content-center gap-2 border-t-2 p-4 sm:border-t-0 sm:border-l-2 ${tone}`}>
         <Link to={`/calculations/${envelope.result_id}/report`} className={buttonClass}>
           {t('result.toReport')}
           <ArrowRight aria-hidden="true" size={18} />
         </Link>
         {editType && <EditInputsLink type={editType} primary={false} />}
       </div>
-      <dl className={`col-span-full grid border-t text-sm sm:grid-cols-3 ${tone}`}>
+      <dl className={`col-span-full grid min-w-0 border-t text-sm sm:grid-cols-3 ${tone}`}>
         {(
           [
             [

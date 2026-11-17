@@ -17,9 +17,9 @@ function OutputRow({ output, source }: { output: Output; source: boolean }) {
   return (
     <tr
       data-output={output.quantity}
-      className="data-row align-baseline not-last:border-b not-last:border-border max-sm:grid max-sm:grid-cols-[auto_auto_1fr] max-sm:items-baseline max-sm:gap-x-3 max-sm:gap-y-2 max-sm:p-3"
+      className="data-row align-baseline not-last:border-b not-last:border-border max-sm:grid max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:items-baseline max-sm:gap-x-3 max-sm:gap-y-2 max-sm:p-3"
     >
-      <th scope="row" className="px-3 py-3 text-left font-normal max-sm:p-0">
+      <th scope="row" className="px-3 py-3 text-left font-normal max-sm:col-span-full max-sm:p-0">
         <code className="text-lg">{output.quantity}</code>
       </th>
       <td className="px-3 py-3 text-right font-mono text-3xl font-semibold whitespace-nowrap max-sm:p-0" data-value>
@@ -60,7 +60,7 @@ export function Outputs({
   return (
     <section aria-labelledby="outputs-title" className={`mt-8 grid gap-3${REVEAL_CLASS[reveal]}`} data-reveal={reveal}>
       <h2 id="outputs-title">{t('outputs.title')}</h2>
-      <div className="relative">
+      <div className="relative min-w-0">
         {reveal === 'pending' && <Checking marker="outputs" />}
         <table className="w-full border-collapse border border-border bg-card max-sm:block">
           <thead className="border-b border-foreground max-sm:hidden">

@@ -36,7 +36,7 @@ describe('axe over the four screens in their states (8.5)', () => {
     it('loading and loaded', async () => {
       const { container } = open('/')
       await expectNoA11yViolations(container)
-      await screen.findByRole('link', { name: /Расчётное сопротивление грунта/ })
+      await screen.findByRole('link', { name: 'Расчётное сопротивление грунта' })
       await expectNoA11yViolations(container)
     })
 

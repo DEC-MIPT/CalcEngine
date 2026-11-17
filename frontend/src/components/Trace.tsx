@@ -9,6 +9,7 @@ import { Formula } from './Formula'
 import { NamedSymbol } from './NamedSymbol'
 import { NormRefList } from './NormRefList'
 import { QuantityText } from './Quantity'
+import { Source } from './Source'
 import { Button } from './ui/button'
 
 type Step = components['schemas']['ResultEnvelope']['trace'][number]
@@ -118,7 +119,13 @@ function TraceStep({
         </button>
       </h3>
       <div id={detailsId} hidden={!expanded} className="step-details grid gap-3 border-t border-dashed border-border bg-background/40 px-3 py-3 pl-10">
-        <div className="overflow-x-auto">
+        <div
+          role="region"
+          aria-label={`${t('trace.formula')}: ${step.step_id}`}
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Keyboard users must be able to scroll wide formulas.
+          tabIndex={0}
+          className="overflow-x-auto focus-visible:outline-offset-[-2px]"
+        >
           <Formula latex={step.expression} display />
         </div>
         {step.substitutions.length > 0 && (
@@ -126,7 +133,7 @@ function TraceStep({
             <h4 className="text-sm font-medium">{t('trace.substitutions')}</h4>
             <ul className="flex flex-wrap gap-x-5 gap-y-1">
               {step.substitutions.map((substitution) => (
-                <li key={substitution.symbol} className="flex items-baseline gap-1">
+                <li key={substitution.symbol} className="flex flex-wrap items-baseline gap-1">
                   <NamedSymbol name={substitution.symbol} latex={symbols.get(substitution.symbol)} /> <span>=</span>{' '}
                   <Value quantity={substitution} rounding={rounding.get(substitution.symbol)} />
                 </li>
@@ -142,7 +149,12 @@ function TraceStep({
             <Value quantity={step.result} rounding={rounding.get(step.step_id)} />
           </p>
         )}
-        {step.norm_refs.length > 0 && (
+        {step.kind === 'engineer_formula' ? (
+          <div>
+            <h4 className="text-sm font-medium">{t('trace.engineerSource')}</h4>
+            <Source source={step.source} />
+          </div>
+        ) : step.norm_refs.length > 0 && (
           <div>
             <h4 className="text-sm font-medium">{t('trace.norms')}</h4>
             <NormRefList refs={step.norm_refs} showStatus={normStatus} />
@@ -219,7 +231,7 @@ export function Trace({
           <span>{t('trace.skipHint')}</span>
         </p>
       )}
-      <ol className="border border-border bg-card">
+      <ol className="min-w-0 border border-border bg-card">
         {steps.map((step, index) => (
           <TraceStep
             key={`${step.step_id}-${index}`}

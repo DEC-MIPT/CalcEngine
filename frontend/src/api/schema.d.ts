@@ -309,11 +309,53 @@ export interface components {
             /** Page */
             page: number | null;
         };
+        /** DerivedViolation */
+        DerivedViolation: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "derived";
+            /**
+             * Check Id
+             * @default full_contact
+             * @constant
+             */
+            check_id: "full_contact";
+            /**
+             * Step Id
+             * @default p_corner_min
+             * @constant
+             */
+            step_id: "p_corner_min";
+            /**
+             * Quantity
+             * @default p_corner_min
+             * @constant
+             */
+            quantity: "p_corner_min";
+            value: components["schemas"]["QuantityValue"];
+            /**
+             * Operator
+             * @default ge
+             * @constant
+             */
+            operator: "ge";
+            limit: components["schemas"]["QuantityValue"];
+            source: components["schemas"]["EngineerRule"];
+            /** Related Inputs */
+            related_inputs: string[];
+            /**
+             * Limiting Corner
+             * @enum {string}
+             */
+            limiting_corner: "pp" | "pm" | "mp" | "mm";
+        };
         /**
          * Dimension
          * @enum {string}
          */
-        Dimension: "dimensionless" | "length" | "area" | "force" | "pressure" | "specific_weight" | "angle";
+        Dimension: "dimensionless" | "length" | "area" | "volume" | "moment" | "force" | "pressure" | "specific_weight" | "angle";
         /**
          * DocumentView
          * @description Документ каталога со своими пунктами в порядке документа (спецификация "Normative document endpoint").
@@ -333,6 +375,22 @@ export interface components {
             source_url: string | null;
             /** Clauses */
             clauses: components["schemas"]["ClauseView"][];
+        };
+        /** EngineerFormulaStep */
+        EngineerFormulaStep: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "engineer_formula";
+            /** Step Id */
+            step_id: string;
+            /** Expression */
+            expression: string;
+            /** Substitutions */
+            substitutions: components["schemas"]["Substitution"][];
+            result: components["schemas"]["QuantityValue"];
+            source: components["schemas"]["EngineerRule"];
         };
         /**
          * EngineerRule
@@ -590,11 +648,11 @@ export interface components {
              */
             verdict: "pass" | "fail" | "refused";
             /** Verdict Reason */
-            verdict_reason: components["schemas"]["CheckReason"] | components["schemas"]["BoundViolation"];
+            verdict_reason: components["schemas"]["CheckReason"] | components["schemas"]["BoundViolation"] | components["schemas"]["DerivedViolation"];
             /** Warnings */
             warnings: components["schemas"]["ApplicabilityWarning"][];
             /** Trace */
-            trace: (components["schemas"]["FormulaStep"] | components["schemas"]["TableStep"] | components["schemas"]["CheckStep"])[];
+            trace: (components["schemas"]["FormulaStep"] | components["schemas"]["TableStep"] | components["schemas"]["CheckStep"] | components["schemas"]["EngineerFormulaStep"])[];
             /** Unverified Step Count */
             unverified_step_count: number;
             /**

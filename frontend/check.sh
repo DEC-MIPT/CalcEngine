@@ -3,6 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 npm run gen:api:check
+npm run gen:fixtures:check
 npx eslint .
 npx tsc -b
 npx vitest run --coverage
