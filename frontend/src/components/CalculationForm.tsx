@@ -17,6 +17,7 @@ import { BoundNote, type BoundShape } from './Bound'
 import { ErrorState } from './RequestStates'
 import { ComputePlot } from './ComputePlot'
 import { Formula } from './Formula'
+import { LoadsDirections } from './LoadsDirections'
 import { QuantityText, UnitText } from './Quantity'
 import { Button } from './ui/button'
 
@@ -245,6 +246,7 @@ export function CalculationForm({ type }: { type: CalculationType }) {
   const invalidCount = Object.keys(errors).length
   return (
     <form noValidate onSubmit={submit} className={`grid gap-4 ${computing ? 'computing' : ''}`}>
+      {type.name === 'foundations_shallow_loads' && <LoadsDirections />}
       {general.length > 0 && (
         <div role="alert" className="max-w-2xl border border-destructive bg-destructive-surface p-4">
           <p className="font-medium">{t('form.rejected')}</p>
