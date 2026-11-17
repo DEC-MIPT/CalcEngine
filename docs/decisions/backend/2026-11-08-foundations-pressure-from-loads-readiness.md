@@ -467,3 +467,64 @@ browser evidence. Only task 3.1 is checked off (26/35 overall). Task 3.2 is next
 3.3-3.6, full diagnostic trace/edit-input/draft focus/playback under 3.4, feature
 review/integration and change-level closure remain open. No commit, merge or push
 was performed for this work.
+
+
+## Frontend task 3.2 acceptance, 2026-11-17
+
+Tester verdict: task 3.2 PASS, with scoped UI/UX PASS and no blocking findings.
+Both types use the existing metadata-driven selection and form: the loads form
+shows all fifteen labeled inputs in contract order, with declared units and hints.
+A native SVG plan and equivalent Russian/English text explain x=b, y=l, signed
+corners, algebraic M+Q*h transfer/cancellation, excluded weights in N, independent
+d/h/d_1 and engineer-prepared d_b. The pilot form has no loads diagram.
+
+Finite/whole-value parsing remains metadata-driven. Engineering-domain validation
+and source-loaded bounds remain backend decisions. Fractional angles are rejected
+without rounding; named backend corrections focus the first field and retain raw
+text, unit choices, signed loads and independent depths without swapping or clamping.
+No type-specific numeric limit or pressure arithmetic was added to the frontend.
+
+The full frontend/check.sh was executed once by the primary agent after the tester's
+pending execution request was cancelled before a process started. Tester independently
+verified the completed log, coverage and frozen files: 565 tests in 55 files passed
+in 15.27 seconds, V8 branch coverage 691/691 (100%), scoped production branches
+107/107. API/fixture drift, ESLint, TypeScript and whitespace passed. Twelve new
+independent transport/correction/draft tests are included in that full run.
+
+UI/UX passed fifteen browser audit states at 1280, 390 and 320 px, plus keyboard,
+payload and draft checks: no axe violations, page errors or horizontal overflow.
+The diagram and equivalent text were visually inspected. Geometry/range correction
+tests used explicit backend-shaped 422 responses: they verify UI consumption,
+not backend validation. Live screen-reader testing was not performed.
+
+Both the six-file task manifest and 28-file accumulated feature manifest match the
+accepted bytes; the frontend journal retains manifests, logs and browser evidence.
+Among the accepted task-3.1 files, only the dictionary changed, by adding guidance.
+Backend code, generated API types, source status and fixtures/mocks were unchanged.
+Selected and all strict OpenSpec validation passed (23/23). Only 3.2 is newly checked
+off, giving 27/35 tasks. Next is 3.3; tasks 3.4-3.6, feature review/integration and
+change closure remain open. No frontend feature GO, commit, merge or push is claimed.
+
+
+## Frontend subtask publication, 2026-11-17
+
+Akim explicitly authorized separate commits for 3.1 and 3.2, followed by push.
+Code is published on origin/feature/foundations-loads/frontend:
+`a7f9e1f` (3.1, API compatibility/fixtures) and `85927fc` (3.2, form guidance).
+Task 3.1 acceptance records are in develop commit `7ad13ce`; task 3.2 records
+and this publication note form a separate develop document commit.
+
+The commit hook initially flagged eight public input/source digests in the generated
+fixture as high-entropy strings. The generator now adds inline allowlist comments
+only to named input_hash/data_sha256 properties. All sixteen comments were reviewed;
+removing them reconstructs the accepted fixture byte-for-byte, including captured
+JSON bodies. No secret finding was added to the baseline and no hook was bypassed.
+The hooks passed for both code commits. The Python exporter was rechecked at
+32/32 statements and 2/2 branches. The repeated frontend/check.sh passed 565 tests
+in 55 files in 13.97 seconds, with 691/691 branches. Tester independently verified
+these results and the updated 28-file manifest; task 3.1/3.2 PASS and prior scoped
+UI confirmations remain applicable. All six task 3.2 file hashes are unchanged.
+The journal retains the refreshed manifest and checks beside the original evidence.
+
+Code remains on its feature branch; documents remain on develop. No frontend merge
+or whole-feature GO is implied. Tasks 3.3-3.6 and feature review/integration remain open.
