@@ -528,3 +528,68 @@ The journal retains the refreshed manifest and checks beside the original eviden
 
 Code remains on its feature branch; documents remain on develop. No frontend merge
 or whole-feature GO is implied. Tasks 3.3-3.6 and feature review/integration remain open.
+
+
+## Frontend task 3.3 acceptance, 2026-11-17
+
+Tester verdict: scoped task 3.3 PASS for stored outputs, checks, deciding reason,
+source presentation and controls; scoped UI/UX PASS. The result screen consumes
+all ten outputs and four bearing checks in the supplied order. The deciding marker
+uses the stored verdict_reason.step_id, and status uses each stored passed flag.
+No pressure, limit, coefficient or engineering outcome is recomputed. Generic
+check rendering also preserves the historical pilot and leaves both refusal
+variants without final outputs or bearing conclusions.
+
+The output table now applies the supplied rounding mode and decimal count rather
+than merely padding zeros; an old presentation assertion that contradicted the
+canonical rounding requirement was corrected. Original engineering fixtures and
+expected calculations were not changed. The existing comparison-presentation
+guard retains raw operands when rounded sides would contradict passed. Tiny raw
+nonzero quantities use localized scientific notation instead of disappearing as
+zero. These are display operations: stored trace values and engineering comparisons
+remain unrounded, as required by the pressure design. Metadata supplies labels
+only when unambiguous; unavailable/conflicting labels retain safe generic fallbacks.
+Source visibility settings, warnings, attribution and pending-summary inertness
+are preserved. An assistive-technology-hidden formula found during review was
+fixed before the final source freeze.
+
+The primary agent executed one full frontend/check.sh on the final freeze; tester
+independently verified its log, coverage and bytes. All 609 tests in 60 files passed
+in 15.59 seconds. Actual V8 branch coverage was 723/723 (100%); changed production
+coverage was 90/90. API/fixture drift, ESLint, TypeScript and whitespace passed.
+Selected/all strict OpenSpec validation passed, 23/23. The 13-file manifest and
+browser evidence are retained in the existing frontend journal. Backend code,
+API schema, generated fixtures, normative source statuses and reference values
+were unchanged; no real database/catalog validation is claimed.
+
+UI/UX checked 33 result states across 1280, 390 and 320 px and four focused
+confirmations: 37 axe audits passed, with no page errors or horizontal overflow.
+Stored ordering, rounding modes, near-boundary/tiny-value comparisons, deciding
+reason, pass/fail, warnings, source labels, missing metadata and pending-to-Tab-skip
+behavior passed. Synthetic source/warning/boundary cases verify presentation only.
+Live screen-reader testing was not performed.
+
+### Open full-feature formula obligation
+
+Unchanged captured expressions for p_x_max/p_y_max contain malformed TeX and use
+exact accessible raw-text fallback. This is an observed source-expression limitation,
+not complete MathJax conformance. The canonical web-platform "Supported browsers"
+scenario requires normal expressions to typeset without raw fallback; the safety
+fallback does not waive that requirement. This obligation must be resolved under
+the owning source/rendering contract before tasks 3.5/3.6 and whole-feature GO.
+Task 3.3 acceptance establishes numeric/check/source presentation only and does
+not close that full-feature gate. No source expression was silently rewritten.
+
+Only task 3.3 is newly checked off (28/35). Next is 3.4: complete diagnostic-prefix
+rendering and eligible edit-input/draft focus/reveal behavior. Tasks 3.4-3.6,
+frontend review/integration and change closure remain open. No commit, merge or
+push was performed for 3.3.
+
+
+## Frontend task 3.3 local commits, 2026-11-17
+
+Akim authorized committing task 3.3. Code commit `2340783` is on
+feature/foundations-loads/frontend and matches all thirteen accepted file hashes.
+Its Git hooks passed. The paired acceptance records and task mark are committed
+separately on develop. The existing scoped tester/UI verdict and explicit open
+MathJax obligation remain unchanged. Push and merge were not requested or performed.
