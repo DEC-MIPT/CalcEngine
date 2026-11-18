@@ -181,6 +181,8 @@ export function Trace({
   symbols,
   rounding = NO_ROUNDING,
   normStatus = true,
+  title,
+  description,
 }: {
   steps: readonly Step[]
   unverifiedStepCount: number
@@ -188,6 +190,8 @@ export function Trace({
   symbols?: ReadonlyMap<string, string>
   rounding?: OutputRounding
   normStatus?: boolean
+  title?: string
+  description?: string
 }) {
   const { t, formatNumber } = useI18n()
   const table = useMemo(() => symbols ?? symbolTable(steps), [symbols, steps])
@@ -202,8 +206,9 @@ export function Trace({
   return (
     <section aria-labelledby="trace-title" className="mt-8 grid gap-4" data-playback={playback?.phase ?? 'idle'}>
       <h2 id="trace-title" tabIndex={-1} className="scroll-mt-4">
-        {t('trace.title')}
+        {title ?? t('trace.title')}
       </h2>
+      {description && <p className="max-w-prose text-sm">{description}</p>}
       {normStatus && unverifiedStepCount > 0 && (
         <p className="flex w-fit items-center gap-2 border border-warning bg-warning-surface px-3 py-2 text-warning-foreground">
           <WarningCircle aria-hidden="true" weight="fill" size={20} />

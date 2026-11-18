@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils'
 
 type Envelope = components['schemas']['ResultEnvelope']
 type CheckReason = components['schemas']['CheckReason']
+type DerivedReason = components['schemas']['DerivedViolation']
 type CalculationType = components['schemas']['CalculationTypeView']
 
 const loadTypes = () => unwrap(api.GET('/calculation-types'))
@@ -80,6 +81,37 @@ function CheckedResult({
   )
 }
 
+function DiagnosticResult({ envelope, reason, editType, types }: {
+  envelope: Envelope
+  reason: DerivedReason
+  editType: string | null
+  types: readonly CalculationType[] | undefined
+}) {
+  const { t } = useI18n()
+  const symbols = useMemo(() => symbolTable(envelope.trace, types), [envelope.trace, types])
+  return (
+    <>
+      <DerivedRefusal reason={reason} source={envelope.parameter_source} />
+      <p className="mt-4 flex flex-wrap gap-3">
+        {editType && <EditInputsLink type={editType} derivedCorrection={{ resultId: envelope.result_id, reason }} primary />}
+        <Link to={`/calculations/${envelope.result_id}/report`} className={cn(buttonClass, editType && secondaryButtonClass)}>
+          {t('result.toReport')}
+          <ArrowRight aria-hidden="true" size={18} />
+        </Link>
+      </p>
+      <Warnings warnings={envelope.warnings} />
+      <Trace
+        steps={envelope.trace}
+        symbols={symbols}
+        unverifiedStepCount={envelope.unverified_step_count}
+        normStatus={SHOW_NORM_STATUS}
+        title={t('refusal.diagnostic.title')}
+        description={t('refusal.diagnostic.description')}
+      />
+    </>
+  )
+}
+
 export function ResultScreen() {
   const { t } = useI18n()
   const { id } = useParams() as { id: string }
@@ -119,15 +151,13 @@ export function ResultScreen() {
               </p>
             </>
           ) : state.data.verdict_reason.kind === 'derived' ? (
-            <>
-              <DerivedRefusal reason={state.data.verdict_reason} source={state.data.parameter_source} />
-              <p className="mt-4">
-                <Link to={`/calculations/${state.data.result_id}/report`} className={buttonClass}>
-                  {t('result.toReport')}
-                  <ArrowRight aria-hidden="true" size={18} />
-                </Link>
-              </p>
-            </>
+            <DiagnosticResult
+              key={state.data.result_id}
+              envelope={state.data}
+              reason={state.data.verdict_reason}
+              editType={editType}
+              types={typesState.status === 'ok' ? typesState.data : undefined}
+            />
           ) : (
             <CheckedResult
               key={state.data.result_id}
