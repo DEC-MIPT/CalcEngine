@@ -593,3 +593,55 @@ feature/foundations-loads/frontend and matches all thirteen accepted file hashes
 Its Git hooks passed. The paired acceptance records and task mark are committed
 separately on develop. The existing scoped tester/UI verdict and explicit open
 MathJax obligation remain unchanged. Push and merge were not requested or performed.
+
+
+## Frontend task 3.4 acceptance, 2026-11-18
+
+Tester verdict: scoped task 3.4 PASS, with scoped UI/UX PASS. Derived refusals now
+show the entire stored diagnostic prefix immediately, with an explicit explanation
+that this is incomplete applicability evidence. Engineer attribution remains visible
+with normative status off. No final output table, bearing verdict/check summary,
+playback delay or success animation is introduced. Stored warnings are retained;
+historical input-bound refusals and completed-result playback remain compatible.
+
+The eligible edit action is primary and report navigation secondary. It restores
+the in-memory draft only for its last submitted result, focuses the first registered
+related input, and attaches a readable stored reason to that field. The diagnostic
+quantity never becomes an input. Raw text and selected units are retained; route
+state carries only stored reason/result identity, not draft values. Related value
+or unit edits and resubmission clear correction state, including when local input
+validation prevents a request. Direct/reloaded results, older results after a newer
+submission, and unmatched correction history do not expose an eligible edit/draft.
+
+After the daemon restart, existing source and test artifacts were inspected before
+continuing. The final 11-file freeze was independently verified by tester and UI.
+One complete frontend/check.sh passed 629 tests in 64 files in 16.79 seconds.
+Actual branch coverage was 754/756 (99.735%); changed production files were
+220/222 (99.099%), both above 95%. API/fixture drift, ESLint, TypeScript and
+whitespace passed. Selected/all strict OpenSpec validation passed, 23/23.
+
+Browser checks covered 1280, 390 and 320 px with normal and reduced motion:
+21 axe audits and 13 workflow confirmations passed, with no page errors or
+horizontal overflow. Refusal focus, immediate prefix, keyboard collapse/expand,
+exact drafts/units, value/unit/resubmit cleanup, history eligibility, historical
+bound focus and completed playback/skip/revisit passed. Screenshots were inspected.
+Live screen-reader testing was not performed. Synthetic warning/edge cases verify
+UI consumption only; the actual loads validated_range remains empty.
+
+The journal retains manifests, logs and browser artifacts. Backend/API/fixtures,
+reference values and normative source statuses are unchanged. The previously
+recorded malformed source-TeX obligation remains open before full browser acceptance
+and feature GO; accessible fallback is not complete MathJax conformance. No real
+DB/catalog or whole-feature GO is claimed. Only 3.4 is newly checked off (29/35).
+Next is 3.5, then 3.6; review/integration and change closure remain open. No commit,
+merge or push was performed for this task.
+
+
+## Frontend task 3.4 local commits, 2026-11-18
+
+Akim authorized committing task 3.4. Code commit `4a6a7c5` is on
+feature/foundations-loads/frontend and matches all eleven accepted file hashes.
+Its Git hooks passed. The paired acceptance records and task mark are committed
+separately on develop. Existing scoped tester/UI verdicts, the open source-TeX
+obligation and remaining feature gates are unchanged. Push and merge were not
+requested or performed.
