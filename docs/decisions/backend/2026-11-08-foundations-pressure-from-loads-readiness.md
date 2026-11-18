@@ -645,3 +645,85 @@ Its Git hooks passed. The paired acceptance records and task mark are committed
 separately on develop. Existing scoped tester/UI verdicts, the open source-TeX
 obligation and remaining feature gates are unchanged. Push and merge were not
 requested or performed.
+
+
+## Task 3.5 check-display scope approval, 2026-11-18
+
+Akim explicitly approved the proposed narrow frontend display repair in the working
+conversation: "Да, исправить отображение в 3.5 (рекомендуется)". It is included
+in frontend task 3.5 acceptance work. Only a check expression that exactly matches
+its two typed operand identifiers and typed operator may receive presentation
+aliases from unambiguous supplied metadata/trace symbols, with safely escaped
+literal identifiers when an alias is unavailable. Original expression text must
+remain available verbatim for accessibility/audit. Stored envelopes, fixtures,
+values, order, IDs, verdicts and source references must not change.
+
+Unexpected/hostile expressions and rejected presentation aliases retain inert
+original-text fallback; the MathJax SafeHandler remains mandatory. No global
+backslash unescaping or historical pilot table-expression rewrite is approved.
+Read-only browser diagnosis confirmed the stored relation has one backslash and
+renders a real less-than-or-equal glyph; apparent doubling was JSON escaping.
+The actual defects are malformed repeated subscripts and misleading grouping of
+internal check-operand identifiers. The approval concerns display spelling only,
+not engineering formulas, source status, coefficients or backend/API changes.
+Full normal-expression typesetting must still pass before task 3.5 is checked off;
+task 3.6 and whole-feature GO remain separate gates.
+
+
+## Frontend task 3.5 acceptance, 2026-11-18
+
+Tester verdict: scoped task 3.5 PASS; rendering UI confirmation PASS. The approved
+CHECK-only adapter uses exact typed operand/operator matching and unambiguous
+supplied symbols, with escaped literal identifiers for missing/ambiguous aliases.
+Original expressions remain verbatim in aria-label/data-source-expression. Hostile
+or unsupported expressions and rejected aliases retain inert original fallback;
+SafeHandler is unchanged. No backend/API/fixture, numerical result, source status,
+reference expectation or historical non-check presentation was modified.
+
+The first full component run passed 658 tests and failed one old assertion expecting
+an image for a deliberately inconsistent synthetic expression. Only that assertion
+was corrected to require the exact inert original, retaining its supplied status
+and operands. All normal captured-formula gates remain strict. The repeated
+frontend/check.sh passed all 659 tests in 66 files in 16.61 seconds: actual V8
+branches 803/805 (99.75%), changed production files 209/210 (99.52%). The adapter
+itself covered 35/35 branches. API/fixture drift, ESLint, TypeScript and whitespace
+passed. E2E files additionally passed standalone TypeScript and lint checks.
+
+The focused new Chromium suite passed 16/16 in 18.3 seconds. The full Playwright
+run with two workers passed 104 tests and intentionally skipped 64 in 4.2 minutes:
+Chromium 56/0, Firefox 24/32 and WebKit 24/32. The skips follow the existing
+Chromium-only timing/contrast/recorded-playback policies; no loads formula or core
+journey was skipped. All seven formula/safety cases and nine journey cases ran in
+every engine. C/X/XY, failure, zero-contact, both refusals, correction/draft/history,
+keyboard access and mock report request/download passed, with pilot regressions
+retained. Downloads use mock PK payloads and do not verify backend DOCX generation.
+
+All ten Chromium transition checks used the unchanged 20 samples and strict
+p95<1000 ms policy, including submitted-loads minimum computation. The list reporter
+did not retain exact numerical p95 annotations; only threshold compliance is
+claimed. No competing Vitest/browser run was active during those measurements.
+
+Post-fix UI verification covered eighteen pilot/loads/derived semantic pages across
+installed Chromium 153.0.8010.12, Firefox 155.0 and WebKit 26.6 at desktop/320 px,
+plus three missing-metadata cases. All 21 axe audits passed without violations,
+page errors or overflow. Real relation glyphs, grouped x/y/corner/limit subscripts,
+original expressions and unchanged pilot/non-check glyphs were verified in trace,
+headers, ruler, summary and stamp. Screenshots were inspected. Missing metadata
+uses safe literal identifiers; hostile expressions remain inert. Live screen-reader
+and a branded last-two-version browser matrix were not performed.
+
+This resolves the previously recorded frontend normal-CHECK MathJax obligation for
+the tested registered payloads through the explicitly approved display convention.
+Producer strings remain unchanged; no normative-source verification is implied.
+The journal retains the final 17-file manifest, logs, coverage and before/after UI
+evidence. Tester independently verified all frozen bytes and results. Selected/all
+strict OpenSpec validation passed (23/23). Only 3.5 is newly checked off (30/35).
+Task 3.6, whole-feature GO, review/integration and change closure remain open.
+No commit, merge, push, dependency installation or database migration was performed.
+
+### Task 3.5 local commit, 2026-11-18
+
+At Akim's explicit request, code was committed as `5bb9a9d` on
+`feature/foundations-loads/frontend`. All 17 committed files match the accepted
+manifest; the secret-scan hook passed. Acceptance records are committed separately
+on develop. No push or merge was performed. Task 3.6 and whole-feature GO remain open.
