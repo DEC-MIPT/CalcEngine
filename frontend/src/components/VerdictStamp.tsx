@@ -6,6 +6,7 @@ import { useI18n } from '@/i18n/context'
 import type { TextKey } from '@/i18n/dictionary'
 import { jumpTo } from '@/lib/jumpTo'
 import { checkRounding, outputRounding } from '@/lib/rounding'
+import { checkPresentation } from '@/lib/checkPresentation'
 import { useFocusOnMount } from '@/lib/useFocusOnMount'
 import { Checking } from './Checking'
 import { EditInputsLink } from './EditInputsLink'
@@ -54,11 +55,13 @@ export function VerdictStamp({
   reason,
   editType = null,
   reveal = 'none',
+  symbols,
 }: {
   envelope: Envelope
   reason: CheckReason
   editType?: string | null
   reveal?: StampReveal
+  symbols?: ReadonlyMap<string, string>
 }) {
   const { t, formatNumber } = useI18n()
   const headingId = useId()
@@ -92,7 +95,7 @@ export function VerdictStamp({
         {check && (
           <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1" data-check={check.step_id}>
             <span className="text-xl">
-              <Formula latex={check.expression} />
+              <Formula latex={check.expression} presentation={checkPresentation(check, symbols)} />
             </span>
             <p className="min-w-0 font-mono text-verdict">
               <Reading quantity={check.result} rounding={left} /> <span aria-hidden="true">{SYMBOLS[check.operator]}</span>

@@ -23,7 +23,8 @@ describe('stored check presentation', () => {
       <I18nProvider initialLanguage="en"><StoredChecks steps={[sparse]} reason={{ kind: 'check', step_id: 'another_stored_reason' }} labels={new Map([['p', 'Mean pressure']])} /></I18nProvider>,
     )
     expect(screen.getByRole('heading', { name: 'Check 1' })).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: sparse.expression })).toBeInTheDocument()
+    expect(container.querySelector('[data-fallback]')).toHaveTextContent(sparse.expression)
+    expect(container.querySelector('[data-fallback]')).toHaveAttribute('data-source-expression', sparse.expression)
     expect(container.querySelector('[data-comparison]')).toHaveTextContent('120 kPa ≤less than or equal to 152.02 kPa')
     expect(container.querySelector('[data-deciding="true"]')).toBeNull()
     expect(screen.getByText('another_stored_reason')).toBeInTheDocument()

@@ -3,6 +3,7 @@ import { useId, useMemo, useState } from 'react'
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
 import { checkRounding, type OutputRounding } from '@/lib/rounding'
+import { checkPresentation } from '@/lib/checkPresentation'
 import { symbolTable } from '@/lib/stepSymbol'
 import { arrivalOf, type Arrival, type TracePlayback } from '@/lib/useTracePlayback'
 import { Formula } from './Formula'
@@ -112,7 +113,11 @@ function TraceStep({
             className={`shrink-0 self-center transition-transform motion-reduce:transition-none ${expanded ? 'rotate-90' : ''}`}
           />
           <span className="font-semibold" data-step-label>
-            <NamedSymbol name={step.step_id} latex={symbols.get(step.step_id)} />
+            <NamedSymbol
+              name={step.step_id}
+              latex={step.kind === 'check' ? step.expression : symbols.get(step.step_id)}
+              presentation={step.kind === 'check' ? checkPresentation(step, symbols) : undefined}
+            />
           </span>
           <span className="text-sm text-muted-foreground">{t(`trace.kind.${step.kind}`)}</span>
           <StepSummary step={step} rounding={rounding} />
@@ -126,7 +131,7 @@ function TraceStep({
           tabIndex={0}
           className="overflow-x-auto focus-visible:outline-offset-[-2px]"
         >
-          <Formula latex={step.expression} display />
+          <Formula latex={step.expression} presentation={step.kind === 'check' ? checkPresentation(step, symbols) : undefined} display />
         </div>
         {step.substitutions.length > 0 && (
           <div>

@@ -65,10 +65,10 @@ function CheckedResult({
   return (
     <>
       <TraceRuler steps={envelope.trace} verdict={envelope.verdict} playback={playback} reveal={reveal} symbols={symbols} />
-      <VerdictStamp envelope={envelope} reason={reason} editType={editType} reveal={reveal} />
+      <VerdictStamp envelope={envelope} reason={reason} editType={editType} reveal={reveal} symbols={symbols} />
       <Outputs outputs={envelope.outputs} reveal={reveal} source={SHOW_ROUNDING_SOURCE} symbols={symbols} labels={labels} />
       <Warnings warnings={envelope.warnings} />
-      <StoredChecks steps={envelope.trace} reason={reason} rounding={rounding} reveal={reveal} normStatus={SHOW_NORM_STATUS} labels={labels} />
+      <StoredChecks steps={envelope.trace} reason={reason} rounding={rounding} reveal={reveal} normStatus={SHOW_NORM_STATUS} labels={labels} symbols={symbols} />
       <Trace
         steps={envelope.trace}
         unverifiedStepCount={envelope.unverified_step_count}

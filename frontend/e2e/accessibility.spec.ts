@@ -85,9 +85,9 @@ test('the journey from type selection to the downloaded report completes with th
   test.setTimeout(120_000)
   const seen: Indicator[] = []
   await page.goto('/')
-  await expect(page.getByRole('link', { name: /Расчётное сопротивление грунта/ })).toBeVisible()
+  await expect(page.locator('a[href="/calculations/new?type=foundations_shallow_r"]')).toBeVisible()
 
-  await tabUntil(page, (current) => current.getByRole('link', { name: /Расчётное сопротивление грунта/ }).evaluate((node) => node === document.activeElement), seen)
+  await tabUntil(page, (current) => current.locator('a[href="/calculations/new?type=foundations_shallow_r"]').evaluate((node) => node === document.activeElement), seen)
   await press(page, 'Enter', seen)
   await expect(page.locator('#field-b')).toBeVisible()
 
@@ -133,13 +133,13 @@ async function contrastViolations(page: Page) {
 }
 
 const SCREENS: [string, string, (page: Page) => Promise<void>][] = [
-  ['type selection', '/', (page) => expect(page.getByRole('link', { name: /Расчётное сопротивление грунта/ })).toBeVisible()],
+  ['type selection', '/', (page) => expect(page.locator('a[href="/calculations/new?type=foundations_shallow_r"]')).toBeVisible()],
   ['input form', '/calculations/new?type=foundations_shallow_r', (page) => expect(page.locator('#field-b')).toBeVisible()],
   ['result: pass', `/calculations/${PASS_ID}`, (page) => expect(page.locator('[data-verdict]')).toBeVisible()],
   ['result: fail', `/calculations/${FAIL_ID}`, (page) => expect(page.locator('[data-verdict]')).toBeVisible()],
   ['result: warning', `/calculations/${WARNING_ID}`, (page) => expect(page.getByRole('region', { name: /^Предупреждение/ })).toBeVisible()],
   ['result: refusal', `/calculations/${REFUSED_ID}`, (page) => expect(page.getByRole('region', { name: /^Расчёт не выполнен/ })).toBeVisible()],
-  ['result: not found', '/calculations/99999999-9999-4999-8999-999999999999', (page) => expect(page.getByRole('heading', { name: 'Результат не найден' })).toBeVisible()],
+  ['result: not found', '/calculations/cccccccc-cccc-4ccc-8ccc-cccccccccccc', (page) => expect(page.getByRole('heading', { name: 'Результат не найден' })).toBeVisible()],
   ['report request', `/calculations/${PASS_ID}/report`, (page) => expect(page.getByLabel('Обозначение документа', { exact: true })).toBeVisible()],
   ['page not found', '/nowhere', (page) => expect(page.getByRole('link', { name: 'Типы расчётов' })).toBeVisible()],
 ]

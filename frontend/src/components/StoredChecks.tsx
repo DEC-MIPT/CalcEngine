@@ -2,6 +2,7 @@ import { CheckCircle, XCircle } from '@phosphor-icons/react'
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
 import { checkRounding, type OutputRounding } from '@/lib/rounding'
+import { checkPresentation } from '@/lib/checkPresentation'
 import { Checking } from './Checking'
 import { Formula } from './Formula'
 import { NormRefList } from './NormRefList'
@@ -20,6 +21,7 @@ export function StoredChecks({
   reveal = 'none',
   normStatus = true,
   labels,
+  symbols,
 }: {
   steps: readonly Step[]
   reason: Reason
@@ -27,6 +29,7 @@ export function StoredChecks({
   reveal?: StampReveal
   normStatus?: boolean
   labels?: ReadonlyMap<string, string>
+  symbols?: ReadonlyMap<string, string>
 }) {
   const { t } = useI18n()
   const pending = reveal === 'pending'
@@ -57,7 +60,7 @@ export function StoredChecks({
                     tabIndex={0}
                     className="min-w-0 overflow-x-auto focus-visible:outline-offset-[-2px]"
                   >
-                    <Formula latex={step.expression} />
+                    <Formula latex={step.expression} presentation={checkPresentation(step, symbols)} />
                   </div>
                   <p className="font-mono" data-comparison>
                     <QuantityText {...step.result} rounding={left} />{' '}
