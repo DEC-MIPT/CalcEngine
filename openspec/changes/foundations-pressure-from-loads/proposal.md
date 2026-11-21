@@ -31,6 +31,11 @@ loads, explains loss of applicability, and preserves existing pilot results.
   basement-depth bound; aggregate identity preserves the pilot document digest.
 - Add the type, input explanations, direction/sign diagram, all outputs/checks and
   diagnostic refusal actions to the existing user journey and report routes.
+- Present loads traces as compact step summaries under contiguous semantic headings,
+  with each formula, substitution and source available by expansion. Keep every
+  stored step and its original order. Select this view through a complete known
+  typed loads-step signature, without adding an API field; unrecognized traces
+  and the pilot retain the flat expanded initial view.
 - Require three admitted independent full-type references, invariants, regression
   comparison and runner/API/DOCX checks before backend feature GO. Signed P1b formula
   points remain supplementary evidence.

@@ -727,3 +727,88 @@ At Akim's explicit request, code was committed as `5bb9a9d` on
 `feature/foundations-loads/frontend`. All 17 committed files match the accepted
 manifest; the secret-scan hook passed. Acceptance records are committed separately
 on develop. No push or merge was performed. Task 3.6 and whole-feature GO remain open.
+
+
+## Frontend task 3.6 acceptance gate, 2026-11-18
+
+Tester verdict: NO-GO for the complete frontend feature under the current browser
+requirement. Reviewed revision: `5bb9a9dca4cfe7349dd152b275acada6ca2f2c8f` on
+`feature/foundations-loads/frontend`. The accepted chronological manifests cover
+exactly the 56 files changed from the feature base, with every committed and current
+file matching its accepted hash. Source code remains unchanged.
+
+Tester independently verified the frozen automated evidence: 659 tests in 66 files
+passed; API/fixture drift, lint and types passed. Overall branch coverage is 803/805
+(99.75%); all changed executable frontend source covers 380/382 branches (99.48%).
+The new correction.ts contains types only. Full Playwright evidence reports
+104 passes and 64 existing Chromium-only-policy skips. Selected/all strict OpenSpec
+was rerun successfully, 23/23. No new source or security defect was found in the
+inspected changes. Prior task 3.5 results and their disclosed limitations remain
+applicable to these identical files.
+
+The canonical web-platform requirement "Non-functional — language, accessibility,
+browsers" requires the last two versions of Chrome, Firefox, Edge and Safari.
+Available compatibility evidence covers one installed Chromium, Firefox and WebKit
+version each. This does not establish the required branded two-version matrix.
+No exception has been approved. UI/UX confirmation on the installed engines is
+being finalized; it cannot establish compatibility with the untested browsers.
+
+Akim was asked in the working conversation whether to retain the full matrix pending
+access or explicitly permit a revised MVP acceptance criterion based on the three
+installed engines. No answer has been received. Task 3.6 remains unchecked (30/35);
+whole-feature GO, frontend review/integration and change closure remain pending.
+Evidence is retained in the existing frontend journal's frontend36-evidence folder.
+No code change, commit, merge, push, dependency installation or migration was made.
+
+### Final UI/UX confirmation for the available engines
+
+UI/UX confirms PASS for the tested engine scope on the same reviewed revision.
+It independently verified the final 17-file manifest and retained 18 semantic-page
+checks with 21 axe audits across Chromium 153, Firefox 155 and WebKit 26.6 at
+desktop and 320 px. No recorded violation, page error or overflow remains. Correct
+CHECK relation glyphs and grouped subscripts, exact original expressions, unchanged
+pilot/non-check glyphs, keyboard controls, immediate diagnostics, correction focus,
+draft/unit retention, history eligibility and reduced-motion/playback behavior are
+confirmed by the inspected frozen evidence. No further blocking visual, control
+or accessibility defect was found in that evidence and inspected source.
+
+Full branded browser compatibility remains unconfirmed, and live screen-reader
+testing was not performed. A new mock-server smoke attempt on port 5186 timed out
+after 30 seconds; its escalated retry was interrupted. No new successful smoke
+result is claimed. The verified frozen successful evidence remains applicable.
+Tester NO-GO and unchecked task 3.6 remain in force pending the browser criterion.
+
+
+## Compact trace follow-up DOR, 2026-11-19
+
+READY for task 3.5a in the existing frontend feature. Akim requested a more compact
+trace in the working conversation. The revised proposal, design, transparent-output
+delta and task define initially collapsed details, contiguous semantic headings,
+conservative typed loads-signature recognition and flat expanded fallback, retaining
+every stored step, original index and source. No calculation or API contract changes.
+Current spec-reviewer reports zero blocker, major or minor findings. Selected/all
+strict validation passes, 23/23. Implementation requires fresh tests, coverage and
+UI confirmation; task 3.6 and the full-browser compatibility NO-GO remain open.
+
+
+## Compact trace publication checkpoint, 2026-11-21
+
+At Akim's explicit commit/push request, the compact trace implementation and tests
+were committed on the existing frontend branch as `2b70c69`. Nine files change
+presentation and tests only. All stored rows, values, sources and original anchors
+remain available; no backend, API, calculation or DOCX change is included.
+
+The tester reported frontend/check.sh PASS with 709 tests in 68 files, overall
+branch coverage 822/824 (99.75%) and changed executable coverage 64/64 (100%).
+UI/UX reported scoped PASS after the exact resistance-ID mapping correction,
+covering 18 real-service pages and 24 axe audits. These are retained agent reports,
+not new checks performed at this publication checkpoint. The final focused browser
+run encountered a page-startup timeout, then the tester session ended due to a
+usage limit before renewed acceptance. Its temporary log is no longer available.
+No clean final browser verdict or whole-feature GO is claimed. Tasks 3.5a and 3.6
+remain unchecked, with the full branded two-version browser matrix still open.
+
+The commit secret-scan hook passed. Selected/all strict validation is rerun for
+publication. Push is authorized; frontend integration and archive are not performed.
+The requested switch to develop preserves the auxiliary documentation checkout
+by detaching it at its committed revision after publication.

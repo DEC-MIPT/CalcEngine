@@ -232,6 +232,49 @@ corresponding to this result enables editing. Directly opening a historical resu
 does not create a draft. Navigation/playback/reveal must not hide diagnostics or
 block access to the refusal explanation.
 
+ResultEnvelope does not carry calculation_type. Select the compact view only
+when every identifier in the complete known loads signature occurs exactly once
+with kind=engineer_formula: A, Wx, Wy, Mx_base, My_base, p_corner_pp, p_corner_pm,
+p_corner_mp, p_corner_mm and p_corner_min. Inspect only these stored identifiers,
+step kinds and occurrence counts, without evaluating values, interpreting expression
+text or adding an API field. A missing, duplicate or wrong-kind signature member
+uses the existing flat, initially expanded trace. Unknown supplemental steps do
+not invalidate an otherwise complete signature.
+
+For a trace with that signature, initialize every step's details as collapsed. Its header retains the stored step identity/symbol, kind, result and
+unit, plus text pass/fail for a check, using the existing rounding and safe MathJax
+presentation rules. Existing per-step disclosure and expand/collapse-all controls
+remain. Expansion reveals the original expression, all substitutions, comparison,
+result and source attribution. The pilot retains initially expanded steps.
+
+Add non-collapsible semantic headings inside the existing flat ordered list over
+contiguous steps: resistance R;
+geometry and load transfer; mean pressure; pressure along X; pressure along Y;
+corner pressures; contact envelope; bearing limits and checks. Classify only the
+known stored step identifiers from the reviewed module. The R prefix belongs to
+resistance; A/Wx/Wy and transferred moments to geometry/transfer; gamma_mt/p/V to
+mean pressure; each axis's extrema, eccentricity, applicability and diagram steps
+to its axis; corner_component and matching p_corner steps to corners;
+p_corner_min/max to contact; loaded limit factors, assembled limits and ordered
+bearing checks to limits/checks. Unknown steps form a neutral contiguous section at
+their original positions, without dropping, sorting or inferring them. Empty
+sections are absent; disjoint runs are not moved together. A missing recognized
+non-signature step is not synthesized; a missing signature member selects the flat
+fallback instead. Place each heading with the first step of its run, without extra
+list items or nested lists. Headings add no trace steps, derived values, source
+claims or nested disclosure state.
+
+Keep each original zero-based step index, anchor and ruler tick. Playback still
+reveals the original step headers in order at its existing interval; a section
+heading appears with its first revealed step and must not expose pending details.
+Neither playback completion nor grouping resets disclosure choices. A derived
+refusal bypasses playback as before: its complete stored prefix headers, readable
+reason and correction action are immediately available, with every diagnostic
+field available by individual or global expansion. No group-level action is
+needed to reach a step. Source component and engineer-rule rows remain separate,
+even when their numeric values coincide. This is presentation compaction, with
+unchanged API payloads, calculation data and DOCX output.
+
 python-docx consumes stored inputs/envelope, not a new calculation. It includes
 load definitions/directions, typed trace, checks and deciding reason; derived
 refusal has diagnostic sections and the contact explanation. Historical bound
