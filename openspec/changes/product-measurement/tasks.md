@@ -11,8 +11,8 @@
 
 - [ ] 2.1 Add typed measurement schemas, event vocabulary, and feature settings; verify unknown fields, disabled defaults, UUIDs, sequence numbers, attribute allowlists, batch size and request size are covered by pytest.
 - [ ] 2.2 Add additive PostgreSQL models, repositories and migration for scenarios, client events, server observations, monitor slots, export snapshots and writer diagnostics; verify migration upgrade/downgrade and repository round trips with PostgreSQL tests or documented skips.
-- [ ] 2.3 Implement private event intake at `POST /telemetry/events` with atomic batches, duplicate handling, conflict responses, size limits and disabled behavior; verify API status codes, no payload logging and no persistence for invalid batches.
-- [ ] 2.4 Add nonblocking server measurement around calculation and DOCX routes without changing business outcomes; verify refusal, executed engineering failure, HTTP failure, report success and report failure are represented separately.
+- [ ] 2.3 Implement private event intake at `POST /telemetry/events` with atomic batches, duplicate handling, conflict responses, size limits and disabled behavior; verify exact Origin and secret checks before body reads, direct and forged requests, HTTP statuses, no payload logging and atomic persistence.
+- [ ] 2.4 Add nonblocking server measurement around calculation and DOCX routes without changing business outcomes; verify refusal, executed engineering failure, HTTP failure, report success and report failure separately; exercise 422, handled 500 with CORS, preflight, health, unmatched and telemetry exclusions, completed streaming, client disconnect and an escaping exception.
 - [ ] 2.5 Add bounded measurement writer and graceful lifespan flush; verify queue overflow and storage failure never fail a calculation or report response and diagnostics contain no request payloads.
 - [ ] 2.6 Implement UTC cohort selection, visibility and idle exclusion, 24-hour completion cutoff, sequence-gap detection, exact median and nearest-rank p95 aggregation for metrics 1.1, 1.2, 1.4-1.8, 1.11, 2.1, 2.9, 2.10, 3.1 and 3.2; verify boundary, empty-denominator, duplicate and incomplete-sequence cases.
 - [ ] 2.7 Implement monitor CSV import, snapshot-based metric export and `python -m scripts.export_pilot_metrics`; verify schema validation, duplicate slots, deterministic ordering, `N/A` output and identical repeat exports.
@@ -29,7 +29,7 @@
 ## 4. Infrastructure feature - `feature/product-measurement/infra`
 
 - [ ] 4.1 Add a separate monitor command or container configuration for minute-aligned frontend and synthetic-result probes with five-second timeouts; verify it stores only slot and boolean results and continues when DEC is unavailable.
-- [ ] 4.2 Add pilot configuration and operational instructions for private ingress, feature flags, UTC retention, working windows, monitor CSV import and rollback; verify the default deployment has collection disabled and no secret or personal value is committed.
+- [ ] 4.2 Add pilot configuration and operational instructions for private ingress, feature flags, UTC retention, working windows, monitor CSV import and rollback; verify default-off, no published backend port, proxy header replacement, authorized export and exit without CSV for runtime and writer logins, and no committed credentials or personal values.
 - [ ] 4.3 Run the monitor and configuration checks in the local environment without changing application behavior; record unavailable external-host checks as skipped rather than successful.
 
 ## 5. Integrated acceptance

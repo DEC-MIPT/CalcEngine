@@ -8,7 +8,7 @@ Measure the DEC workflow and service availability in a closed pilot and provide 
 
 ### Requirement: Closed pilot collection
 
-The system SHALL enable measurement only in an operator-configured closed pilot. It SHALL disable collection by default, reject invalid and over-limit event batches, and record no engineering input values, clipboard contents, report contents, personal identifiers or company identifiers. Measurements SHALL be exported only by the dedicated least-privilege `dec-measurement-operator` OS/database role through the protected export command; no public measurement-read endpoint SHALL exist. A successful export SHALL append a payload-free audit record containing operator role, period, definition version and UTC time.
+The system SHALL enable measurement only in an operator-configured closed pilot. It SHALL disable collection by default, reject invalid and over-limit event batches, and record no engineering input values, clipboard contents, report contents, personal identifiers or company identifiers. Measurements SHALL be exported only by the dedicated least-privilege `dec-measurement-operator` OS/database role through the local export command. The PostgreSQL operator login SHALL read measurements and insert export snapshots and audit records only. Ordinary runtime and writer identities SHALL NOT have raw measurement read privileges. No public measurement-read endpoint SHALL exist. A successful export SHALL append a payload-free audit record containing operator role, period, definition version and UTC time.
 
 #### Scenario: Collection disabled
 
@@ -27,8 +27,8 @@ The system SHALL enable measurement only in an operator-configured closed pilot.
 
 #### Scenario: Local export requires process access
 
-- **WHEN** a caller without access to the application runtime and database invokes the export command
-- **THEN** the export is denied by the operating environment and no measurement data is returned
+- **WHEN** a caller invokes the export command using the runtime or telemetry writer database login
+- **THEN** the command exits nonzero without emitting CSV, and those logins cannot query raw observations
 
 #### Scenario: Export audit
 
@@ -77,10 +77,22 @@ The system SHALL export 2.1, 2.2, 2.9 and 2.10 separately. Server outcomes SHALL
 - **WHEN** the external monitor can run but neither application probe succeeds
 - **THEN** that minute is recorded independently as a failed check rather than a missing check
 
-#### Scenario: Route-class observation
+#### Scenario: Handled errors and exclusions
 
-- **WHEN** a registered calculation, report, health, telemetry or unmatched route returns a final response, raises an application exception, streams a response or ends with a client disconnect
-- **THEN** middleware records the final status and duration for diagnostics, while the metric exporter includes only eligible route classes defined in the design
+- **WHEN** a registered operation returns 422 or the application error boundary sends a final 500, and health, telemetry, preflight and unmatched routes also respond
+- **THEN** the exporter counts the registered 422 and 500 by route template and excludes health, telemetry, preflight and unmatched requests
+- **AND** response bodies and permitted CORS headers remain unchanged
+
+#### Scenario: Streaming and disconnect
+
+- **WHEN** one streamed response completes and another disconnects after headers but before the final body
+- **THEN** only the completed response contributes to HTTP status ratios, and the second observation is counted as a disconnect
+
+#### Scenario: Exception without a response
+
+- **WHEN** an exception escapes before a response status is sent
+- **THEN** the observation has an error terminal kind and no sent status, is excluded from response status ratios, and does not suppress the exception
+
 
 ### Requirement: Reproducible operator export
 
@@ -111,14 +123,19 @@ The system SHALL expose measurement writer failures, queue drops, rejected batch
 
 ### Requirement: Trusted pilot ingress
 
-The system SHALL accept browser telemetry only from the configured trusted proxy boundary. The proxy SHALL strip incoming measurement-trust headers and add its own internal marker. The application SHALL reject direct requests without that marker, apply the existing configured-origin CORS policy, and require the existing platform CSRF protection for state-changing browser requests.
+The system SHALL accept telemetry only when collection is enabled, the request carries exactly one valid deployment-specific proxy secret, and its Origin exactly matches the configured HTTPS pilot origin. The private proxy SHALL replace any incoming trust header with its own value. The endpoint SHALL NOT use browser cookies as authority or expose the backend port to pilot clients.
 
-#### Scenario: Direct backend request
+#### Scenario: Missing or forged trust header
 
-- **WHEN** a client sends a telemetry request directly to the backend without the trusted proxy marker
-- **THEN** the application rejects it without persisting the batch
+- **WHEN** an enabled backend receives a batch without the configured secret, or with an incorrect or duplicated trust header
+- **THEN** it returns 403 before reading the payload and stores nothing
 
-#### Scenario: Forged trust header
+#### Scenario: Cross-site browser request
 
-- **WHEN** a client sends a forged trust header to a backend address reachable without the proxy
-- **THEN** the application rejects it because the direct backend listener is not exposed to the pilot network and the marker is accepted only on the proxy-to-application connection
+- **WHEN** a proxied request has an absent, null, duplicate or foreign Origin even though it has a valid proxy secret
+- **THEN** it returns 403 and stores nothing
+
+#### Scenario: Valid trusted request
+
+- **WHEN** the configured proxy overwrites a client-supplied trust header and forwards a valid same-origin batch
+- **THEN** the application accepts one trusted header and returns 204 after commit
