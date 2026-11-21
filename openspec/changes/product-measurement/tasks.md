@@ -15,7 +15,7 @@
 - [ ] 2.4 Add nonblocking server measurement around calculation and DOCX routes without changing business outcomes; verify refusal, executed engineering failure, HTTP failure, report success and report failure separately; exercise 422, handled 500 with CORS, preflight, health, unmatched and telemetry exclusions, completed streaming, client disconnect and an escaping exception.
 - [ ] 2.5 Add bounded measurement writer and graceful lifespan flush; verify queue overflow and storage failure never fail a calculation or report response and diagnostics contain no request payloads.
 - [ ] 2.6 Implement UTC cohort selection, visibility and idle exclusion, 24-hour completion cutoff, sequence-gap detection, exact median and nearest-rank p95 aggregation for metrics 1.1, 1.2, 1.4-1.8, 1.11, 2.1, 2.9, 2.10, 3.1 and 3.2; verify boundary, empty-denominator, duplicate and incomplete-sequence cases, including a completed immature start excluded from both 1.4 counts.
-- [ ] 2.7 Implement monitor CSV import, snapshot-based metric export and `python -m scripts.export_pilot_metrics`; verify schema validation, duplicate slots, deterministic ordering, `N/A` output and identical repeat exports.
+- [ ] 2.7 Implement monitor CSV import, snapshot-based metric export and `python -m scripts.export_pilot_metrics`; verify schema validation, duplicate slots, deterministic ordering, `N/A` output and identical repeat exports. Verify metric 1.11 with enabled zero-count and disabled days and reject missing or ambiguous day states.
 - [ ] 2.8 Run backend ruff, mypy, import-lint and focused pytest with branch coverage at least 95% for changed measurement code; record skipped database checks explicitly.
 
 ## 3. Frontend feature - `feature/product-measurement/frontend`
@@ -29,8 +29,10 @@
 ## 4. Infrastructure feature - `feature/product-measurement/infra`
 
 - [ ] 4.1 Add a separate monitor command or container configuration for minute-aligned frontend and synthetic-result probes with five-second timeouts; verify it stores only slot and boolean results and continues when DEC is unavailable.
-- [ ] 4.2 Add pilot configuration and operational instructions for private ingress, feature flags, UTC retention, working windows, monitor CSV import and rollback; verify default-off, no published backend port, proxy header replacement, proxy 401 without valid pilot credentials even with the expected Origin, retention deletion by the migration owner only, authorized export and exit without CSV for runtime and writer logins, and no committed credentials or personal values.
-- [ ] 4.3 Run the monitor and configuration checks in the local environment without changing application behavior; record unavailable external-host checks as skipped rather than successful.
+- [ ] 4.2 Configure closed pilot ingress. After backend intake (2.3) is available, verify default-off, no public backend port, proxy 401 without pilot credentials, and trust-header replacement on authorized requests.
+- [ ] 4.3 Define the export operating procedure and manifest, including working windows, daily collection state, monitor input and rollback. After backend export (2.7) is available, verify CLI access using the operator, runtime and writer identities.
+- [ ] 4.4 Define raw data retention. After backend migration (2.2), verify only the migration owner can delete disposable raw data and aggregate exports and audits survive.
+- [ ] 4.5 Run the monitor and configuration checks after 4.1 through 4.4. Record unavailable external-host checks as unverified and leave live pilot collection disabled until they pass.
 
 ## 5. Integrated acceptance
 

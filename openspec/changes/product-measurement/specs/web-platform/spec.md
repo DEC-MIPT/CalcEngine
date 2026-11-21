@@ -4,7 +4,7 @@
 
 ### Requirement: Pilot workflow correlation
 
-With closed-pilot collection enabled, the frontend SHALL attach a fresh measurement attempt UUID to each calculation and DOCX POST, following `calculation-api` "Optional pilot correlation header". With collection disabled it SHALL send neither telemetry events nor correlation headers.
+The system SHALL, with closed-pilot collection enabled, attach a fresh measurement attempt UUID to each calculation and DOCX POST, following `calculation-api` "Optional pilot correlation header". With collection disabled it SHALL send neither telemetry events nor correlation headers.
 
 #### Scenario: Repeat with pilot collection enabled
 

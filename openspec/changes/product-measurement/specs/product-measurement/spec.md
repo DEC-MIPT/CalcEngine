@@ -159,3 +159,17 @@ The system SHALL restrict deletion of raw pilot observations and raw export inpu
 - **WHEN** the approved retention procedure runs under the migration owner after an aggregate export is saved
 - **THEN** the selected raw data is removed and aggregate exports and payload-free audit records are retained
 - **AND** the same raw deletion is denied under each restricted identity
+
+### Requirement: Collection-day manifest
+
+The system SHALL derive the eligible days for metric 1.11 from an operator manifest of pilot-local dates and recorded collection states. It SHALL count zero on an enabled day with no observed executions, exclude disabled days, and reject incomplete or ambiguous collection-day input without emitting CSV.
+
+#### Scenario: Enabled zero-count day and disabled day
+
+- **WHEN** a three-day period contains an enabled day with four executions, an enabled day with none and a disabled day
+- **THEN** metric 1.11 reports daily counts of four and zero, a mean of two and a peak of four, without a row for the disabled day
+
+#### Scenario: Missing collection-day state
+
+- **WHEN** a report period includes a local date without an unambiguous recorded collection state
+- **THEN** the export reports a data-quality error and produces no CSV
