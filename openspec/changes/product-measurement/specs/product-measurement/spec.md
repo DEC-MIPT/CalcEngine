@@ -51,7 +51,7 @@ The system SHALL correlate browser observations and server operations without tr
 
 ### Requirement: Timing and workflow metrics
 
-The system SHALL export 1.1 as a provisional active-time measurement, 1.2 and 1.4 through 1.8, 1.11, and 3.1 and 3.2 according to the design metric definitions. It SHALL exclude hidden-tab time and idle gaps longer than five minutes from active duration, and distinguish result display, API response and DOCX generation. The system SHALL count starts with a full 24-hour observation window in the completion denominator, including starts with no observed completion.
+The system SHALL export 1.1 as a provisional active-time measurement, 1.2 and 1.4 through 1.8, 1.11, and 3.1 and 3.2 according to the design metric definitions. It SHALL exclude hidden-tab time and idle gaps longer than five minutes from active duration, and distinguish result display, API response and DOCX generation. The system SHALL count starts with a full 24-hour observation window in the completion denominator, including starts with no observed completion. The completion numerator SHALL count only observed completions from that same cohort.
 
 #### Scenario: Hidden time and long idle gap
 
@@ -62,6 +62,11 @@ The system SHALL export 1.1 as a provisional active-time measurement, 1.2 and 1.
 
 - **WHEN** a recorded start has no terminal observation within 24 hours and the observation cutoff is at least 24 hours after that start
 - **THEN** it remains in the completion denominator and is not counted as complete
+
+#### Scenario: Completed but immature start
+
+- **WHEN** one mature start has no completion and one start less than 24 hours old already has an observed completion
+- **THEN** the numerator is zero and the denominator is one
 
 ### Requirement: Server outcomes and external availability
 
@@ -125,6 +130,11 @@ The system SHALL expose measurement writer failures, queue drops, rejected batch
 
 The system SHALL accept telemetry only when collection is enabled, the request carries exactly one valid deployment-specific proxy secret, and its Origin exactly matches the configured HTTPS pilot origin. The private proxy SHALL replace any incoming trust header with its own value. The endpoint SHALL NOT use browser cookies as authority or expose the backend port to pilot clients.
 
+#### Scenario: Caller without pilot access
+
+- **WHEN** a caller with missing, invalid or revoked pilot credentials sends a request to the proxy with a matching Origin
+- **THEN** the proxy returns 401 before injecting its trust secret or forwarding the request, and nothing is stored
+
 #### Scenario: Missing or forged trust header
 
 - **WHEN** an enabled backend receives a batch without the configured secret, or with an incorrect or duplicated trust header
@@ -139,3 +149,13 @@ The system SHALL accept telemetry only when collection is enabled, the request c
 
 - **WHEN** the configured proxy overwrites a client-supplied trust header and forwards a valid same-origin batch
 - **THEN** the application accepts one trusted header and returns 204 after commit
+
+### Requirement: Raw observation retention
+
+The system SHALL restrict deletion of raw pilot observations and raw export inputs to the migration-owner database identity. The export operator, application runtime and telemetry writer SHALL NOT be able to delete them.
+
+#### Scenario: Retention at the agreed cutoff
+
+- **WHEN** the approved retention procedure runs under the migration owner after an aggregate export is saved
+- **THEN** the selected raw data is removed and aggregate exports and payload-free audit records are retained
+- **AND** the same raw deletion is denied under each restricted identity
