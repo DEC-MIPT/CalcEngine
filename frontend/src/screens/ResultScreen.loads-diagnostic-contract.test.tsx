@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -37,6 +37,7 @@ describe('stored derived diagnostic contract', () => {
     open(loadsContactRefusalEnvelope.result_id, false)
     await screen.findByRole('region', { name: /условие полного контакта не выполнено/ })
     const trace = screen.getByRole('region', { name: 'Диагностическая последовательность' })
+    fireEvent.click(within(trace).getByRole('button', { name: 'Развернуть все шаги' }))
     for (const step of loadsContactRefusalEnvelope.trace) {
       if (step.kind !== 'engineer_formula') continue
       const row = trace.querySelector(`[data-step="${step.step_id}"]`) as HTMLElement

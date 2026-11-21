@@ -23,6 +23,7 @@ for (const scenario of loadsScenarios.filter((item) => item.envelope.trace.lengt
     const rows = page.locator('[data-step]')
     await expect(rows).toHaveCount(scenario.envelope.trace.length)
     expect(await rows.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-step')))).toEqual(scenario.envelope.trace.map((step) => step.step_id))
+    await page.getByRole('button', { name: 'Развернуть все шаги', exact: true }).click()
 
     const failures: { step: string; rendered: number; fallback: string | null }[] = []
     for (const step of scenario.envelope.trace) {
@@ -68,6 +69,7 @@ test('a hostile synthetic checked expression stays inert instead of being launde
     }
   }, { stored: envelope })
   await page.goto(`/calculations/${envelope.result_id}`)
+  await page.getByRole('button', { name: 'Развернуть все шаги', exact: true }).click()
   const traceFormula = page.locator('[data-step="p_le_R"] .step-details > [role="region"]').first()
   await expect(traceFormula.locator('[data-fallback]')).toHaveText(hostile)
   await expect(traceFormula.locator('[role="img"]')).toHaveCount(0)

@@ -2,6 +2,8 @@ import { CaretRight, CheckCircle, WarningCircle, XCircle } from '@phosphor-icons
 import { useId, useMemo, useState } from 'react'
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
+import type { TextKey } from '@/i18n/dictionary'
+import { loadsTraceSections, type LoadsTraceSection } from '@/lib/loadsTraceSections'
 import { checkRounding, type OutputRounding } from '@/lib/rounding'
 import { checkPresentation } from '@/lib/checkPresentation'
 import { symbolTable } from '@/lib/stepSymbol'
@@ -18,6 +20,18 @@ type Quantity = components['schemas']['QuantityValue']
 type RoundingRule = components['schemas']['RoundingRule']
 
 const NO_ROUNDING: OutputRounding = new Map()
+
+const SECTION_TITLES: Record<LoadsTraceSection, TextKey> = {
+  resistance: 'trace.section.resistance',
+  geometry: 'trace.section.geometry',
+  mean: 'trace.section.mean',
+  x: 'trace.section.x',
+  y: 'trace.section.y',
+  corners: 'trace.section.corners',
+  contact: 'trace.section.contact',
+  checks: 'trace.section.checks',
+  other: 'trace.section.other',
+}
 
 function Value({ quantity, rounding }: { quantity: Quantity; rounding?: RoundingRule }) {
   return <QuantityText value={quantity.value} unit={quantity.unit} rounding={rounding} />
@@ -79,6 +93,8 @@ function TraceStep({
   symbols,
   rounding,
   normStatus,
+  compact,
+  sectionTitle,
 }: {
   step: Step
   index: number
@@ -88,9 +104,12 @@ function TraceStep({
   symbols: ReadonlyMap<string, string>
   rounding: OutputRounding
   normStatus: boolean
+  compact: boolean
+  sectionTitle?: string
 }) {
   const { t } = useI18n()
   const detailsId = useId()
+  const StepHeading = compact ? 'h4' : 'h3'
   return (
     <li
       id={`trace-step-${index}`}
@@ -99,7 +118,12 @@ function TraceStep({
       data-arrival={arrival}
       inert={arrival === 'pending'}
     >
-      <h3 className="text-base">
+      {sectionTitle && (
+        <h3 className="border-b border-border bg-secondary px-3 py-2 text-sm font-semibold" data-trace-section>
+          {sectionTitle}
+        </h3>
+      )}
+      <StepHeading className="text-base" data-step-heading>
         <button
           type="button"
           aria-expanded={expanded}
@@ -122,7 +146,7 @@ function TraceStep({
           <span className="text-sm text-muted-foreground">{t(`trace.kind.${step.kind}`)}</span>
           <StepSummary step={step} rounding={rounding} />
         </button>
-      </h3>
+      </StepHeading>
       <div id={detailsId} hidden={!expanded} className="step-details grid gap-3 border-t border-dashed border-border bg-background/40 px-3 py-3 pl-10">
         <div
           role="region"
@@ -200,8 +224,9 @@ export function Trace({
 }) {
   const { t, formatNumber } = useI18n()
   const table = useMemo(() => symbols ?? symbolTable(steps), [symbols, steps])
+  const sections = useMemo(() => loadsTraceSections(steps), [steps])
   const playing = playback?.phase === 'playing'
-  const [expanded, setExpanded] = useState<ReadonlySet<number>>(() => new Set(steps.map((_, index) => index)))
+  const [expanded, setExpanded] = useState<ReadonlySet<number>>(() => new Set(sections ? [] : steps.map((_, index) => index)))
   const toggle = (index: number) =>
     setExpanded((current) => {
       const next = new Set(current)
@@ -241,7 +266,7 @@ export function Trace({
           <span>{t('trace.skipHint')}</span>
         </p>
       )}
-      <ol className="min-w-0 border border-border bg-card">
+      <ol className="min-w-0 border border-border bg-card" data-trace-layout={sections ? 'compact' : 'expanded'}>
         {steps.map((step, index) => (
           <TraceStep
             key={`${step.step_id}-${index}`}
@@ -253,6 +278,8 @@ export function Trace({
             symbols={table}
             rounding={rounding}
             normStatus={normStatus}
+            compact={sections !== null}
+            sectionTitle={sections && (index === 0 || sections[index] !== sections[index - 1]) ? t(SECTION_TITLES[sections[index]]) : undefined}
           />
         ))}
       </ol>
