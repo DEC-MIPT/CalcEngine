@@ -162,7 +162,7 @@ The system SHALL restrict deletion of raw pilot observations and raw export inpu
 
 ### Requirement: Collection-day manifest
 
-The system SHALL derive the eligible days for metric 1.11 from an operator manifest of pilot-local dates and recorded collection states. It SHALL count zero on an enabled day with no observed executions, exclude disabled days, and reject incomplete or ambiguous collection-day input without emitting CSV.
+The system SHALL derive the eligible days for metric 1.11 from an operator manifest of pilot-local dates and ordered UTC state intervals recording both deployed flags. It SHALL count zero on an enabled day with no observed executions, exclude disabled days, and reject incomplete or ambiguous collection-day input without emitting CSV.
 
 #### Scenario: Enabled zero-count day and disabled day
 
@@ -172,4 +172,9 @@ The system SHALL derive the eligible days for metric 1.11 from an operator manif
 #### Scenario: Missing collection-day state
 
 - **WHEN** a report period includes a local date without an unambiguous recorded collection state
+- **THEN** the export reports a data-quality error and produces no CSV
+
+#### Scenario: Mixed collection-day state
+
+- **WHEN** frontend and backend enablement disagree, or either flag changes during a pilot-local day
 - **THEN** the export reports a data-quality error and produces no CSV
