@@ -49,6 +49,20 @@ The system SHALL correlate browser observations and server operations without tr
 - **WHEN** a DOCX response reaches the browser and its ready state is displayed without a subsequent download action
 - **THEN** completion is observable and neither a disk save nor GOST compliance is reported
 
+### Requirement: Workflow step identity
+
+The system SHALL use the same `step_key` vocabulary for browser events and receipt validation: `inputs` for the calculation form, `result` for the calculation result, and `report` for the DOCX form. `step_entered`, `field_committed` and `validation_failed` SHALL carry the active step key. Type selection before first input is outside the measured scenario. Entering a screen again after visiting another tracked screen SHALL count as a return for metric 3.1; a render or consecutive entry on the same screen SHALL NOT count as a return.
+
+#### Scenario: Repeated entry and genuine return
+
+- **WHEN** the observed step entries are `inputs`, `inputs`, `result`, `inputs`
+- **THEN** the consecutive `inputs` entries are treated as one visit and the final `inputs` entry is counted as one return
+
+#### Scenario: Unsupported step key
+
+- **WHEN** an event batch contains `step_entered` with `step_key` set to `settings`
+- **THEN** intake returns 422 and stores none of the batch
+
 ### Requirement: Timing and workflow metrics
 
 The system SHALL export 1.1 as a provisional active-time measurement, 1.2 and 1.4 through 1.8, 1.11, and 3.1 and 3.2 according to the design metric definitions. It SHALL exclude hidden-tab time and idle gaps longer than five minutes from active duration, and distinguish result display, API response and DOCX generation. The system SHALL count starts with a full 24-hour observation window in the completion denominator, including starts with no observed completion. The completion numerator SHALL count only observed completions from that same cohort.
@@ -76,6 +90,11 @@ The system SHALL export 2.1, 2.2, 2.9 and 2.10 separately. Server outcomes SHALL
 
 - **WHEN** two create requests return HTTP 201, one with a refusal and one with a completed result whose engineering check fails
 - **THEN** only the latter is counted as an executed calculation and neither is counted as a server error
+
+#### Scenario: Calculation outcome before a result is stored
+
+- **WHEN** a working window contains one executed calculation, one invalid input, one unregistered calculation type, one unavailable parameter source and one failed result commit
+- **THEN** metric 2.1 reports a numerator of one, a denominator of three, two technical failures, one excluded invalid input and one excluded unregistered type
 
 #### Scenario: Application unavailable
 
@@ -168,6 +187,11 @@ The system SHALL derive the eligible days for metric 1.11 from an operator manif
 
 - **WHEN** a three-day period contains an enabled day with four executions, an enabled day with none and a disabled day
 - **THEN** metric 1.11 reports daily counts of four and zero, a mean of two and a peak of four, without a row for the disabled day
+
+#### Scenario: Partial first and last days
+
+- **WHEN** two enabled pilot-local days have complete flag records and the report runs from noon on the first day to noon on the second, with three executions before the start, one exactly at the start, two on the second day before the end, and one exactly at the end
+- **THEN** metric 1.11 reports daily counts of one and two, a mean of 1.5 and a peak of two
 
 #### Scenario: Missing collection-day state
 

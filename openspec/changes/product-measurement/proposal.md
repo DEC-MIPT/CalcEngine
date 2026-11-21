@@ -18,8 +18,8 @@ DEC needs repeatable evidence of calculation workflow duration, completion and r
 
 ### Modified capabilities
 
-- `calculation-api`: allow a validated measurement-attempt correlation header on existing calculation and report requests without changing business responses.
-- `web-platform`: allow the same header for configured frontend origins.
+- `calculation-api`: accept an optional measurement-attempt header on calculation and report requests and allow it in CORS preflight for configured origins without changing business responses.
+- `web-platform`: send a fresh measurement-attempt UUID on each calculation and report POST when pilot collection is enabled.
 
 ## Non-goals
 

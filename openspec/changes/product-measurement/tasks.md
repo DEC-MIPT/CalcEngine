@@ -9,23 +9,23 @@
 
 ## 2. Backend feature - `feature/product-measurement/backend`
 
-- [ ] 2.1 Add typed measurement schemas, event vocabulary, and feature settings; verify unknown fields, disabled defaults, UUIDs, sequence numbers, attribute allowlists, batch size and request size are covered by pytest.
+- [ ] 2.1 Add typed measurement schemas, event vocabulary, and feature settings; verify unknown fields, disabled defaults, UUIDs, sequence numbers, attribute allowlists, batch size and request size with pytest. Accept the three shared step keys and reject unsupported ones.
 - [ ] 2.2 Add additive PostgreSQL models, repositories and migration for scenarios, client events, server observations, monitor slots, export snapshots and writer diagnostics; verify migration upgrade/downgrade and repository round trips with PostgreSQL tests or documented skips.
-- [ ] 2.3 Implement private event intake at `POST /telemetry/events` with atomic batches, duplicate handling, conflict responses, size limits and disabled behavior; verify exact Origin and secret checks before body reads, direct and forged requests, HTTP statuses, no payload logging and atomic persistence.
-- [ ] 2.4 Add nonblocking server measurement around calculation and DOCX routes without changing business outcomes; verify refusal, executed engineering failure, HTTP failure, report success and report failure separately; exercise 422, handled 500 with CORS, preflight, health, unmatched and telemetry exclusions, completed streaming, client disconnect and an escaping exception.
+- [ ] 2.3 Implement private event intake at `POST /telemetry/events` with atomic batches, duplicate handling, conflict responses, size limits and disabled behavior; verify exact Origin and secret checks before body reads, direct and forged requests, HTTP statuses, no payload logging and atomic persistence, including a batch with an undeclared field that stores no observations.
+- [ ] 2.4 Add nonblocking server measurement around calculation and DOCX routes without changing business outcomes; verify refusal, executed engineering failure, HTTP failure, report success and report failure separately; exercise 422, handled 500 with CORS, preflight, health, unmatched and telemetry exclusions, completed streaming, client disconnect and an escaping exception. Drive real API requests for the 2.1 fixture, including an injected commit failure, and assert that the observer emits one executed outcome, two technical failures and both exclusions, without a duplicate or tentative success.
 - [ ] 2.5 Add bounded measurement writer and graceful lifespan flush; verify queue overflow and storage failure never fail a calculation or report response and diagnostics contain no request payloads.
 - [ ] 2.6 Implement UTC cohort reconstruction and sequence-gap classification; verify 24-hour maturity, incomplete sequences and an immature completed start excluded from both 1.4 counts.
-- [ ] 2.7 Implement workflow timing and actions (1.1, 1.2, 1.5, 1.8, 3.1 and 3.2) from 2.6; verify idle and visibility boundaries, percentiles, repeats and incomplete samples.
-- [ ] 2.8 Implement server timing and outcome aggregation (1.6, 1.7, 2.1, 2.9 and 2.10) from 2.4; verify refusal, engineering failure, HTTP failure, route exclusions and empty denominators.
+- [ ] 2.7 Implement workflow timing and actions (1.1, 1.2, 1.5, 1.8, 3.1 and 3.2) from 2.6; verify idle and visibility boundaries, percentiles and incomplete samples. Verify `inputs`, `inputs`, `result`, `inputs` produces exactly one return.
+- [ ] 2.8 Implement server timing and outcome aggregation (1.6, 1.7, 2.1, 2.9 and 2.10) from 2.4; verify refusal, engineering failure, route exclusions and empty denominators. Use the observations emitted by the metric 2.1 pre-persistence fixture in 2.4 to assert one executed, two technical failures and two separately reported exclusions.
 - [ ] 2.9 Implement monitor CSV parsing and metric 2.2; verify duplicate slot rejection and a partial working window with three expected slots, one passed, one failed, and one missing, yielding 50% observed availability.
-- [ ] 2.10 Implement metric 1.11 and manifest validation; verify enabled zero-count days, disabled days and mixed-state rejection without CSV.
+- [ ] 2.10 Implement metric 1.11 and manifest validation; verify enabled zero-count days, disabled days and mixed-state rejection without CSV. Verify the partial-day fixture yields daily counts of one and two, mean 1.5 and peak two.
 - [ ] 2.11 Implement snapshot-based export and `python -m scripts.export_pilot_metrics` after 2.6 through 2.10; verify deterministic ordering, `N/A` output and identical repeat exports.
 - [ ] 2.12 Run backend ruff, mypy, import-lint and focused pytest with branch coverage at least 95% for changed measurement code; record skipped database checks explicitly.
 
 ## 3. Frontend feature - `feature/product-measurement/frontend`
 
 - [ ] 3.1 Add the versioned telemetry client with bounded in-memory queue, one retry for transport or 503, terminal event protection and silent failure; verify no request blocks form interactions and queue drops are bounded.
-- [ ] 3.2 Instrument the calculation and report journey with scenario, step, field, attempt, visibility, progress, result-visible and report-ready events; verify one event per semantic action and no raw input, clipboard, route or report content is sent.
+- [ ] 3.2 Instrument the calculation and report journey with scenario, step, field, attempt, visibility, progress, result-visible and report-ready events; verify navigation emits `inputs`, `result`, `inputs` when returning from the result, rerenders emit no extra entry, the DOCX form uses `report`, and no raw input, clipboard, route or report content is sent.
 - [ ] 3.3 Add validated correlation headers to calculation and DOCX requests and regenerate/check API types; verify UUID format, attempt separation and compatibility with existing API tests.
 - [ ] 3.4 Add browser tests for hidden-tab intervals, five-minute idle boundary, reload/new scenario, result visibility, report readiness, retry and disabled collection; verify Playwright produces a complete event sequence for one synthetic walkthrough.
 - [ ] 3.5 Run ESLint, TypeScript, Vitest and focused Playwright checks with branch coverage at least 95% for changed telemetry code; obtain ui-ux-tester confirmation that instrumentation does not alter focus, announcements, controls or visible timing.
@@ -36,7 +36,8 @@
 - [ ] 4.2 Configure closed pilot ingress. After backend intake (2.3) is available, verify default-off, no public backend port, proxy 401 without pilot credentials, and trust-header replacement on authorized requests.
 - [ ] 4.3 Define the export operating procedure and manifest, including working windows, daily collection state, monitor input and rollback. After backend export (2.11) is available, verify CLI access using the operator, runtime and writer identities.
 - [ ] 4.4 Define raw data retention. After backend migration (2.2), verify only the migration owner can delete disposable raw data and aggregate exports and audits survive.
-- [ ] 4.5 Run the monitor and configuration checks after 4.1 through 4.4. Record unavailable external-host checks as unverified and leave live pilot collection disabled until they pass.
+- [ ] 4.5 Establish the deployment flag journal and assign it to the pilot deployment operator. In staging, change the deployed frontend and backend flags at different times, verify the journal records each effective UTC transition and both flag values, and confirm the manifest preserves the disagreement.
+- [ ] 4.6 Run the monitor and configuration checks after 4.1 through 4.5. Record unavailable external-host checks as unverified and leave live pilot collection disabled until these checks pass.
 
 ## 5. Integrated acceptance
 
