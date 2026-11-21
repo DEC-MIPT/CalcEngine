@@ -8,7 +8,7 @@ Measure the DEC workflow and service availability in a closed pilot and provide 
 
 ### Requirement: Closed pilot collection
 
-The system SHALL enable measurement only in an operator-configured closed pilot. It SHALL disable collection by default, reject invalid and over-limit event batches, and record no engineering input values, clipboard contents, report contents, personal identifiers or company identifiers. Measurements SHALL be exported only by a local process operator through the protected export command; no public measurement-read endpoint SHALL exist.
+The system SHALL enable measurement only in an operator-configured closed pilot. It SHALL disable collection by default, reject invalid and over-limit event batches, and record no engineering input values, clipboard contents, report contents, personal identifiers or company identifiers. Measurements SHALL be exported only by the dedicated least-privilege `dec-measurement-operator` OS/database role through the protected export command; no public measurement-read endpoint SHALL exist. A successful export SHALL append a payload-free audit record containing operator role, period, definition version and UTC time.
 
 #### Scenario: Collection disabled
 
@@ -29,6 +29,11 @@ The system SHALL enable measurement only in an operator-configured closed pilot.
 
 - **WHEN** a caller without access to the application runtime and database invokes the export command
 - **THEN** the export is denied by the operating environment and no measurement data is returned
+
+#### Scenario: Export audit
+
+- **WHEN** the dedicated measurement operator successfully exports a period
+- **THEN** the export produces one audit record without raw observations or identifiers from the event payload
 
 ### Requirement: Workflow correlation and completion
 
@@ -72,6 +77,11 @@ The system SHALL export 2.1, 2.2, 2.9 and 2.10 separately. Server outcomes SHALL
 - **WHEN** the external monitor can run but neither application probe succeeds
 - **THEN** that minute is recorded independently as a failed check rather than a missing check
 
+#### Scenario: Route-class observation
+
+- **WHEN** a registered calculation, report, health, telemetry or unmatched route returns a final response, raises an application exception, streams a response or ends with a client disconnect
+- **THEN** middleware records the final status and duration for diagnostics, while the metric exporter includes only eligible route classes defined in the design
+
 ### Requirement: Reproducible operator export
 
 The system SHALL export a CSV with metric ID, definition version, period, unit, value, sample count, applicable numerator and denominator, and data-quality counts. It SHALL distinguish an unavailable measurement from zero, and reproduce the same rows for the same input observation snapshot, external checks, settings and definition version.
@@ -98,3 +108,17 @@ The system SHALL expose measurement writer failures, queue drops, rejected batch
 
 - **WHEN** a telemetry batch is rejected or a writer drops observations
 - **THEN** the structured diagnostic contains the rejection or drop reason and count but no event payload or correlation identifier
+
+### Requirement: Trusted pilot ingress
+
+The system SHALL accept browser telemetry only from the configured trusted proxy boundary. The proxy SHALL strip incoming measurement-trust headers and add its own internal marker. The application SHALL reject direct requests without that marker, apply the existing configured-origin CORS policy, and require the existing platform CSRF protection for state-changing browser requests.
+
+#### Scenario: Direct backend request
+
+- **WHEN** a client sends a telemetry request directly to the backend without the trusted proxy marker
+- **THEN** the application rejects it without persisting the batch
+
+#### Scenario: Forged trust header
+
+- **WHEN** a client sends a forged trust header to a backend address reachable without the proxy
+- **THEN** the application rejects it because the direct backend listener is not exposed to the pilot network and the marker is accepted only on the proxy-to-application connection

@@ -4,7 +4,7 @@
 
 ### Requirement: Optional pilot correlation header
 
-When pilot measurement is enabled, the system SHALL accept an optional `X-DEC-Measurement-Attempt` on `POST /calculations` and `POST /calculations/{result_id}/report`. The header SHALL be documented in OpenAPI and SHALL be used only to correlate observations. Missing or invalid UUID values SHALL be ignored for measurement and SHALL NOT change business responses, authorization, or calculation identity.
+The system SHALL, when pilot measurement is enabled, accept an optional `X-DEC-Measurement-Attempt` on `POST /calculations` and `POST /calculations/{result_id}/report`. The header SHALL be documented in OpenAPI and SHALL be used only to correlate observations. Missing or invalid UUID values SHALL be ignored for measurement and SHALL NOT change business responses, authorization, or calculation identity.
 
 #### Scenario: Invalid correlation identifier
 
