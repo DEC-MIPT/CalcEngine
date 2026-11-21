@@ -101,10 +101,14 @@ Documentation-only edits need OpenSpec and document checks, not the full applica
 
 ## 2. Methodology: Spec-Driven Development (SDD) via OpenSpec
 
-Every task in this project MUST be recorded in specs through OpenSpec. There is no
-"just write code" path. The canonical OpenSpec root is `openspec/` in this repository.
+Project tasks MUST be recorded in OpenSpec, except for edits confined to local,
+Git-ignored academic materials such as thesis presentations, reports, and coursework.
+The exception applies only when the edits do not change product requirements, code,
+shared project documentation, or team decisions. For these local edits, do not create
+an OpenSpec change or run its readiness and acceptance gates. Edit on `develop`
+and verify the resulting document. The canonical OpenSpec root is `openspec/`.
 
-### Lifecycle of any task
+### Lifecycle of a task covered by OpenSpec
 
 1. **Capture** — a task becomes an OpenSpec change proposal (`openspec new change`).
 2. **Plan** — the `business-analyst` agent produces the plan and the DOR.

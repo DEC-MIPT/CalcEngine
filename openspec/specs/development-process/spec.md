@@ -1,21 +1,27 @@
 # Development Process
 
 ## Purpose
-Defines the Spec-Driven Development (SDD) process enforced in this repository: every
-task is captured as an OpenSpec change, planned with a DOR, implemented (documents directly
-on develop, code on feature branches), tested with >= 95% branch coverage, and archived
-only after a GO verdict.
+Defines the Spec-Driven Development (SDD) process for project work: tasks covered by the capture rule below require an
+OpenSpec change and a DOR. Documents are edited on develop and code on feature
+branches. Code requires >= 95% branch coverage, and changes are archived only after
+a GO verdict.
 
 ## Requirements
 
 ### Requirement: Every task is an OpenSpec change
-The system SHALL require that every task be recorded as an OpenSpec change proposal
-with proposal, specs delta, design, and tasks artifacts, validated with
-`openspec validate`.
+The system SHALL require an OpenSpec change proposal with proposal, specs delta,
+design, and tasks artifacts, validated with `openspec validate`, for project tasks
+outside the local academic material exception in `AGENTS.md` section 2.
 
 #### Scenario: Task capture
-- **WHEN** a new task is started
+- **WHEN** a task is outside the local academic material exception
 - **THEN** an OpenSpec change proposal exists and validates before implementation begins
+
+#### Scenario: Local academic edit
+- **WHEN** a task edits only local, Git-ignored academic materials without changing
+  product requirements, code, shared project documentation, or team decisions
+- **THEN** the material is edited on develop and checked as a document without an
+  OpenSpec change or its readiness and acceptance gates
 
 ### Requirement: Planning before implementation
 The system SHALL require a plan produced by the business-analyst agent, including the

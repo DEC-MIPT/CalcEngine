@@ -5,8 +5,9 @@ description: Spec-Driven Development workflow for DEC. Enforces DOR (Definition 
 
 # SDD Workflow (Spec-Driven Development)
 
-Every task in DEC follows this lifecycle through OpenSpec. No code without a change
-proposal.
+Project tasks follow this lifecycle through OpenSpec. For edits that qualify for
+the local academic material exception in `AGENTS.md` section 2, skip the lifecycle
+and check the edited document on `develop`. No code without a change proposal.
 
 ## Lifecycle
 
