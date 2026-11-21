@@ -1,0 +1,100 @@
+# Product measurement
+
+## Purpose
+
+Measure the DEC workflow and service availability in a closed pilot and provide reproducible aggregate evidence for evaluation of the product hypothesis.
+
+## ADDED Requirements
+
+### Requirement: Closed pilot collection
+
+The system SHALL enable measurement only in an operator-configured closed pilot. It SHALL disable collection by default, reject invalid and over-limit event batches, and record no engineering input values, clipboard contents, report contents, personal identifiers or company identifiers. Measurements SHALL be exported only by a local process operator through the protected export command; no public measurement-read endpoint SHALL exist.
+
+#### Scenario: Collection disabled
+
+- **WHEN** DEC runs with default settings
+- **THEN** no measurement is collected and the event endpoint does not accept submissions
+
+#### Scenario: Pilot ingress and validation
+
+- **WHEN** a request reaches the pilot event endpoint from outside the allowed ingress or includes fields outside the versioned event schema
+- **THEN** no observation from that batch is stored
+
+#### Scenario: Public read is unavailable
+
+- **WHEN** a client requests measurement data through the application API
+- **THEN** the application exposes no measurement-read route and raw observations are not returned
+
+#### Scenario: Local export requires process access
+
+- **WHEN** a caller without access to the application runtime and database invokes the export command
+- **THEN** the export is denied by the operating environment and no measurement data is returned
+
+### Requirement: Workflow correlation and completion
+
+The system SHALL correlate browser observations and server operations without treating client observations as authoritative server outcomes. It SHALL count duplicate event deliveries once and detect gaps within observed browser sequences. A workflow starts on first input and completes when the browser receives a DOCX and displays it as ready; neither delivery nor readiness establishes disk persistence or compliance with GOST.
+
+#### Scenario: Duplicate and incomplete delivery
+
+- **WHEN** the same event is accepted twice and the associated workflow sequence has a missing event before its terminal event
+- **THEN** the event counts once, the sequence is flagged incomplete, and sequence-dependent metrics exclude it
+
+#### Scenario: Report delivered without download
+
+- **WHEN** a DOCX response reaches the browser and its ready state is displayed without a subsequent download action
+- **THEN** completion is observable and neither a disk save nor GOST compliance is reported
+
+### Requirement: Timing and workflow metrics
+
+The system SHALL export 1.1 as a provisional active-time measurement, 1.2 and 1.4 through 1.8, 1.11, and 3.1 and 3.2 according to the design metric definitions. It SHALL exclude hidden-tab time and idle gaps longer than five minutes from active duration, and distinguish result display, API response and DOCX generation. The system SHALL count starts with a full 24-hour observation window in the completion denominator, including starts with no observed completion.
+
+#### Scenario: Hidden time and long idle gap
+
+- **WHEN** a complete workflow contains both a hidden-tab interval and an idle interval longer than five minutes
+- **THEN** overlapping excluded time counts once, neither interval contributes to active duration, and full duration is unchanged
+
+#### Scenario: No documented completion
+
+- **WHEN** a recorded start has no terminal observation within 24 hours and the observation cutoff is at least 24 hours after that start
+- **THEN** it remains in the completion denominator and is not counted as complete
+
+### Requirement: Server outcomes and external availability
+
+The system SHALL export 2.1, 2.2, 2.9 and 2.10 separately. Server outcomes SHALL distinguish executed calculations, expected refusals, invalid input and technical failure. Availability SHALL use externally recorded checks of the frontend and synthetic result retrieval in configured working windows and SHALL report missed checks separately.
+
+#### Scenario: Stored refusal versus executed calculation
+
+- **WHEN** two create requests return HTTP 201, one with a refusal and one with a completed result whose engineering check fails
+- **THEN** only the latter is counted as an executed calculation and neither is counted as a server error
+
+#### Scenario: Application unavailable
+
+- **WHEN** the external monitor can run but neither application probe succeeds
+- **THEN** that minute is recorded independently as a failed check rather than a missing check
+
+### Requirement: Reproducible operator export
+
+The system SHALL export a CSV with metric ID, definition version, period, unit, value, sample count, applicable numerator and denominator, and data-quality counts. It SHALL distinguish an unavailable measurement from zero, and reproduce the same rows for the same input observation snapshot, external checks, settings and definition version.
+
+#### Scenario: Empty denominator
+
+- **WHEN** no eligible observations exist for a ratio in the requested period
+- **THEN** the export reports N/A, not zero
+
+### Requirement: Measurement failure isolation and accessibility
+
+The system SHALL preserve existing calculation and report behavior when measurement is disabled, unavailable or overloaded. Business responses SHALL NOT wait for telemetry database writes. Instrumentation SHALL NOT introduce interactive controls, move focus, announce telemetry failures, or delay interface updates.
+
+#### Scenario: Measurement storage unreachable
+
+- **WHEN** only telemetry storage or its writer is unavailable
+- **THEN** calculation and DOCX outcomes are unchanged and the failure or measurement drop is exposed through payload-free operator diagnostics
+
+### Requirement: Measurement diagnostics
+
+The system SHALL expose measurement writer failures, queue drops, rejected batches and incomplete export inputs through structured application diagnostics containing event type, reason, count and UTC time only. Diagnostics SHALL be written through the existing application logging channel and SHALL omit request bodies, field values, report contents, raw paths, correlation UUIDs and authentication material.
+
+#### Scenario: Diagnostic excludes payload
+
+- **WHEN** a telemetry batch is rejected or a writer drops observations
+- **THEN** the structured diagnostic contains the rejection or drop reason and count but no event payload or correlation identifier
