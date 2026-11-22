@@ -3,10 +3,12 @@
 ### Requirement: Expandable steps
 The system SHALL allow each calculation step to be expanded and collapsed on demand, by
 pointer and by keyboard, and SHALL expose the state of each step to assistive technology,
-with controls that expand or collapse every step at once. Steps are expanded when a
-result opens except for loads traces recognized by the complete typed-step signature
-in "Compact loads trace sections", whose details SHALL initially be collapsed.
-Unrecognized or incomplete signatures SHALL retain the flat expanded initial view. A collapsed header SHALL retain the step's identity or declared symbol,
+with controls that expand or collapse every step at once. Every step SHALL initially
+be expanded when a result opens, including recognized loads traces, unrecognized
+traces and derived diagnostic refusals. Grouping SHALL NOT change initial disclosure
+state. Existing playback SHALL still control when each step is revealed and hide
+pending content from keyboard and assistive technology. A collapsed header SHALL
+retain the step's identity or declared symbol,
 kind, stored result with unit and, for a check, text pass/fail. Every step's expression,
 substitutions, result, comparison and recorded normative or engineer source SHALL
 remain available by expanding that step or choosing expand all. Grouping SHALL NOT
@@ -21,12 +23,12 @@ add another disclosure action before a step can be reached.
 - **THEN** the step expands or collapses, and the header's aria-expanded is true while expanded and false while collapsed
 
 #### Scenario: Expanded on open
-- **WHEN** a user opens a completed calculation whose trace does not match the complete typed loads signature
-- **THEN** every step is initially expanded in the existing flat view, and a step the user collapses shows the step's result with its unit in its header
+- **WHEN** a user opens any completed calculation or derived-refused result
+- **THEN** every supplied step is initially expanded when revealed, with its expression, substitutions, result, comparison where applicable and recorded source visible; collapsing a step retains its result with unit in the header
 
-#### Scenario: Compact loads on open
+#### Scenario: Grouped loads on open
 - **WHEN** a completed or derived-refused result whose trace matches the complete typed loads signature opens
-- **THEN** each available step header shows its identity or symbol, kind and stored result with unit, check headers retain text pass/fail, and details start collapsed without omitting any stored step
+- **THEN** each available step header shows its identity or symbol, kind and stored result with unit, check headers retain text pass/fail, and all details start expanded without omitting any stored step
 
 #### Scenario: Expand or collapse all
 - **WHEN** a user chooses expand all or collapse all
@@ -143,13 +145,13 @@ continue to reveal original step headers in order and hide pending steps from
 keyboard and assistive technology; each heading SHALL appear with its first revealed
 step. Playback completion SHALL NOT reset the user's disclosure choices. Derived
 refusals SHALL immediately expose their complete prefix headers, reason and correction
-action, with all diagnostic details available through existing per-step/global
-expansion, without a final output table or bearing verdict. Historical pilot traces
+action, with all diagnostic details initially expanded and still controlled by
+existing per-step/global disclosure, without a final output table or bearing verdict. Historical pilot traces
 SHALL retain their current initial expansion and presentation.
 
 #### Scenario: Completed loads trace grouped without loss
 - **WHEN** a stored completed trace with the complete typed loads signature is presented compactly
-- **THEN** every stored step has exactly one header under its contiguous semantic section, in original order with unchanged anchor indices, and expanding all reveals the complete stored details
+- **THEN** every stored step has exactly one header under its contiguous semantic section, in original order with unchanged anchor indices, and its complete stored details are initially expanded and can be collapsed and reopened
 
 #### Scenario: Unknown or missing non-signature steps
 - **WHEN** a trace with the complete typed loads signature has an unrecognized supplemental step or lacks a recognized non-signature step
@@ -165,7 +167,7 @@ SHALL retain their current initial expansion and presentation.
 
 #### Scenario: Compact derived diagnostic prefix
 - **WHEN** a derived-refused result with the complete typed loads signature opens
-- **THEN** all stored diagnostic headers and their result summaries plus the refusal reason are immediately available without playback or group disclosure, individual/global expansion exposes every stored detail and no final output or bearing verdict is introduced
+- **THEN** all stored diagnostic headers and their result summaries plus the refusal reason are immediately available without playback or group disclosure, all stored details are initially expanded and remain individually/globally collapsible and no final output or bearing verdict is introduced
 
 #### Scenario: Historical pilot remains expanded
 - **WHEN** a foundations_shallow_r result opens

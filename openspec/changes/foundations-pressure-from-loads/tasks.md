@@ -51,7 +51,7 @@ consent; completing a checkbox is not Git consent.
 - [x] 3.3 Display ten outputs, four ordered checks and deciding verdict reason; verify rounded presentation, no recomputation and pass/fail/warning/source states.
 - [x] 3.4 Render engineer_formula and derived diagnostic refusal prefixes; verify no final pressure/bearing-success display, historical bound-refusal behavior, draft eligibility, correction/reveal actions and text/keyboard/reduced-motion accessibility.
 - [x] 3.5 Run frontend automated and browser acceptance; verify frontend/check.sh, >=95% branch coverage, Playwright type/form/result/report journeys, zero-contact/derived-refusal interactions and unchanged pilot journeys.
-- [ ] 3.5a Compact recognized loads traces with initially collapsed step details and contiguous headings inside the existing flat ordered list; verify conservative complete typed-step signature recognition, flat expanded fallback for incomplete/unrecognized traces, all stored steps/order/anchors/results/sources retained, neutral unknown supplemental steps, keyboard/global disclosure, original-index playback/ruler behavior, immediate derived diagnostics and unchanged expanded pilot. Run frontend checks with >=95% branch coverage and focused browser/UI acceptance; bind fresh evidence to the changed revision.
+- [ ] 3.5a Group recognized loads traces with initially expanded step details and contiguous headings inside the existing flat ordered list; verify conservative complete typed-step signature recognition, flat expanded fallback for incomplete/unrecognized traces, all stored steps/order/anchors/results/sources retained, neutral unknown supplemental steps, keyboard/global disclosure, original-index playback/ruler behavior, immediate derived diagnostics and unchanged expanded pilot. Run frontend checks with >=95% branch coverage and focused browser/UI acceptance; bind fresh evidence to the changed revision.
 - [ ] 3.6 Obtain ui-ux-tester confirmation and separate tester GO; verify resolved visual/control/accessibility findings and current automated/browser evidence names the reviewed feature revision.
 
 ## 4. Review, integration and closure
@@ -127,7 +127,8 @@ validation alone do not declare DOR, feature GO or calculation correctness.
 
 ## Compact trace follow-up readiness and acceptance
 
-The user requested a more compact trace in the working conversation on 2026-11-18.
+The user requested a more compact trace in the working conversation on 2026-11-18
+and explicitly required all steps expanded by default on 2026-11-22.
 Task 3.5a refines presentation inside the existing frontend feature and branch; it
 changes no calculation method, source contract or backend ownership. Proposal,
 design and transparent-output delta define the bounded deliverable. Implementation
@@ -135,14 +136,14 @@ requires strict validation and a current spec-reviewer report without blocker or
 major findings on these revised artifacts. Prior DOR/reviews remain evidence for
 unchanged scope, not approval of the new presentation amendment.
 
-Acceptance requires component coverage for initial collapsed loads details versus
-expanded pilot, exact original step sequence and stable indices, complete typed
+Acceptance requires component coverage for initially expanded details in all traces,
+including completed and derived-refused loads and the pilot, exact original step sequence and stable indices, complete typed
 signature recognition without values/expression heuristics, flat expanded fallback
 for absent/duplicate/wrong-kind signature members, unknown supplemental steps and
 missing non-signature group members, individual/global keyboard disclosure, unchanged stored
 field rendering, refusal immediacy and original-index playback/ruler navigation.
 Browser/UI checks cover completed and derived-refused loads at desktop and 320 px,
-readable MathJax after expansion, no horizontal overflow, accessibility and
+readable MathJax on initial reveal and after reopening, no horizontal overflow, accessibility and
 reduced motion, plus the historical pilot. Existing safe rendering, performance
 and >=95% branch coverage gates continue to apply.
 

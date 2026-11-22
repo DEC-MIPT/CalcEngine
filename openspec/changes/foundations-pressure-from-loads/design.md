@@ -241,11 +241,14 @@ text or adding an API field. A missing, duplicate or wrong-kind signature member
 uses the existing flat, initially expanded trace. Unknown supplemental steps do
 not invalidate an otherwise complete signature.
 
-For a trace with that signature, initialize every step's details as collapsed. Its header retains the stored step identity/symbol, kind, result and
-unit, plus text pass/fail for a check, using the existing rounding and safe MathJax
-presentation rules. Existing per-step disclosure and expand/collapse-all controls
-remain. Expansion reveals the original expression, all substitutions, comparison,
-result and source attribution. The pilot retains initially expanded steps.
+Initialize every trace step's details as expanded, including recognized loads,
+unrecognized traces and derived refusals. Its header retains the stored step
+identity/symbol, kind, result and unit, plus text pass/fail for a check, using the
+existing rounding and safe MathJax presentation rules. The original expression,
+all substitutions, comparison, result and source attribution are visible when the
+step is revealed. Per-step disclosure and expand/collapse-all controls remain;
+a user can collapse details and reopen them without affecting other steps.
+Signature recognition selects semantic grouping only, never initial disclosure.
 
 Add non-collapsible semantic headings inside the existing flat ordered list over
 contiguous steps: resistance R;
@@ -270,7 +273,7 @@ heading appears with its first revealed step and must not expose pending details
 Neither playback completion nor grouping resets disclosure choices. A derived
 refusal bypasses playback as before: its complete stored prefix headers, readable
 reason and correction action are immediately available, with every diagnostic
-field available by individual or global expansion. No group-level action is
+field initially expanded. No group-level action is
 needed to reach a step. Source component and engineer-rule rows remain separate,
 even when their numeric values coincide. This is presentation compaction, with
 unchanged API payloads, calculation data and DOCX output.

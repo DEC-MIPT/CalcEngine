@@ -812,3 +812,92 @@ The commit secret-scan hook passed. Selected/all strict validation is rerun for
 publication. Push is authorized; frontend integration and archive are not performed.
 The requested switch to develop preserves the auxiliary documentation checkout
 by detaching it at its committed revision after publication.
+
+
+## Expanded trace default readiness, 2026-11-22
+
+READY for the revised default-disclosure scope of task 3.5a. Akim explicitly
+requested all trace steps expanded by default. Semantic grouping, individual/global
+collapse and original playback accessibility remain. Current spec-reviewer reports
+zero blocker, major or minor findings; selected/all strict validation passes, 24/24.
+Prior collapsed-default reports remain historical. New code/test and UI acceptance
+is pending; no change to task 3.6 or the full-browser compatibility requirement.
+
+
+## Expanded-default scoped acceptance, 2026-11-22
+
+Tester verdict: scoped PASS for restoring initially expanded trace details, with
+UI confirmation. Every step starts expanded, including the recognized loads trace
+and derived diagnostic prefix. Semantic sections, stored values/source expressions,
+original indices, manual/global collapse and pending-playback accessibility remain.
+
+The final full run passed 709 tests in 68 files; API/fixture drift, ESLint and
+TypeScript passed. Branch coverage is 820/822 (99.75%) overall and 56/56 (100%)
+for changed Trace.tsx. Focused Playwright passed 18/18 across installed Chromium,
+Firefox and WebKit at desktop/320 px. UI checked 24 mocked pages with zero axe
+violations, page errors or overflow; three playback checks passed. Live screen
+reader and the branded two-version browser matrix were not tested. The initial
+two failed H4-count assertions were corrected to count actual step headers rather
+than visible source headings; the final full run passed without a production fix.
+
+The three-file reviewed manifest and logs are retained beside the Russian frontend
+journal. This scoped verdict does not close the entire pre-existing task 3.5a or
+3.6 and does not replace their remaining feature-level gates. Whole-feature NO-GO
+remains in force; no commit, push, merge or source-status promotion was performed.
+
+
+## External pressure-source comparison, 2026-11-22
+
+The confirmed comparison of NCFU, official SCAD documentation and the accessible
+MGSU-titled fragment establishes no new admitted pressure reference or methodology
+change. The current pressure-only engine path remains N/A+20d, with N excluding
+foundation/soil weight and d independent from the transfer arm h and R input d_1.
+The Russian frontend journal owns the detailed audit, source URLs/pages, independent
+arithmetic and retained evidence; see its "Сопоставление p с СКФУ, SCAD и фрагментом
+МГСУ, 2026-11-22" entry in the existing develop worktree.
+
+NCFU's general expression includes foundation and soil weights explicitly, but its
+worked example does not derive their separate volumes. Its printed p=235.7 kPa is
+reconstructed from the displayed allowance 6.76*1.5*24. With the explicitly conditional
+mapping N=1350, b=l=2.6, d=h=1.5, DEC produces p=229.704142 kPa and the reconstruction
+235.704142 kPa, a -6 kPa difference. This is not a bearing-verdict comparison. The
+source references SP22.13330.2011 and contains inconsistent arithmetic/coefficients,
+footing-offset values and an incorrect printed inequality. It is not admitted as
+a full independent oracle.
+
+SCAD documents N on the foundation cut, averaged foundation/soil/floor unit weight
+2 T/m3 and mean pressure including those weights. No runtime result, explicit
+mean-p formula/complete geometry mapping or matching numeric example was verified;
+only conceptual correspondence is established. Exact unit conversion must not be
+replaced by assuming 2 T/m3 equals 20 kN/m3 numerically.
+
+The open MGSU-titled fragment directly states p=(N+Q+G)/A and, before geometry is
+known, the approximation Q+G=A*d*20, with d being assumed embedment depth (printed
+p12/PDF9). This matches DEC algebra only under aligned input meanings. It does not
+provide a complete numerical pressure oracle. The full official book was inaccessible;
+the fragment lacks title/copyright pages, so its exact identity with the cataloged
+2020 edition remains unconfirmed. The earlier broad claim of complete reference
+availability is not retained.
+
+No engineering input, formula, prepared coefficient, reference expectation, norm
+status, task completion or GO changed. Existing source conflicts remain explicit.
+A future exact-weight mode would require a separately agreed engineering/input
+contract; it was not implemented. No commit, push or merge was performed.
+
+
+## Hidrafter competitor pressure audit, 2026-11-22
+
+The requested public-service audit is recorded in the existing Russian frontend
+journal with live screenshots, displayed reports and the public bundle digest.
+A live central probe N=600 kN, A=6 m2, H=d=1 m, gammaF=1, q=0, no moments
+or shear produced p=124 kPa. DEC's corresponding pressure model gives 120 kPa.
+The competitor uses G=20*1.2*A*max(H,d), divides entered full loads by gammaF
+for the group-II pressure path, and adds q separately. This comparison does not
+certify the competitor's normative compliance or admit it as a reference oracle.
+
+The live default report's displayed Ntot=NII+G formula omits q, although its
+numeric result and public JavaScript include q*A/gammaF. Its moment-axis/sign
+convention and the biaxial maximum-pressure check also differ from DEC. The
+competitor exposes broader design/settlement/seismic modes; those implementations
+were not verified in this pressure-focused audit. No coefficient, input contract,
+source status, code, task completion or GO changed; Git publication was not requested.
