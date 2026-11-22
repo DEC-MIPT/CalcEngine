@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { CheckCircle, XCircle } from '@phosphor-icons/react'
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
@@ -32,10 +33,11 @@ export function StoredChecks({
   symbols?: ReadonlyMap<string, string>
 }) {
   const { t } = useI18n()
+  const title = useId()
   const pending = reveal === 'pending'
   return (
-    <section aria-labelledby="checks-title" className="mt-8 grid min-w-0 gap-3" data-reveal={reveal}>
-      <h2 id="checks-title">{t('checks.title')}</h2>
+    <section aria-labelledby={title} className="mt-8 grid min-w-0 gap-3" data-reveal={reveal}>
+      <h2 id={title}>{t('checks.title')}</h2>
       <div className="relative min-w-0">
         {pending && <Checking marker="checks" />}
         <div inert={pending} className={pending ? 'invisible' : undefined}>

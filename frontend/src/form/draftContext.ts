@@ -10,7 +10,11 @@ export interface SentForm {
   type: string
 }
 
+export type CandidateDraft = { id: number; b: string; l: string; bUnit: string; lUnit: string }
+
 export interface Draft {
+  candidates: readonly CandidateDraft[]
+  setCandidates: (candidates: readonly CandidateDraft[]) => void
   read: (type: string) => FormDraft
   setValue: (type: string, name: string, text: string) => void
   setUnit: (type: string, name: string, unit: string) => void

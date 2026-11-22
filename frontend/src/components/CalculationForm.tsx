@@ -10,6 +10,7 @@ import { unitLabel } from '@/i18n/units'
 import { prefersReducedMotion, withMinimumDuration } from '@/lib/motion'
 import { toBaseUnit } from '@/lib/unitFactors'
 import { parseValue, type ParseError } from '@/form/parseValue'
+import { CANDIDATE_LIMIT, LOADS_TYPE, selectionPolicy, WEIGHTS_TYPE } from '@/lib/foundationDesign'
 import { useDraft } from '@/form/draftContext'
 import type { FormCorrectionState } from '@/form/correction'
 import { mapFieldErrors } from '@/form/serverErrors'
@@ -21,6 +22,8 @@ import { Formula } from './Formula'
 import { LoadsDirections } from './LoadsDirections'
 import { DerivedCorrectionNote } from './DerivedCorrectionNote'
 import { QuantityText, UnitText } from './Quantity'
+import { candidateFieldId, readCandidates, selectionErrors } from '@/form/foundationCandidates'
+import { CandidateFields } from './CandidateFields'
 import { Button } from './ui/button'
 
 type CalculationType = components['schemas']['CalculationTypeView']
@@ -163,10 +166,13 @@ function Field({ input, value, unit, error, bound, derived, locked, index, onVal
   )
 }
 
-export function CalculationForm({ type }: { type: CalculationType }) {
+export function CalculationForm({ type, searching: selectionRequested = false }: { type: CalculationType; searching?: boolean }) {
+  const searching = selectionRequested && type.name === LOADS_TYPE
+  const inputsToShow = searching ? type.inputs.filter(({ name }) => name !== 'b' && name !== 'l') : type.inputs
   const { t } = useI18n()
   const navigate = useNavigate()
   const draft = useDraft()
+  const candidateRows = draft.candidates
   const { values, units } = draft.read(type.name)
   const location = useLocation()
   const routeState = location.state as FormCorrectionState | null
@@ -184,6 +190,20 @@ export function CalculationForm({ type }: { type: CalculationType }) {
   const [submitting, setSubmitting] = useState(false)
   const [computing, setComputing] = useState(false)
   const inFlight = useRef(false)
+  const pendingSearch = useRef<AbortController | null>(null)
+  const [candidateErrors, setCandidateErrors] = useState<Record<string, string>>({})
+  const [cancelled, setCancelled] = useState(false)
+  const focusTarget = useRef<string | null>(null)
+  useEffect(() => () => {
+    const request = pendingSearch.current
+    pendingSearch.current = null
+    request?.abort()
+  }, [])
+  useEffect(() => {
+    if (submitting || !focusTarget.current) return
+    document.getElementById(focusTarget.current)?.focus()
+    focusTarget.current = null
+  }, [submitting])
   const stage = useSendingHints(submitting)
 
   async function send() {
@@ -191,7 +211,7 @@ export function CalculationForm({ type }: { type: CalculationType }) {
     clearDerivedCorrection()
     const inputs: Record<string, Quantity> = {}
     const invalid: Record<string, string> = {}
-    for (const input of type.inputs) {
+    for (const input of inputsToShow) {
       const parsed = parseValue(values[input.name] ?? '', input.whole_values_only)
       if (parsed.ok) {
         inputs[input.name] = { value: parsed.value, unit: units[input.name] ?? input.base_unit }
@@ -202,13 +222,50 @@ export function CalculationForm({ type }: { type: CalculationType }) {
     setErrors(invalid)
     setGeneral([])
     setFailure(null)
-    const first = type.inputs.find((input) => input.name in invalid)
+    setCancelled(false)
+    const candidates = searching ? readCandidates(candidateRows, t) : null
+    setCandidateErrors(candidates?.errors ?? {})
+    const first = inputsToShow.find((input) => input.name in invalid)
     if (first) {
       document.getElementById(fieldId(first.name))?.focus()
       return
     }
 
+    if (candidates && (Object.keys(candidates.errors).length || candidates.values.length < 1 || candidates.values.length > CANDIDATE_LIMIT)) {
+      const invalidCandidate = Object.keys(candidates.errors)[0]
+      if (invalidCandidate) document.getElementById(candidateFieldId(invalidCandidate))?.focus()
+      return
+    }
+
     inFlight.current = true
+    if (candidates) {
+      const controller = new AbortController()
+      pendingSearch.current = controller
+      setSubmitting(true)
+      const result = await unwrap(api.POST('/foundation-selections', {
+        body: { ...selectionPolicy, common_inputs: inputs, candidates: candidates.values },
+        signal: controller.signal,
+      }))
+      if (pendingSearch.current !== controller) return
+      pendingSearch.current = null
+      inFlight.current = false
+      setSubmitting(false)
+      if (result.ok) {
+        void navigate(`/foundation-selections/${encodeURIComponent(result.data.selection_id)}`)
+      } else if (result.error.kind === 'api' && result.error.status === 422) {
+        const mapped = selectionErrors(result.error.fields, inputsToShow, draft.candidates)
+        setErrors(mapped.byField)
+        setCandidateErrors(mapped.byCandidate)
+        setGeneral(mapped.general.length || Object.keys(mapped.byField).length || Object.keys(mapped.byCandidate).length ? mapped.general : [result.error.message])
+        const input = Object.keys(mapped.byField)[0]
+        const candidate = Object.keys(mapped.byCandidate)[0]
+        if (input) focusTarget.current = fieldId(input)
+        else if (candidate) focusTarget.current = candidateFieldId(candidate)
+      } else {
+        setFailure(result.error)
+      }
+      return
+    }
     const animated = !prefersReducedMotion()
     setComputing(animated)
     setSubmitting(true)
@@ -238,6 +295,15 @@ export function CalculationForm({ type }: { type: CalculationType }) {
     } else {
       setFailure(result.error)
     }
+  }
+
+  function cancelSearch() {
+    const controller = pendingSearch.current
+    pendingSearch.current = null
+    controller?.abort()
+    inFlight.current = false
+    setSubmitting(false)
+    setCancelled(true)
   }
 
   function submit(event: FormEvent) {
@@ -273,10 +339,11 @@ export function CalculationForm({ type }: { type: CalculationType }) {
     setErrors((current) => Object.fromEntries(Object.entries(current).filter(([key]) => key !== name)))
   }
 
-  const invalidCount = Object.keys(errors).length
+  const invalidCount = Object.keys(errors).length + Object.keys(candidateErrors).length
   return (
-    <form noValidate onSubmit={submit} className={`grid gap-4 ${computing ? 'computing' : ''}`}>
-      {type.name === 'foundations_shallow_loads' && <LoadsDirections />}
+    <form noValidate onSubmit={submit} className={`grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 ${computing ? 'computing' : ''}`}>
+      {(type.name === LOADS_TYPE || type.name === WEIGHTS_TYPE) && <LoadsDirections explicit={type.name === WEIGHTS_TYPE} />}
+      {searching && <p>{t('foundation.policy')}</p>}
       {general.length > 0 && (
         <div role="alert" className="max-w-2xl border border-destructive bg-destructive-surface p-4">
           <p className="font-medium">{t('form.rejected')}</p>
@@ -307,7 +374,7 @@ export function CalculationForm({ type }: { type: CalculationType }) {
             <span className="w-24 px-2.5">{t('form.unit')}</span>
           </span>
         </div>
-        {type.inputs.map((input, index) => (
+        {inputsToShow.map((input, index) => (
           <Field
             key={input.name}
             index={index}
@@ -326,6 +393,14 @@ export function CalculationForm({ type }: { type: CalculationType }) {
           />
         ))}
       </div>
+      {searching && (
+        <CandidateFields candidates={candidateRows} errors={candidateErrors} locked={submitting}
+          dimensions={type.inputs.filter(({ name }) => name === 'b' || name === 'l')}
+          onChange={(next) => {
+            draft.setCandidates(next)
+            setCandidateErrors({})
+          }} />
+      )}
       <div className={row}>
         {computing && (
           <div className="col-span-full row-start-2 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:self-start">
@@ -339,14 +414,18 @@ export function CalculationForm({ type }: { type: CalculationType }) {
             aria-busy={submitting ? true : undefined}
             className="w-full aria-disabled:cursor-not-allowed aria-disabled:opacity-60 aria-disabled:active:translate-y-0"
           >
-            {t(submitting ? 'form.submitting' : 'form.submit')}
+            {t(searching ? 'foundation.search' : submitting ? 'form.submitting' : 'form.submit')}
           </Button>
           <span aria-hidden="true" className="block h-0.5 bg-border">
             {submitting && <span className="send-rule" />}
           </span>
           <p role="status" className="min-h-5 text-sm text-muted-foreground">
-            {stage && t(stageText[stage])}
+            {searching ? (submitting ? t('foundation.pending') : cancelled ? t('foundation.cancelled') : null) : stage && t(stageText[stage])}
           </p>
+          {searching && submitting && <>
+            <Button type="button" onClick={cancelSearch}>{t('foundation.cancel')}</Button>
+            <p className="text-sm">{t('foundation.cancelNote')}</p>
+          </>}
         </div>
       </div>
     </form>

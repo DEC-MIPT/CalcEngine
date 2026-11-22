@@ -10,6 +10,8 @@ import { DerivedRefusal, Refusal } from '@/components/Refusal'
 import { ErrorState, LoadingState, NotFoundState } from '@/components/RequestStates'
 import { Trace } from '@/components/Trace'
 import { TraceRuler } from '@/components/TraceRuler'
+import { isFoundationType } from '@/lib/foundationDesign'
+import { FoundationEvidence } from '@/components/FoundationEvidence'
 import { EditInputsLink } from '@/components/EditInputsLink'
 import { buttonClass, secondaryButtonClass } from '@/components/ui/button'
 import { VerdictStamp, type StampReveal } from '@/components/VerdictStamp'
@@ -166,6 +168,9 @@ export function ResultScreen() {
               editType={editType}
               types={typesState.status === 'ok' ? typesState.data : undefined}
             />
+          )}
+          {(isFoundationType(editType) || state.data.trace.some((step) => step.step_id === 'Mx_base')) && (
+            <FoundationEvidence resultId={state.data.result_id} inputHash={state.data.input_hash} />
           )}
         </>
       )}

@@ -86,6 +86,20 @@ describe('loads fixture generation command', () => {
     expect(harness.write).not.toHaveBeenCalled()
   })
 
+  it('checks the generated design fixtures with the design exporter', async () => {
+    process.argv.push('--design', '--check')
+    harness.read.mockImplementation((path: string) => path.endsWith('export-design-fixtures.py') ? 'design exporter source' : 'stale')
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    await runGenerator()
+
+    expect(harness.execute.mock.calls[0][1]).toEqual(['-c', 'design exporter source'])
+    expect(harness.read).toHaveBeenCalledWith(expect.stringMatching(/src\/mocks\/designFixtures\.ts$/), 'utf8')
+    expect(errors).toHaveBeenCalledWith(expect.stringContaining('designFixtures.ts is out of date'))
+    expect(process.exitCode).toBe(1)
+    expect(harness.write).not.toHaveBeenCalled()
+  })
+
   it('propagates backend export failures without writing fabricated data', async () => {
     harness.execute.mockImplementation(() => {
       throw new Error('backend export failed')

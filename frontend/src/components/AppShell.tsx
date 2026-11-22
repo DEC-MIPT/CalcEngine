@@ -5,7 +5,7 @@ import { I18nProvider } from '@/i18n/I18nProvider'
 import { useI18n } from '@/i18n/context'
 import { LanguageSwitch } from './LanguageSwitch'
 
-export type Crumb = 'form' | 'result' | 'report' | 'notFound'
+export type Crumb = 'form' | 'selection' | 'result' | 'report' | 'notFound'
 
 const SHORT_ID = 8
 const SHOW_LANGUAGE_SWITCH = false
@@ -53,7 +53,7 @@ function Trail() {
                   <CrumbLabel crumb={crumb} id={id} />
                 </span>
               ) : (
-                <Link to={`/calculations/${id}`}>
+                <Link to={`${crumb === 'selection' ? '/foundation-selections' : '/calculations'}/${encodeURIComponent(id ?? '')}`}>
                   <CrumbLabel crumb={crumb} id={id} />
                 </Link>
               )}

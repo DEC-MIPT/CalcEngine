@@ -1,7 +1,7 @@
 import { useId } from 'react'
 import { useI18n } from '@/i18n/context'
 
-export function LoadsDirections() {
+export function LoadsDirections({ explicit = false }: { explicit?: boolean }) {
   const { t } = useI18n()
   const id = useId()
   const heading = `${id}-heading`
@@ -50,12 +50,12 @@ export function LoadsDirections() {
           <div className="grid gap-2">
             <h3 className="font-semibold">{t('loads.directions.signs')}</h3>
             <p>{t('loads.directions.variation')}</p>
-            <p className="font-mono">Mx_base = Mx + Qx·h<br />My_base = My + Qy·h</p>
-            <p>{t('loads.directions.transfer')}</p>
+            <p className="font-mono">Mx_base = Mx + Qx·h{explicit && ' + Mx_add_base'}<br />My_base = My + Qy·h{explicit && ' + My_add_base'}</p>
+            <p>{t(explicit ? 'foundation.explicitHint' : 'loads.directions.transfer')}</p>
           </div>
           <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-2">
-            <dt className="font-mono">N</dt><dd>{t('loads.directions.weight')}</dd>
-            <dt className="font-mono">d</dt><dd>{t('loads.directions.d')}</dd>
+            {!explicit && <><dt className="font-mono">N</dt><dd>{t('loads.directions.weight')}</dd>
+            <dt className="font-mono">d</dt><dd>{t('loads.directions.d')}</dd></>}
             <dt className="font-mono">h</dt><dd>{t('loads.directions.h')}</dd>
             <dt className="font-mono">d_1</dt><dd>{t('loads.directions.d1')}</dd>
             <dt className="font-mono">d_b</dt><dd>{t('loads.directions.db')}</dd>

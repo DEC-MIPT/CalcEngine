@@ -95,6 +95,7 @@ function TraceStep({
   normStatus,
   compact,
   sectionTitle,
+  anchorPrefix,
 }: {
   step: Step
   index: number
@@ -106,13 +107,14 @@ function TraceStep({
   normStatus: boolean
   compact: boolean
   sectionTitle?: string
+  anchorPrefix: string
 }) {
   const { t } = useI18n()
   const detailsId = useId()
   const StepHeading = compact ? 'h4' : 'h3'
   return (
     <li
-      id={`trace-step-${index}`}
+      id={`${anchorPrefix}-step-${index}`}
       className={`data-row scroll-mt-4 not-last:border-b not-last:border-border${ARRIVAL_CLASS[arrival]}`}
       data-step={step.step_id}
       data-arrival={arrival}
@@ -212,6 +214,7 @@ export function Trace({
   normStatus = true,
   title,
   description,
+  anchorPrefix = 'trace',
 }: {
   steps: readonly Step[]
   unverifiedStepCount: number
@@ -221,6 +224,7 @@ export function Trace({
   normStatus?: boolean
   title?: string
   description?: string
+  anchorPrefix?: string
 }) {
   const { t, formatNumber } = useI18n()
   const table = useMemo(() => symbols ?? symbolTable(steps), [symbols, steps])
@@ -234,8 +238,8 @@ export function Trace({
       return next
     })
   return (
-    <section aria-labelledby="trace-title" className="mt-8 grid gap-4" data-playback={playback?.phase ?? 'idle'}>
-      <h2 id="trace-title" tabIndex={-1} className="scroll-mt-4">
+    <section aria-labelledby={`${anchorPrefix}-title`} className="mt-8 grid gap-4" data-playback={playback?.phase ?? 'idle'}>
+      <h2 id={`${anchorPrefix}-title`} tabIndex={-1} className="scroll-mt-4">
         {title ?? t('trace.title')}
       </h2>
       {description && <p className="max-w-prose text-sm">{description}</p>}
@@ -272,6 +276,7 @@ export function Trace({
             key={`${step.step_id}-${index}`}
             step={step}
             index={index}
+            anchorPrefix={anchorPrefix}
             expanded={expanded.has(index)}
             onToggle={() => toggle(index)}
             arrival={arrivalOf(index, playback)}

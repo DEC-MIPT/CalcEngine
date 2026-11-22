@@ -12,9 +12,20 @@ import {
   WARNING_ID,
   warningEnvelope,
   LOADS_TYPE,
+  weightsCentralEnvelope,
+  weightsOneAxisEnvelope,
+  weightsBiaxialEnvelope,
+  weightsContactRefusalEnvelope,
   loadsCalculationType,
   loadsScenarios,
 } from './fixtures'
+import { selectionPolicy, WEIGHTS_TYPE } from '../lib/foundationDesign'
+import {
+  loadsCentralContext, loadsContactRefusalContext, selectionWinnerContext,
+  selectionSelected, selectionExhausted, selectionIncomplete,
+  weightsCentralContext, weightsCentralRequest, weightsOneAxisContext, weightsOneAxisRequest,
+  weightsBiaxialContext, weightsBiaxialRequest, weightsContactRefusalContext, weightsContactRefusalRequest,
+} from './designFixtures'
 
 type CalculationRequest = components['schemas']['CalculationRequest']
 type ErrorBody = components['schemas']['ErrorBody']
@@ -27,12 +38,26 @@ const METRES: Record<string, number> = { m: 1, cm: 0.01, mm: 0.001 }
 const METHOD_MAX_B_M = refusedEnvelope.verdict_reason.bound.value
 const VALIDATED_MAX_B_M = warningEnvelope.warnings[0].bound.value
 
+const weightsRecords = [
+  { request: weightsCentralRequest, envelope: weightsCentralEnvelope, context: weightsCentralContext },
+  { request: weightsOneAxisRequest, envelope: weightsOneAxisEnvelope, context: weightsOneAxisContext },
+  { request: weightsBiaxialRequest, envelope: weightsBiaxialEnvelope, context: weightsBiaxialContext },
+  { request: weightsContactRefusalRequest, envelope: weightsContactRefusalEnvelope, context: weightsContactRefusalContext },
+]
+const selectionRecords: components['schemas']['FoundationSelectionResult'][] = [selectionSelected, selectionExhausted, selectionIncomplete]
+const winner = selectionRecords[0].outcomes[selectionSelected.selected_candidate_index].envelope
+const contexts = new Map([
+  ...weightsRecords.map(({ context }) => context), loadsCentralContext, loadsContactRefusalContext, selectionWinnerContext,
+].map((record) => [record.context.result_id, record] as const))
+
 const envelopes: Record<string, Envelope> = {
   [PASS_ID]: passEnvelope,
   [FAIL_ID]: failEnvelope,
   [REFUSED_ID]: refusedEnvelope,
   [WARNING_ID]: warningEnvelope,
   ...Object.fromEntries(loadsScenarios.map(({ envelope }) => [envelope.result_id, envelope])),
+  ...Object.fromEntries(weightsRecords.map(({ envelope }) => [envelope.result_id, envelope])),
+  ...(winner ? { [winner.result_id]: winner } : {}),
 }
 
 const serializedLoads: Record<string, string> = Object.fromEntries(
@@ -98,6 +123,23 @@ function invalidSchema(location: (string | number)[], message: string) {
   })
 }
 
+function quantitiesMatch(given: Record<string, unknown>, stored: Record<string, Quantity>) {
+  return Object.keys(given).length === Object.keys(stored).length && Object.entries(stored).every(([key, quantity]) => {
+    const item = given[key]
+    return isRecord(item) && Object.keys(item).length === 2 && item.value === quantity.value && item.unit === quantity.unit
+  })
+}
+
+function mockUnavailable() {
+  return error(422, { code: 'mock_fixture_unavailable', message: 'No recorded mock result matches these inputs.' })
+}
+
+function reportResponse(file: string) {
+  return new HttpResponse(new Uint8Array([0x50, 0x4b, 0x03, 0x04]), {
+    headers: { 'Content-Type': DOCX, 'Content-Disposition': `attachment; filename="${file}"` },
+  })
+}
+
 export const serviceUnavailable = http.post('*/calculations', () =>
   error(503, {
     code: 'parameter_source_unavailable',
@@ -107,6 +149,36 @@ export const serviceUnavailable = http.post('*/calculations', () =>
 
 export const handlers = [
   http.get('*/calculation-types', () => HttpResponse.json(calculationTypes)),
+
+
+  http.get('*/foundation-calculations/:id/context', ({ params }) => {
+    const context = contexts.get(String(params.id))
+    return context ? HttpResponse.json(context) : error(404, {
+      code: 'foundation_context_unavailable', message: 'No stored visualization context.',
+    })
+  }),
+  http.get('*/foundation-selections/:id', ({ params }) => {
+    const result = selectionRecords.find((item) => item.selection_id === params.id)
+    return result ? HttpResponse.json(result) : error(404, { code: 'not_found', message: 'The requested selection does not exist.' })
+  }),
+  http.post('*/foundation-selections', async ({ request }) => {
+    const body: unknown = await request.json().catch(() => null)
+    if (!isRecord(body) || !Object.entries(selectionPolicy).every(([key, value]) => body[key] === value)) {
+      return invalidSchema(['body'], 'Expected averaged weights and the approved selection policy.')
+    }
+    const { candidates, common_inputs: common } = body
+    if (!Array.isArray(candidates) || candidates.length < 1 || candidates.length > 256 || !isRecord(common)) {
+      return invalidSchema(['body', 'candidates'], 'Expected 1–256 candidates and common inputs.')
+    }
+    const result = selectionRecords.find(({ request: saved }) => (
+      quantitiesMatch(common, saved.common_inputs) && candidates.length === saved.candidates.length
+      && saved.candidates.every((candidate, index) => isRecord(candidates[index]) && quantitiesMatch(candidates[index], candidate))
+    ))
+    return result ? HttpResponse.json(result, { status: 201, headers: { Location: `/foundation-selections/${result.selection_id}` } }) : mockUnavailable()
+  }),
+  http.post('*/foundation-selections/:id/report', ({ params }) => selectionRecords.some((item) => item.selection_id === params.id)
+    ? reportResponse('foundation-selection-report.docx')
+    : error(404, { code: 'not_found', message: 'The requested selection does not exist.' })),
 
   http.post('*/calculations', async ({ request }) => {
     let body: unknown
@@ -151,13 +223,10 @@ export const handlers = [
       }
       quantities[name] = { value: value.value, unit: value.unit }
     }
-    const envelope = calculation_type === LOADS_TYPE ? loadsScenario(quantities) : pilotScenario(quantities)
-    if (!envelope) {
-      return error(422, {
-        code: 'mock_fixture_unavailable',
-        message: 'No recorded mock result matches these inputs.',
-      })
-    }
+    const envelope = calculation_type === LOADS_TYPE ? loadsScenario(quantities)
+      : calculation_type === WEIGHTS_TYPE ? weightsRecords.find(({ request }) => quantitiesMatch(quantities, request.inputs))?.envelope
+      : pilotScenario(quantities)
+    if (!envelope) return mockUnavailable()
     return envelopeResponse(envelope, 201, `/calculations/${envelope.result_id}`)
   }),
 
@@ -172,11 +241,6 @@ export const handlers = [
     if (!lookup(params.id)) {
       return error(404, { code: 'not_found', message: 'The requested resource does not exist.' })
     }
-    return new HttpResponse(new Uint8Array([0x50, 0x4b, 0x03, 0x04]), {
-      headers: {
-        'Content-Type': DOCX,
-        'Content-Disposition': 'attachment; filename="report.docx"',
-      },
-    })
+    return reportResponse('report.docx')
   }),
 ]
