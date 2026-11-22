@@ -48,7 +48,7 @@ Every code task belongs to exactly one feature above. Backend integrates before 
 ## 4. Review, integration and closure
 
 - [x] 4.1 Review the completed backend after tester GO; verify all section-2 tasks complete, independent references, unchanged executor/pilot and no open blocker/major/security finding.
-- [ ] 4.2 With explicit consent, integrate accepted backend and verify actual develop DB/API/report/source behavior, recording every unavailable catalog check separately.
+- [x] 4.2 With explicit consent, integrate accepted backend and verify actual develop DB/API/report/source behavior, recording every unavailable catalog check separately.
 - [ ] 4.3 Review the completed frontend after tester GO/UI confirmation; verify all section-3 tasks complete, correct backend compatibility and no open blocker/major/security finding.
 - [ ] 4.4 With explicit consent, integrate accepted frontend and run actual-develop integrated checks, candidate and check-only journeys, report verification and strict validation.
 - [ ] 4.5 After all features are accepted and integrated, sync canonical specs and archive this change; verify no unchecked task, accurate provenance/limits and final strict validation.

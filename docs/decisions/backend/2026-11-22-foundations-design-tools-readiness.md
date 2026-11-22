@@ -175,3 +175,32 @@ migration and catalog integration remain unverified and are recorded as
 environment-dependent skips. Orchestrator review and integration into `develop`
 passed with no blocker, major or security finding. Integration into `develop`,
 commit and push remain pending explicit consent.
+
+## Integrated backend verification, 2026-11-22
+
+Task 4.2 is complete with the environment limitations below. Akim authorized the
+feature commit/push, merge into develop and publication in the working conversation.
+Feature commit 6d830d0 is integrated through merge fb0a448; origin/develop contains
+the documentation commit 53b91ac. The earlier pending-integration statement is
+superseded by this verified integration record.
+
+On develop at 53b91ac, backend/check.sh passes Ruff, mypy, all five import
+contracts and 1757 tests, with 11 skips in 147.76 seconds. Actual branch coverage
+is 974/976 (99.80%); combined coverage is 99.95%. The tester independently audited
+the integrated evidence and confirmed PASS / GO. The full suite includes the
+three admitted references through the runner, API, persistence and DOCX,
+candidate-search controls, strict interim sources and isolated SQLite migration.
+Normative source statuses remain unverified; no source status is promoted.
+
+Unavailable checks are recorded separately:
+
+- Application PostgreSQL: DEC_TEST_APP_DATABASE_URL is unset; application-result
+  PostgreSQL integration and live PostgreSQL migration remain unverified.
+- Normative catalog: DEC_TEST_NORMATIVES_DATABASE_URL is unset; PostgreSQL catalog
+  queries and the catalog fixture check are skipped.
+- Ingested catalog: DEC_TEST_INGESTED_NORMATIVES_DATABASE_URL is unset; ingested
+  catalog integration and its seven verification-property tests are skipped.
+
+No application database migration was run. SQLite checks do not verify PostgreSQL.
+The dependent frontend still waits for accepted integration of the preceding
+loads frontend; the change is not ready for archive.
