@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 const PASS_ID = '11111111-1111-4111-8111-111111111111'
-const UNKNOWN_ID = '99999999-9999-4999-8999-999999999999'
+const UNKNOWN_ID = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'
 
 const FIELDS = {
   'Обозначение документа': 'ДЕК-2026-001-РР',

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { LOADS_TYPE, loadsCentralEnvelope, loadsCentralInputs, loadsContactRefusalEnvelope, loadsContactRefusalInputs } from '../src/mocks/loadsFixtures'
 
 const PASS_ID = '11111111-1111-4111-8111-111111111111'
 const RUNS = 20
@@ -79,9 +80,9 @@ async function measure(page: Page, run: (page: Page) => Promise<number>) {
 test('type selection to the input form (8.9)', async ({ page }) => {
   const p95 = await measure(page, async (current) => {
     await current.goto('/')
-    await current.getByRole('link', { name: /Расчётное сопротивление грунта/ }).waitFor()
+    await current.locator('a[href="/calculations/new?type=foundations_shallow_r"]').waitFor()
     await current.evaluate(() => window.__watch('form', '#field-b'))
-    await current.getByRole('link', { name: /Расчётное сопротивление грунта/ }).click()
+    await current.locator('a[href="/calculations/new?type=foundations_shallow_r"]').click()
     await expect(current.locator('#field-b')).toBeVisible()
     return elapsed(current, 'form', /\/calculation-types$/)
   })
@@ -122,6 +123,67 @@ test('the submitted report form to the issued stamp (8.9)', async ({ page }) => 
     await current.locator('form button[type="submit"]').click()
     await expect(current.locator('[data-report-stamp]')).toBeVisible()
     return elapsed(current, 'stamp', /\/report$/)
+  })
+  expect(p95).toBeLessThan(LIMIT_MS)
+})
+
+test('loads type selection to the fifteen-input form uses the same p95 policy', async ({ page }) => {
+  const p95 = await measure(page, async (current) => {
+    await current.goto('/')
+    const type = current.locator(`a[href="/calculations/new?type=${LOADS_TYPE}"]`)
+    await type.waitFor()
+    await current.evaluate(() => window.__watch('loads-form', '#field-Qy'))
+    await type.click()
+    await expect(current.locator('#field-Qy')).toBeVisible()
+    return elapsed(current, 'loads-form', /\/calculation-types$/)
+  })
+  expect(p95).toBeLessThan(LIMIT_MS)
+})
+
+for (const [name, inputs, selector] of [
+  ['completed', loadsCentralInputs, '[data-verdict]'],
+  ['derived refusal', loadsContactRefusalInputs, '[data-status="refusal"]'],
+] as const) {
+  test(`loads submitted form to ${name}, including minimum computation, uses the same p95 policy`, async ({ page }) => {
+    const p95 = await measure(page, async (current) => {
+      await current.goto(`/calculations/new?type=${LOADS_TYPE}`)
+      for (const [field, quantity] of Object.entries(inputs)) await current.locator(`#field-${field}`).fill(String(quantity.value))
+      await current.evaluate((target) => window.__watch('loads-submitted', target), selector)
+      await current.getByRole('button', { name: 'Рассчитать', exact: true }).click()
+      await expect(current.locator(selector)).toBeVisible()
+      return elapsed(current, 'loads-submitted', /\/calculations$/)
+    })
+    expect(p95).toBeLessThan(LIMIT_MS)
+  })
+}
+
+for (const [name, id, selector] of [
+  ['completed', loadsCentralEnvelope.result_id, '[data-verdict]'],
+  ['derived refusal', loadsContactRefusalEnvelope.result_id, '[data-status="refusal"]'],
+] as const) {
+  test(`loads ${name} opened by its address uses the same p95 policy`, async ({ page }) => {
+    const p95 = await measure(page, async (current) => {
+      await current.goto('/nowhere')
+      await current.evaluate((target) => window.__watch('loads-opened', target), selector)
+      await current.evaluate((resultId) => {
+        history.pushState({}, '', `/calculations/${resultId}`)
+        dispatchEvent(new PopStateEvent('popstate'))
+      }, id)
+      await expect(current.locator(selector)).toBeVisible()
+      return elapsed(current, 'loads-opened', /\/calculations\/[\w-]+$/)
+    })
+    expect(p95).toBeLessThan(LIMIT_MS)
+  })
+}
+
+test('loads report POST to the issued stamp uses the same p95 policy', async ({ page }) => {
+  const p95 = await measure(page, async (current) => {
+    await current.goto(`/calculations/${loadsCentralEnvelope.result_id}/report`)
+    for (const [label, value] of Object.entries(REPORT)) await current.getByLabel(label, { exact: true }).fill(value)
+    await current.evaluate(() => window.__watch('loads-report', '[data-report-stamp]'))
+    await current.locator('form button[type="submit"]').click()
+    await expect(current.locator('[data-report-stamp]')).toBeVisible()
+    return elapsed(current, 'loads-report', /\/report$/)
   })
   expect(p95).toBeLessThan(LIMIT_MS)
 })

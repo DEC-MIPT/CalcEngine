@@ -1,4 +1,6 @@
 import type { components } from '../api/schema'
+import { loadsCalculationType } from './loadsFixtures'
+export * from './loadsFixtures'
 
 type CalculationTypeView = components['schemas']['CalculationTypeView']
 type ResultEnvelope = components['schemas']['ResultEnvelope']
@@ -9,7 +11,7 @@ export const FAIL_ID = '22222222-2222-4222-8222-222222222222'
 export const REFUSED_ID = '33333333-3333-4333-8333-333333333333'
 export const WARNING_ID = '44444444-4444-4444-8444-444444444444'
 
-export const calculationTypes = [
+export const pilotCalculationTypes = [
   {
     "name": "foundations_shallow_r",
     "inputs": [
@@ -166,6 +168,8 @@ export const calculationTypes = [
     ]
   }
 ] satisfies CalculationTypeView[]
+
+export const calculationTypes: CalculationTypeView[] = [...pilotCalculationTypes, loadsCalculationType]
 
 export const strictSource = {
   kind: 'interim',

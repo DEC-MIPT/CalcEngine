@@ -11,12 +11,15 @@ import { prefersReducedMotion, withMinimumDuration } from '@/lib/motion'
 import { toBaseUnit } from '@/lib/unitFactors'
 import { parseValue, type ParseError } from '@/form/parseValue'
 import { useDraft } from '@/form/draftContext'
+import type { FormCorrectionState } from '@/form/correction'
 import { mapFieldErrors } from '@/form/serverErrors'
 import { useSendingHints, type SendingStage } from '@/form/useSendingHints'
 import { BoundNote, type BoundShape } from './Bound'
 import { ErrorState } from './RequestStates'
 import { ComputePlot } from './ComputePlot'
 import { Formula } from './Formula'
+import { LoadsDirections } from './LoadsDirections'
+import { DerivedCorrectionNote } from './DerivedCorrectionNote'
 import { QuantityText, UnitText } from './Quantity'
 import { Button } from './ui/button'
 
@@ -58,13 +61,14 @@ interface FieldProps {
   unit: string
   error: string | undefined
   bound: BoundShape | undefined
+  derived: components['schemas']['DerivedViolation'] | undefined
   locked: boolean
   index: number
   onValue: (event: ChangeEvent<HTMLInputElement>) => void
   onUnit: (event: ChangeEvent<HTMLSelectElement>) => void
 }
 
-function Field({ input, value, unit, error, bound, locked, index, onValue, onUnit }: FieldProps) {
+function Field({ input, value, unit, error, bound, derived, locked, index, onValue, onUnit }: FieldProps) {
   const { t, language } = useI18n()
   const [flashing, setFlashing] = useState(false)
   const label = pickText(input.label, language)
@@ -72,11 +76,12 @@ function Field({ input, value, unit, error, bound, locked, index, onValue, onUni
   const hintId = `hint-${input.name}`
   const errorId = `error-${input.name}`
   const noteId = `bound-${input.name}`
+  const derivedId = `derived-${input.name}`
   const fixedUnit = input.whole_values_only || input.units.length === 1
   const echoId = `echo-${input.name}`
   const parsed = parseValue(value, false)
   const inBase = !fixedUnit && unit !== input.base_unit && parsed.ok ? toBaseUnit(parsed.value, unit, input.base_unit) : null
-  const describedBy = [hint ? hintId : null, error ? errorId : null, bound ? noteId : null, inBase !== null ? echoId : null]
+  const describedBy = [hint ? hintId : null, error ? errorId : null, bound ? noteId : null, derived ? derivedId : null, inBase !== null ? echoId : null]
     .filter(Boolean)
     .join(' ')
   return (
@@ -110,7 +115,7 @@ function Field({ input, value, unit, error, bound, locked, index, onValue, onUni
           onAnimationEnd={() => setFlashing(false)}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
-          className={`min-h-9 w-36 min-w-0 border ${bound && !error ? 'border-warning' : 'border-input'} bg-card px-2.5 py-1.5 text-right font-mono ${flashing ? 'unit-flash' : ''} read-only:bg-secondary focus-visible:outline-offset-[-1px] aria-invalid:border-destructive aria-invalid:focus-visible:outline-destructive`}
+          className={`min-h-9 w-36 min-w-0 border ${(bound || derived) && !error ? 'border-warning' : 'border-input'} bg-card px-2.5 py-1.5 text-right font-mono ${flashing ? 'unit-flash' : ''} read-only:bg-secondary focus-visible:outline-offset-[-1px] aria-invalid:border-destructive aria-invalid:focus-visible:outline-destructive`}
         />
         {fixedUnit ? (
           <span className="flex min-h-9 w-24 shrink-0 items-center px-2.5">
@@ -142,10 +147,11 @@ function Field({ input, value, unit, error, bound, locked, index, onValue, onUni
           </span>
         )}
       </div>
-      {(error || (bound && !error) || inBase !== null) && (
+      {(error || (bound && !error) || derived || inBase !== null) && (
         <div className="col-start-2 grid gap-1 sm:col-start-3">
           {error && <FieldMessage id={errorId}>{error}</FieldMessage>}
           {bound && !error && <BoundNote id={noteId} bound={bound} unit={input.base_unit} />}
+          {derived && <DerivedCorrectionNote id={derivedId} reason={derived} />}
           {inBase !== null && (
             <p id={echoId} className="font-mono text-sm text-muted-foreground">
               = <QuantityText value={inBase} unit={input.base_unit} />
@@ -163,9 +169,15 @@ export function CalculationForm({ type }: { type: CalculationType }) {
   const draft = useDraft()
   const { values, units } = draft.read(type.name)
   const location = useLocation()
+  const routeState = location.state as FormCorrectionState | null
   const [bound, setBound] = useState<BoundShape | null>(
-    () => (location.state as { bound?: BoundShape } | null)?.bound ?? null,
+    () => routeState?.bound ?? null,
   )
+  const [derivedCorrection, setDerivedCorrection] = useState(() => {
+    const correction = routeState?.derivedCorrection
+    return correction && draft.sent?.resultId === correction.resultId && draft.sent.type === type.name ? correction : null
+  })
+  const correctionInput = derivedCorrection?.reason.related_inputs.find((name) => type.inputs.some((input) => input.name === name))
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [general, setGeneral] = useState<string[]>([])
   const [failure, setFailure] = useState<ApiError | null>(null)
@@ -176,6 +188,7 @@ export function CalculationForm({ type }: { type: CalculationType }) {
 
   async function send() {
     if (inFlight.current) return
+    clearDerivedCorrection()
     const inputs: Record<string, Quantity> = {}
     const invalid: Record<string, string> = {}
     for (const input of type.inputs) {
@@ -236,15 +249,34 @@ export function CalculationForm({ type }: { type: CalculationType }) {
     if (bound) document.getElementById(fieldId(bound.quantity))?.focus()
   }, [bound])
 
+  useEffect(() => {
+    if (correctionInput) document.getElementById(fieldId(correctionInput))?.focus()
+  }, [correctionInput])
+
+  function clearDerivedCorrection() {
+    if (!derivedCorrection) return
+    setDerivedCorrection(null)
+    void navigate({ pathname: location.pathname, search: location.search, hash: location.hash }, {
+      replace: true,
+      state: routeState?.bound ? { bound: routeState.bound } : null,
+    })
+  }
+
+  function clearCorrection(name: string) {
+    if (bound?.quantity === name) setBound(null)
+    if (derivedCorrection?.reason.related_inputs.includes(name)) clearDerivedCorrection()
+  }
+
   function change(name: string, text: string) {
     draft.setValue(type.name, name, text)
-    if (bound?.quantity === name) setBound(null)
+    clearCorrection(name)
     setErrors((current) => Object.fromEntries(Object.entries(current).filter(([key]) => key !== name)))
   }
 
   const invalidCount = Object.keys(errors).length
   return (
     <form noValidate onSubmit={submit} className={`grid gap-4 ${computing ? 'computing' : ''}`}>
+      {type.name === 'foundations_shallow_loads' && <LoadsDirections />}
       {general.length > 0 && (
         <div role="alert" className="max-w-2xl border border-destructive bg-destructive-surface p-4">
           <p className="font-medium">{t('form.rejected')}</p>
@@ -284,9 +316,13 @@ export function CalculationForm({ type }: { type: CalculationType }) {
             unit={units[input.name] ?? input.base_unit}
             error={errors[input.name]}
             bound={bound?.quantity === input.name ? bound : undefined}
+            derived={correctionInput === input.name ? derivedCorrection?.reason : undefined}
             locked={submitting}
             onValue={(event) => change(input.name, event.target.value)}
-            onUnit={(event) => draft.setUnit(type.name, input.name, event.target.value)}
+            onUnit={(event) => {
+              draft.setUnit(type.name, input.name, event.target.value)
+              clearCorrection(input.name)
+            }}
           />
         ))}
       </div>

@@ -481,14 +481,14 @@
   .step-reveal {
     animation: row-read 420ms linear;
   }
-  .step-reveal > h3 {
+  .step-reveal > [data-step-heading] {
     position: relative;
     animation: trace-type 180ms steps(6, end) backwards;
   }
   .step-reveal > .step-details {
     animation: trace-print 240ms steps(4, end) 180ms backwards;
   }
-  .step-reveal > h3::after {
+  .step-reveal > [data-step-heading]::after {
     content: '';
     position: absolute;
     top: 0.625rem;

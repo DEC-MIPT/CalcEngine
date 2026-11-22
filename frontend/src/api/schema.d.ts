@@ -145,6 +145,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/foundation-selections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Selection */
+        post: operations["create_selection_foundation_selections_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/foundation-selections/{selection_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Selection */
+        get: operations["get_selection_foundation_selections__selection_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/foundation-selections/{selection_id}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Selection Report */
+        post: operations["selection_report_foundation_selections__selection_id__report_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/foundation-calculations/{result_id}/context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Calculation Context */
+        get: operations["calculation_context_foundation_calculations__result_id__context_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/normatives/search": {
         parameters: {
             query?: never;
@@ -256,6 +324,20 @@ export interface components {
             /** Outputs */
             outputs: components["schemas"]["OutputView"][];
         };
+        /** CandidateOutcome */
+        CandidateOutcome: {
+            /** Index */
+            index: number;
+            candidate: components["schemas"]["FoundationCandidate"];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "evaluated" | "error" | "skipped";
+            envelope?: components["schemas"]["ResultEnvelope"] | null;
+            /** Reason */
+            reason?: ("parameter_source_unavailable" | "calculation_error" | "time_budget" | "cancelled" | "not_evaluated") | null;
+        };
         /**
          * CheckReason
          * @description Шаг проверки, решивший вердикт ``pass`` или ``fail``.
@@ -309,11 +391,53 @@ export interface components {
             /** Page */
             page: number | null;
         };
+        /** DerivedViolation */
+        DerivedViolation: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "derived";
+            /**
+             * Check Id
+             * @default full_contact
+             * @constant
+             */
+            check_id: "full_contact";
+            /**
+             * Step Id
+             * @default p_corner_min
+             * @constant
+             */
+            step_id: "p_corner_min";
+            /**
+             * Quantity
+             * @default p_corner_min
+             * @constant
+             */
+            quantity: "p_corner_min";
+            value: components["schemas"]["QuantityValue"];
+            /**
+             * Operator
+             * @default ge
+             * @constant
+             */
+            operator: "ge";
+            limit: components["schemas"]["QuantityValue"];
+            source: components["schemas"]["EngineerRule"];
+            /** Related Inputs */
+            related_inputs: string[];
+            /**
+             * Limiting Corner
+             * @enum {string}
+             */
+            limiting_corner: "pp" | "pm" | "mp" | "mm";
+        };
         /**
          * Dimension
          * @enum {string}
          */
-        Dimension: "dimensionless" | "length" | "area" | "force" | "pressure" | "specific_weight" | "angle";
+        Dimension: "dimensionless" | "length" | "area" | "volume" | "moment" | "force" | "pressure" | "specific_weight" | "angle";
         /**
          * DocumentView
          * @description Документ каталога со своими пунктами в порядке документа (спецификация "Normative document endpoint").
@@ -333,6 +457,22 @@ export interface components {
             source_url: string | null;
             /** Clauses */
             clauses: components["schemas"]["ClauseView"][];
+        };
+        /** EngineerFormulaStep */
+        EngineerFormulaStep: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "engineer_formula";
+            /** Step Id */
+            step_id: string;
+            /** Expression */
+            expression: string;
+            /** Substitutions */
+            substitutions: components["schemas"]["Substitution"][];
+            result: components["schemas"]["QuantityValue"];
+            source: components["schemas"]["EngineerRule"];
         };
         /**
          * EngineerRule
@@ -393,6 +533,138 @@ export interface components {
              * @enum {string}
              */
             kind: "formula";
+        };
+        /** FoundationCandidate */
+        FoundationCandidate: {
+            b: components["schemas"]["QuantityValue"];
+            l: components["schemas"]["QuantityValue"];
+        };
+        /** FoundationContext */
+        FoundationContext: {
+            /**
+             * Schema Version
+             * @default foundation-result-context-v1
+             * @constant
+             */
+            schema_version: "foundation-result-context-v1";
+            /**
+             * Result Id
+             * Format: uuid
+             */
+            result_id: string;
+            /**
+             * Calculation Type
+             * @enum {string}
+             */
+            calculation_type: "foundations_shallow_loads" | "foundations_shallow_weights";
+            /** Methodology Version */
+            methodology_version: string;
+            /** Input Hash */
+            input_hash: string;
+            /**
+             * Load Level
+             * @default upper_cut
+             * @constant
+             */
+            load_level: "upper_cut";
+            /**
+             * Weight Mode
+             * @enum {string}
+             */
+            weight_mode: "averaged" | "explicit";
+            /** Inputs */
+            inputs: {
+                [key: string]: components["schemas"]["QuantityValue"];
+            };
+            /** Geometry */
+            geometry: {
+                [key: string]: components["schemas"]["QuantityValue"];
+            };
+            /** Trace Values */
+            trace_values: {
+                [key: string]: components["schemas"]["QuantityValue"];
+            };
+            /**
+             * Pressure State
+             * @enum {string}
+             */
+            pressure_state: "full_contact" | "diagnostic" | "unavailable";
+            /**
+             * Corners
+             * @default []
+             */
+            corners: components["schemas"]["PressureCorner"][];
+        };
+        /** FoundationContextResponse */
+        FoundationContextResponse: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "available" | "unavailable";
+            context?: components["schemas"]["FoundationContext"] | null;
+        };
+        /** FoundationSelectionRequest */
+        FoundationSelectionRequest: {
+            /**
+             * Schema Version
+             * @default foundation-selection-request-v1
+             * @constant
+             */
+            schema_version: "foundation-selection-request-v1";
+            /**
+             * Calculation Type
+             * @default foundations_shallow_loads
+             * @constant
+             */
+            calculation_type: "foundations_shallow_loads";
+            /**
+             * Policy Version
+             * @default foundation-min-area-v1
+             * @constant
+             */
+            policy_version: "foundation-min-area-v1";
+            /** Common Inputs */
+            common_inputs: {
+                [key: string]: components["schemas"]["QuantityValue"];
+            };
+            /** Candidates */
+            candidates: components["schemas"]["FoundationCandidate"][];
+        };
+        /** FoundationSelectionResult */
+        FoundationSelectionResult: {
+            /**
+             * Schema Version
+             * @default foundation-selection-result-v1
+             * @constant
+             */
+            schema_version: "foundation-selection-result-v1";
+            /**
+             * Selection Id
+             * Format: uuid
+             */
+            selection_id: string;
+            /** Input Hash */
+            input_hash: string;
+            request: components["schemas"]["FoundationSelectionRequest"];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "selected" | "no_acceptable_candidate" | "incomplete";
+            /** Outcomes */
+            outcomes: components["schemas"]["CandidateOutcome"][];
+            /** Stop Reason */
+            stop_reason?: ("parameter_source_unavailable" | "calculation_error" | "time_budget" | "cancelled") | null;
+            /** Selected Candidate Index */
+            selected_candidate_index?: number | null;
+            /** Selected Result Id */
+            selected_result_id?: string | null;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
         };
         /**
          * InputView
@@ -536,6 +808,19 @@ export interface components {
             /** Profile */
             profile?: ("strict" | "draft") | null;
         };
+        /** PressureCorner */
+        PressureCorner: {
+            /**
+             * Name
+             * @enum {string}
+             */
+            name: "pp" | "pm" | "mp" | "mm";
+            x: components["schemas"]["QuantityValue"];
+            y: components["schemas"]["QuantityValue"];
+            pressure: components["schemas"]["QuantityValue"];
+            /** Step Id */
+            step_id: string;
+        };
         /**
          * QuantityValue
          * @description Конечное значение с единицей из словаря единиц.
@@ -590,11 +875,11 @@ export interface components {
              */
             verdict: "pass" | "fail" | "refused";
             /** Verdict Reason */
-            verdict_reason: components["schemas"]["CheckReason"] | components["schemas"]["BoundViolation"];
+            verdict_reason: components["schemas"]["CheckReason"] | components["schemas"]["BoundViolation"] | components["schemas"]["DerivedViolation"];
             /** Warnings */
             warnings: components["schemas"]["ApplicabilityWarning"][];
             /** Trace */
-            trace: (components["schemas"]["FormulaStep"] | components["schemas"]["TableStep"] | components["schemas"]["CheckStep"])[];
+            trace: (components["schemas"]["FormulaStep"] | components["schemas"]["TableStep"] | components["schemas"]["CheckStep"] | components["schemas"]["EngineerFormulaStep"])[];
             /** Unverified Step Count */
             unverified_step_count: number;
             /**
@@ -730,6 +1015,19 @@ export interface components {
             inclusive: boolean;
             /** Source */
             source: components["schemas"]["NormRef"][] | components["schemas"]["EngineerRule"];
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
         };
     };
     responses: never;
@@ -949,6 +1247,215 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description `parameter_source_unavailable` or `database_unavailable`. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    create_selection_foundation_selections_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FoundationSelectionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FoundationSelectionResult"];
+                };
+            };
+            /** @description `payload_too_large`: the request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description `validation_error` or `invalid_input`, with one entry in `fields` per offending field. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description `parameter_source_unavailable` or `database_unavailable`. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    get_selection_foundation_selections__selection_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                selection_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FoundationSelectionResult"];
+                };
+            };
+            /** @description `not_found`: the calculation type or the stored result does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description `parameter_source_unavailable` or `database_unavailable`. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    selection_report_foundation_selections__selection_id__report_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                selection_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description `not_found`: the calculation type or the stored result does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description `payload_too_large`: the request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description `validation_error` or `invalid_input`, with one entry in `fields` per offending field. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description `parameter_source_unavailable` or `database_unavailable`. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    calculation_context_foundation_calculations__result_id__context_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                result_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FoundationContextResponse"];
+                };
+            };
+            /** @description `not_found`: the calculation type or the stored result does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
             /** @description `parameter_source_unavailable` or `database_unavailable`. */

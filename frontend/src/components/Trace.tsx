@@ -2,13 +2,17 @@ import { CaretRight, CheckCircle, WarningCircle, XCircle } from '@phosphor-icons
 import { useId, useMemo, useState } from 'react'
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
+import type { TextKey } from '@/i18n/dictionary'
+import { loadsTraceSections, type LoadsTraceSection } from '@/lib/loadsTraceSections'
 import { checkRounding, type OutputRounding } from '@/lib/rounding'
+import { checkPresentation } from '@/lib/checkPresentation'
 import { symbolTable } from '@/lib/stepSymbol'
 import { arrivalOf, type Arrival, type TracePlayback } from '@/lib/useTracePlayback'
 import { Formula } from './Formula'
 import { NamedSymbol } from './NamedSymbol'
 import { NormRefList } from './NormRefList'
 import { QuantityText } from './Quantity'
+import { Source } from './Source'
 import { Button } from './ui/button'
 
 type Step = components['schemas']['ResultEnvelope']['trace'][number]
@@ -16,6 +20,18 @@ type Quantity = components['schemas']['QuantityValue']
 type RoundingRule = components['schemas']['RoundingRule']
 
 const NO_ROUNDING: OutputRounding = new Map()
+
+const SECTION_TITLES: Record<LoadsTraceSection, TextKey> = {
+  resistance: 'trace.section.resistance',
+  geometry: 'trace.section.geometry',
+  mean: 'trace.section.mean',
+  x: 'trace.section.x',
+  y: 'trace.section.y',
+  corners: 'trace.section.corners',
+  contact: 'trace.section.contact',
+  checks: 'trace.section.checks',
+  other: 'trace.section.other',
+}
 
 function Value({ quantity, rounding }: { quantity: Quantity; rounding?: RoundingRule }) {
   return <QuantityText value={quantity.value} unit={quantity.unit} rounding={rounding} />
@@ -77,6 +93,8 @@ function TraceStep({
   symbols,
   rounding,
   normStatus,
+  compact,
+  sectionTitle,
 }: {
   step: Step
   index: number
@@ -86,9 +104,12 @@ function TraceStep({
   symbols: ReadonlyMap<string, string>
   rounding: OutputRounding
   normStatus: boolean
+  compact: boolean
+  sectionTitle?: string
 }) {
   const { t } = useI18n()
   const detailsId = useId()
+  const StepHeading = compact ? 'h4' : 'h3'
   return (
     <li
       id={`trace-step-${index}`}
@@ -97,7 +118,12 @@ function TraceStep({
       data-arrival={arrival}
       inert={arrival === 'pending'}
     >
-      <h3 className="text-base">
+      {sectionTitle && (
+        <h3 className="border-b border-border bg-secondary px-3 py-2 text-sm font-semibold" data-trace-section>
+          {sectionTitle}
+        </h3>
+      )}
+      <StepHeading className="text-base" data-step-heading>
         <button
           type="button"
           aria-expanded={expanded}
@@ -111,22 +137,32 @@ function TraceStep({
             className={`shrink-0 self-center transition-transform motion-reduce:transition-none ${expanded ? 'rotate-90' : ''}`}
           />
           <span className="font-semibold" data-step-label>
-            <NamedSymbol name={step.step_id} latex={symbols.get(step.step_id)} />
+            <NamedSymbol
+              name={step.step_id}
+              latex={step.kind === 'check' ? step.expression : symbols.get(step.step_id)}
+              presentation={step.kind === 'check' ? checkPresentation(step, symbols) : undefined}
+            />
           </span>
           <span className="text-sm text-muted-foreground">{t(`trace.kind.${step.kind}`)}</span>
           <StepSummary step={step} rounding={rounding} />
         </button>
-      </h3>
+      </StepHeading>
       <div id={detailsId} hidden={!expanded} className="step-details grid gap-3 border-t border-dashed border-border bg-background/40 px-3 py-3 pl-10">
-        <div className="overflow-x-auto">
-          <Formula latex={step.expression} display />
+        <div
+          role="region"
+          aria-label={`${t('trace.formula')}: ${step.step_id}`}
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Keyboard users must be able to scroll wide formulas.
+          tabIndex={0}
+          className="overflow-x-auto focus-visible:outline-offset-[-2px]"
+        >
+          <Formula latex={step.expression} presentation={step.kind === 'check' ? checkPresentation(step, symbols) : undefined} display />
         </div>
         {step.substitutions.length > 0 && (
           <div>
             <h4 className="text-sm font-medium">{t('trace.substitutions')}</h4>
             <ul className="flex flex-wrap gap-x-5 gap-y-1">
               {step.substitutions.map((substitution) => (
-                <li key={substitution.symbol} className="flex items-baseline gap-1">
+                <li key={substitution.symbol} className="flex flex-wrap items-baseline gap-1">
                   <NamedSymbol name={substitution.symbol} latex={symbols.get(substitution.symbol)} /> <span>=</span>{' '}
                   <Value quantity={substitution} rounding={rounding.get(substitution.symbol)} />
                 </li>
@@ -142,7 +178,12 @@ function TraceStep({
             <Value quantity={step.result} rounding={rounding.get(step.step_id)} />
           </p>
         )}
-        {step.norm_refs.length > 0 && (
+        {step.kind === 'engineer_formula' ? (
+          <div>
+            <h4 className="text-sm font-medium">{t('trace.engineerSource')}</h4>
+            <Source source={step.source} />
+          </div>
+        ) : step.norm_refs.length > 0 && (
           <div>
             <h4 className="text-sm font-medium">{t('trace.norms')}</h4>
             <NormRefList refs={step.norm_refs} showStatus={normStatus} />
@@ -169,6 +210,8 @@ export function Trace({
   symbols,
   rounding = NO_ROUNDING,
   normStatus = true,
+  title,
+  description,
 }: {
   steps: readonly Step[]
   unverifiedStepCount: number
@@ -176,9 +219,12 @@ export function Trace({
   symbols?: ReadonlyMap<string, string>
   rounding?: OutputRounding
   normStatus?: boolean
+  title?: string
+  description?: string
 }) {
   const { t, formatNumber } = useI18n()
   const table = useMemo(() => symbols ?? symbolTable(steps), [symbols, steps])
+  const sections = useMemo(() => loadsTraceSections(steps), [steps])
   const playing = playback?.phase === 'playing'
   const [expanded, setExpanded] = useState<ReadonlySet<number>>(() => new Set(steps.map((_, index) => index)))
   const toggle = (index: number) =>
@@ -190,8 +236,9 @@ export function Trace({
   return (
     <section aria-labelledby="trace-title" className="mt-8 grid gap-4" data-playback={playback?.phase ?? 'idle'}>
       <h2 id="trace-title" tabIndex={-1} className="scroll-mt-4">
-        {t('trace.title')}
+        {title ?? t('trace.title')}
       </h2>
+      {description && <p className="max-w-prose text-sm">{description}</p>}
       {normStatus && unverifiedStepCount > 0 && (
         <p className="flex w-fit items-center gap-2 border border-warning bg-warning-surface px-3 py-2 text-warning-foreground">
           <WarningCircle aria-hidden="true" weight="fill" size={20} />
@@ -219,7 +266,7 @@ export function Trace({
           <span>{t('trace.skipHint')}</span>
         </p>
       )}
-      <ol className="border border-border bg-card">
+      <ol className="min-w-0 border border-border bg-card" data-trace-layout={sections ? 'compact' : 'expanded'}>
         {steps.map((step, index) => (
           <TraceStep
             key={`${step.step_id}-${index}`}
@@ -231,6 +278,8 @@ export function Trace({
             symbols={table}
             rounding={rounding}
             normStatus={normStatus}
+            compact={sections !== null}
+            sectionTitle={sections && (index === 0 || sections[index] !== sections[index - 1]) ? t(SECTION_TITLES[sections[index]]) : undefined}
           />
         ))}
       </ol>

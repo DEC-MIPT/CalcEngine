@@ -2,6 +2,7 @@ import { useMemo, type CSSProperties, type MouseEvent } from 'react'
 import type { components } from '@/api/schema'
 import { jumpTo } from '@/lib/jumpTo'
 import { symbolTable } from '@/lib/stepSymbol'
+import { checkPresentation } from '@/lib/checkPresentation'
 import { arrivalOf, type TracePlayback } from '@/lib/useTracePlayback'
 import { NamedSymbol } from './NamedSymbol'
 import type { StampReveal } from './VerdictStamp'
@@ -64,7 +65,11 @@ export function TraceRuler({
           >
             <span className="tr-bar" />
             <span className="tr-label">
-              <NamedSymbol name={step.step_id} latex={table.get(step.step_id)} />
+              <NamedSymbol
+                name={step.step_id}
+                latex={step.kind === 'check' ? step.expression : table.get(step.step_id)}
+                presentation={step.kind === 'check' ? checkPresentation(step, table) : undefined}
+              />
             </span>
           </a>
         )

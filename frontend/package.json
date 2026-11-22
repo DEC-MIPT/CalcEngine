@@ -12,6 +12,8 @@
     "test": "vitest run",
     "gen:api": "node scripts/gen-api.mjs",
     "gen:api:check": "node scripts/gen-api.mjs --check",
+    "gen:fixtures": "node scripts/gen-loads-fixtures.mjs",
+    "gen:fixtures:check": "node scripts/gen-loads-fixtures.mjs --check",
     "test:e2e": "playwright test"
   },
   "dependencies": {
