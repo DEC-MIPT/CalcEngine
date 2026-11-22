@@ -21,7 +21,7 @@ Akim confirmed the capability of named weights and additional moments for one fi
 geometry. That confirmation alone does not admit these examples, their expected
 values, the proposed moment signs, a new manual-origin exception or numerical
 tolerances. The existing manual-reference exception and approvals in
-`../foundations-pressure-from-loads/reference-candidates.md` apply to the old
+`../archive/2026-11-23-foundations-pressure-from-loads/reference-candidates.md` apply to the old
 averaged type only; they do not automatically extend to this new registered type.
 The applicable three-complete-reference gate remains in force.
 

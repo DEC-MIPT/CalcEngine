@@ -53,6 +53,14 @@ verifier.
 - **WHEN** a valid type file names a calculation type that is not registered
 - **THEN** the file is validated, its type gets no source, and one log line names the file
 
+Only foundations_shallow_loads SHALL use the fixed alias to the prepared file
+foundations_pressure_from_loads.yaml. This allowlist does not permit arbitrary
+client paths, inference of aliases, or changes to the pilot mapping or signed data.
+
+#### Scenario: Fixed loads alias
+- **WHEN** the public loads type resolves pressure records
+- **THEN** only the fixed reviewed file is used, without renaming or modifying signed records
+
 ### Requirement: Stored applicability and diagram conditions
 The system SHALL accept optional `applicability_conditions` and `diagram_cases` lists in an
 interim type file, defaulting each to empty. Every record SHALL have the same `norm_refs`,
@@ -76,11 +84,17 @@ These records SHALL participate in record iteration, verifier validation, effect
 strict startup warnings and record/document digests. Iteration SHALL append applicability
 records and then diagram records after the existing five lists, preserving each list's
 order. An unregistered type file SHALL remain validated and skipped as specified by
-"Interim normative data files". A registered type containing any such record SHALL refuse
-parameter resolution with `ParameterSourceUnavailableError` in both `strict` and `draft`,
+"Interim normative data files". A registered type without the reviewed loads binding containing such records
+SHALL refuse parameter resolution with `ParameterSourceUnavailableError` in both `strict` and `draft`,
 regardless of verification status; the API SHALL retain `503 parameter_source_unavailable`.
 Logs SHALL name the type and parameter without data values. The system SHALL NOT silently
-drop or execute these records through the catalog assembly.
+drop or execute these records through generic catalog assembly. Only the explicit
+foundations_shallow_loads binding MAY consume the allowlisted prepared records,
+under the same verification/profile gates and with exact printed forms retained.
+It follows foundations-pressure-from-loads "Full contact before bearing checks":
+Akim's adopted signed-corner rule and the cited SP 22.13330.2016 edition 2016
+with amendments 1-5, clauses 5.6.27-5.6.28. Axial minima alone do not establish
+biaxial contact.
 
 #### Scenario: Legacy file without optional lists
 - **WHEN** a valid type file contains only the five required lists
@@ -118,10 +132,15 @@ drop or execute these records through the catalog assembly.
   for that type
 
 #### Scenario: Registered extended file cannot bypass stored conditions
-- **WHEN** a registered type containing any new record resolves parameters in either profile,
+- **WHEN** a registered type without the reviewed loads binding contains a new record
+  and resolves parameters in either profile,
   including when all records are human-verified or rejected
 - **THEN** resolution raises ParameterSourceUnavailableError, the API returns the existing
   503 error code, and no stored condition is dropped or executed
+
+#### Scenario: Reviewed loads binding
+- **WHEN** the allowlisted new type resolves its prepared extended records
+- **THEN** strict verification and exact fraction/diagram controls remain mandatory, and missing or unsupported required records fail closed
 
 ### Requirement: Verification record
 Every interim record SHALL carry a verification record with `status` (`pending`,
@@ -194,8 +213,9 @@ label.
 objects (`Formula`, `TableValue`, `Threshold` and the reference lists of the checks), the same
 method range and the same errors as `CatalogParameterSource` for the same data. One
 parametrized contract test battery SHALL run against both sources, with the same data loaded
-into each. This equivalence applies to the five executable lists; storage-only extended
-records use the refusal specified by "Stored applicability and diagram conditions".
+into each. This equivalence applies to the five executable lists; extended records without the reviewed loads binding use the refusal specified
+by "Stored applicability and diagram conditions". The reviewed loads binding is
+an explicit interim-only adapter; generic catalog assembly stays unchanged.
 
 #### Scenario: Same data, same parameters
 - **WHEN** the battery loads one data set into the catalog fixture and into interim files and
@@ -217,6 +237,10 @@ records use the refusal specified by "Stored applicability and diagram condition
 #### Scenario: Broken binding
 - **WHEN** a parameter of the type's model has no record, or two records
 - **THEN** both sources raise `ParameterSourceUnavailableError`
+
+#### Scenario: No fallback in catalog mode
+- **WHEN** catalog mode has no usable complete binding for the loads type
+- **THEN** the existing parameter_source_unavailable error is returned rather than reading interim files
 
 ### Requirement: Interim data digest
 The system SHALL compute, at startup, one SHA-256 per document directory over the canonical
@@ -255,6 +279,23 @@ serialization SHALL remain unchanged.
 - **WHEN** a calculation runs on interim data
 - **THEN** the result envelope's source label holds kind `interim`, the digest and the
   profile
+
+The loads-only supplementary directory sp-22-13330-2016-loads-scope SHALL hold its
+own manifest and prepared normative d_b bound from signed LOADS-DB-1 evidence. The
+original sp-22-13330-2016 directory SHALL stay byte-identical. For this type only,
+data_sha256 SHALL be SHA-256 of UTF-8 canonical JSON (sorted keys, compact separators,
+ensure_ascii=False, no trailing newline) with this structure:
+{"format":"foundations-shallow-loads-source-v1","documents":[
+{"name":"sp-22-13330-2016","data_sha256":"<original-document-digest>"},
+{"name":"sp-22-13330-2016-loads-scope","data_sha256":"<supplement-digest>"}]}.
+Documents SHALL be sorted by name from this fixed allowlist. Existing per-document
+and signed-record digest rules stay unchanged. Every constituent must be present
+and usable under the same selected profile or resolution fails closed. The existing
+parameter_source object carries this aggregate without new envelope fields.
+
+#### Scenario: Pilot identity remains stable
+- **WHEN** a loads scope supplement is installed
+- **THEN** the loads aggregate includes both constituents while pilot data bytes and document digest remain unchanged
 
 ### Requirement: Parameter source selection
 The system SHALL choose the source of norm-given parameters for all calculation types at

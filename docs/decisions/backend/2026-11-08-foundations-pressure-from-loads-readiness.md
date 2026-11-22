@@ -1060,3 +1060,32 @@ Skips are not passes. Source verification statuses are unchanged.
 Tasks 4.4 and 4.5 are complete. Canonical spec synchronization and archive
 remain open under task 4.6. Local logs and retained diagnostic artifacts are
 indexed in the existing Russian frontend journal.
+
+## Specification synchronization and archive, 2026-11-23
+
+OpenSpec synchronized eight delta capabilities into the canonical specifications:
+9 added and 14 modified requirements, with no removals or renames.
+Strict validation passes for 17 canonical specifications and 25 total items,
+with zero failures.
+
+The change is archived at
+`openspec/changes/archive/2026-11-23-foundations-pressure-from-loads/`.
+The archive retains the proposal, design, reference candidates, tasks,
+all eight delta specifications and `.openspec.yaml`. Its task file has
+no unchecked tasks. No calculation code or runtime behavior changed.
+Spec-keeper verification: PASS. All 13 original files are retained, all 23
+delta requirements match canonical text and all 280 pre-existing scenario
+headings remain. Untouched canonical requirements are unchanged.
+Spec-reviewer: PASS with zero blocker, major or minor findings.
+No conflict with the active foundations-design-tools deltas was found.
+
+Acceptance commit 5bfd1aa and the frontend integration are published in
+origin/develop. Archive and synchronization edits are separate local changes.
+The PostgreSQL/catalog and manual-browser limitations above remain applicable.
+
+Tester confirmed PASS for task 4.6: archive completion checks 16/16, canonical
+spec checks 17/17, all strict checks 25/25 and whitespace checks passed.
+Archive links and the dependent design-tools reference path were checked.
+For this documentation-only closure execution, tests: N/A, coverage: N/A and
+UI/UX: N/A because no runtime code or UI changed. Existing feature GO and
+integrated acceptance evidence remain in force. Task 4.6 is complete.

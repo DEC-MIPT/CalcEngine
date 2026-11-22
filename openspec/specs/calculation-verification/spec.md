@@ -22,9 +22,14 @@ requirement fixes the fields, not a value. An output is within its tolerance whe
 absolute difference between the computed and the expected value is not more than the
 `tolerance` (`absolute`), or not more than the `tolerance` times the absolute expected
 value (`relative`). The calculation types are those listed in the requirement "In-scope
-calculation types" of the canonical capability `foundations-shallow`. For `foundations-shallow` the `origin` of every
-example is `textbook`, and the source is a methodical guide for students on the design of
-shallow foundations that contains worked calculation examples.
+calculation types" of the canonical capability `foundations-shallow`. For foundations-shallow, textbook examples from methodical guides remain required,
+except that foundations_shallow_loads MAY additionally admit manual calculation
+examples after Akim explicitly checks and approves their inputs, full intermediate
+derivation, expected outputs/checks and per-output tolerances with provenance.
+Akim conditionally authorized this exception on 2026-11-09: approval after his check.
+It admits no candidate automatically and does not alter the pilot policy. Outputs
+of the tested implementation SHALL NOT serve as independent expected results.
+Agent arithmetic remains candidate evidence until independently engineer-checked.
 
 #### Scenario: Reference suite within tolerance
 - **WHEN** the reference suite runs and every output of every example is within its
@@ -42,6 +47,10 @@ shallow foundations that contains worked calculation examples.
   a `tolerance` or `tolerance_kind` for any expected output, an `origin`, a source citation, or
   `source_norm_edition`
 - **THEN** the reference suite is invalid and the verdict is NO-GO
+
+#### Scenario: Unapproved manual candidate
+- **WHEN** a loads candidate has not received recorded engineer approval of its results and tolerances
+- **THEN** it cannot count toward the minimum of three admitted examples or support a feature GO
 
 ### Requirement: Regression corpus
 Depends on the result envelope of `calculation-core-contract` (`input_hash`,

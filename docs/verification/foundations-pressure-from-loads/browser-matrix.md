@@ -1,7 +1,7 @@
 # Desktop browser compatibility matrix
 
 Status: COMPLETE under the approved manual protocol. This worksheet records manual evidence for task 3.6 of
-[foundations-pressure-from-loads](../../../openspec/changes/foundations-pressure-from-loads/tasks.md).
+[foundations-pressure-from-loads archive](../../../openspec/changes/archive/2026-11-23-foundations-pressure-from-loads/tasks.md).
 The acceptance requirement is in [web-platform](../../../openspec/specs/web-platform/spec.md),
 "Non-functional — language, accessibility, browsers".
 

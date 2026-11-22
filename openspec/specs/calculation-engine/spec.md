@@ -57,7 +57,6 @@ conclusion, even if completed diagnostic steps contain individual checks.
 - **WHEN** an applicable module completes and one of its engineering checks fails
 - **THEN** execution remains completed and the foundation adapter returns fail with the first failed check
 
-
 ### Requirement: Hot-swap boundary for C/C++
 The system SHALL isolate computational hot paths behind a well-defined boundary so
 they can be replaced with C/C++ implementations later without changing callers.
@@ -85,7 +84,6 @@ selected module's schema before external adaptation.
 #### Scenario: Internal structured contract
 - **WHEN** an internal module declares a nested schema and receives valid nested inputs
 - **THEN** it executes without changing the existing foundation API input mapping
-
 
 ### Requirement: Table value selectors
 The system SHALL give each table value that the engine receives the heading value that
@@ -202,7 +200,6 @@ the module's explicit default execution options.
 - **WHEN** two module executions are interleaved with another execution
 - **THEN** matching calls return identical results and all supplied objects are unchanged
 
-
 ### Requirement: Typed trace step
 The system SHALL record every normative calculation step as a typed trace step with these fields:
 `step_id`; `expression`, in a form the transparent output can render; `substitutions`,
@@ -255,7 +252,6 @@ The shared trace validation SHALL reject duplicate step identifiers.
 #### Scenario: Normative source cannot be replaced
 - **WHEN** an engineering rule is offered as the source for a normative formula, coefficient or method bound
 - **THEN** the module's source validation rejects it without promoting the rule to a normative reference
-
 
 ### Requirement: Explicit units at the boundary
 The system SHALL attach a unit to every input, output, constant, substitution, and step
@@ -374,7 +370,6 @@ a module's external diagnostic variant is owned by its public adapter contract.
 - **WHEN** a stopped module returns details outside its schema or references a missing retained step
 - **THEN** execution raises a calculation error before external adaptation
 
-
 ### Requirement: Result envelope
 The system SHALL return every calculation through its declared external adapter. The
 existing R foundation adapter returns every calculation, including a refused one, as a result envelope
@@ -452,6 +447,7 @@ historical data.
 #### Scenario: Internal stop source accounting
 - **WHEN** an internal module stops after engineer-sourced and normative trace steps
 - **THEN** its summary includes retained steps and diagnostic sources once in first-use order and counts only unverified normative steps
+
 ### Requirement: Formula evaluation from data
 The system SHALL receive every formula, every coefficient, and every threshold that
 chooses between branches of a method, where a norm gives it, as part of the resolved
@@ -488,6 +484,20 @@ order of the method's steps.
 - **WHEN** evaluating a formula gives a value that is not a finite number, such as a
   division by zero
 - **THEN** the evaluation fails with a `DECError` that names the step
+
+For foundations_shallow_loads only, the reviewed source assembler MAY instantiate
+limit expressions with symbol/multiply nodes binding R to the loaded edge or
+corner multiplier. Their numeric values and unchanged NormRefs come from prepared
+SP 22.13330.2016, edition 2016 with amendments 1-5, clause 5.6.26, as specified
+by foundations-pressure-from-loads "Ordered resistance checks and outputs". The
+composite is an assembled binding, not a separately human-verified record. It SHALL
+use the existing closed interpreter, with no hardcoded coefficient and no new
+NormRef provenance enum or rewriting of signed record digests. Reviewed geometry,
+transfer and corner combinations use engineer_formula with their EngineerRule.
+
+#### Scenario: Assembled limit provenance
+- **WHEN** the source assembler binds R and a prepared pressure multiplier
+- **THEN** the expression inherits that record source unchanged, uses the validated interpreter and introduces no verified-record claim
 
 ### Requirement: Calculation accuracy
 The system SHALL express the accuracy of a calculation as its deviation from named

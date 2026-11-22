@@ -216,10 +216,12 @@ any screen other than the form's own fields.
 The result screen SHALL offer an "edit inputs" action that opens the form of the type just
 calculated with that draft, only for the result that the draft was last sent for; any other result
 (opened by its address alone, or reached again by the browser's history after another calculation)
-offers no such action. The input named by a refusal's bound is always an input of the calculated
-type (`bound.quantity`, as `calculation-core-contract` fixes it). For a refusal the action SHALL be the
-screen's main action and the link to the report request its second action, and the form it opens SHALL move focus to the input that the violated bound
-names and show the bound next to that input.
+offers no such action. For historical input-bound refusals, bound.quantity is a registered input.
+For a derived refusal, related_inputs names registered inputs and the diagnostic
+quantity SHALL NOT be treated as an input. For a refusal the action SHALL be the
+screen's main action and the link to the report request its second action, and the form it opens SHALL focus the bound input for a historical refusal, or the
+first related_input for a derived refusal, and show the readable reason nearby.
+Existing eligibility remains limited to the last submitted result of that draft.
 
 #### Scenario: Back keeps the values
 - **WHEN** a user fills the form, submits, and returns to the form with the browser's back action
@@ -244,6 +246,10 @@ names and show the bound next to that input.
 - **WHEN** a user calculates twice in one page session and returns by the browser's history to the
   first result
 - **THEN** the screen shows that result and no "edit inputs" action
+
+#### Scenario: Edit a derived refusal
+- **WHEN** the derived refusal belongs to the eligible in-memory draft and edit inputs is chosen
+- **THEN** the existing draft is restored and its first related_input is focused, without inventing a p_corner_min input
 
 ### Requirement: Unit echo in the base unit
 When a user chooses, for an input, a unit other than its base unit and the field holds a number,
@@ -357,17 +363,18 @@ focus of "Verdict focus on arrival" announces the verdict at once and assistive 
 wait for the playback; the stamp region is a live region, polite for a `pass` and assertive for a
 `fail`. After the last step a `pass` with no warning SHALL be revealed with an expressive stamp (a
 scan line from 200 ms, the content and the output values at 520 ms, a drawn check mark complete by
-1.9 s after the last step), and a `fail` or a `pass` with a warning at once; a refusal has no steps
-and shows at once. A result shown again in the same page session, or shown while the system asks
+1.9 s after the last step), and a `fail` or a `pass` with a warning at once; an input-bound refusal has no steps and shows at once; a derived refusal may
+contain diagnostic steps, but its reason and complete prefix SHALL also show at
+once, with no delayed reveal or success animation. A result shown again in the same page session, or shown while the system asks
 for reduced motion, shows every step, the verdict and the outputs at once.
 
 #### Scenario: First showing of a result
-- **WHEN** a result with nine steps is shown for the first time in a page session
+- **WHEN** a non-refused pass/fail result with nine steps is shown for the first time in a page session
 - **THEN** the steps appear one by one, the stamp and the output values are held with the status
   «ВЫПОЛНЕНИЕ РАСЧЁТА» until the last step, and then they are shown
 
 #### Scenario: Long trace
-- **WHEN** a result with 40 steps is shown for the first time in a page session
+- **WHEN** a non-refused pass/fail result with 40 steps is shown for the first time in a page session
 - **THEN** the steps appear 250 ms apart, and the last one appears 10 s after the first showing at
   the latest
 
@@ -383,6 +390,10 @@ for reduced motion, shows every step, the verdict and the outputs at once.
 #### Scenario: Result shown again
 - **WHEN** the same result is shown again in the page session
 - **THEN** every step, the verdict and the output values are shown at once, with no playback
+
+#### Scenario: Diagnostic refusal is immediate
+- **WHEN** a derived refusal with trace steps is opened for the first time
+- **THEN** its complete diagnostic prefix and reason are immediately accessible, outputs remain absent and no success animation plays
 
 ### Requirement: Responsive type
 The page heading SHALL scale with the viewport between 1.875 rem and 2.25 rem, and the verdict line

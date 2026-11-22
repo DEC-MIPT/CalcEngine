@@ -80,9 +80,10 @@ frame sizes are taken from those figures; this requirement fixes none of them as
 
 #### Scenario: Report of a refused calculation
 - **WHEN** a report is generated for a refused calculation
-- **THEN** the body keeps the same sections in the same order, the trace section states
-  that the calculation was refused and holds no step, and the conclusion names the
-  violated bound, the input value with its unit, and the bound's normative references
+- **THEN** the body keeps the same sections in the same order, an input-bound refusal keeps its historical empty trace and bound reason; a
+  derived refusal prints only its completed diagnostic prefix and stored quantity,
+  value, limit, source and limiting_corner, with no final outputs or conclusion
+  that bearing checks passed or failed
 
 #### Scenario: Report without the signature block
 - **WHEN** a report is generated with the signature block disabled, with surnames and
@@ -95,6 +96,10 @@ frame sizes are taken from those figures; this requirement fixes none of them as
 - **THEN** the row under the developer line carries the caption Пров. with the checker's
   surname and date, and without a checker given the caption, surname, and date cells of
   that row are empty
+
+#### Scenario: Loads report attribution
+- **WHEN** a DOCX is generated for the loads type
+- **THEN** it distinguishes d, h and d_1, explains x=b and y=l and load signs, labels engineer_formula steps, prints completed bearing checks in order and retains the existing source profile/digest line
 
 ### Requirement: DOCX export for MVP
 The system SHALL export the report as `.docx` for the MVP using python-docx.

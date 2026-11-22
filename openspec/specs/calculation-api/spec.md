@@ -59,6 +59,17 @@ That requirement is defined in the canonical `calculation-engine` capability.
 - **THEN** both responses are `201` with different `result_id` values, the same
   `input_hash`, and envelopes that are otherwise equal
 
+The new registered loads type SHALL use these existing endpoints, not a dedicated
+endpoint. After unit conversion its typed input guard SHALL reject invalid
+engineer-defined input domains, including reversed b/l, with invalid_input 422 and
+named input fields; it SHALL NOT swap or round them. Normative method-bound and
+derived-contact refusals remain stored 201 results with Location, not validation
+errors. Pure direct calls must enforce the same typed engineering input contract.
+
+#### Scenario: Stored derived refusal
+- **WHEN** a valid loads request computes negative minimum corner pressure
+- **THEN** POST returns 201 with the typed reason, limiting_corner and diagnostic prefix, GET preserves it, final outputs are empty and DOCX remains available
+
 ### Requirement: Calculation request validation over HTTP
 The system SHALL validate a calculation request at the API boundary, as `security`
 "Input validation" requires, and SHALL reject an invalid request before the calculation
@@ -137,6 +148,15 @@ stored result SHALL NOT be changed after it is stored.
   returns the same values (in tests, the same synthetic source)
 - **THEN** the new envelope has the same `input_hash` and is equal to the stored one
   except for `result_id`
+
+Persistence SHALL accept engineer_formula and derived-reason variants without
+recalculating stored results. The loads source metadata retains its interim marker,
+profile and aggregate digest. Old stored envelopes remain valid without mandatory
+new fields or rewriting their trace/reason shapes.
+
+#### Scenario: Old and new payloads coexist
+- **WHEN** stored pilot results and loads-derived refusals are retrieved
+- **THEN** each payload is preserved and report generation uses its stored inputs/envelope, not a new calculation
 
 ### Requirement: Report download
 The system SHALL expose `POST /calculations/{result_id}/report`, which takes a report

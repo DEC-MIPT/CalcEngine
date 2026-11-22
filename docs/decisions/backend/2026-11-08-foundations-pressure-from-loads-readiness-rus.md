@@ -1046,3 +1046,32 @@ Skip не считается PASS. Статусы проверки нормат�
 Задачи 4.4 и 4.5 завершены. Синхронизация canonical specs и архивирование
 остаются открытыми в 4.6. Локальные логи и диагностические артефакты
 связаны из существующего русского frontend-журнала.
+
+## Синхронизация спецификаций и архивирование, 2026-11-23
+
+OpenSpec синхронизировал восемь delta-capability с canonical specs:
+добавлено 9 и изменено 14 требований, удалений и переименований нет.
+Strict-проверка прошла для 17 canonical specs и 25 элементов общей проверки,
+ноль ошибок.
+
+Change архивирован в
+`openspec/changes/archive/2026-11-23-foundations-pressure-from-loads/`.
+Архив сохраняет proposal, design, reference candidates, tasks,
+все восемь delta-спецификаций и `.openspec.yaml`. В tasks нет незавершённых
+задач. Код расчёта и runtime-поведение не менялись. Spec-keeper: PASS,
+все 13 исходных файлов сохранены; все 23 delta-требования совпадают с
+canonical text; сохранены все 280 прежних заголовков сценариев.
+Остальные canonical requirements не менялись. Spec-reviewer: PASS,
+blocker, major и minor findings отсутствуют. Конфликтов с active
+foundations-design-tools delta не найдено.
+
+Acceptance-коммит 5bfd1aa и интеграция frontend опубликованы в origin/develop.
+Archive и sync пока остаются отдельными локальными изменениями.
+Ограничения PostgreSQL/catalog и ручной браузерной проверки сохранены выше.
+
+Tester подтвердил PASS задачи 4.6: archive completion checks 16/16,
+canonical specs 17/17, all strict 25/25 и whitespace checks прошли.
+Проверены ссылки на архив и reference path зависимого design-tools.
+Для этого шага документального закрытия tests: N/A, coverage: N/A,
+UI/UX: N/A, поскольку runtime-код и UI не менялись. Прежние feature GO
+и интеграционная приёмка сохраняют силу. Задача 4.6 завершена.
