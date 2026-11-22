@@ -36,7 +36,7 @@ describe('compact stored loads trace', () => {
     ])
   })
 
-  it.each([loadsCentralEnvelope.trace, loadsContactRefusalEnvelope.trace].map((trace) => ({ trace })))('starts with complete summaries and collapsed details in the original flat list', ({ trace }) => {
+  it.each([loadsCentralEnvelope.trace, loadsContactRefusalEnvelope.trace].map((trace) => ({ trace })))('starts with complete summaries and expanded details in the original flat list', ({ trace }) => {
     const before = structuredClone(trace)
     show(trace)
     expect(rows().map((row) => row.dataset.step)).toEqual(trace.map((step) => step.step_id))
@@ -45,31 +45,32 @@ describe('compact stored loads trace', () => {
       expect(row).toHaveAttribute('id', `trace-step-${index}`)
       expect(row.parentElement?.tagName).toBe('OL')
       expect(row).not.toHaveAttribute('inert')
-      expect(header(row)).toHaveAttribute('aria-expanded', 'false')
+      expect(header(row)).toHaveAttribute('aria-expanded', 'true')
       expect(row.querySelector('[data-summary]')).not.toBeEmptyDOMElement()
-      expect(details(row)).not.toBeVisible()
+      expect(details(row)).toBeVisible()
     }
-    expect(screen.getAllByRole('heading', { level: 4 })).toHaveLength(trace.length)
+    expect(rows().every((row) => row.querySelector('[data-step-heading]')?.tagName === 'H4')).toBe(true)
     expect(screen.getAllByRole('heading', { level: 3 }).length).toBeGreaterThan(1)
     expect(trace).toEqual(before)
   })
 
-  it('exposes each formula and source with keyboard disclosure, while leaving other rows compact', async () => {
+  it('collapses and reopens each formula and source with the keyboard, leaving other rows expanded', async () => {
     const user = userEvent.setup()
     show()
     const row = rows().find((candidate) => candidate.dataset.step === 'A')!
     const button = header(row)
     button.focus()
     await user.keyboard('{Enter}')
+    expect(button).toHaveAttribute('aria-expanded', 'false')
+    expect(details(row)).not.toBeVisible()
+    expect(rows().filter((candidate) => header(candidate).getAttribute('aria-expanded') === 'false')).toEqual([row])
+    await user.keyboard(' ')
     expect(button).toHaveAttribute('aria-expanded', 'true')
     expect(details(row)).toBeVisible()
     const stored = steps.find((step) => step.step_id === 'A')!
     expect(within(details(row)).getByRole('img', { name: stored.expression })).toBeInTheDocument()
     expect(within(details(row)).getByText('Engineer rule')).toBeVisible()
-    expect(rows().filter((candidate) => header(candidate).getAttribute('aria-expanded') === 'true')).toEqual([row])
-    await user.keyboard(' ')
-    expect(button).toHaveAttribute('aria-expanded', 'false')
-    expect(details(row)).not.toBeVisible()
+    expect(rows().every((candidate) => header(candidate).getAttribute('aria-expanded') === 'true')).toBe(true)
   })
 
   it('retains complete original fields and text check status through global expansion and collapse', () => {
@@ -78,6 +79,8 @@ describe('compact stored loads trace', () => {
       const stored = steps.find((step) => step.step_id === row.dataset.step)!
       if (stored.kind === 'check') expect(header(row)).toHaveTextContent(stored.passed ? 'Check passed' : 'Check failed')
     }
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse all steps' }))
+    expect(rows().every((row) => header(row).getAttribute('aria-expanded') === 'false')).toBe(true)
     fireEvent.click(screen.getByRole('button', { name: 'Expand all steps' }))
     for (const [index, row] of rows().entries()) {
       expect(header(row)).toHaveAttribute('aria-expanded', 'true')
@@ -113,6 +116,9 @@ describe('compact stored loads trace', () => {
     expect(headings[0].textContent).toBe(headings[2].textContent)
     expect(headings[1].textContent).not.toBe(headings[0].textContent)
     expect(rows()[1]).toHaveAttribute('data-step', unknown.step_id)
+    expect(details(rows()[1])).toBeVisible()
+    fireEvent.click(header(rows()[1]))
+    expect(details(rows()[1])).not.toBeVisible()
     fireEvent.click(header(rows()[1]))
     expect(details(rows()[1])).toBeVisible()
     expect(rows().map((row) => row.dataset.step)).toEqual(trace.map((step) => step.step_id))
@@ -129,15 +135,15 @@ describe('compact stored loads trace', () => {
     }
     fireEvent.click(header(rows()[0]))
     rerender(view('skipped', steps.length))
-    expect(header(rows()[0])).toHaveAttribute('aria-expanded', 'true')
-    expect(header(rows()[1])).toHaveAttribute('aria-expanded', 'false')
+    expect(header(rows()[0])).toHaveAttribute('aria-expanded', 'false')
+    expect(header(rows()[1])).toHaveAttribute('aria-expanded', 'true')
     expect(rows().some((row) => row.hasAttribute('inert'))).toBe(false)
     expect(rows().every((row, index) => row.id === `trace-step-${index}`)).toBe(true)
   })
 
   it.each([false, true])('has no detectable accessibility violations with expanded details %s', async (expanded) => {
     const { container } = show()
-    if (expanded) fireEvent.click(screen.getByRole('button', { name: 'Expand all steps' }))
+    if (!expanded) fireEvent.click(screen.getByRole('button', { name: 'Collapse all steps' }))
     await expectNoA11yViolations(container)
   }, 10000)
 })

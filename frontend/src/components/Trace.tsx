@@ -226,7 +226,7 @@ export function Trace({
   const table = useMemo(() => symbols ?? symbolTable(steps), [symbols, steps])
   const sections = useMemo(() => loadsTraceSections(steps), [steps])
   const playing = playback?.phase === 'playing'
-  const [expanded, setExpanded] = useState<ReadonlySet<number>>(() => new Set(sections ? [] : steps.map((_, index) => index)))
+  const [expanded, setExpanded] = useState<ReadonlySet<number>>(() => new Set(steps.map((_, index) => index)))
   const toggle = (index: number) =>
     setExpanded((current) => {
       const next = new Set(current)
