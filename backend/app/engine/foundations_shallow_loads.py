@@ -161,7 +161,7 @@ def _quantity(value: float, unit: str) -> QuantityValue:
     return QuantityValue(value=value, unit=unit)
 
 
-def pressure_steps(inputs: Mapping[str, QuantityValue], data: Parameters) -> tuple[tuple[ModuleStep, ...], dict[str, QuantityValue], str]:
+def pressure_steps(inputs: Mapping[str, QuantityValue], data: Parameters, *, assembly_rule: EngineerRule | None = None) -> tuple[tuple[ModuleStep, ...], dict[str, QuantityValue], str]:
     values = dict(inputs)
     prefix, resistance = resistance_steps(inputs, data.resistance)
     trace: list[ModuleStep] = list(prefix)
@@ -181,25 +181,45 @@ def pressure_steps(inputs: Mapping[str, QuantityValue], data: Parameters) -> tup
         engineer("Wy", "W_y=b l^2/6", b * length * length / 6, "m3", ("b", "l"), GEOMETRY_RULE)
         for axis in ("x", "y"):
             moment, shear = f"M{axis}", f"Q{axis}"
-            engineer(f"M{axis}_base", f"M_{{{axis},base}}=M_{axis}+Q_{axis} h",
-                     inputs[moment].value + inputs[shear].value * height, "kN*m",
-                     (moment, shear, "h"), TRANSFER_RULE)
-        gamma = table_step("gamma_mt", data.gamma_mt, {})
-        trace.append(gamma)
-        values["gamma_mt"] = gamma.result
-        mean_values = values | {"M": _quantity(0, "kN*m"), "W": values["Wx"]}
-        mean = formula_step("p", data.p_edge_plus, mean_values)
-        trace.append(mean)
-        values["p"] = mean.result
-        engineer("V", "V=N+\\gamma_{mt} d A", inputs["N"].value + gamma.result.value * inputs["d"].value * values["A"].value,
-                 "kN", ("N", "gamma_mt", "d", "A"), CORNER_RULE)
+            base = inputs[moment].value + inputs[shear].value * height
+            if assembly_rule is None:
+                engineer(f"M{axis}_base", f"M_{{{axis},base}}=M_{axis}+Q_{axis} h", base, "kN*m",
+                         (moment, shear, "h"), TRANSFER_RULE)
+            else:
+                extra = f"M{axis}_add_base"
+                engineer(f"M{axis}_base", f"M_{{{axis},base}}=M_{axis}+Q_{axis} h+M_{{{axis},add,base}}",
+                         base + inputs[extra].value, "kN*m", (moment, shear, "h", extra), assembly_rule)
+        if assembly_rule is None:
+            gamma = table_step("gamma_mt", data.gamma_mt, {})
+            trace.append(gamma)
+            values["gamma_mt"] = gamma.result
+            mean_values = values | {"M": _quantity(0, "kN*m"), "W": values["Wx"]}
+            mean = formula_step("p", data.p_edge_plus, mean_values)
+            trace.append(mean)
+            values["p"] = mean.result
+            engineer("V", "V=N+\\gamma_{mt} d A", inputs["N"].value + gamma.result.value * inputs["d"].value * values["A"].value,
+                     "kN", ("N", "gamma_mt", "d", "A"), CORNER_RULE)
+        else:
+            names = ("G_fund", "G_soil", "G_other")
+            engineer("G_sum", "G_{sum}=G_{fund}+G_{soil}+G_{other}", sum(inputs[name].value for name in names),
+                     "kN", names, assembly_rule)
+            engineer("V", "V=N+G_{sum}", inputs["N"].value + values["G_sum"].value,
+                     "kN", ("N", "G_sum"), assembly_rule)
+            engineer("p", "p=V/A", values["V"].value / values["A"].value, "kPa", ("V", "A"), assembly_rule)
         for axis in ("x", "y"):
             moment_value = values[f"M{axis}_base"]
             modulus = values[f"W{axis}"]
             for suffix, expression in (("min", data.p_edge_minus), ("max", data.p_edge_plus)):
-                step = formula_step(f"p_{axis}_{suffix}", expression, values | {"M": _quantity(abs(moment_value.value), "kN*m"), "W": modulus})
-                trace.append(step)
-                values[step.step_id] = step.result
+                if assembly_rule is None:
+                    step = formula_step(f"p_{axis}_{suffix}", expression, values | {"M": _quantity(abs(moment_value.value), "kN*m"), "W": modulus})
+                    trace.append(step)
+                    values[step.step_id] = step.result
+                else:
+                    increment = abs(moment_value.value) / modulus.value
+                    sign = -1 if suffix == "min" else 1
+                    operator = "-" if suffix == "min" else "+"
+                    engineer(f"p_{axis}_{suffix}", f"p_{{{axis},{suffix}}}=p{operator}|M_{{{axis},base}}|/W_{axis}",
+                             values["p"].value + sign * increment, "kPa", ("p", f"M{axis}_base", f"W{axis}"), assembly_rule)
             engineer(f"e_{axis}", f"e_{axis}=|M_{{{axis},base}}|/V", abs(moment_value.value) / values["V"].value,
                      "m", (f"M{axis}_base", "V"), CORNER_RULE)
             ratio = values[f"e_{axis}"].value / inputs["b" if axis == "x" else "l"].value
@@ -222,16 +242,21 @@ def pressure_steps(inputs: Mapping[str, QuantityValue], data: Parameters) -> tup
                                    Substitution(symbol="l", value=inputs["b" if axis == "x" else "l"].value, unit="m")),
                     result=values[f"e_{axis}"], norm_refs=data.diagram_cases.norm_refs))
         for suffix, sign_x, sign_y in (("pp", 1, 1), ("pm", 1, -1), ("mp", -1, 1), ("mm", -1, -1)):
-            component = formula_step(f"corner_component_{suffix}", data.p_corner, values | {
-                "M_x": _quantity(sign_x * values["Mx_base"].value, "kN*m"),
-                "M_y": _quantity(sign_y * values["My_base"].value, "kN*m"),
-                "W_x": values["Wx"], "W_y": values["Wy"]})
-            trace.append(component)
-            values[component.step_id] = component.result
             values[f"sign_x_{suffix}"] = _quantity(sign_x, "1")
             values[f"sign_y_{suffix}"] = _quantity(sign_y, "1")
-            engineer(f"p_corner_{suffix}", f"p_{{{suffix}}}=p+s_x M_{{x,base}}/W_x+s_y M_{{y,base}}/W_y", component.result.value,
-                     "kPa", ("p", "Mx_base", "Wx", "My_base", "Wy", f"sign_x_{suffix}", f"sign_y_{suffix}", component.step_id), CORNER_RULE)
+            if assembly_rule is None:
+                component = formula_step(f"corner_component_{suffix}", data.p_corner, values | {
+                    "M_x": _quantity(sign_x * values["Mx_base"].value, "kN*m"),
+                    "M_y": _quantity(sign_y * values["My_base"].value, "kN*m"),
+                    "W_x": values["Wx"], "W_y": values["Wy"]})
+                trace.append(component)
+                values[component.step_id] = component.result
+                engineer(f"p_corner_{suffix}", f"p_{{{suffix}}}=p+s_x M_{{x,base}}/W_x+s_y M_{{y,base}}/W_y", component.result.value,
+                         "kPa", ("p", "Mx_base", "Wx", "My_base", "Wy", f"sign_x_{suffix}", f"sign_y_{suffix}", component.step_id), CORNER_RULE)
+            else:
+                pressure = values["p"].value + sign_x * values["Mx_base"].value / values["Wx"].value + sign_y * values["My_base"].value / values["Wy"].value
+                engineer(f"p_corner_{suffix}", f"p_{{{suffix}}}=p+s_x M_{{x,base}}/W_x+s_y M_{{y,base}}/W_y", pressure,
+                         "kPa", ("p", "Mx_base", "Wx", "My_base", "Wy", f"sign_x_{suffix}", f"sign_y_{suffix}"), assembly_rule)
         corners = tuple(f"p_corner_{suffix}" for suffix in ("pp", "pm", "mp", "mm"))
         minimum = min(corners, key=lambda name: values[name].value)
         engineer("p_corner_min", "p_{corner,min}=\\min(p_{++},p_{+-},p_{-+},p_{--})", values[minimum].value,
@@ -242,6 +267,27 @@ def pressure_steps(inputs: Mapping[str, QuantityValue], data: Parameters) -> tup
         raise ExpressionError("invalid loads intermediate arithmetic") from exc
     return tuple(trace), values, minimum.removeprefix("p_corner_")
 
+
+
+
+def pressure_outcome(trace: tuple[ModuleStep, ...], values: Mapping[str, QuantityValue], corner: str, data: Parameters,
+                     related_inputs: tuple[str, ...] = CONTACT_INPUTS) -> ModuleOutcome[Outputs, Details]:
+    if values["p_corner_min"].value < 0:
+        reason = DerivedViolation(value=values["p_corner_min"], limit=QuantityValue(value=0, unit="kPa"), source=CONTACT_RULE,
+                                  related_inputs=related_inputs, limiting_corner=cast(Literal["pp", "pm", "mp", "mm"], corner))
+        return ModuleOutcome(execution="stopped", applicability="not_applicable", trace=trace,
+            diagnostic=ModuleDiagnostic(code="full_contact", step_id=reason.step_id, source=reason.source, details=reason), stop_stage="after_start")
+    edge_factor = table_step("edge_limit_multiplier", data.edge_pressure_limit_multiplier, {})
+    edge_limit = formula_step("edge_limit", data.edge_limit, dict(values) | {data.edge_pressure_limit_multiplier.symbol: edge_factor.result})
+    corner_factor = table_step("corner_limit_multiplier", data.corner_pressure_limit_multiplier, {})
+    corner_limit = formula_step("corner_limit", data.corner_limit, dict(values) | {data.corner_pressure_limit_multiplier.symbol: corner_factor.result})
+    checks = (
+        check_step(CHECKS[0], ("p", values["p"]), "le", ("R", values["R"]), data.resistance.check_norm_refs),
+        check_step(CHECKS[1], ("p_x_max", values["p_x_max"]), "le", ("edge_limit", edge_limit.result), data.edge_pressure_limit_multiplier.norm_refs),
+        check_step(CHECKS[2], ("p_y_max", values["p_y_max"]), "le", ("edge_limit", edge_limit.result), data.edge_pressure_limit_multiplier.norm_refs),
+        check_step(CHECKS[3], ("p_corner_max", values["p_corner_max"]), "le", ("corner_limit", corner_limit.result), data.corner_pressure_limit_multiplier.norm_refs))
+    return ModuleOutcome(execution="completed", applicability="applicable", outputs=Outputs(**{key: values[key] for key in OUTPUTS}),
+        trace=(*trace, edge_factor, edge_limit, corner_factor, corner_limit, *checks), checks=checks)
 
 
 @dataclass(frozen=True)
@@ -292,22 +338,7 @@ class FoundationsLoadsModule:
             return ModuleOutcome(execution="stopped", applicability="not_applicable", warnings=warnings,
                 diagnostic=ModuleDiagnostic(code="method_bound", source=refusal.bound.source, details=refusal), stop_stage="before_calculation")
         trace, values, corner = pressure_steps(inputs.quantities(), data)
-        if values["p_corner_min"].value < 0:
-            reason = DerivedViolation(value=values["p_corner_min"], limit=QuantityValue(value=0, unit="kPa"), source=CONTACT_RULE,
-                                      related_inputs=CONTACT_INPUTS, limiting_corner=cast(Literal["pp", "pm", "mp", "mm"], corner))
-            return ModuleOutcome(execution="stopped", applicability="not_applicable", trace=trace,
-                diagnostic=ModuleDiagnostic(code="full_contact", step_id=reason.step_id, source=reason.source, details=reason), stop_stage="after_start")
-        edge_factor = table_step("edge_limit_multiplier", data.edge_pressure_limit_multiplier, {})
-        edge_limit = formula_step("edge_limit", data.edge_limit, values | {data.edge_pressure_limit_multiplier.symbol: edge_factor.result})
-        corner_factor = table_step("corner_limit_multiplier", data.corner_pressure_limit_multiplier, {})
-        corner_limit = formula_step("corner_limit", data.corner_limit, values | {data.corner_pressure_limit_multiplier.symbol: corner_factor.result})
-        checks = (
-            check_step(CHECKS[0], ("p", values["p"]), "le", ("R", values["R"]), data.resistance.check_norm_refs),
-            check_step(CHECKS[1], ("p_x_max", values["p_x_max"]), "le", ("edge_limit", edge_limit.result), data.edge_pressure_limit_multiplier.norm_refs),
-            check_step(CHECKS[2], ("p_y_max", values["p_y_max"]), "le", ("edge_limit", edge_limit.result), data.edge_pressure_limit_multiplier.norm_refs),
-            check_step(CHECKS[3], ("p_corner_max", values["p_corner_max"]), "le", ("corner_limit", corner_limit.result), data.corner_pressure_limit_multiplier.norm_refs))
-        return ModuleOutcome(execution="completed", applicability="applicable", outputs=Outputs(**{key: values[key] for key in OUTPUTS}),
-            trace=(*trace, edge_factor, edge_limit, corner_factor, corner_limit, *checks), checks=checks)
+        return pressure_outcome(trace, values, corner, data)
 
     def validate_diagnostic(self, diagnostic: ModuleDiagnostic[Details], trace: tuple[ModuleStep, ...], inputs: Inputs,
                             data: Parameters, options: LegacyOptions) -> None:

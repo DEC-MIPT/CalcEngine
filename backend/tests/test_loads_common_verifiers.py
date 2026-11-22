@@ -1,11 +1,13 @@
 from datetime import date
 
 import pytest
+from test_foundations_weights_contract import EXAMPLES as WEIGHTS_EXAMPLES
 from test_loads_acceptance import EXAMPLES
 
 from app.core.config import INTERIM_ROOT, PARAMS_ROOT
 from app.engine import foundations_shallow_r as pilot
 from app.engine.foundations_shallow_loads import NAME as LOADS
+from app.engine.foundations_shallow_weights import NAME as WEIGHTS
 from app.engine.pipeline import calculate
 from app.schemas.calculation import MethodBound, NormRef, QuantityValue
 from app.services.calculation import CalculationService
@@ -16,11 +18,12 @@ from app.verification.regression import CorpusEntry, freeze, run_regression
 from app.verification.runner import ExampleParameters
 
 CASES = ((pilot.NAME, "pass"), (pilot.NAME, "fail"), (LOADS, "pass"),
-         (LOADS, "fail"), (LOADS, "bound"), (LOADS, "contact"))
+         (LOADS, "fail"), (LOADS, "bound"), (LOADS, "contact"),
+         (WEIGHTS, "pass"), (WEIGHTS, "fail"), (WEIGHTS, "bound"), (WEIGHTS, "contact"))
 
 
 def given(name: str, state: str) -> dict[str, QuantityValue]:
-    inputs = dict(EXAMPLES[0].inputs)
+    inputs = dict((WEIGHTS_EXAMPLES if name == WEIGHTS else EXAMPLES)[0].inputs)
     if name == pilot.NAME:
         inputs = {field.name: inputs[field.name] for field in pilot.INPUTS if field.name != "p"}
         inputs["p"] = QuantityValue(value=120 if state == "pass" else 220, unit="kPa")
@@ -74,7 +77,7 @@ def test_every_registered_type_uses_common_verifiers_with_prepared_sources(name:
     assert report.checks[0].differences == ()
 
 
-@pytest.mark.parametrize("name", (pilot.NAME, LOADS))
+@pytest.mark.parametrize("name", (pilot.NAME, LOADS, WEIGHTS))
 def test_common_verifiers_preserve_explicit_method_ranges_for_every_registered_type(name: str) -> None:
     registry = build_registry(PARAMS_ROOT)
     source = interim_sources(registry, INTERIM_ROOT, "strict", date(2026, 11, 16))[name]

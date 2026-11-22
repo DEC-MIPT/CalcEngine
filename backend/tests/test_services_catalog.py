@@ -4,7 +4,11 @@ import pytest
 import yaml
 
 from app.core.exceptions import DECError
-from app.engine import foundations_shallow_loads, foundations_shallow_r
+from app.engine import (
+    foundations_shallow_loads,
+    foundations_shallow_r,
+    foundations_shallow_weights,
+)
 from app.engine.base import Calculator
 from app.engine.registry import CalculatorRegistry
 from app.parameters.loader import load_parameters
@@ -67,9 +71,8 @@ def synthetic_contract(name: str) -> CalculationTypeContract:
 def write_params(root: Path, text: str) -> Path:
     path = root / FILE_NAME
     path.write_text(text, encoding="utf-8")
-    (root / "foundations_shallow_loads.yaml").write_text(
-        (PARAMS_ROOT / "foundations_shallow_loads.yaml").read_text(encoding="utf-8"), encoding="utf-8"
-    )
+    for calculation_type in (foundations_shallow_loads.NAME, foundations_shallow_weights.NAME):
+        (root / f"{calculation_type}.yaml").write_bytes((PARAMS_ROOT / f"{calculation_type}.yaml").read_bytes())
     return path
 
 
@@ -201,7 +204,7 @@ def test_validated_ranges_are_read_for_every_registered_type(tmp_path: Path) -> 
     write_params(tmp_path, VALID_RULE)
     registry = build_registry(tmp_path)
 
-    assert load_validated_ranges(registry, tmp_path) == {foundations_shallow_r.NAME: (), foundations_shallow_loads.NAME: ()}
+    assert load_validated_ranges(registry, tmp_path) == {foundations_shallow_r.NAME: (), foundations_shallow_loads.NAME: (), foundations_shallow_weights.NAME: ()}
     assert load_validated_ranges(CalculatorRegistry(), tmp_path) == {}
 
 
@@ -246,6 +249,7 @@ def test_each_registration_names_its_parameters_model() -> None:
     assert PARAMETER_MODELS == {
         foundations_shallow_r.NAME: foundations_shallow_r.Parameters,
         foundations_shallow_loads.NAME: foundations_shallow_loads.Parameters,
+        foundations_shallow_weights.NAME: foundations_shallow_weights.Parameters,
     }
     assert [registration.name for registration in REGISTRATIONS] == list(PARAMETER_MODELS)
 

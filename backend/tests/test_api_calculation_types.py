@@ -14,7 +14,11 @@ from test_services_submit import CONTRACT, FixedSource, SyntheticCalculator, req
 from app.api.dependencies import get_service
 from app.core.config import PARAMS_ROOT, ApiSettings
 from app.core.exceptions import DECError
-from app.engine import foundations_shallow_loads, foundations_shallow_r
+from app.engine import (
+    foundations_shallow_loads,
+    foundations_shallow_r,
+    foundations_shallow_weights,
+)
 from app.engine.registry import CalculatorRegistry
 from app.main import create_app
 from app.models import Base
@@ -45,7 +49,9 @@ def test_the_registered_types_are_listed_in_contract_order() -> None:
 
     assert status == 200
     assert body == [view.model_dump(mode="json") for view in calculation_types(registry)]
-    pilot, loads = body
+    pilot, loads, weights = body
+    assert weights["name"] == foundations_shallow_weights.NAME
+    assert len(weights["inputs"]) == 19 and len(weights["outputs"]) == 10
     assert loads["name"] == foundations_shallow_loads.NAME
     assert len(loads["inputs"]) == 15 and len(loads["outputs"]) == 10
     assert [item["name"] for item in pilot["inputs"]] == [q.name for q in foundations_shallow_r.INPUTS]
@@ -87,7 +93,7 @@ def test_the_listing_answers_without_the_database_variable() -> None:
     status, body = get_types(create_app())
 
     assert status == 200
-    assert [entry["name"] for entry in body] == [foundations_shallow_r.NAME, foundations_shallow_loads.NAME]
+    assert [entry["name"] for entry in body] == [foundations_shallow_r.NAME, foundations_shallow_loads.NAME, foundations_shallow_weights.NAME]
 
 
 def test_the_start_up_loads_the_validated_range_of_each_type(tmp_path: Path) -> None:
@@ -106,9 +112,8 @@ validated_range:
 """,
         encoding="utf-8",
     )
-    (tmp_path / "foundations_shallow_loads.yaml").write_text(
-        (PARAMS_ROOT / "foundations_shallow_loads.yaml").read_text(encoding="utf-8"), encoding="utf-8"
-    )
+    for calculation_type in (foundations_shallow_loads.NAME, foundations_shallow_weights.NAME):
+        (tmp_path / f"{calculation_type}.yaml").write_bytes((PARAMS_ROOT / f"{calculation_type}.yaml").read_bytes())
     application = create_app(ApiSettings.model_validate({"DEC_PARAMS_ROOT": tmp_path}))
 
     with TestClient(application):
@@ -116,6 +121,7 @@ validated_range:
 
     assert ranges == {
         foundations_shallow_loads.NAME: (),
+        foundations_shallow_weights.NAME: (),
         foundations_shallow_r.NAME: (
             EngineerBound(quantity="b", kind="max", value=3.0, inclusive=True, source=RULE),
         )
@@ -126,7 +132,7 @@ def test_the_pilot_parameter_file_has_an_empty_validated_range() -> None:
     application = create_app()
 
     with TestClient(application):
-        assert application.state.validated_ranges == {foundations_shallow_r.NAME: (), foundations_shallow_loads.NAME: ()}
+        assert application.state.validated_ranges == {foundations_shallow_r.NAME: (), foundations_shallow_loads.NAME: (), foundations_shallow_weights.NAME: ()}
 
 
 def test_a_given_registry_comes_with_the_given_ranges_or_none() -> None:
@@ -206,9 +212,8 @@ validated_range:
 """,
         encoding="utf-8",
     )
-    (tmp_path / "foundations_shallow_loads.yaml").write_text(
-        (PARAMS_ROOT / "foundations_shallow_loads.yaml").read_text(encoding="utf-8"), encoding="utf-8"
-    )
+    for calculation_type in (foundations_shallow_loads.NAME, foundations_shallow_weights.NAME):
+        (tmp_path / f"{calculation_type}.yaml").write_bytes((PARAMS_ROOT / f"{calculation_type}.yaml").read_bytes())
     application = create_app(ApiSettings.model_validate({"DEC_PARAMS_ROOT": tmp_path}))
 
     with pytest.raises(DECError) as raised, TestClient(application):

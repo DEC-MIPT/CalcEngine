@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.api.calculations import router as calculations_router
 from app.api.errors import install_error_handlers
+from app.api.foundation_design import router as foundation_design_router
 from app.api.health import router as health_router
 from app.api.limits import BodySizeLimit
 from app.api.normatives import router as normatives_router
@@ -102,6 +103,7 @@ def create_app(
     )
     app.include_router(health_router)
     app.include_router(calculations_router)
+    app.include_router(foundation_design_router)
     app.include_router(normatives_router)
     return app
 

@@ -12,8 +12,10 @@ from app.core.exceptions import (
 from app.engine.pipeline import calculate
 from app.engine.registry import CalculatorRegistry
 from app.reporting.docx_writer import render_docx
+from app.reporting.foundation_design import render_foundation_docx
 from app.reporting.model import build_report
 from app.repositories.calculation_result import CalculationResultRepository
+from app.repositories.foundation_design import FoundationDesignRepository
 from app.schemas.calculation import (
     CalculationRequest,
     CalculationResult,
@@ -25,6 +27,7 @@ from app.schemas.calculation import (
 )
 from app.schemas.report import ReportRequest
 from app.schemas.stored import StoredResult
+from app.services.foundation_context import FOUNDATION_TYPES, foundation_context
 from app.services.parameter_source import ParameterSource
 
 NO_SOURCES: Mapping[str, ParameterSource] = MappingProxyType({})
@@ -68,12 +71,14 @@ class CalculationService:
         sources: Mapping[str, ParameterSource] = NO_SOURCES,
         validated_ranges: Mapping[str, Sequence[ValidatedBound]] = NO_RANGES,
         results: CalculationResultRepository | None = None,
+        design_results: FoundationDesignRepository | None = None,
     ) -> None:
         self._registry = registry
         self._new_id = new_id
         self._sources = sources
         self._validated_ranges = validated_ranges
         self._results = results
+        self._design_results = design_results
 
     def envelope(self, result: CalculationResult, source: ParameterSourceInfo | None = None) -> ResultEnvelope:
         """Превращает результат в конверт с новым ``result_id``.
@@ -110,7 +115,12 @@ class CalculationService:
             ParameterSourceUnavailableError: если у типа нет источника параметров.
             RuntimeError: если сервис создан без репозитория результатов.
         """
-        results = self._repository()
+        self._repository()
+        envelope = self.evaluate(request)
+        self.persist(request, envelope)
+        return envelope
+
+    def evaluate(self, request: CalculationRequest) -> ResultEnvelope:
         name = request.calculation_type
         request.check_against(self._registry.contract(name))
         source = self._sources.get(name)
@@ -127,6 +137,11 @@ class CalculationService:
             validated_range=self._validated_ranges.get(name, ()),
             source=resolved.source,
         )
+        return envelope
+
+    def persist(self, request: CalculationRequest, envelope: ResultEnvelope) -> None:
+        results = self._repository()
+        name = request.calculation_type
         results.add(
             result_id=envelope.result_id,
             calculation_type=name,
@@ -136,7 +151,10 @@ class CalculationService:
             envelope=envelope.model_dump(mode="json"),
             norm_sources=norm_sources(envelope),
         )
-        return envelope
+        if self._design_results is not None and name in FOUNDATION_TYPES:
+            self._design_results.add_context(foundation_context(
+                name, request.inputs, envelope, self._registry.module(name).metadata.methodology_version,
+            ))
 
     def get(self, result_id: UUID) -> StoredResult:
         """Читает сохранённый результат.
@@ -193,7 +211,9 @@ class CalculationService:
             raise CalculationTypeNotRegisteredError(
                 f"The calculation type {stored.calculation_type!r} of this result is no longer registered."
             ) from None
-        return render_docx(build_report(contract, stored.inputs, stored.envelope, report_request))
+        rendered = render_docx(build_report(contract, stored.inputs, stored.envelope, report_request))
+        context = None if self._design_results is None else self._design_results.context(result_id)
+        return rendered if context is None else render_foundation_docx(rendered, context)
 
     def _repository(self) -> CalculationResultRepository:
         if self._results is None:
@@ -248,4 +268,5 @@ def calculation_service(
         sources=sources,
         validated_ranges=validated_ranges,
         results=CalculationResultRepository(session),
+        design_results=FoundationDesignRepository(session),
     )

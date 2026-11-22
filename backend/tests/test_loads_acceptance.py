@@ -2,10 +2,12 @@ import json
 import random
 from collections.abc import Iterator
 from datetime import date
+from io import BytesIO
 from pathlib import Path
 from typing import Any
 
 import pytest
+from docx import Document
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 from sqlalchemy import create_engine
@@ -117,7 +119,10 @@ def test_approved_reference_roundtrips_through_api_and_docx(client: TestClient, 
     assert "N не включает собственный вес" in text
     assert "Эти величины независимы" in text
     assert "Инженерная формула" in text
-    assert len(rows) == 16
+    original_inputs = Document(BytesIO(report.content)).tables[0]
+    assert len(original_inputs.rows) == 16
+    assert "Величина / источник" in "\n".join(cell for row in rows for cell in row)
+    assert len(Document(BytesIO(report.content)).inline_shapes) == 1
     assert "Все проверки выполнены." in text
     assert result.parameter_source is not None
     assert result.parameter_source.profile == "strict"
