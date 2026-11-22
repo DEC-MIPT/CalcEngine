@@ -51,16 +51,16 @@ consent; completing a checkbox is not Git consent.
 - [x] 3.3 Display ten outputs, four ordered checks and deciding verdict reason; verify rounded presentation, no recomputation and pass/fail/warning/source states.
 - [x] 3.4 Render engineer_formula and derived diagnostic refusal prefixes; verify no final pressure/bearing-success display, historical bound-refusal behavior, draft eligibility, correction/reveal actions and text/keyboard/reduced-motion accessibility.
 - [x] 3.5 Run frontend automated and browser acceptance; verify frontend/check.sh, >=95% branch coverage, Playwright type/form/result/report journeys, zero-contact/derived-refusal interactions and unchanged pilot journeys.
-- [ ] 3.5a Group recognized loads traces with initially expanded step details and contiguous headings inside the existing flat ordered list; verify conservative complete typed-step signature recognition, flat expanded fallback for incomplete/unrecognized traces, all stored steps/order/anchors/results/sources retained, neutral unknown supplemental steps, keyboard/global disclosure, original-index playback/ruler behavior, immediate derived diagnostics and unchanged expanded pilot. Run frontend checks with >=95% branch coverage and focused browser/UI acceptance; bind fresh evidence to the changed revision.
-- [ ] 3.6 Obtain ui-ux-tester confirmation and separate tester GO; verify resolved visual/control/accessibility findings and current automated/browser evidence names the reviewed feature revision.
+- [x] 3.5a Group recognized loads traces with initially expanded step details and contiguous headings inside the existing flat ordered list; verify conservative complete typed-step signature recognition, flat expanded fallback for incomplete/unrecognized traces, all stored steps/order/anchors/results/sources retained, neutral unknown supplemental steps, keyboard/global disclosure, original-index playback/ruler behavior, immediate derived diagnostics and unchanged expanded pilot. Run frontend checks with >=95% branch coverage and focused browser/UI acceptance; bind fresh evidence to the changed revision.
+- [x] 3.6 Obtain ui-ux-tester confirmation and separate tester GO; verify resolved visual/control/accessibility findings and current automated/browser evidence names the reviewed feature revision.
 
 ## 4. Review, integration and closure
 
 - [x] 4.1 Review complete backend after tester GO; verify all section-2 tasks complete, three admitted references, unchanged-pilot evidence and no open blocker/major/security finding.
 - [x] 4.2 With explicit consent, integrate reviewed backend into develop; verify actual integrated backend checks and source/pilot invariants with DB/catalog skips recorded separately; verify shared executor hashes match the integrated contract revision.
-- [ ] 4.3 Review complete frontend after tester GO and UI/UX confirmation; verify all section-3 tasks complete and compatibility with integrated backend.
-- [ ] 4.4 With explicit consent, integrate reviewed frontend after backend; verify actual integrated frontend/browser checks and both type journeys without claiming skipped checks passed.
-- [ ] 4.5 Complete actual-develop integrated acceptance; verify three admitted references through runner/API/DOCX, contact/sign/unit/rounding cases, unchanged pilot fixtures/reports, backend/frontend checks, Playwright and selected/all strict validation.
+- [x] 4.3 Review complete frontend after tester GO and UI/UX confirmation; verify all section-3 tasks complete and compatibility with integrated backend.
+- [x] 4.4 With explicit consent, integrate reviewed frontend after backend; verify actual integrated frontend/browser checks and both type journeys without claiming skipped checks passed.
+- [x] 4.5 Complete actual-develop integrated acceptance; verify three admitted references through runner/API/DOCX, contact/sign/unit/rounding cases, unchanged pilot fixtures/reports, backend/frontend checks, Playwright and selected/all strict validation.
 - [ ] 4.6 After accepted integration of both features, sync canonical specs and archive; verify no unchecked task, accurate verdict/skip records and final strict validation. Git actions retain their separate consent requirement.
 
 ## Dependencies

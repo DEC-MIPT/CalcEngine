@@ -901,3 +901,162 @@ convention and the biaxial maximum-pressure check also differ from DEC. The
 competitor exposes broader design/settlement/seismic modes; those implementations
 were not verified in this pressure-focused audit. No coefficient, input contract,
 source status, code, task completion or GO changed; Git publication was not requested.
+
+## Scoped frontend acceptance for task 3.5a, 2026-11-22
+
+Task 3.5a has scoped tester PASS and UI/UX confirmation. The audit covered 54
+mocked pages at 1280 px and 320 px in Chromium 153.0.8010.12, Firefox 155.0 and
+WebKit 26.6, with zero axe violations, page errors or horizontal overflow.
+Expanded defaults, stored order, formulas, sources, keyboard controls and three
+playback checks passed. Trace.tsx retains reviewed SHA-256
+ebd028c88b11343e770d27c0942c6c0494bdbe1363d22585834583c14c6df735.
+
+The frontend check against the accepted develop backend passed 709 tests in 68
+files, ESLint, TypeScript, API drift and fixture drift. Branch coverage is
+820/822 (99.75%). The generated schema now includes the accepted selection/context
+API additions; existing ResultEnvelope and loads fixtures remain unchanged.
+
+Whole-feature NO-GO remains. Serial Chromium accessibility passed 12/12; the
+serial completed-loads submission latency p95 was 1565.7 ms against the required
+less-than-1000 ms target. A latency fix is in progress without changing that
+threshold. The last two desktop versions of Chrome, Firefox, Edge and Safari,
+and live screen-reader behavior, remain unverified. Task 3.6 and integration
+remain open; no commit, merge or push was performed in this acceptance step.
+
+## Latency result correction, 2026-11-22
+
+The earlier parallel latency observation is superseded for acceptance by the
+isolated Chromium run. The original frontend code, without a cache change,
+passed the existing 20-run check at p95 967.2 ms, below the unchanged
+less-than-1000 ms requirement. The 1565.7 ms observation occurred while Vitest
+workers consumed the same host and remains a contention observation. No
+production latency change is required. Task 3.6 remains NO-GO for the
+unverified branded browser matrix. Live screen-reader behavior remains untested.
+
+## Final available-engine tester verdict, 2026-11-22
+
+Tester confirms task 3.5a PASS for 2b70c69 plus the four reviewed working-tree
+files. The clean functional Playwright run passed 112 tests with 44 existing
+Chromium-only policy skips and zero failures. Timing scenarios were excluded
+from that functional run and measured separately. The completed-load submission
+passed 20 idle runs at p95 967.2 ms; the derived-refusal submission also passed
+its existing 20-run less-than-1000 ms assertion. Thresholds and production
+performance code are unchanged.
+
+The final frontend check against the integrated backend producer passed 709
+tests, API/fixture drift, ESLint and TypeScript, with 820/822 covered branches.
+UI/UX confirms the 54-page audit and three playback checks. Original stored
+formulas, sources, values, order and expanded defaults remain intact.
+
+Whole-feature NO-GO remains solely for the unverified last-two-version desktop
+Chrome/Firefox/Edge/Safari matrix required by canonical web-platform specs.
+Live screen-reader testing remains a disclosed limitation, not an additional
+acceptance gate introduced by this audit. Tasks 3.6 and 4.3-4.6 remain open.
+No browser exception, commit, merge, push or frontend integration was authorized
+or performed in this acceptance step.
+
+## Manual browser matrix collection, 2026-11-22
+
+Akim reported access to the required test environment and requested stepwise
+matrix collection. The [browser worksheet](../../verification/foundations-pressure-from-loads/browser-matrix.md)
+owns the candidate manifest, version slots and manual result entries. OS,
+served-build identity, qualifying version targets and scenario results are
+pending. Access availability is not browser PASS; task 3.6 remains open.
+
+The first environment entry is recorded for C1: Windows 11 Pro 26H2 with
+Google Chrome 157.0.8103.38. No scenario result has been assigned yet.
+
+The browser worksheet now uses one simplified E2E check per version: choose a
+calculation type, enter valid inputs, run the calculation, open the result and
+download the report. The earlier B1 report remains contextual evidence and is
+not counted as the simplified E2E result.
+
+On 2026-11-23, Akim confirmed the simplified C1 E2E scenario PASS for Chrome
+157.0.8103.38 on Windows 11 Pro 26H2: type selection, valid input, calculation,
+result opening and report download. C2 is the next matrix entry.
+
+The same E2E journey was reported PASS for Chrome 158.0.8127.36 on
+2026-11-23. The matrix keeps both Chrome observations; release-slot ordering
+remains pending official version qualification.
+
+## Manual matrix completed, 2026-11-23
+
+Akim reported PASS for the simplified journey in all eight supplied versions:
+Chrome 157.0.8103.38 and 158.0.8127.36; Firefox 160.0.1 and 159.0;
+Edge 158.0.4370.33 and 157.0.4341.53; Safari 27.2 and 27.1.
+The worksheet records version and reported E2E outcome under Akim's explicit
+simplification. Independent vendor release-currency and served-build observations
+are not claimed.
+
+UI/UX confirms the reviewed candidate with its unchanged manifest and
+installed-engine evidence. Final tester review of the completed manual record
+is pending. No feature GO, commit, merge or push is implied by the eight
+reported results alone.
+
+## Tester verdict after the manual matrix, 2026-11-23
+
+Tester issued GO for task 3.6 under the explicitly approved simplified manual
+protocol, with final UI/UX confirmation. The evidence combines the eight
+user-reported complete E2E journeys with the existing 709 passing tests,
+820/822 covered branches, clean functional browser run and idle latency checks.
+The verdict applies to 2b70c69 plus the four worksheet manifest files.
+
+Independent branded-browser operation, served-build observation, official
+vendor release qualification and live screen-reader testing remain unclaimed.
+Task 3.6 is complete. Final frontend review is in progress; integration,
+commit, push and archive remain separate actions.
+
+## Frontend review after GO, 2026-11-23
+
+Tester confirmed feature GO for feature/foundations-loads/frontend under the
+approved manual protocol. Task 4.3 review APPROVE: no blocker, major or introduced
+security finding. The four-file manifest remains compatible with the integrated
+backend. Trace expansion, typed rendering, diagnostic refusals, draft retention,
+MathJax safety and additive API schema generation remain intact.
+Task 4.4 requires explicit consent before frontend integration and develop checks.
+
+## Integrated frontend acceptance, 2026-11-23
+
+Tester declared integrated GO for tasks 4.4 and 4.5 on develop at 49a5c98.
+Akim authorized feature commit/push and integration in the working conversation.
+Feature commit b1818b1 is an ancestor of that merge; its frontend files match
+the integrated tree. This supersedes the earlier pending-integration statement.
+Publication of develop and these acceptance documents remains separate.
+
+The final functional command was `npm run test:e2e` with
+`--grep-invert '8\.9|p95 policy'`, `--workers=1` and
+`--trace=retain-on-failure`: 112 passed, 44 intentional browser-policy skips,
+zero failures. Both the historical pilot and loads journeys are covered.
+Timing checks were evaluated separately using the accepted isolated evidence
+recorded above; functional results do not substitute for timing results.
+The accepted frontend check has 709 passing tests and branch coverage 820/822.
+API/fixture drift, ESLint and TypeScript pass.
+
+Two preceding integrated runs were non-green: ZeroContact trace readiness and
+Biaxial initial type-list readiness each timed out after five seconds.
+Each unchanged scenario passed three isolated repetitions. The final complete
+run also passed both unchanged. Tester accepted these as transient readiness
+failures; their exact cause is unproven. No timeout, test, skip policy,
+fixture or production code was changed to obtain the final result.
+
+Backend code is identical to the integrated 53b91ac revision.
+The [integrated backend record](2026-11-22-foundations-design-tools-readiness.md#integrated-backend-verification-2026-11-22)
+retains 1757 passing tests, 11 skips and branch coverage 974/976.
+Tester audited the three admitted pressure references through runner/API/DOCX,
+contact/sign/unit/rounding cases and unchanged-pilot regression coverage.
+The shared executor SHA-256 is
+`c4655444c36bb50d174e081f28a49d9b04eac9044d03bf8f644a30684188485c`,
+matching cd204c5. No backend rerun was needed after frontend-only integration.
+Selected strict validation passes; all strict validation reports 25 passed,
+zero failed.
+
+The [browser matrix](../../verification/foundations-pressure-from-loads/browser-matrix.md)
+remains user-reported under the approved simplified protocol. Independent
+branded-browser execution, release/build qualification and live screen-reader
+operation remain unclaimed. Application PostgreSQL and normative/ingested-catalog
+checks remain unavailable because their test database variables are unset.
+Skips are not passes. Source verification statuses are unchanged.
+
+Tasks 4.4 and 4.5 are complete. Canonical spec synchronization and archive
+remain open under task 4.6. Local logs and retained diagnostic artifacts are
+indexed in the existing Russian frontend journal.

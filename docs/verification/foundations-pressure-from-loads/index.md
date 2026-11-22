@@ -23,3 +23,9 @@ Runtime promotion requires the signature and committed provenance described in
 [the verifier rules](../README.md). It does not promote an unverified NormRef.
 The source evidence and remaining readiness gates are recorded in the
 [paired readiness record](../../decisions/backend/2026-11-08-foundations-pressure-from-loads-readiness.md).
+
+## Browser acceptance
+
+The [desktop browser matrix](browser-matrix.md) records the separate manual UI
+compatibility evidence for frontend task 3.6. It does not change normative
+source verification or the LOADS-DB-1 verdict.
