@@ -388,6 +388,7 @@ class BoundViolation(BaseModel):
 
 
 CONTACT_INPUTS = ("N", "Mx", "My", "Qx", "Qy", "h", "b", "l", "d")
+WEIGHTS_CONTACT_INPUTS = ("N", "Mx", "My", "Qx", "Qy", "h", "b", "l", "G_fund", "G_soil", "G_other", "Mx_add_base", "My_add_base")
 CONTACT_RULE = EngineerRule(
     engineer="Аким",
     rationale="Полный контакт прямоугольной подошвы: минимум четырёх подписанных угловых давлений неотрицателен; решение инженера 2026-11-08.",
@@ -412,7 +413,7 @@ class DerivedViolation(BaseModel):
     def _valid_contact(self) -> "DerivedViolation":
         if (self.value.unit != "kPa" or self.value.value >= 0
             or self.limit != QuantityValue(value=0, unit="kPa")
-            or self.source != CONTACT_RULE or self.related_inputs != CONTACT_INPUTS):
+            or self.source != CONTACT_RULE or self.related_inputs not in (CONTACT_INPUTS, WEIGHTS_CONTACT_INPUTS)):
             raise ValueError("invalid full-contact diagnostic")
         return self
 
@@ -640,16 +641,27 @@ class CalculationRequest(BaseModel):
             )
         if contract.name == "foundations_shallow_loads":
             validate_loads_domains(self.inputs)
+        elif contract.name == "foundations_shallow_weights":
+            validate_loads_domains(self.inputs, explicit_weights=True)
 
 
-def validate_loads_domains(inputs: dict[str, QuantityValue]) -> None:
+def validate_loads_domains(inputs: dict[str, QuantityValue], *, explicit_weights: bool = False) -> None:
     units = {"N": "kN", "Mx": "kN*m", "My": "kN*m", "Qx": "kN", "Qy": "kN",
              "phi_II": "deg", "gamma_II": "kN/m3", "gamma_II_prime": "kN/m3", "c_II": "kPa"}
+    if explicit_weights:
+        units.update({name: "kN" for name in ("G_fund", "G_soil", "G_other")})
+        units.update({name: "kN*m" for name in ("Mx_add_base", "My_add_base")})
     values = {name: item.value if item.unit == units.get(name, "m") else
               item.value * UNITS[item.unit].factor / UNITS[units.get(name, "m")].factor
               for name, item in inputs.items()}
-    invalid = [name for name in ("b", "l", "d", "gamma_II", "gamma_II_prime") if values[name] <= 0]
+    positive = ("b", "l", "gamma_II", "gamma_II_prime") if explicit_weights else ("b", "l", "d", "gamma_II", "gamma_II_prime")
+    invalid = [name for name in positive if values[name] <= 0]
     invalid.extend(name for name in ("h", "d_1", "d_b", "N", "c_II") if values[name] < 0)
+    if explicit_weights:
+        forces = ("N", "G_fund", "G_soil", "G_other")
+        invalid.extend(name for name in forces[1:] if values[name] < 0)
+        if not any(values[name] > 0 for name in forces):
+            invalid.extend(forces)
     if values["b"] > values["l"]:
         invalid.extend(("b", "l"))
     angle = values["phi_II"]

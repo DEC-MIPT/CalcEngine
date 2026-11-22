@@ -1,0 +1,575 @@
+[
+  {
+    "example_id": "weights-C",
+    "calculation_type": "foundations_shallow_weights",
+    "inputs": {
+      "b": {
+        "value": 2,
+        "unit": "m"
+      },
+      "d_1": {
+        "value": 1,
+        "unit": "m"
+      },
+      "d_b": {
+        "value": 0,
+        "unit": "m"
+      },
+      "gamma_II": {
+        "value": 20,
+        "unit": "kN/m3"
+      },
+      "gamma_II_prime": {
+        "value": 20,
+        "unit": "kN/m3"
+      },
+      "c_II": {
+        "value": 10,
+        "unit": "kPa"
+      },
+      "phi_II": {
+        "value": 20,
+        "unit": "deg"
+      },
+      "l": {
+        "value": 3,
+        "unit": "m"
+      },
+      "h": {
+        "value": 1,
+        "unit": "m"
+      },
+      "N": {
+        "value": 600,
+        "unit": "kN"
+      },
+      "Mx": {
+        "value": 0,
+        "unit": "kN*m"
+      },
+      "My": {
+        "value": 0,
+        "unit": "kN*m"
+      },
+      "Qx": {
+        "value": 0,
+        "unit": "kN"
+      },
+      "Qy": {
+        "value": 0,
+        "unit": "kN"
+      },
+      "G_fund": {
+        "value": 60,
+        "unit": "kN"
+      },
+      "G_soil": {
+        "value": 40,
+        "unit": "kN"
+      },
+      "G_other": {
+        "value": 20,
+        "unit": "kN"
+      },
+      "Mx_add_base": {
+        "value": 0,
+        "unit": "kN*m"
+      },
+      "My_add_base": {
+        "value": 0,
+        "unit": "kN*m"
+      }
+    },
+    "expected_outputs": {
+      "R": {
+        "value": 152.02,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_x_min": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_x_max": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_y_min": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_y_max": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_corner_pp": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_corner_pm": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_corner_mp": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_corner_mm": {
+        "value": 120,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      }
+    },
+    "origin": "manual calculation",
+    "citation": {
+      "document": "foundations-design-tools/reference-candidates.md; independent manual derivation reviewed by Akim",
+      "year": 2026,
+      "locator": "Common inputs, Central case weights-C, Complete expected outputs and Final admission; reviewed derivation SHA-256 24044046751e1024b457deef3ca4f99fb9bc8cb261e741ce43cb2f928cbe5578"
+    },
+    "source_norm_edition": "SP 22.13330.2016, edition 2016 with amendments 1-5; runtime NormRefs unverified"
+  },
+  {
+    "example_id": "weights-X",
+    "calculation_type": "foundations_shallow_weights",
+    "inputs": {
+      "b": {
+        "value": 2,
+        "unit": "m"
+      },
+      "d_1": {
+        "value": 1,
+        "unit": "m"
+      },
+      "d_b": {
+        "value": 0,
+        "unit": "m"
+      },
+      "gamma_II": {
+        "value": 20,
+        "unit": "kN/m3"
+      },
+      "gamma_II_prime": {
+        "value": 20,
+        "unit": "kN/m3"
+      },
+      "c_II": {
+        "value": 10,
+        "unit": "kPa"
+      },
+      "phi_II": {
+        "value": 20,
+        "unit": "deg"
+      },
+      "l": {
+        "value": 3,
+        "unit": "m"
+      },
+      "h": {
+        "value": 1,
+        "unit": "m"
+      },
+      "N": {
+        "value": 600,
+        "unit": "kN"
+      },
+      "Mx": {
+        "value": 40,
+        "unit": "kN*m"
+      },
+      "My": {
+        "value": 0,
+        "unit": "kN*m"
+      },
+      "Qx": {
+        "value": 20,
+        "unit": "kN"
+      },
+      "Qy": {
+        "value": 0,
+        "unit": "kN"
+      },
+      "G_fund": {
+        "value": 60,
+        "unit": "kN"
+      },
+      "G_soil": {
+        "value": 40,
+        "unit": "kN"
+      },
+      "G_other": {
+        "value": 50,
+        "unit": "kN"
+      },
+      "Mx_add_base": {
+        "value": 10,
+        "unit": "kN*m"
+      },
+      "My_add_base": {
+        "value": 0,
+        "unit": "kN*m"
+      }
+    },
+    "expected_outputs": {
+      "R": {
+        "value": 152.02,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p": {
+        "value": 125,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_x_min": {
+        "value": 90,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_x_max": {
+        "value": 160,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_y_min": {
+        "value": 125,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_y_max": {
+        "value": 125,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_corner_pp": {
+        "value": 160,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_corner_pm": {
+        "value": 160,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_corner_mp": {
+        "value": 90,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_corner_mm": {
+        "value": 90,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      }
+    },
+    "origin": "manual calculation",
+    "citation": {
+      "document": "foundations-design-tools/reference-candidates.md; independent manual derivation reviewed by Akim",
+      "year": 2026,
+      "locator": "Common inputs, One-axis case weights-X, Complete expected outputs and Final admission; reviewed derivation SHA-256 24044046751e1024b457deef3ca4f99fb9bc8cb261e741ce43cb2f928cbe5578"
+    },
+    "source_norm_edition": "SP 22.13330.2016, edition 2016 with amendments 1-5; runtime NormRefs unverified"
+  },
+  {
+    "example_id": "weights-XY",
+    "calculation_type": "foundations_shallow_weights",
+    "inputs": {
+      "b": {
+        "value": 2,
+        "unit": "m"
+      },
+      "d_1": {
+        "value": 1,
+        "unit": "m"
+      },
+      "d_b": {
+        "value": 0,
+        "unit": "m"
+      },
+      "gamma_II": {
+        "value": 20,
+        "unit": "kN/m3"
+      },
+      "gamma_II_prime": {
+        "value": 20,
+        "unit": "kN/m3"
+      },
+      "c_II": {
+        "value": 10,
+        "unit": "kPa"
+      },
+      "phi_II": {
+        "value": 20,
+        "unit": "deg"
+      },
+      "l": {
+        "value": 3,
+        "unit": "m"
+      },
+      "h": {
+        "value": 1,
+        "unit": "m"
+      },
+      "N": {
+        "value": 600,
+        "unit": "kN"
+      },
+      "Mx": {
+        "value": 40,
+        "unit": "kN*m"
+      },
+      "My": {
+        "value": -30,
+        "unit": "kN*m"
+      },
+      "Qx": {
+        "value": 20,
+        "unit": "kN"
+      },
+      "Qy": {
+        "value": -15,
+        "unit": "kN"
+      },
+      "G_fund": {
+        "value": 60,
+        "unit": "kN"
+      },
+      "G_soil": {
+        "value": 40,
+        "unit": "kN"
+      },
+      "G_other": {
+        "value": 50,
+        "unit": "kN"
+      },
+      "Mx_add_base": {
+        "value": 10,
+        "unit": "kN*m"
+      },
+      "My_add_base": {
+        "value": -15,
+        "unit": "kN*m"
+      }
+    },
+    "expected_outputs": {
+      "R": {
+        "value": 152.02,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p": {
+        "value": 125,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_x_min": {
+        "value": 90,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_x_max": {
+        "value": 160,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_y_min": {
+        "value": 105,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_y_max": {
+        "value": 145,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_corner_pp": {
+        "value": 140,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_corner_pm": {
+        "value": 180,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_corner_mp": {
+        "value": 70,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      },
+      "p_corner_mm": {
+        "value": 110,
+        "unit": "kPa",
+        "tolerance": 0.005,
+        "tolerance_kind": "absolute",
+        "tolerance_source": {
+          "engineer": "Akim",
+          "rationale": "Explicit engineering decision in user conversation on 2026-11-22: manual weights-C/X/XY references and absolute 0.005 kPa for each R/pressure output approved; foundations-design-tools/reference-candidates.md final admission."
+        }
+      }
+    },
+    "origin": "manual calculation",
+    "citation": {
+      "document": "foundations-design-tools/reference-candidates.md; independent manual derivation reviewed by Akim",
+      "year": 2026,
+      "locator": "Common inputs, Two-axis case weights-XY, Complete expected outputs and Final admission; reviewed derivation SHA-256 24044046751e1024b457deef3ca4f99fb9bc8cb261e741ce43cb2f928cbe5578"
+    },
+    "source_norm_edition": "SP 22.13330.2016, edition 2016 with amendments 1-5; runtime NormRefs unverified"
+  }
+]

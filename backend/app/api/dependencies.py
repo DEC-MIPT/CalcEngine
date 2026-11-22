@@ -12,6 +12,10 @@ from app.core.exceptions import DatabaseUnavailableError
 from app.db.session import get_engine, get_session_factory
 from app.engine.registry import CalculatorRegistry
 from app.services.calculation import CalculationService, calculation_service
+from app.services.foundation_design import (
+    FoundationDesignService,
+    foundation_design_service,
+)
 from app.services.normatives import NormativesService
 
 _FACTORY_LOCK = threading.Lock()
@@ -110,3 +114,12 @@ def get_normatives_service(request: Request) -> NormativesService:
         Сервис поиска и чтения документов каталога.
     """
     return NormativesService(request.app.state.catalog)
+
+
+def get_foundation_design_service(
+    request: Request, session: Annotated[Session, Depends(get_session, scope="function")]
+) -> FoundationDesignService:
+    state = request.app.state
+    return foundation_design_service(
+        session, state.registry, sources=state.sources, validated_ranges=state.validated_ranges
+    )

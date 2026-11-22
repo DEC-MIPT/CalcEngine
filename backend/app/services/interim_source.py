@@ -63,6 +63,7 @@ USABLE: Mapping[Profile, frozenset[VerificationStatus]] = {
 """Статусы, которые профиль использует; ``rejected`` не использует ни один (design.md, решение 4)."""
 
 LOADS_TYPE = "foundations_shallow_loads"
+WEIGHTS_TYPE = "foundations_shallow_weights"
 LOADS_DOCUMENT = "sp-22-13330-2016"
 LOADS_SUPPLEMENT = "sp-22-13330-2016-loads-scope"
 LOADS_FILES = {
@@ -300,11 +301,11 @@ class LoadsInterimParameterSource:
     def resolve(self, calculation_type: str, inputs: Mapping[str, QuantityValue]) -> ResolvedParameters:
         contract = self._registry.contract(calculation_type)
         normalized = inputs_to_base_units(contract, inputs)
-        validate_loads_domains(dict(normalized))
+        validate_loads_domains(dict(normalized), explicit_weights=calculation_type == WEIGHTS_TYPE)
         base_units = {quantity.name: quantity.base_unit for quantity in contract.inputs}
         quantities = (*contract.inputs, *contract.outputs)
         try:
-            if calculation_type != LOADS_TYPE or set(self._data) != set(LOADS_FILES):
+            if calculation_type not in (LOADS_TYPE, WEIGHTS_TYPE) or set(self._data) != set(LOADS_FILES):
                 raise ParameterDataError()
             resistance = self._records("resistance")
             pressure = self._records("pressure")
@@ -411,9 +412,10 @@ def interim_sources(
     documents = load_interim_root(root, registered)
     warn_passed_sunsets(documents, today)
     found = check_documents(documents, profile)
-    served: Sequence[str] = [name for name in found if name in registered and name in models and name != LOADS_TYPE]
+    served: Sequence[str] = [name for name in found if name in registered and name in models and name not in (LOADS_TYPE, WEIGHTS_TYPE)]
     source = InterimParameterSource(registry, {name: found[name] for name in served}, profile, models, selectors)
     result: dict[str, ParameterSource] = {name: source for name in served}
-    if LOADS_TYPE in registered and LOADS_TYPE in models:
-        result[LOADS_TYPE] = LoadsInterimParameterSource(registry, found, profile, models[LOADS_TYPE])
+    for name in (LOADS_TYPE, WEIGHTS_TYPE):
+        if name in registered and name in models:
+            result[name] = LoadsInterimParameterSource(registry, found, profile, models[name])
     return result

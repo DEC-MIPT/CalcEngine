@@ -7,6 +7,7 @@ from app.core.config import Settings
 from app.db.session import as_psycopg_url
 from app.models import Base
 from app.models.calculation_result import CalculationResultRow
+from app.models.foundation_design import FoundationContextRow, FoundationSelectionRow
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -21,6 +22,8 @@ if config.config_file_name is not None:
 # decision 1), so its metadata is what autogenerate compares against.
 target_metadata = Base.metadata
 assert CalculationResultRow.metadata is target_metadata
+assert FoundationContextRow.metadata is target_metadata
+assert FoundationSelectionRow.metadata is target_metadata
 
 
 def _database_url() -> str:

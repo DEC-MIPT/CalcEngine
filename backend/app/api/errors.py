@@ -13,6 +13,7 @@ from app.core.exceptions import (
     CatalogUnavailableError,
     DatabaseUnavailableError,
     DECError,
+    FoundationContextUnavailableError,
     InputValidationError,
     NotFoundError,
     ParameterSourceUnavailableError,
@@ -23,6 +24,7 @@ from app.schemas.api import ErrorBody, FieldError
 logger = logging.getLogger("app.api")
 
 DEC_ERRORS: tuple[tuple[type[DECError], int, str], ...] = (
+    (FoundationContextUnavailableError, 404, "foundation_context_unavailable"),
     (NotFoundError, 404, "not_found"),
     (CalculationTypeNotRegisteredError, 409, "calculation_type_not_registered"),
     (InputValidationError, 422, "invalid_input"),
@@ -37,6 +39,7 @@ HTTP_CODES = {404: "not_found", 405: "method_not_allowed"}
 
 MESSAGES = {
     "not_found": "The requested resource does not exist.",
+    "foundation_context_unavailable": "Stored foundation visualization context is unavailable.",
     "method_not_allowed": "The method is not allowed for this resource.",
     "validation_error": "The request does not match its schema.",
     "invalid_input": "The inputs do not fit the calculation type.",

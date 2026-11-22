@@ -5,7 +5,11 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from app.core.exceptions import ParameterValidationError
-from app.engine import foundations_shallow_loads, foundations_shallow_r
+from app.engine import (
+    foundations_shallow_loads,
+    foundations_shallow_r,
+    foundations_shallow_weights,
+)
 from app.engine.registry import CalculatorRegistry
 from app.parameters.loader import load_parameters
 from app.schemas.api import CalculationTypeView, InputView, OutputView
@@ -36,6 +40,17 @@ def _register_foundations_shallow_loads(registry: CalculatorRegistry, params_roo
                 f"{foundations_shallow_loads.NAME}.yaml: no rounding rule for the output {name!r}"
             )
     foundations_shallow_loads.register(registry, entries)
+
+
+def _register_foundations_shallow_weights(registry: CalculatorRegistry, params_root: Path) -> None:
+    values = load_parameters(foundations_shallow_weights.NAME, params_root)
+    entries = values.rounding_rules
+    for name in foundations_shallow_weights.OUTPUT_NAMES:
+        if name not in entries:
+            raise ParameterValidationError(
+                f"{foundations_shallow_weights.NAME}.yaml: no rounding rule for the output {name!r}"
+            )
+    foundations_shallow_weights.register(registry, entries)
 
 
 @dataclass(frozen=True)
@@ -70,6 +85,12 @@ REGISTRATIONS = (
         name=foundations_shallow_loads.NAME,
         register=_register_foundations_shallow_loads,
         parameters=foundations_shallow_loads.Parameters,
+        selectors={},
+    ),
+    Registration(
+        name=foundations_shallow_weights.NAME,
+        register=_register_foundations_shallow_weights,
+        parameters=foundations_shallow_weights.Parameters,
         selectors={},
     ),
 )

@@ -6,6 +6,10 @@ class NotFoundError(DECError):
     """Запрошенного ресурса не существует."""
 
 
+class FoundationContextUnavailableError(NotFoundError):
+    pass
+
+
 class AlreadyRegisteredError(DECError):
     """Имя регистрируется второй раз."""
 
