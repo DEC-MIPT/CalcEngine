@@ -36,3 +36,15 @@ The system SHALL provide distinct controls for checking dimensions and selecting
 - **THEN** the form identifies the synthetic `weights-C` data and initially presents all 19 editable quantities and their units without issuing a calculation request
 - **AND** the example draft stays separate from the ordinary form, including when the user returns from the result to edit the submitted inputs
 - **AND** explicit submission uses the existing calculation type and validation with no mock result or new API type
+
+### Requirement: Revision-scoped browser acceptance evidence
+For the foundations-design-tools frontend candidate `bd9924478cf24f8e392f75efe7ee4a8289756c3b` only, the tester SHALL accept the eight inherited manual browser-version verdicts from the pressure-from-loads matrix in combination with the candidate's full Playwright run and independent UI/UX PASS, in place of fresh branded desktop browser runs for feature acceptance. The tester SHALL retain the source revision and distinguish the inherited verdicts from current-candidate checks. This is an evidence exception, not a change to the base browser support requirement or to the other GO criteria. It SHALL NOT apply to another candidate or be retained as a general exception in the canonical spec.
+
+#### Scenario: Assess the approved candidate without new branded runs
+- **WHEN** the tester evaluates `bd9924478cf24f8e392f75efe7ee4a8289756c3b` with the documented inherited matrix, passing full Playwright and independent UI/UX PASS for the candidate
+- **THEN** the absence of fresh branded runs does not block the candidate's browser acceptance
+- **AND** no inherited slot is identified as newly executed
+
+#### Scenario: Assess another revision
+- **WHEN** the tester evaluates a different frontend candidate
+- **THEN** the browser acceptance evidence exception does not apply

@@ -220,3 +220,15 @@ Firefox and WebKit before the review fixes. Tester and UI/UX acceptance of the
 revised code is separate.
 
 The DOCX patch based on `d37fab0` passed 1,765 backend tests with 11 PostgreSQL/catalog skips and covered 57 of 58 changed branches (98.28%). The tester gave a scoped report-parity GO for the tested patch. Independent report review confirmed that near-zero negative pressures remain exact in DOCX and that the stored rationale is retained separately from normative references. Integration remains pending.
+
+Akim subsequently directed reuse of previous browser versions and verdicts. See the [design tools browser matrix](../../verification/foundations-design-tools/browser-matrix.md) for inherited manual results and separate independent evidence on `bd99244`.
+
+Akim approved using the combined browser evidence for candidate `bd9924478cf24f8e392f75efe7ee4a8289756c3b` only, in place of fresh branded runs. The web-platform delta records the scope, and the browser matrix retains the provenance. The general requirement and the tester GO gate remain unchanged.
+
+The tester issued GO for `bd99244` under the scoped exception: 749 frontend tests passed, 451/462 changed branches covered (97.62%), and full Playwright recorded 154 passes, 68 configured skips, and no failures. Independent UI/UX reported PASS. The spec reviewer closed both follow-up findings with no blockers or majors. Post-GO code review and integration are separate.
+
+## Frontend post-GO review, 2026-11-24
+
+The post-GO review accepts `bd9924478cf24f8e392f75efe7ee4a8289756c3b` for local integration. It found no blocker, major regression, or security finding in the reviewed frontend diff. The frontend candidate and local `develop` at `184f8c6` expose matching OpenAPI schemas, and a merge-tree preview found no conflict. DOCX is already integrated through `184f8c6`, which passed 100 targeted backend tests.
+
+Review covered the typed mode and draft boundaries, stored context identity, report routing, candidate cancellation and stale responses, formula rendering, and trace navigation. The tester GO and its limits are recorded above and in the [browser matrix](../../verification/foundations-design-tools/browser-matrix.md). This review does not certify the combined tree or deployment; integrated checks remain open.

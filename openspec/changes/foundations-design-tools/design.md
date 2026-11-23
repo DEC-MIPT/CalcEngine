@@ -74,7 +74,7 @@ Before implementation, approve named independent reference derivations and per-o
 
 The chosen transport controls are 1-256 candidates, the existing 1 MiB body cap and a 10-second cooperative evaluation budget, with the terminal/error/cancellation semantics in decision 4. These are technical safety controls, not normative applicability bounds or measured performance promises. Before DOR, review the concrete API/unit-of-work design and its tests; a benchmark may require revising the cap before enabling the route. Existing API/report latency targets remain; measure search separately with candidate counts and named environment instead of inventing a typical-design benchmark.
 
-Backend ruff, mypy, import boundaries and tests; frontend drift, ESLint, TypeScript, Vitest; branch coverage at least 95%; Playwright; UI/UX; source traceability and current spec review are acceptance gates. Historical pilot and averaged reference fixtures remain frozen. Real DB/catalog integration checks and all skips are recorded separately. The unresolved full branded browser-matrix gate of the prior frontend is not waived here.
+Backend ruff, mypy, import boundaries and tests; frontend drift, ESLint, TypeScript, Vitest; branch coverage at least 95%; Playwright; UI/UX; source traceability and current spec review are acceptance gates. Historical pilot and averaged reference fixtures remain frozen. Real DB/catalog integration checks and all skips are recorded separately. The [preceding loads frontend integration](../../../docs/decisions/backend/2026-11-08-foundations-pressure-from-loads-readiness.md#integrated-frontend-acceptance-2026-11-23) is accepted. Its browser results are historical evidence, not runs of the design tools candidate.
 
 ## Risks / Trade-offs
 
@@ -94,4 +94,12 @@ Resolve engineering questions and prerequisite gates, obtain current review and 
 2. Akim confirmed on 2026-11-22: named foundation, soil and other weights plus additional moments for one fixed footing geometry. The proposed scalar fields are G_fund, G_soil, G_other, Mx_add_base and My_add_base. The upper-cut structural loads and already-base signed additional moments were presented and checked in all three admitted references. An additional typed base-level structural-load variant remains outside this confirmation.
 3. Akim admitted the three independently derived manual references weights-C/X/XY and absolute 0.005 kPa per-output tolerance on 2026-11-22; see the final admission and frozen digest in reference-candidates.md. Runner/API/DOCX execution remains an implementation acceptance gate. Methodical/competitor output is not an oracle.
 4. Obtain current review of the concrete search/context routes, atomic persistence, cancellation and technical limits in decisions 3-4; their runtime performance remains unmeasured until implementation acceptance.
-5. Complete the preceding loads frontend's acceptance, review and authorized integration before starting the dependent frontend branch. Its existing browser-matrix NO-GO remains owned by that change.
+5. The [preceding loads frontend integration](../../../docs/decisions/backend/2026-11-08-foundations-pressure-from-loads-readiness.md#integrated-frontend-acceptance-2026-11-23) satisfies the predecessor acceptance dependency. Its earlier NO-GO was superseded there; the design tools frontend has a separate browser evidence decision.
+
+## Browser evidence for the reviewed frontend candidate
+
+Akim approved a one-candidate evidence exception in the working conversation.
+The web-platform delta defines its scope and guards against applying it to a
+later revision. The [browser matrix](../../../docs/verification/foundations-design-tools/browser-matrix.md)
+separates inherited manual results from the candidate's automated and UI/UX checks.
+The generic browser support requirement is unchanged.

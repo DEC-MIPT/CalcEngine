@@ -41,29 +41,29 @@ Every code task belongs to exactly one feature above. Backend integrates before 
 
 ## 3. Frontend design tools feature
 
-- [ ] 3.1 Regenerate API types and extend mocks with the new type, optional visualization context and search outcomes; verify schema/fixture drift and unchanged old envelopes.
-- [ ] 3.2 Add labelled weight-type controls and the approved fixed load-level explanation with scalar weights/moments; verify raw drafts/units, explicit mode changes, no hidden reverse load-factor conversion and clear d/h/d_1 explanations.
-- [ ] 3.3 Render the load schematic from stored context with signs, dimensions and load-plane distinction; verify keyboard/text alternatives, 320 px layout and no physical client recomputation.
-- [ ] 3.4 Render stored pressure envelopes and tables with labelled extrema/corners; verify pass/fail/diagnostic states, no false contact-area redistribution and exact source-value bindings.
-- [ ] 3.5 Add approved finite-candidate entry and search controls; verify bounds/policy visibility, explicit-weight search rejection, progress/cancellation/errors and no global-optimum language.
-- [ ] 3.6 Render immutable candidate comparisons and selected-result navigation; verify failed/refused/incomplete/exhausted distinctions, original inputs and report links.
-- [ ] 3.7 Add weight/selection trace context while retaining all steps initially expanded and manual disclosure; verify source labels, playback, derived refusal and historical draft eligibility.
-- [ ] 3.8 Run frontend automated and browser acceptance; verify frontend/check.sh, at least 95% branch coverage, keyboard/diagram/report journeys, reduced motion, all applicable browser requirements and unchanged pilot.
-- [ ] 3.9 Obtain ui-ux-tester confirmation and separate tester GO for the full reviewed frontend revision; verify no unresolved visual/control/accessibility finding and accurate check/skip evidence.
+- [x] 3.1 Regenerate API types and extend mocks with the new type, optional visualization context and search outcomes; verify schema/fixture drift and unchanged old envelopes.
+- [x] 3.2 Add labelled weight-type controls and the approved fixed load-level explanation with scalar weights/moments; verify raw drafts/units, explicit mode changes, no hidden reverse load-factor conversion and clear d/h/d_1 explanations.
+- [x] 3.3 Render the load schematic from stored context with signs, dimensions and load-plane distinction; verify keyboard/text alternatives, 320 px layout and no physical client recomputation.
+- [x] 3.4 Render stored pressure envelopes and tables with labelled extrema/corners; verify pass/fail/diagnostic states, no false contact-area redistribution and exact source-value bindings.
+- [x] 3.5 Add approved finite-candidate entry and search controls; verify bounds/policy visibility, explicit-weight search rejection, progress/cancellation/errors and no global-optimum language.
+- [x] 3.6 Render immutable candidate comparisons and selected-result navigation; verify failed/refused/incomplete/exhausted distinctions, original inputs and report links.
+- [x] 3.7 Add weight/selection trace context while retaining all steps initially expanded and manual disclosure; verify source labels, playback, derived refusal and historical draft eligibility.
+- [x] 3.8 Run frontend automated and browser acceptance; verify frontend/check.sh, at least 95% branch coverage, keyboard/diagram/report journeys, reduced motion, all applicable browser requirements and unchanged pilot.
+- [x] 3.9 Obtain ui-ux-tester confirmation and separate tester GO for the full reviewed frontend revision; verify no unresolved visual/control/accessibility finding and accurate check/skip evidence.
 
-- [ ] 3.10 Add a separate registry entry for the editable `weights-C` synthetic example; verify draft isolation, explicit submission, edit-return navigation and supported browser behavior.
+- [x] 3.10 Add a separate registry entry for the editable `weights-C` synthetic example; verify draft isolation, explicit submission, edit-return navigation and supported browser behavior.
 
 ## 4. Review, integration and closure
 
 - [x] 4.1 Review the completed backend after tester GO; verify all section-2 tasks complete, independent references, unchanged executor/pilot and no open blocker/major/security finding.
 - [x] 4.2 With explicit consent, integrate accepted backend and verify actual develop DB/API/report/source behavior, recording every unavailable catalog check separately.
-- [ ] 4.3 Review the completed frontend after tester GO/UI confirmation; verify all section-3 tasks complete, correct backend compatibility and no open blocker/major/security finding.
+- [x] 4.3 Review the completed frontend after tester GO/UI confirmation; verify all section-3 tasks complete, correct backend compatibility and no open blocker/major/security finding.
 - [ ] 4.4 With explicit consent, integrate accepted frontend and run actual-develop integrated checks, candidate and check-only journeys, report verification and strict validation.
 - [ ] 4.5 After all features are accepted and integrated, sync canonical specs and archive this change; verify no unchecked task, accurate provenance/limits and final strict validation.
 
 ## Current readiness
 
-READY for backend implementation, recorded 2026-11-22 after the approved positive-resultant rule, admitted manual references and tolerances, finalized API, current spec review with no findings, current source traceability without gaps, and selected/all strict validation (25/25). Reviewed loads backend integration 2a401c5 is an ancestor of current develop 6269bae. The shared executor is unchanged. Section 3 remains dependent on the earlier loads frontend's accepted reviewed integration and the new backend contract. This backend DOR does not waive that dependency or the browser-matrix gate. Commit, merge, push and actual database migration remain separately authorized actions.
+READY for backend implementation, recorded 2026-11-22 after the approved positive-resultant rule, admitted manual references and tolerances, finalized API, current spec review with no findings, current source traceability without gaps, and selected/all strict validation (25/25). Reviewed loads backend integration 2a401c5 is an ancestor of current develop 6269bae. The shared executor is unchanged. The [preceding loads frontend integration](../../../docs/decisions/backend/2026-11-08-foundations-pressure-from-loads-readiness.md#integrated-frontend-acceptance-2026-11-23) satisfies the frontend predecessor dependency. The design tools frontend remains subject to the acceptance gates below. Commit, merge, push and actual database migration remain separately authorized actions.
 
 ## DOR checklist
 
@@ -82,6 +82,6 @@ Only tester declares GO per complete feature, with UI/UX confirmation where UI c
 
 The new mode must conserve assembled vertical force and signed moments, include each contribution once, preserve unit equivalence, refuse contact loss and retain all four ordered bearing checks. Search may select only complete passing candidates under the approved finite policy; source failure, interruption and no solution cannot produce a pass. Old results retain identity, retrieval and report meaning.
 
-All feature suites, required lint/types/import boundaries and branch coverage at least 95% must pass. Frontend requires responsive diagram/text parity, keyboard and reduced-motion behavior, applicable WCAG/browser checks and reviewed screenshots. Existing browser requirements remain unwaived; unsupported or skipped matrix checks are reported as gaps. Real DB/catalog checks and skips are distinct from mock or unit evidence. Applicable existing API/report targets remain, and bounded search is measured with named candidate counts and environment.
+All feature suites, required lint/types/import boundaries and branch coverage at least 95% must pass. Frontend requires responsive diagram/text parity, keyboard and reduced-motion behavior, applicable WCAG/browser checks and reviewed screenshots. Existing browser support requirements remain in force. For `bd99244` only, the web-platform delta defines the approved evidence exception; unsupported or skipped matrix checks remain visible in the evidence. Real DB/catalog checks and skips are distinct from mock or unit evidence. Applicable existing API/report targets remain, and bounded search is measured with named candidate counts and environment.
 
 NO-GO includes any unresolved blocker/major/security issue, unapproved methodology or source, missing independent reference, failing test, insufficient coverage, blocking UI defect, incomplete search represented as success, regression identity change, or unvalidated/currently unreviewed artifacts. DOD requires reviewed, consented, verified integration of all code features, matching canonical specs and archive. No Git operation is implied by satisfying a task.
