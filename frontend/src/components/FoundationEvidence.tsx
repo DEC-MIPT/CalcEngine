@@ -3,6 +3,7 @@ import { api, unwrap } from '@/api/client'
 import type { components } from '@/api/schema'
 import { useRequest } from '@/api/useRequest'
 import { useI18n } from '@/i18n/context'
+import type { OutputRounding } from '@/lib/rounding'
 import { QuantityText } from './Quantity'
 import { ErrorState, LoadingState } from './RequestStates'
 
@@ -15,12 +16,12 @@ const baseKeys = ['Mx_add_base', 'My_add_base']
 const resultantKeys = ['V', 'Mx_base', 'My_base']
 const extrema = ['p', 'p_x_min', 'p_x_max', 'p_y_min', 'p_y_max', 'p_corner_min', 'p_corner_max']
 
-function EvidenceValues({ keys, values }: { keys: readonly string[]; values: Quantities }) {
+function EvidenceValues({ keys, values, rounding }: { keys: readonly string[]; values: Quantities; rounding?: OutputRounding }) {
   return <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 text-sm">
     {keys.map((key) => values[key] && (
       <div className="contents" key={key}>
         <dt className="break-words font-mono">{key}</dt>
-        <dd><QuantityText {...values[key]} /></dd>
+        <dd><QuantityText {...values[key]} rounding={rounding?.get(key)} /></dd>
       </div>
     ))}
   </dl>
@@ -56,7 +57,7 @@ function LoadSchematic({ context }: { context: Context }) {
   </section>
 }
 
-function PressureEvidence({ context }: { context: Context }) {
+function PressureEvidence({ context, rounding }: { context: Context; rounding?: OutputRounding }) {
   const { t } = useI18n()
   if (context.pressure_state === 'unavailable') return <p>{t('foundation.unavailable')}</p>
   const diagnostic = context.pressure_state === 'diagnostic'
@@ -66,7 +67,7 @@ function PressureEvidence({ context }: { context: Context }) {
     {diagnostic && <p className="border border-warning bg-warning-surface p-3">{t('foundation.diagnostic')}</p>}
     <div className="grid min-w-0 gap-4 md:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
       <svg role="img" aria-label={t('foundation.corners')} viewBox="0 0 300 150" className="block w-full max-w-[20rem] text-foreground">
-        <path d="M155 8v132" stroke="currentColor" /><text x="151" y="149" fill="currentColor" className="text-xs">0</text>
+        <path d="M155 8v132" stroke="currentColor" /><text x="155" y="149" textAnchor="middle" fill="currentColor" className="text-xs"><QuantityText value={0} unit="1" /></text>
         {context.corners.map(({ name, pressure }, index) => {
           const y = 15 + 30 * index
           const dx = 105 * (pressure.value / maxMagnitude)
@@ -84,17 +85,17 @@ function PressureEvidence({ context }: { context: Context }) {
           <tbody>{context.corners.map((corner) => (
             <tr key={corner.name} data-pressure-step={corner.step_id} className="border-t border-border text-center">
               <th scope="row" className="p-1 text-left font-mono">{corner.name}</th>
-              <td><QuantityText {...corner.x} /></td><td><QuantityText {...corner.y} /></td><td><QuantityText {...corner.pressure} /></td>
+              <td><QuantityText {...corner.x} /></td><td><QuantityText {...corner.y} /></td><td><QuantityText {...corner.pressure} rounding={rounding?.get(corner.step_id)} /></td>
             </tr>
           ))}</tbody>
         </table>
-        <EvidenceValues keys={extrema} values={context.trace_values} />
+        <EvidenceValues keys={extrema} values={context.trace_values} rounding={rounding} />
       </div>
     </div>
   </section>
 }
 
-export function FoundationEvidence({ resultId, inputHash }: { resultId: string; inputHash: string }) {
+export function FoundationEvidence({ resultId, inputHash, rounding }: { resultId: string; inputHash: string; rounding?: OutputRounding }) {
   const { t } = useI18n()
   const load = useCallback(() => unwrap(api.GET('/foundation-calculations/{result_id}/context', {
     params: { path: { result_id: resultId } },
@@ -107,5 +108,5 @@ export function FoundationEvidence({ resultId, inputHash }: { resultId: string; 
   )
   const context = state.data.context
   if (state.data.status !== 'available' || !context || context.result_id !== resultId || context.input_hash !== inputHash) return unavailable
-  return <div className="mt-8 grid min-w-0 gap-8"><LoadSchematic context={context} /><PressureEvidence context={context} /></div>
+  return <div className="mt-8 grid min-w-0 gap-8"><LoadSchematic context={context} /><PressureEvidence context={context} rounding={rounding} /></div>
 }

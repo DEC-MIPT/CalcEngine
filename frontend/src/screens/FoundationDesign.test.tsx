@@ -109,7 +109,7 @@ describe('foundation design tools', () => {
     fireEvent.change(screen.getByRole('combobox', { name: 'Единица l · Вариант 1' }), { target: { value: 'cm' } })
     fireEvent.click(run())
     expect(await screen.findByText('Проверьте длину.')).toBeInTheDocument()
-    expect(field('candidate-0-l')).toHaveFocus()
+    await waitFor(() => expect(field('candidate-0-l')).toHaveFocus())
     expect(router.state.location.search).toContain('task=selection')
     expect(field('candidate-0-l')).toHaveValue('300,0')
   })
@@ -158,6 +158,32 @@ describe('foundation design tools', () => {
     expect(within(table).getAllByRole('row')).toHaveLength(5)
     expect(table).toHaveTextContent(/[-−]\d/)
     expect(screen.queryByRole('heading', { name: 'Проверки' })).toBeNull()
+  })
+
+  it('respects saved output precision in both the trace and the pressure evidence', async () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: true }))
+    const envelope = { ...weightsCentralEnvelope, outputs: weightsCentralEnvelope.outputs.map((output) =>
+      output.quantity === 'p_corner_pp' ? { ...output, rounding_rule: { ...output.rounding_rule, decimals: 3 } } : output,
+    ) }
+    server.use(http.get(`*/calculations/${envelope.result_id}`, () => HttpResponse.json(envelope)))
+    const { container } = open(`/calculations/${envelope.result_id}`)
+    await screen.findByRole('table', { name: 'Давления в углах' })
+    expect(container.querySelector('[data-pressure-step="p_corner_pp"] td:last-child')).toHaveTextContent('120,000 кПа')
+    expect(container.querySelector('[data-step="p_corner_pp"] [data-summary]')).toHaveTextContent('120,000 кПа')
+    expect(container.querySelector('[data-output="p_corner_pp"] [data-value]')).toHaveTextContent('120,000')
+  })
+
+  it('keeps a near-zero refused pressure distinguishable from zero and shows the diagnostic immediately', async () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: false }))
+    const reason = weightsContactRefusalEnvelope.verdict_reason
+    server.use(http.get(`*/calculations/${weightsContactRefusalEnvelope.result_id}`, () => HttpResponse.json({
+      ...weightsContactRefusalEnvelope, verdict_reason: { ...reason, value: { ...reason.value, value: -0.001 } },
+    })))
+    const { container } = open(`/calculations/${weightsContactRefusalEnvelope.result_id}`)
+    const refusal = await screen.findByRole('region', { name: /условие полного контакта не выполнено/ })
+    expect(refusal).toHaveTextContent('-0,001 кПа')
+    expect(screen.getByRole('region', { name: 'Диагностическая последовательность' })).toHaveAttribute('data-playback', 'idle')
+    expect(container.querySelector('[data-ruler-verdict="refused"]')).toBeInTheDocument()
   })
 
   it('retains the trace on context errors and retries only the optional context', async () => {

@@ -6,6 +6,7 @@ import { useI18n } from '@/i18n/context'
 import type { TextKey } from '@/i18n/dictionary'
 import { jumpTo } from '@/lib/jumpTo'
 import { checkRounding, outputRounding } from '@/lib/rounding'
+import { useResultRounding } from '@/lib/resultDisplay'
 import { checkPresentation } from '@/lib/checkPresentation'
 import { useFocusOnMount } from '@/lib/useFocusOnMount'
 import { Checking } from './Checking'
@@ -34,7 +35,7 @@ const REVEAL_CLASS: Record<StampReveal, string> = {
 function Reading({ quantity, rounding }: { quantity: Quantity; rounding: RoundingRule | undefined }) {
   return (
     <span className="whitespace-nowrap max-sm:whitespace-normal">
-      <QuantityText value={quantity.value} unit={quantity.unit} unitClassName="text-muted-foreground" rounding={rounding} />
+      <QuantityText value={quantity.value} unit={quantity.unit} unitClassName="text-muted-foreground" rounding={rounding ?? null} />
     </span>
   )
 }
@@ -77,7 +78,8 @@ export function VerdictStamp({
     rounding.set('edge_limit', resistanceRounding)
     rounding.set('corner_limit', resistanceRounding)
   }
-  const [left, right] = check ? checkRounding(check, rounding) : []
+  const fallback = useResultRounding()
+  const [left, right] = check ? checkRounding(check, rounding, fallback) : []
   const Icon = passed ? CheckCircle : XCircle
   const tone = passed ? 'border-primary' : 'border-destructive'
   return (

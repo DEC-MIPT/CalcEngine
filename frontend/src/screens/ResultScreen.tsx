@@ -10,7 +10,8 @@ import { DerivedRefusal, Refusal } from '@/components/Refusal'
 import { ErrorState, LoadingState, NotFoundState } from '@/components/RequestStates'
 import { Trace } from '@/components/Trace'
 import { TraceRuler } from '@/components/TraceRuler'
-import { isFoundationType } from '@/lib/foundationDesign'
+import { DemoResultDisplay } from '@/lib/resultDisplay'
+import { isFoundationType, WEIGHTS_TYPE } from '@/lib/foundationDesign'
 import { FoundationEvidence } from '@/components/FoundationEvidence'
 import { EditInputsLink } from '@/components/EditInputsLink'
 import { buttonClass, secondaryButtonClass } from '@/components/ui/button'
@@ -60,7 +61,7 @@ function CheckedResult({
   types: readonly CalculationType[] | undefined
   hideEngineerSource: boolean
 }) {
-  const { language } = useI18n()
+  const { t, language } = useI18n()
   const playback = useTracePlayback(envelope.result_id, envelope.trace.length)
   const reveal = stampReveal(playback.phase, envelope)
   const symbols = useMemo(() => symbolTable(envelope.trace, types), [envelope.trace, types])
@@ -68,7 +69,7 @@ function CheckedResult({
   const labels = useMemo(() => outputLabels(types ?? [], language), [types, language])
   return (
     <>
-      <TraceRuler steps={envelope.trace} verdict={envelope.verdict} playback={playback} reveal={reveal} symbols={symbols} />
+      <TraceRuler steps={envelope.trace} verdict={envelope.verdict} playback={playback} reveal={reveal} symbols={symbols} scrollLabel={hideEngineerSource ? t('trace.ruler') : undefined} />
       <VerdictStamp envelope={envelope} reason={reason} editType={editType} reveal={reveal} symbols={symbols} />
       <Outputs outputs={envelope.outputs} reveal={reveal} source={SHOW_ROUNDING_SOURCE} symbols={symbols} labels={labels} />
       <Warnings warnings={envelope.warnings} />
@@ -98,6 +99,9 @@ function DiagnosticResult({ envelope, reason, editType, types, hideEngineerSourc
   const symbols = useMemo(() => symbolTable(envelope.trace, types), [envelope.trace, types])
   return (
     <>
+      {hideEngineerSource && (
+        <TraceRuler steps={envelope.trace} verdict={envelope.verdict} symbols={symbols} scrollLabel={t('trace.ruler')} />
+      )}
       <DerivedRefusal
         reason={reason}
         source={envelope.parameter_source}
@@ -136,6 +140,8 @@ export function ResultScreen() {
   const { state, retry } = useRequest(load)
   const { state: typesState } = useRequest(loadTypes)
   const { sent } = useDraft()
+  const outputs = state.status === 'ok' ? state.data.outputs : undefined
+  const rounding = useMemo(() => outputs && outputRounding(outputs), [outputs])
 
   if (state.status === 'error' && isMissingResult(state.error)) {
     return <NotFoundState subject="result" />
@@ -143,14 +149,15 @@ export function ResultScreen() {
   const editType = state.status === 'ok' && sent?.resultId === state.data.result_id ? sent.type : null
   const checked = state.status === 'ok' && state.data.verdict_reason.kind === 'check'
   const hideEngineerSource = state.status === 'ok' && state.data.trace.some((step) => step.step_id === 'G_sum')
+  const showRuler = checked || (hideEngineerSource && state.status === 'ok' && state.data.verdict_reason.kind === 'derived')
   return (
     <>
       <h1 className="h1-ruled">{t('result.title')}</h1>
-      {!checked && <TraceRuler />}
+      {!showRuler && <TraceRuler />}
       {state.status === 'loading' && <LoadingState />}
       {state.status === 'error' && <ErrorState error={state.error} onRetry={retry} />}
       {state.status === 'ok' && (
-        <>
+        <DemoResultDisplay.Provider value={hideEngineerSource || editType === WEIGHTS_TYPE}>
           {state.data.verdict_reason.kind === 'bound' ? (
             <>
               <Refusal reason={state.data.verdict_reason} source={state.data.parameter_source} />
@@ -185,9 +192,9 @@ export function ResultScreen() {
             />
           )}
           {(isFoundationType(editType) || state.data.trace.some((step) => step.step_id === 'Mx_base')) && (
-            <FoundationEvidence resultId={state.data.result_id} inputHash={state.data.input_hash} />
+            <FoundationEvidence resultId={state.data.result_id} inputHash={state.data.input_hash} rounding={hideEngineerSource ? rounding : undefined} />
           )}
-        </>
+        </DemoResultDisplay.Provider>
       )}
     </>
   )

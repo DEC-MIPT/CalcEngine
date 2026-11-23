@@ -20,6 +20,10 @@ export function CalculationFormScreen() {
   const otherType = name === WEIGHTS_TYPE ? LOADS_TYPE : WEIGHTS_TYPE
   const switchable = state.status === 'ok' && (name === LOADS_TYPE || name === WEIGHTS_TYPE) && state.data.some((entry) => entry.name === otherType)
   if (state.status === 'ok' && !type) return <NotFoundState subject="type" />
+
+  const title = name === WEIGHTS_TYPE ? t('types.foundationDemo')
+    : name === LOADS_TYPE ? t(searching ? 'foundation.search' : 'foundation.averaged')
+      : type && typeName(type, language)
   return (
     <>
       <h1>{t('form.title')}</h1>
@@ -28,7 +32,7 @@ export function CalculationFormScreen() {
       {type && (
         <>
           <p className="mb-5 font-heading text-xl font-semibold">
-            {type.name === WEIGHTS_TYPE ? t('types.foundationDemo') : typeName(type, language)}
+            {title}
           </p>
           {(switchable || name === LOADS_TYPE) && (
             <nav aria-label={t('foundation.candidates')} className="mb-5 flex flex-wrap gap-x-5 gap-y-2">

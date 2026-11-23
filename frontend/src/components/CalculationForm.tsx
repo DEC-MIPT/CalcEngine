@@ -48,6 +48,7 @@ const COMPUTE_MS = 700
 const fieldId = (name: string) => `field-${name}`
 
 const row = 'grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 sm:grid-cols-[3.5rem_minmax(0,1fr)_15.5rem] sm:items-center'
+const foundationRow = 'grid grid-cols-[6.5rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 sm:grid-cols-[6.5rem_minmax(0,1fr)_15.5rem] sm:items-center'
 
 function FieldMessage({ id, children }: { id: string; children: string }) {
   return (
@@ -67,11 +68,12 @@ interface FieldProps {
   derived: components['schemas']['DerivedViolation'] | undefined
   locked: boolean
   index: number
+  rowClass: string
   onValue: (event: ChangeEvent<HTMLInputElement>) => void
   onUnit: (event: ChangeEvent<HTMLSelectElement>) => void
 }
 
-function Field({ input, value, unit, error, bound, derived, locked, index, onValue, onUnit }: FieldProps) {
+function Field({ input, value, unit, error, bound, derived, locked, index, rowClass, onValue, onUnit }: FieldProps) {
   const { t, language } = useI18n()
   const [flashing, setFlashing] = useState(false)
   const label = pickText(input.label, language)
@@ -88,7 +90,7 @@ function Field({ input, value, unit, error, bound, derived, locked, index, onVal
     .filter(Boolean)
     .join(' ')
   return (
-    <div data-row style={{ '--row': index } as CSSProperties} className={`field-row ${row} border-b border-border py-2.5`}>
+    <div data-row style={{ '--row': index } as CSSProperties} className={`field-row ${rowClass} border-b border-border py-2.5`}>
       <span
         aria-hidden="true"
         className={`row-span-2 pt-0.5 text-lg sm:row-span-1 sm:pt-0 ${error ? 'text-destructive' : ''}`}
@@ -167,6 +169,9 @@ function Field({ input, value, unit, error, bound, derived, locked, index, onVal
 }
 
 export function CalculationForm({ type, searching: selectionRequested = false }: { type: CalculationType; searching?: boolean }) {
+  const explicit = type.name === WEIGHTS_TYPE
+  const foundation = explicit || type.name === LOADS_TYPE
+  const rowClass = foundation ? foundationRow : row
   const searching = selectionRequested && type.name === LOADS_TYPE
   const inputsToShow = searching ? type.inputs.filter(({ name }) => name !== 'b' && name !== 'l') : type.inputs
   const { t } = useI18n()
@@ -342,7 +347,7 @@ export function CalculationForm({ type, searching: selectionRequested = false }:
   const invalidCount = Object.keys(errors).length + Object.keys(candidateErrors).length
   return (
     <form noValidate onSubmit={submit} className={`grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 ${computing ? 'computing' : ''}`}>
-      {(type.name === LOADS_TYPE || type.name === WEIGHTS_TYPE) && <LoadsDirections explicit={type.name === WEIGHTS_TYPE} />}
+      {foundation && <LoadsDirections explicit={explicit} />}
       {searching && <p>{t('foundation.policy')}</p>}
       {general.length > 0 && (
         <div role="alert" className="max-w-2xl border border-destructive bg-destructive-surface p-4">
@@ -365,7 +370,7 @@ export function CalculationForm({ type, searching: selectionRequested = false }:
         {computing && <span aria-hidden="true" className="compute-scan" style={{ '--rows': type.inputs.length } as CSSProperties} />}
         <div
           aria-hidden="true"
-          className={`${row} hidden border-b border-foreground pb-2 font-heading text-sm font-semibold text-muted-foreground sm:grid`}
+          className={`${rowClass} hidden border-b border-foreground pb-2 font-heading text-sm font-semibold text-muted-foreground sm:grid`}
         >
           <span />
           <span>{t('form.column.quantity')}</span>
@@ -378,6 +383,7 @@ export function CalculationForm({ type, searching: selectionRequested = false }:
           <Field
             key={input.name}
             index={index}
+            rowClass={rowClass}
             input={input}
             value={values[input.name] ?? ''}
             unit={units[input.name] ?? input.base_unit}
@@ -401,7 +407,7 @@ export function CalculationForm({ type, searching: selectionRequested = false }:
             setCandidateErrors({})
           }} />
       )}
-      <div className={row}>
+      <div className={rowClass}>
         {computing && (
           <div className="col-span-full row-start-2 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:self-start">
             <ComputePlot />
