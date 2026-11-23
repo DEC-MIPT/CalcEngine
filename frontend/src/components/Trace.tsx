@@ -18,6 +18,7 @@ import { Button } from './ui/button'
 type Step = components['schemas']['ResultEnvelope']['trace'][number]
 type Quantity = components['schemas']['QuantityValue']
 type RoundingRule = components['schemas']['RoundingRule']
+type NormRef = components['schemas']['NormRef']
 
 const NO_ROUNDING: OutputRounding = new Map()
 
@@ -96,6 +97,8 @@ function TraceStep({
   compact,
   sectionTitle,
   anchorPrefix,
+  hideEngineerSource,
+  fallbackNormRefs,
 }: {
   step: Step
   index: number
@@ -108,6 +111,8 @@ function TraceStep({
   compact: boolean
   sectionTitle?: string
   anchorPrefix: string
+  hideEngineerSource: boolean
+  fallbackNormRefs: readonly NormRef[]
 }) {
   const { t } = useI18n()
   const detailsId = useId()
@@ -180,10 +185,15 @@ function TraceStep({
             <Value quantity={step.result} rounding={rounding.get(step.step_id)} />
           </p>
         )}
-        {step.kind === 'engineer_formula' ? (
+        {step.kind === 'engineer_formula' && !hideEngineerSource ? (
           <div>
             <h4 className="text-sm font-medium">{t('trace.engineerSource')}</h4>
             <Source source={step.source} />
+          </div>
+        ) : step.kind === 'engineer_formula' ? (
+          <div>
+            <h4 className="text-sm font-medium">{t('trace.norms')}</h4>
+            <NormRefList refs={fallbackNormRefs} showStatus={normStatus} />
           </div>
         ) : step.norm_refs.length > 0 && (
           <div>
@@ -215,6 +225,8 @@ export function Trace({
   title,
   description,
   anchorPrefix = 'trace',
+  hideEngineerSource = false,
+  fallbackNormRefs = [],
 }: {
   steps: readonly Step[]
   unverifiedStepCount: number
@@ -225,6 +237,8 @@ export function Trace({
   title?: string
   description?: string
   anchorPrefix?: string
+  hideEngineerSource?: boolean
+  fallbackNormRefs?: readonly NormRef[]
 }) {
   const { t, formatNumber } = useI18n()
   const table = useMemo(() => symbols ?? symbolTable(steps), [symbols, steps])
@@ -277,6 +291,8 @@ export function Trace({
             step={step}
             index={index}
             anchorPrefix={anchorPrefix}
+            hideEngineerSource={hideEngineerSource}
+            fallbackNormRefs={fallbackNormRefs}
             expanded={expanded.has(index)}
             onToggle={() => toggle(index)}
             arrival={arrivalOf(index, playback)}

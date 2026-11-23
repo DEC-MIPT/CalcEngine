@@ -14,23 +14,11 @@ function start() {
   return router
 }
 
-async function typeLink(name: string) {
-  const table = await screen.findByRole('table')
-  const links = await within(table).findAllByRole('link')
-  return links.find((link) => link.getAttribute('href') === `/calculations/new?type=${name}`)!
-}
-
 describe('loads type selection and isolated form drafts', () => {
-  it('opens the fifteen-field loads form using only keyboard selection', async () => {
-    const user = userEvent.setup()
+  it('keeps the fifteen-field loads form reachable by direct address without a registry link', async () => {
     const router = start()
-    const link = await typeLink(LOADS_TYPE)
-    expect(link).toBeDefined()
-    for (let steps = 0; document.activeElement !== link && steps < screen.getAllByRole('link').length; steps += 1) {
-      await user.tab()
-    }
-    expect(link).toHaveFocus()
-    await user.keyboard('{Enter}')
+    expect(within(await screen.findByRole('table')).queryByRole('link', { name: /усреднённые веса/i })).not.toBeInTheDocument()
+    await act(async () => { await router.navigate(`/calculations/new?type=${LOADS_TYPE}`) })
     await screen.findByRole('textbox', { name: label('N') })
     expect(router.state.location.search).toBe(`?type=${LOADS_TYPE}`)
     expect(screen.getAllByRole('textbox')).toHaveLength(15)
@@ -40,7 +28,7 @@ describe('loads type selection and isolated form drafts', () => {
   it('isolates pilot and loads drafts and restores entered strings and units on browser back', async () => {
     const user = userEvent.setup()
     const router = start()
-    await user.click(await typeLink(LOADS_TYPE))
+    await act(async () => { await router.navigate(`/calculations/new?type=${LOADS_TYPE}`) })
     const width = await screen.findByRole('textbox', { name: label('b') })
     fireEvent.change(width, { target: { value: '002,500' } })
     fireEvent.change(screen.getByRole('textbox', { name: label('Mx') }), { target: { value: '-40,00' } })
@@ -48,7 +36,7 @@ describe('loads type selection and isolated form drafts', () => {
     fireEvent.change(screen.getByRole('combobox', { name: `Единица: ${label('b')}` }), { target: { value: 'cm' } })
     fireEvent.change(screen.getByRole('combobox', { name: `Единица: ${label('Mx')}` }), { target: { value: 'MN*m' } })
     await user.click(screen.getAllByRole('link').find((link) => link.getAttribute('href') === '/')!)
-    await user.click(await typeLink('foundations_shallow_r'))
+    await user.click(await screen.findByRole('link', { name: 'Расчётное сопротивление грунта' }))
     await waitFor(() => expect(screen.getAllByRole('textbox')).toHaveLength(8))
     expect(screen.getByRole('textbox', { name: label('b') })).toHaveValue('')
     expect(screen.queryByRole('textbox', { name: label('N') })).toBeNull()
@@ -61,7 +49,7 @@ describe('loads type selection and isolated form drafts', () => {
     expect(screen.getByRole('combobox', { name: `Единица: ${label('b')}` })).toHaveValue('cm')
     expect(screen.getByRole('combobox', { name: `Единица: ${label('Mx')}` })).toHaveValue('MN*m')
     await user.click(screen.getAllByRole('link').find((link) => link.getAttribute('href') === '/')!)
-    await user.click(await typeLink('foundations_shallow_r'))
+    await user.click(await screen.findByRole('link', { name: 'Расчётное сопротивление грунта' }))
     expect(await screen.findByRole('textbox', { name: label('b') })).toHaveValue('1,75')
   })
 })

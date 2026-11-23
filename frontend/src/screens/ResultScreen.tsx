@@ -52,11 +52,13 @@ function CheckedResult({
   reason,
   editType,
   types,
+  hideEngineerSource,
 }: {
   envelope: Envelope
   reason: CheckReason
   editType: string | null
   types: readonly CalculationType[] | undefined
+  hideEngineerSource: boolean
 }) {
   const { language } = useI18n()
   const playback = useTracePlayback(envelope.result_id, envelope.trace.length)
@@ -78,22 +80,30 @@ function CheckedResult({
         symbols={symbols}
         rounding={rounding}
         normStatus={SHOW_NORM_STATUS}
+        hideEngineerSource={hideEngineerSource}
+        fallbackNormRefs={envelope.norm_refs}
       />
     </>
   )
 }
 
-function DiagnosticResult({ envelope, reason, editType, types }: {
+function DiagnosticResult({ envelope, reason, editType, types, hideEngineerSource }: {
   envelope: Envelope
   reason: DerivedReason
   editType: string | null
   types: readonly CalculationType[] | undefined
+  hideEngineerSource: boolean
 }) {
   const { t } = useI18n()
   const symbols = useMemo(() => symbolTable(envelope.trace, types), [envelope.trace, types])
   return (
     <>
-      <DerivedRefusal reason={reason} source={envelope.parameter_source} />
+      <DerivedRefusal
+        reason={reason}
+        source={envelope.parameter_source}
+        hideEngineerSource={hideEngineerSource}
+        fallbackNormRefs={envelope.norm_refs}
+      />
       <p className="mt-4 flex flex-wrap gap-3">
         {editType && <EditInputsLink type={editType} derivedCorrection={{ resultId: envelope.result_id, reason }} primary />}
         <Link to={`/calculations/${envelope.result_id}/report`} className={cn(buttonClass, editType && secondaryButtonClass)}>
@@ -109,6 +119,8 @@ function DiagnosticResult({ envelope, reason, editType, types }: {
         normStatus={SHOW_NORM_STATUS}
         title={t('refusal.diagnostic.title')}
         description={t('refusal.diagnostic.description')}
+        hideEngineerSource={hideEngineerSource}
+        fallbackNormRefs={envelope.norm_refs}
       />
     </>
   )
@@ -130,6 +142,7 @@ export function ResultScreen() {
   }
   const editType = state.status === 'ok' && sent?.resultId === state.data.result_id ? sent.type : null
   const checked = state.status === 'ok' && state.data.verdict_reason.kind === 'check'
+  const hideEngineerSource = state.status === 'ok' && state.data.trace.some((step) => step.step_id === 'G_sum')
   return (
     <>
       <h1 className="h1-ruled">{t('result.title')}</h1>
@@ -159,6 +172,7 @@ export function ResultScreen() {
               reason={state.data.verdict_reason}
               editType={editType}
               types={typesState.status === 'ok' ? typesState.data : undefined}
+              hideEngineerSource={hideEngineerSource}
             />
           ) : (
             <CheckedResult
@@ -167,6 +181,7 @@ export function ResultScreen() {
               reason={state.data.verdict_reason}
               editType={editType}
               types={typesState.status === 'ok' ? typesState.data : undefined}
+              hideEngineerSource={hideEngineerSource}
             />
           )}
           {(isFoundationType(editType) || state.data.trace.some((step) => step.step_id === 'Mx_base')) && (

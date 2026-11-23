@@ -10,6 +10,7 @@ import { ErrorState, LoadingState } from '@/components/RequestStates'
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n/context'
 import { unitLabel } from '@/i18n/units'
+import { LOADS_TYPE, WEIGHTS_TYPE } from '@/lib/foundationDesign'
 import { typeName } from '@/lib/typeName'
 
 type CalculationType = components['schemas']['CalculationTypeView']
@@ -54,7 +55,7 @@ function Notice({ children }: { children: ReactNode }) {
 }
 
 function TypeRow({ type }: { type: CalculationType }) {
-  const { language } = useI18n()
+  const { language, t } = useI18n()
   return (
     <tr className="registry-row group relative not-last:border-b not-last:border-border">
       <td className="px-3 py-4 sm:px-4 sm:py-5">
@@ -62,7 +63,7 @@ function TypeRow({ type }: { type: CalculationType }) {
           to={`/calculations/new?type=${encodeURIComponent(type.name)}`}
           className="font-heading text-xl font-semibold text-foreground no-underline group-hover:text-primary-foreground group-has-[a:focus-visible]:text-primary-foreground after:absolute after:inset-0 focus-visible:outline-offset-[-4px] focus-visible:outline-primary-foreground sm:text-3xl"
         >
-          {typeName(type, language)}
+          {type.name === WEIGHTS_TYPE ? t('types.foundationDemo') : typeName(type, language)}
         </Link>
         <span
           aria-hidden="true"
@@ -116,6 +117,7 @@ function Hero() {
 export function TypeSelectionScreen() {
   const { t } = useI18n()
   const { state, retry } = useRequest(loadTypes)
+  const visibleTypes = state.status === 'ok' ? state.data.filter((type) => type.name !== LOADS_TYPE) : []
   return (
     <>
       <Hero />
@@ -129,7 +131,7 @@ export function TypeSelectionScreen() {
                 <LoadingState />
               </Notice>
             )}
-            {state.status === 'ok' && state.data.length === 0 && (
+            {state.status === 'ok' && visibleTypes.length === 0 && (
               <Notice>
                 <div className="grid justify-items-start gap-3">
                   <p>{t('types.empty')}</p>
@@ -137,7 +139,7 @@ export function TypeSelectionScreen() {
                 </div>
               </Notice>
             )}
-            {state.status === 'ok' && state.data.map((type) => <TypeRow key={type.name} type={type} />)}
+            {visibleTypes.map((type) => <TypeRow key={type.name} type={type} />)}
           </Registry>
         )}
       </div>

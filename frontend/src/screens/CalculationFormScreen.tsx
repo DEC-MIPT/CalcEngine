@@ -27,7 +27,9 @@ export function CalculationFormScreen() {
       {state.status === 'error' && <ErrorState error={state.error} onRetry={retry} />}
       {type && (
         <>
-          <p className="mb-5 font-heading text-xl font-semibold">{typeName(type, language)}</p>
+          <p className="mb-5 font-heading text-xl font-semibold">
+            {type.name === WEIGHTS_TYPE ? t('types.foundationDemo') : typeName(type, language)}
+          </p>
           {(switchable || name === LOADS_TYPE) && (
             <nav aria-label={t('foundation.candidates')} className="mb-5 flex flex-wrap gap-x-5 gap-y-2">
               {switchable && <Link to={`/calculations/new?type=${otherType}`}>{t(otherType === LOADS_TYPE ? 'foundation.averaged' : 'foundation.explicit')}</Link>}

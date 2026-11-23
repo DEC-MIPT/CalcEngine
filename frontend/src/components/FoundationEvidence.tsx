@@ -40,7 +40,7 @@ function LoadSchematic({ context }: { context: Context }) {
           <path d="M133 18v37m-6-8 6 8 6-8M245 60h12m-6 0v79m-6 0h12M48 150v12m0-6h171m0-6v12" />
         </g>
         <g fill="currentColor" className="font-mono text-sm">
-          <text x="145" y="33">N</text><text x="37" y="52">{t('foundation.upper')}</text>
+          <text x="145" y="30">N</text><text x="145" y="52">{t('foundation.upper')}</text>
           <text x="263" y="106">h</text><text x="114" y="174">b · x</text>
           <text x="39" y="104">{explicit ? 'G' : 'γ · d'}</text><text x="32" y="124">{t('foundation.base')}</text>
         </g>

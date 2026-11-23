@@ -128,15 +128,15 @@ test('the submitted report form to the issued stamp (8.9)', async ({ page }) => 
   expect(p95).toBeLessThan(LIMIT_MS)
 })
 
-test('loads type selection to the fifteen-input form uses the same p95 policy', async ({ page }) => {
+test('demo type selection to the explicit-weight form uses the same p95 policy', async ({ page }) => {
   const p95 = await measure(page, async (current) => {
     await current.goto('/')
-    const type = current.locator(`a[href="/calculations/new?type=${LOADS_TYPE}"]`)
-    await type.waitFor()
-    await current.evaluate(() => window.__watch('loads-form', '#field-Qy'))
-    await type.click()
-    await expect(current.locator('#field-Qy')).toBeVisible()
-    return elapsed(current, 'loads-form', /\/calculation-types$/)
+    const demo = current.getByRole('link', { name: 'Расчет фундамента мелкого заложения (демо)' })
+    await demo.waitFor()
+    await current.evaluate(() => window.__watch('demo-form', '#field-G_fund'))
+    await demo.click()
+    await expect(current.locator('#field-G_fund')).toBeVisible()
+    return elapsed(current, 'demo-form', /\/calculation-types$/)
   })
   expect(p95).toBeLessThan(LIMIT_MS)
 })

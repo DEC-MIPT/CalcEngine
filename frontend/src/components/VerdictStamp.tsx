@@ -71,7 +71,13 @@ export function VerdictStamp({
   const check = envelope.trace.find(
     (step): step is CheckStep => step.kind === 'check' && step.step_id === reason.step_id,
   )
-  const [left, right] = check ? checkRounding(check, outputRounding(envelope.outputs)) : []
+  const rounding = new Map(outputRounding(envelope.outputs))
+  const resistanceRounding = rounding.get('R')
+  if (resistanceRounding) {
+    rounding.set('edge_limit', resistanceRounding)
+    rounding.set('corner_limit', resistanceRounding)
+  }
+  const [left, right] = check ? checkRounding(check, rounding) : []
   const Icon = passed ? CheckCircle : XCircle
   const tone = passed ? 'border-primary' : 'border-destructive'
   return (

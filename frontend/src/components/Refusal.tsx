@@ -33,7 +33,17 @@ export function Refusal({ reason, source }: { reason: BoundViolation; source?: P
   )
 }
 
-export function DerivedRefusal({ reason, source }: { reason: DerivedViolation; source?: ParameterSource | null }) {
+export function DerivedRefusal({
+  reason,
+  source,
+  hideEngineerSource = false,
+  fallbackNormRefs = [],
+}: {
+  reason: DerivedViolation
+  source?: ParameterSource | null
+  hideEngineerSource?: boolean
+  fallbackNormRefs?: readonly components['schemas']['NormRef'][]
+}) {
   const { t } = useI18n()
   return (
     <Status tone="refusal" title={t('refusal.contact.title')} focusOnMount>
@@ -56,7 +66,7 @@ export function DerivedRefusal({ reason, source }: { reason: DerivedViolation; s
       </dl>
       <div>
         <h3 className="text-sm font-medium">{t('bound.source')}</h3>
-        <Source source={reason.source} />
+        {hideEngineerSource ? <NormRefList refs={fallbackNormRefs} /> : <Source source={reason.source} />}
       </div>
       {source && (
         <dl className="grid gap-0.5 text-sm">
