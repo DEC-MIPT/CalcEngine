@@ -176,10 +176,13 @@ test('loads type, fifteen fields, result and report request remain reachable wit
   await expect(page.locator(averaged)).toBeVisible()
   await tabTo(averaged)
   await page.keyboard.press('Enter')
-  await expect(page.locator('#field-Qy')).toBeVisible()
+  await expect(page).toHaveURL(new RegExp(`${LOADS_TYPE}$`))
+  await expect(page.locator('#field-d')).toBeVisible()
   for (const [name, quantity] of Object.entries(loadsBiaxialInputs)) {
-    await tabTo(`#field-${name}`)
+    const selector = `#field-${name}`
+    await tabTo(selector)
     await page.keyboard.type(String(quantity.value))
+    await expect(page.locator(selector)).toHaveValue(String(quantity.value))
   }
   await tabTo('form button[type="submit"]')
   await page.keyboard.press('Enter')
