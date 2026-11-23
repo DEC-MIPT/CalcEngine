@@ -26,8 +26,8 @@ function isControl(target: EventTarget | null): boolean {
   return target instanceof Element && target.closest(CONTROLS) !== null
 }
 
-export function useTracePlayback(resultId: string, stepCount: number): TracePlayback {
-  const [animated] = useState(() => stepCount > 0 && !hasPlayed(resultId) && !prefersReducedMotion())
+export function useTracePlayback(resultId: string, stepCount: number, animate = true): TracePlayback {
+  const [animated] = useState(() => animate && stepCount > 0 && !hasPlayed(resultId) && !prefersReducedMotion())
   const [shown, setShown] = useState(animated ? 0 : stepCount)
   const [skipped, setSkipped] = useState(false)
   const playing = shown < stepCount

@@ -104,6 +104,22 @@ describe('loads result presentation contract', () => {
   })
 
   it.each([
+    [120, 228.03000000000003, true, '228.03 kPa'],
+    [120.004, 120.003, false, '120.003 kPa'],
+  ] as const)('formats a pressure limit without changing the displayed comparison outcome (%s)', (left, right, passed, expected) => {
+    const step: Check = {
+      ...syntheticCheck('le', passed, left, right),
+      substitutions: [{ symbol: 'p', value: left, unit: 'kPa' }, { symbol: 'corner_limit', value: right, unit: 'kPa' }],
+    }
+    show(<VerdictStamp
+      envelope={{ ...loadsCentralEnvelope, verdict: passed ? 'pass' : 'fail', trace: [step] }}
+      reason={{ kind: 'check', step_id: step.step_id }}
+    />)
+    expect(screen.getByText(expected.split(' ')[0], { exact: false })).toBeInTheDocument()
+    if (!passed) expect(screen.getByText('120.004', { exact: false })).toBeInTheDocument()
+  })
+
+  it.each([
     ['le', false, 1.004, 1.003, '≤', 'less than or equal to'],
     ['lt', true, 1.003, 1.004, '<', 'less than'],
     ['ge', false, 1.003, 1.004, '≥', 'greater than or equal to'],

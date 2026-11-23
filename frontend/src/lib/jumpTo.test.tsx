@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { jumpTo } from './jumpTo'
+import { jumpTo, traceStepAnchor } from './jumpTo'
 
 const scrollIntoView = vi.fn()
 
@@ -61,4 +61,13 @@ describe('jumpTo', () => {
     expect(followed).toBe(true)
     expect(scrollIntoView).not.toHaveBeenCalled()
   })
+})
+
+
+it('accepts only existing trace-step fragments', () => {
+  expect(traceStepAnchor('#trace-step-0', 31)).toBe('trace-step-0')
+  expect(traceStepAnchor('#trace-step-30', 31)).toBe('trace-step-30')
+  for (const fragment of ['', '#trace-title', '#trace-step-31', '#trace-step--1', '#trace-step-01']) {
+    expect(traceStepAnchor(fragment, 31)).toBeUndefined()
+  }
 })

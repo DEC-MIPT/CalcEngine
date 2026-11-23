@@ -20,6 +20,24 @@ const second = {
 const PILOT_NAME = 'Расчётное сопротивление грунта'
 
 describe('TypeSelectionScreen', () => {
+  it('omits the loads type from the registry and labels the explicit-weight demo', async () => {
+    const { container } = open()
+
+    const demo = await screen.findByRole('link', { name: 'Расчет фундамента мелкого заложения (демо)' })
+    const table = within(screen.getByRole('table'))
+    expect(table.getAllByRole('row')).toHaveLength(4)
+    expect(table.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
+      '/calculations/new?type=foundations_shallow_r',
+      '/calculations/new?type=foundations_shallow_weights',
+      '/calculations/new?type=foundations_shallow_weights&example=weights-C',
+    ])
+    expect(table.queryByText('foundations_shallow_loads')).not.toBeInTheDocument()
+    await expectNoA11yViolations(container)
+    fireEvent.click(demo)
+    expect(await screen.findByRole('link', { name: 'Усреднённые веса' })).toBeInTheDocument()
+    expect(screen.getByText('Расчет фундамента мелкого заложения (демо)')).toBeVisible()
+  })
+
   it('lists every type of the listing, shows loading first, and has no a11y violations', async () => {
     server.use(http.get('*/calculation-types', () => HttpResponse.json([pilot, second])))
     const { container } = open()

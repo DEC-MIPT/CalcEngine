@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { selectionSelected, weightsCentralRequest } from '../src/mocks/designFixtures'
 import { LOADS_TYPE, loadsCentralEnvelope, loadsCentralInputs, loadsContactRefusalEnvelope, loadsContactRefusalInputs } from '../src/mocks/loadsFixtures'
 
 const PASS_ID = '11111111-1111-4111-8111-111111111111'
@@ -127,15 +128,15 @@ test('the submitted report form to the issued stamp (8.9)', async ({ page }) => 
   expect(p95).toBeLessThan(LIMIT_MS)
 })
 
-test('loads type selection to the fifteen-input form uses the same p95 policy', async ({ page }) => {
+test('demo type selection to the explicit-weight form uses the same p95 policy', async ({ page }) => {
   const p95 = await measure(page, async (current) => {
     await current.goto('/')
-    const type = current.locator(`a[href="/calculations/new?type=${LOADS_TYPE}"]`)
-    await type.waitFor()
-    await current.evaluate(() => window.__watch('loads-form', '#field-Qy'))
-    await type.click()
-    await expect(current.locator('#field-Qy')).toBeVisible()
-    return elapsed(current, 'loads-form', /\/calculation-types$/)
+    const demo = current.getByRole('link', { name: 'Расчет фундамента мелкого заложения (демо)', exact: true })
+    await demo.waitFor()
+    await current.evaluate(() => window.__watch('demo-form', '#field-G_fund'))
+    await demo.click()
+    await expect(current.locator('#field-G_fund')).toBeVisible()
+    return elapsed(current, 'demo-form', /\/calculation-types$/)
   })
   expect(p95).toBeLessThan(LIMIT_MS)
 })
@@ -185,5 +186,37 @@ test('loads report POST to the issued stamp uses the same p95 policy', async ({ 
     await expect(current.locator('[data-report-stamp]')).toBeVisible()
     return elapsed(current, 'loads-report', /\/report$/)
   })
+  expect(p95).toBeLessThan(LIMIT_MS)
+})
+
+
+test('design tools explicit check to result meets p95', async ({ page }) => {
+  const p95 = await measure(page, async (current) => {
+    await current.goto('/calculations/new?type=foundations_shallow_weights')
+    for (const [field, quantity] of Object.entries(weightsCentralRequest.inputs)) await current.locator(`#field-${field}`).fill(String(quantity.value))
+    await current.evaluate(() => window.__watch('explicit-result', '[data-verdict]'))
+    await current.getByRole('button', { name: 'Рассчитать', exact: true }).click()
+    await expect(current.locator('[data-verdict]')).toBeVisible()
+    return elapsed(current, 'explicit-result', /\/calculations$/)
+  })
+  console.log(`Explicit check transition p95: ${p95.toFixed(1)} ms`)
+  expect(p95).toBeLessThan(LIMIT_MS)
+})
+
+test('design tools selection POST to stored comparison meets p95', async ({ page }) => {
+  const p95 = await measure(page, async (current) => {
+    await current.goto(`/calculations/new?type=${LOADS_TYPE}&task=selection`)
+    for (const [field, quantity] of Object.entries(selectionSelected.request.common_inputs)) await current.locator(`#field-${field}`).fill(String(quantity.value))
+    for (const [index, { b, l }] of selectionSelected.request.candidates.entries()) {
+      if (index > 0) await current.getByRole('button', { name: 'Добавить вариант' }).click()
+      await current.locator(`#candidate-${index}-b`).fill(String(b.value))
+      await current.locator(`#candidate-${index}-l`).fill(String(l.value))
+    }
+    await current.evaluate(() => window.__watch('selection', '[data-candidate]'))
+    await current.getByRole('button', { name: 'Подобрать размеры' }).click()
+    await expect(current.locator('[data-candidate]').first()).toBeVisible()
+    return elapsed(current, 'selection', /\/foundation-selections$/)
+  })
+  console.log(`Selection transition p95: ${p95.toFixed(1)} ms`)
   expect(p95).toBeLessThan(LIMIT_MS)
 })

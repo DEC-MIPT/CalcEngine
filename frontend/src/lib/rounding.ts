@@ -28,11 +28,19 @@ const HOLDS: Record<CheckStep['operator'], (left: number, right: number) => bool
   gt: (left, right) => left > right,
 }
 
+export function preservesComparison(
+  operator: CheckStep['operator'], left: number, right: number, rule: RoundingRule,
+): boolean {
+  return HOLDS[operator](left, right) === HOLDS[operator](roundValue(left, rule), roundValue(right, rule))
+}
+
 export function checkRounding(
   step: CheckStep,
   rounding: OutputRounding,
+  fallback?: RoundingRule,
 ): readonly [RoundingRule | undefined, RoundingRule | undefined] {
-  const [left, right] = step.substitutions.map((substitution) => rounding.get(substitution.symbol))
+  const left = rounding.get(step.substitutions[0]?.symbol) ?? fallback
+  const right = rounding.get(step.substitutions[1]?.symbol) ?? fallback
   const shown = (value: number, rule: RoundingRule | undefined) => (rule ? roundValue(value, rule) : value)
   const agrees = HOLDS[step.operator](shown(step.result.value, left), shown(step.right.value, right)) === step.passed
   return agrees ? [left, right] : [undefined, undefined]

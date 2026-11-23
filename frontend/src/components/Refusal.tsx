@@ -1,4 +1,6 @@
 import type { components } from '@/api/schema'
+import { useResultRounding } from '@/lib/resultDisplay'
+import { preservesComparison } from '@/lib/rounding'
 import { useI18n } from '@/i18n/context'
 import { BoundFacts } from './Bound'
 import { NormRefList } from './NormRefList'
@@ -33,8 +35,20 @@ export function Refusal({ reason, source }: { reason: BoundViolation; source?: P
   )
 }
 
-export function DerivedRefusal({ reason, source }: { reason: DerivedViolation; source?: ParameterSource | null }) {
+export function DerivedRefusal({
+  reason,
+  source,
+  hideEngineerSource = false,
+  fallbackNormRefs = [],
+}: {
+  reason: DerivedViolation
+  source?: ParameterSource | null
+  hideEngineerSource?: boolean
+  fallbackNormRefs?: readonly components['schemas']['NormRef'][]
+}) {
   const { t } = useI18n()
+  const rule = useResultRounding()
+  const rounding = rule && !preservesComparison('ge', reason.value.value, reason.limit.value, rule) ? null : rule
   return (
     <Status tone="refusal" title={t('refusal.contact.title')} focusOnMount>
       <p>{t('refusal.contact.scope')}</p>
@@ -42,12 +56,12 @@ export function DerivedRefusal({ reason, source }: { reason: DerivedViolation; s
         <dt>{t('refusal.contact.quantity')}</dt>
         <dd><code>{reason.quantity}</code></dd>
         <dt>{t('refusal.contact.value')}</dt>
-        <dd><QuantityText value={reason.value.value} unit={reason.value.unit} /></dd>
+        <dd><QuantityText value={reason.value.value} unit={reason.value.unit} rounding={rounding} /></dd>
         <dt>{t('refusal.contact.limit')}</dt>
         <dd>
           <span aria-hidden="true">≥</span>
           <span className="sr-only">{t('trace.op.ge')}</span>{' '}
-          <QuantityText value={reason.limit.value} unit={reason.limit.unit} />
+          <QuantityText value={reason.limit.value} unit={reason.limit.unit} rounding={rounding} />
         </dd>
         <dt>{t('refusal.contact.corner')}</dt>
         <dd><code>{reason.limiting_corner}</code></dd>
@@ -56,8 +70,14 @@ export function DerivedRefusal({ reason, source }: { reason: DerivedViolation; s
       </dl>
       <div>
         <h3 className="text-sm font-medium">{t('bound.source')}</h3>
-        <Source source={reason.source} />
+        <Source source={reason.source} omitEngineerName={hideEngineerSource} />
       </div>
+      {hideEngineerSource && (
+        <div>
+          <h3 className="text-sm font-medium">{t('trace.resultNorms')}</h3>
+          <NormRefList refs={fallbackNormRefs} />
+        </div>
+      )}
       {source && (
         <dl className="grid gap-0.5 text-sm">
           <dt className="text-muted-foreground">{t('source.label')}</dt>

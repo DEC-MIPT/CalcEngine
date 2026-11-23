@@ -1,5 +1,7 @@
 import { WarningCircle } from '@phosphor-icons/react'
 import type { components } from '@/api/schema'
+import { useResultRounding } from '@/lib/resultDisplay'
+import { preservesComparison } from '@/lib/rounding'
 import { useI18n } from '@/i18n/context'
 import { QuantityText } from './Quantity'
 
@@ -45,16 +47,18 @@ export function BoundFacts({
 }) {
   const { t } = useI18n()
   const operator = OPERATORS[bound.kind][bound.inclusive ? 'inclusive' : 'exclusive']
+  const rule = useResultRounding()
+  const rounding = rule && !preservesComparison(operator, value.value, bound.value, rule) ? null : rule
   return (
     <dl className="grid gap-x-4 gap-y-1 sm:grid-cols-[max-content_1fr]">
       <dt className="text-sm font-medium">{t('bound.input')}</dt>
       <dd data-fact="input">
-        <code>{bound.quantity}</code> = <Amount value={value.value} unit={value.unit} />
+        <code>{bound.quantity}</code> = <QuantityText {...value} rounding={rounding} />
       </dd>
       <dt className="text-sm font-medium">{boundLabel}</dt>
       <dd data-fact="bound">
         <code>{bound.quantity}</code> <span aria-hidden="true">{SYMBOLS[operator]}</span>
-        <span className="sr-only">{t(`trace.op.${operator}`)}</span> <Amount value={bound.value} unit={value.unit} />
+        <span className="sr-only">{t(`trace.op.${operator}`)}</span> <QuantityText value={bound.value} unit={value.unit} rounding={rounding} />
       </dd>
     </dl>
   )

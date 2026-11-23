@@ -1,7 +1,9 @@
+import { useId } from 'react'
 import { CheckCircle, XCircle } from '@phosphor-icons/react'
 import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
 import { checkRounding, type OutputRounding } from '@/lib/rounding'
+import { useResultRounding } from '@/lib/resultDisplay'
 import { checkPresentation } from '@/lib/checkPresentation'
 import { Checking } from './Checking'
 import { Formula } from './Formula'
@@ -32,10 +34,12 @@ export function StoredChecks({
   symbols?: ReadonlyMap<string, string>
 }) {
   const { t } = useI18n()
+  const title = useId()
+  const fallback = useResultRounding()
   const pending = reveal === 'pending'
   return (
-    <section aria-labelledby="checks-title" className="mt-8 grid min-w-0 gap-3" data-reveal={reveal}>
-      <h2 id="checks-title">{t('checks.title')}</h2>
+    <section aria-labelledby={title} className="mt-8 grid min-w-0 gap-3" data-reveal={reveal}>
+      <h2 id={title}>{t('checks.title')}</h2>
       <div className="relative min-w-0">
         {pending && <Checking marker="checks" />}
         <div inert={pending} className={pending ? 'invisible' : undefined}>
@@ -44,7 +48,7 @@ export function StoredChecks({
           </p>
           <ol className="grid min-w-0 border border-border bg-card">
             {steps.filter((step) => step.kind === 'check').map((step, index) => {
-              const [left, right] = checkRounding(step, rounding)
+              const [left, right] = checkRounding(step, rounding, fallback)
               const Icon = step.passed ? CheckCircle : XCircle
               const label = labels?.get(step.substitutions[0]?.symbol)
               return (
@@ -63,10 +67,10 @@ export function StoredChecks({
                     <Formula latex={step.expression} presentation={checkPresentation(step, symbols)} />
                   </div>
                   <p className="font-mono" data-comparison>
-                    <QuantityText {...step.result} rounding={left} />{' '}
+                    <QuantityText {...step.result} rounding={left ?? null} />{' '}
                     <span aria-hidden="true">{OPERATORS[step.operator]}</span>
                     <span className="sr-only">{t(`trace.op.${step.operator}`)}</span>{' '}
-                    <QuantityText {...step.right} rounding={right} />
+                    <QuantityText {...step.right} rounding={right ?? null} />
                   </p>
                   <p className={`flex items-center gap-1.5 font-semibold ${step.passed ? 'text-success' : 'text-destructive'}`}>
                     <Icon size={18} weight="fill" aria-hidden="true" className="shrink-0" />

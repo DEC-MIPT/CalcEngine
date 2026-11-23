@@ -6,9 +6,11 @@ import { useI18n } from '@/i18n/context'
 import type { TextKey } from '@/i18n/dictionary'
 import { jumpTo } from '@/lib/jumpTo'
 import { checkRounding, outputRounding } from '@/lib/rounding'
+import { useResultRounding } from '@/lib/resultDisplay'
 import { checkPresentation } from '@/lib/checkPresentation'
 import { useFocusOnMount } from '@/lib/useFocusOnMount'
 import { Checking } from './Checking'
+import type { SentForm } from '@/form/draftContext'
 import { EditInputsLink } from './EditInputsLink'
 import { Formula } from './Formula'
 import { QuantityText } from './Quantity'
@@ -34,7 +36,7 @@ const REVEAL_CLASS: Record<StampReveal, string> = {
 function Reading({ quantity, rounding }: { quantity: Quantity; rounding: RoundingRule | undefined }) {
   return (
     <span className="whitespace-nowrap max-sm:whitespace-normal">
-      <QuantityText value={quantity.value} unit={quantity.unit} unitClassName="text-muted-foreground" rounding={rounding} />
+      <QuantityText value={quantity.value} unit={quantity.unit} unitClassName="text-muted-foreground" rounding={rounding ?? null} />
     </span>
   )
 }
@@ -54,12 +56,14 @@ export function VerdictStamp({
   envelope,
   reason,
   editType = null,
+  editExample,
   reveal = 'none',
   symbols,
 }: {
   envelope: Envelope
   reason: CheckReason
   editType?: string | null
+  editExample?: SentForm['example']
   reveal?: StampReveal
   symbols?: ReadonlyMap<string, string>
 }) {
@@ -71,7 +75,14 @@ export function VerdictStamp({
   const check = envelope.trace.find(
     (step): step is CheckStep => step.kind === 'check' && step.step_id === reason.step_id,
   )
-  const [left, right] = check ? checkRounding(check, outputRounding(envelope.outputs)) : []
+  const rounding = new Map(outputRounding(envelope.outputs))
+  const resistanceRounding = rounding.get('R')
+  if (resistanceRounding) {
+    rounding.set('edge_limit', resistanceRounding)
+    rounding.set('corner_limit', resistanceRounding)
+  }
+  const fallback = useResultRounding()
+  const [left, right] = check ? checkRounding(check, rounding, fallback) : []
   const Icon = passed ? CheckCircle : XCircle
   const tone = passed ? 'border-primary' : 'border-destructive'
   return (
@@ -109,7 +120,7 @@ export function VerdictStamp({
           {t('result.toReport')}
           <ArrowRight aria-hidden="true" size={18} />
         </Link>
-        {editType && <EditInputsLink type={editType} primary={false} />}
+        {editType && <EditInputsLink type={editType} example={editExample} primary={false} />}
       </div>
       <dl className={`col-span-full grid min-w-0 border-t text-sm sm:grid-cols-3 ${tone}`}>
         {(

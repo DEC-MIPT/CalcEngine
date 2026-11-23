@@ -5,6 +5,7 @@ import type { components } from '@/api/schema'
 import { I18nProvider } from '@/i18n/I18nProvider'
 import { loadsCentralEnvelope, loadsFailEnvelope } from '@/mocks/fixtures'
 import { outputRounding } from '@/lib/rounding'
+import { DemoResultDisplay } from '@/lib/resultDisplay'
 import { expectNoA11yViolations } from '@/test/axe'
 import { StoredChecks } from './StoredChecks'
 
@@ -87,4 +88,17 @@ describe('stored check presentation', () => {
     await user.tab()
     expect(screen.getByRole('region', { name: `Check formula: ${step.step_id}` })).toHaveFocus()
   })
+})
+
+it('formats a demo limit to two decimals unless that would obscure the stored check outcome', () => {
+  const first = { ...checks[0], result: { value: 1.1, unit: 'kPa' }, right: { value: 2, unit: 'kPa' } }
+  const close = { ...first, step_id: 'close', result: { value: 2.001, unit: 'kPa' }, passed: false }
+  const { container } = render(
+    <I18nProvider initialLanguage="en"><DemoResultDisplay.Provider value>
+      <StoredChecks steps={[first, close]} reason={{ kind: 'check', step_id: 'close' }} />
+    </DemoResultDisplay.Provider></I18nProvider>,
+  )
+  const [passing, failing] = container.querySelectorAll('[data-comparison]')
+  expect(passing).toHaveTextContent('1.10 kPa ≤less than or equal to 2.00 kPa')
+  expect(failing).toHaveTextContent('2.001 kPa ≤less than or equal to 2 kPa')
 })

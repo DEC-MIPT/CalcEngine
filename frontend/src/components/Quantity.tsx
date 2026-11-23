@@ -2,6 +2,7 @@ import type { components } from '@/api/schema'
 import { useI18n } from '@/i18n/context'
 import { unitLabel } from '@/i18n/units'
 import { roundValue } from '@/lib/rounding'
+import { useResultRounding } from '@/lib/resultDisplay'
 
 type RoundingRule = components['schemas']['RoundingRule']
 
@@ -10,17 +11,23 @@ export function QuantityText({
   unit,
   unitClassName,
   rounding,
+  preserveNegative = false,
 }: {
   value: number
   unit: string
   unitClassName?: string
-  rounding?: RoundingRule
+  rounding?: RoundingRule | null
+  preserveNegative?: boolean
 }) {
   const { language, formatNumber } = useI18n()
+  const defaultRounding = useResultRounding()
+  const rule = rounding === null ? undefined : rounding ?? defaultRounding
+  const rounded = rule ? roundValue(value, rule) : value
+  const showRounded = rule && !(preserveNegative && value < 0 && rounded === 0)
   const label = unitLabel(unit, language)
   return (
     <>
-      {rounding ? formatNumber(roundValue(value, rounding), rounding.decimals) : formatNumber(value)}
+      {showRounded ? formatNumber(rounded, rule.decimals) : formatNumber(value)}
       {label && <> {unitClassName ? <span className={unitClassName}>{label}</span> : label}</>}
     </>
   )

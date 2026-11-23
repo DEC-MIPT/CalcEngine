@@ -109,9 +109,7 @@ for (const scenario of loadsScenarios) {
   test(`captured loads ${scenario.name}: type, form, stored result and mock report download`, async ({ page }) => {
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
-    await page.goto('/')
-    await expect(page.locator('a[href="/calculations/new?type=foundations_shallow_r"]')).toBeVisible()
-    await page.locator(`a[href="${FORM}"]`).click()
+    await page.goto(FORM)
     await expect(page.getByRole('textbox')).toHaveCount(15)
     expect(await page.getByRole('textbox').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('name')))).toEqual(loadsCalculationType.inputs.map((input) => input.name))
     await expect(page.getByRole('region', { name: 'Схема направлений и знаков', exact: true })).toBeVisible()
@@ -169,14 +167,22 @@ test('loads type, fifteen fields, result and report request remain reachable wit
   }
 
   await page.goto('/')
-  const selected = `a[href="${FORM}"]`
-  await expect(page.locator(selected)).toBeVisible()
-  await tabTo(selected)
+  const demo = 'a[href="/calculations/new?type=foundations_shallow_weights"]'
+  await expect(page.getByRole('link', { name: 'Расчет фундамента мелкого заложения (демо)', exact: true })).toBeVisible()
+  await expect(page.locator(`a[href="${FORM}"]`)).toHaveCount(0)
+  await tabTo(demo)
   await page.keyboard.press('Enter')
-  await expect(page.locator('#field-Qy')).toBeVisible()
+  const averaged = `a[href="${FORM}"]`
+  await expect(page.locator(averaged)).toBeVisible()
+  await tabTo(averaged)
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL(new RegExp(`${LOADS_TYPE}$`))
+  await expect(page.locator('#field-d')).toBeVisible()
   for (const [name, quantity] of Object.entries(loadsBiaxialInputs)) {
-    await tabTo(`#field-${name}`)
+    const selector = `#field-${name}`
+    await tabTo(selector)
     await page.keyboard.type(String(quantity.value))
+    await expect(page.locator(selector)).toHaveValue(String(quantity.value))
   }
   await tabTo('form button[type="submit"]')
   await page.keyboard.press('Enter')

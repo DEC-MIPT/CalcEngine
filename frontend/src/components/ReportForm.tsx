@@ -135,7 +135,7 @@ function requestBody(
 
 const emptyPerson: Person = { surname: '', date: '' }
 
-export function ReportForm({ resultId }: { resultId: string }) {
+export function ReportForm({ resultId, selection = false }: { resultId: string; selection?: boolean }) {
   const { t } = useI18n()
   const [title, setTitle] = useState<Record<TitleName, string>>({
     designation: '',
@@ -183,14 +183,15 @@ export function ReportForm({ resultId }: { resultId: string }) {
     setPhase('sending')
     let outcome
     try {
-      outcome = await withMinimumDuration(
-        api.POST('/calculations/{result_id}/report', {
-          params: { path: { result_id: resultId } },
-          body: requestBody(title, signatureBlock, people),
-          parseAs: 'blob',
-        }),
-        animated ? REPORT_MS : 0,
-      )
+      const body = requestBody(title, signatureBlock, people)
+      const request = selection
+        ? api.POST('/foundation-selections/{selection_id}/report', {
+          params: { path: { selection_id: resultId } }, body, parseAs: 'blob',
+        })
+        : api.POST('/calculations/{result_id}/report', {
+          params: { path: { result_id: resultId } }, body, parseAs: 'blob',
+        })
+      outcome = await withMinimumDuration(request, animated ? REPORT_MS : 0)
     } catch {
       inFlight.current = false
       setPhase('idle')

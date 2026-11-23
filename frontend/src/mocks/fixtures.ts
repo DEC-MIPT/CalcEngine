@@ -1,5 +1,7 @@
 import type { components } from '../api/schema'
+import { weightsCalculationType } from './designFixtures'
 import { loadsCalculationType } from './loadsFixtures'
+export * from './designFixtures'
 export * from './loadsFixtures'
 
 type CalculationTypeView = components['schemas']['CalculationTypeView']
@@ -169,7 +171,7 @@ export const pilotCalculationTypes = [
   }
 ] satisfies CalculationTypeView[]
 
-export const calculationTypes: CalculationTypeView[] = [...pilotCalculationTypes, loadsCalculationType]
+export const calculationTypes: CalculationTypeView[] = [...pilotCalculationTypes, loadsCalculationType, weightsCalculationType]
 
 export const strictSource = {
   kind: 'interim',

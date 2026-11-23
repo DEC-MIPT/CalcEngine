@@ -5,6 +5,7 @@ import { useI18n } from '@/i18n/context'
 import type { TextKey } from '@/i18n/dictionary'
 import { loadsTraceSections, type LoadsTraceSection } from '@/lib/loadsTraceSections'
 import { checkRounding, type OutputRounding } from '@/lib/rounding'
+import { useResultRounding } from '@/lib/resultDisplay'
 import { checkPresentation } from '@/lib/checkPresentation'
 import { symbolTable } from '@/lib/stepSymbol'
 import { arrivalOf, type Arrival, type TracePlayback } from '@/lib/useTracePlayback'
@@ -18,6 +19,7 @@ import { Button } from './ui/button'
 type Step = components['schemas']['ResultEnvelope']['trace'][number]
 type Quantity = components['schemas']['QuantityValue']
 type RoundingRule = components['schemas']['RoundingRule']
+type NormRef = components['schemas']['NormRef']
 
 const NO_ROUNDING: OutputRounding = new Map()
 
@@ -33,7 +35,7 @@ const SECTION_TITLES: Record<LoadsTraceSection, TextKey> = {
   other: 'trace.section.other',
 }
 
-function Value({ quantity, rounding }: { quantity: Quantity; rounding?: RoundingRule }) {
+function Value({ quantity, rounding }: { quantity: Quantity; rounding?: RoundingRule | null }) {
   return <QuantityText value={quantity.value} unit={quantity.unit} rounding={rounding} />
 }
 
@@ -44,13 +46,14 @@ type CheckStep = Extract<Step, { kind: 'check' }>
 function Comparison({ step, rounding }: { step: CheckStep; rounding: OutputRounding }) {
   const { t } = useI18n()
   const Icon = step.passed ? CheckCircle : XCircle
-  const [left, right] = checkRounding(step, rounding)
+  const fallback = useResultRounding()
+  const [left, right] = checkRounding(step, rounding, fallback)
   return (
     <div className="grid gap-1">
       <p>
-        <Value quantity={step.result} rounding={left} />{' '}
+        <Value quantity={step.result} rounding={left ?? null} />{' '}
         <span aria-hidden="true">{SYMBOLS[step.operator]}</span>{' '}
-        <span className="sr-only">{t(`trace.op.${step.operator}`)}</span> <Value quantity={step.right} rounding={right} />
+        <span className="sr-only">{t(`trace.op.${step.operator}`)}</span> <Value quantity={step.right} rounding={right ?? null} />
       </p>
       <p
         className={
@@ -66,16 +69,17 @@ function Comparison({ step, rounding }: { step: CheckStep; rounding: OutputRound
   )
 }
 
-function resultRounding(step: Step, rounding: OutputRounding): RoundingRule | undefined {
-  return step.kind === 'check' ? checkRounding(step, rounding)[0] : rounding.get(step.step_id)
+function resultRounding(step: Step, rounding: OutputRounding, fallback?: RoundingRule): RoundingRule | null | undefined {
+  return step.kind === 'check' ? checkRounding(step, rounding, fallback)[0] ?? null : rounding.get(step.step_id)
 }
 
 function StepSummary({ step, rounding }: { step: Step; rounding: OutputRounding }) {
   const { t } = useI18n()
+  const fallback = useResultRounding()
   return (
     <span className="ml-auto" data-summary>
       <span className="font-mono">
-        <Value quantity={step.result} rounding={resultRounding(step, rounding)} />
+        <Value quantity={step.result} rounding={resultRounding(step, rounding, fallback)} />
       </span>
       {step.kind === 'check' && <> · {t(step.passed ? 'trace.check.passed' : 'trace.check.failed')}</>}
     </span>
@@ -95,6 +99,9 @@ function TraceStep({
   normStatus,
   compact,
   sectionTitle,
+  anchorPrefix,
+  hideEngineerSource,
+  fallbackNormRefs,
 }: {
   step: Step
   index: number
@@ -106,13 +113,17 @@ function TraceStep({
   normStatus: boolean
   compact: boolean
   sectionTitle?: string
+  anchorPrefix: string
+  hideEngineerSource: boolean
+  fallbackNormRefs: readonly NormRef[]
 }) {
   const { t } = useI18n()
   const detailsId = useId()
   const StepHeading = compact ? 'h4' : 'h3'
   return (
     <li
-      id={`trace-step-${index}`}
+      id={`${anchorPrefix}-step-${index}`}
+      tabIndex={-1}
       className={`data-row scroll-mt-4 not-last:border-b not-last:border-border${ARRIVAL_CLASS[arrival]}`}
       data-step={step.step_id}
       data-arrival={arrival}
@@ -179,10 +190,18 @@ function TraceStep({
           </p>
         )}
         {step.kind === 'engineer_formula' ? (
-          <div>
-            <h4 className="text-sm font-medium">{t('trace.engineerSource')}</h4>
-            <Source source={step.source} />
-          </div>
+          <>
+            <div>
+              <h4 className="text-sm font-medium">{t('trace.engineerSource')}</h4>
+              <Source source={step.source} omitEngineerName={hideEngineerSource} />
+            </div>
+            {hideEngineerSource && (
+              <div>
+                <h4 className="text-sm font-medium">{t('trace.resultNorms')}</h4>
+                <NormRefList refs={fallbackNormRefs} showStatus={normStatus} />
+              </div>
+            )}
+          </>
         ) : step.norm_refs.length > 0 && (
           <div>
             <h4 className="text-sm font-medium">{t('trace.norms')}</h4>
@@ -212,6 +231,9 @@ export function Trace({
   normStatus = true,
   title,
   description,
+  anchorPrefix = 'trace',
+  hideEngineerSource = false,
+  fallbackNormRefs = [],
 }: {
   steps: readonly Step[]
   unverifiedStepCount: number
@@ -221,6 +243,9 @@ export function Trace({
   normStatus?: boolean
   title?: string
   description?: string
+  anchorPrefix?: string
+  hideEngineerSource?: boolean
+  fallbackNormRefs?: readonly NormRef[]
 }) {
   const { t, formatNumber } = useI18n()
   const table = useMemo(() => symbols ?? symbolTable(steps), [symbols, steps])
@@ -234,8 +259,8 @@ export function Trace({
       return next
     })
   return (
-    <section aria-labelledby="trace-title" className="mt-8 grid gap-4" data-playback={playback?.phase ?? 'idle'}>
-      <h2 id="trace-title" tabIndex={-1} className="scroll-mt-4">
+    <section aria-labelledby={`${anchorPrefix}-title`} className="mt-8 grid gap-4" data-playback={playback?.phase ?? 'idle'}>
+      <h2 id={`${anchorPrefix}-title`} tabIndex={-1} className="scroll-mt-4">
         {title ?? t('trace.title')}
       </h2>
       {description && <p className="max-w-prose text-sm">{description}</p>}
@@ -272,6 +297,9 @@ export function Trace({
             key={`${step.step_id}-${index}`}
             step={step}
             index={index}
+            anchorPrefix={anchorPrefix}
+            hideEngineerSource={hideEngineerSource}
+            fallbackNormRefs={fallbackNormRefs}
             expanded={expanded.has(index)}
             onToggle={() => toggle(index)}
             arrival={arrivalOf(index, playback)}

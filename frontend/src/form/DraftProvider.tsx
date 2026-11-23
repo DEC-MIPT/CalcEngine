@@ -1,10 +1,12 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
-import { DraftContext, type Draft, type FormDraft, type SentForm } from './draftContext'
+import { foundationExampleDraft, foundationExampleKey } from './foundationExample'
+import { DraftContext, type CandidateDraft, type Draft, type FormDraft, type SentForm } from './draftContext'
 
 const EMPTY: FormDraft = { values: {}, units: {} }
 
 export function DraftProvider({ children }: { children: ReactNode }) {
-  const [drafts, setDrafts] = useState<Readonly<Record<string, FormDraft>>>({})
+  const [drafts, setDrafts] = useState<Readonly<Record<string, FormDraft>>>({ [foundationExampleKey]: foundationExampleDraft })
+  const [candidates, setCandidates] = useState<readonly CandidateDraft[]>([{ id: 0, b: '', l: '', bUnit: 'm', lUnit: 'm' }])
   const [sent, setSent] = useState<SentForm | null>(null)
 
   const read = useCallback((type: string) => drafts[type] ?? EMPTY, [drafts])
@@ -20,11 +22,11 @@ export function DraftProvider({ children }: { children: ReactNode }) {
       return { ...current, [type]: { ...draft, units: { ...draft.units, [name]: unit } } }
     })
   }, [])
-  const remember = useCallback((resultId: string, type: string) => setSent({ resultId, type }), [])
+  const remember = useCallback<Draft['remember']>((resultId, type, example) => setSent(example ? { resultId, type, example } : { resultId, type }), [])
 
   const value = useMemo<Draft>(
-    () => ({ read, setValue, setUnit, sent, remember }),
-    [read, setValue, setUnit, sent, remember],
+    () => ({ read, setValue, setUnit, sent, remember, candidates, setCandidates }),
+    [read, setValue, setUnit, sent, remember, candidates],
   )
   return <DraftContext.Provider value={value}>{children}</DraftContext.Provider>
 }

@@ -41,7 +41,7 @@ describe('captured loads API contract', () => {
     const listing = await response.json()
 
     expect(listing).toEqual(calculationTypes)
-    expect(listing.map((type: { name: string }) => type.name)).toEqual(['foundations_shallow_r', LOADS_TYPE])
+    expect(listing.map((type: { name: string }) => type.name)).toEqual(['foundations_shallow_r', LOADS_TYPE, 'foundations_shallow_weights'])
     expect(loadsCalculationType.inputs.map((input) => input.name)).toEqual([
       'b', 'd_1', 'd_b', 'gamma_II', 'gamma_II_prime', 'c_II', 'phi_II', 'l', 'h', 'd', 'N', 'Mx', 'My', 'Qx', 'Qy',
     ])

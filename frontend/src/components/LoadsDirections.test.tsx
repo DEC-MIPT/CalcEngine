@@ -37,6 +37,16 @@ describe('loads direction and sign guidance', () => {
     await expectNoA11yViolations(container)
   })
 
+  it('retains the explicit-weight guidance without describing the averaged allowance', async () => {
+    const { container } = render(<I18nProvider initialLanguage="en"><LoadsDirections explicit /></I18nProvider>)
+    const guidance = screen.getByRole('region', { name: 'Directions and sign convention' })
+    const hint = within(guidance).getByText(/Structural loads are supplied at the upper cut/)
+    expect(hint.closest('figcaption')).toHaveClass('sr-only')
+    expect(within(guidance).getByText(/Mx_base = /)).toHaveTextContent('Mx + Qx·h + Mx_add_base')
+    expect(within(guidance).queryByText(/Vertical load excluding foundation and overlying soil weight/)).not.toBeInTheDocument()
+    await expectNoA11yViolations(container)
+  })
+
   it('keeps SVG descriptions unique when more than one diagram is mounted', () => {
     render(<I18nProvider><LoadsDirections /><LoadsDirections /></I18nProvider>)
     const images = screen.getAllByRole('img')

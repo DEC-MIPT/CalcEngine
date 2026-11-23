@@ -16,7 +16,7 @@ function show(sent: SentForm, relatedInputs = reason.related_inputs) {
   vi.stubGlobal('matchMedia', () => ({ matches: true }))
   const draft: Draft = {
     read: () => ({ values: { N: '+0600.000' }, units: { N: 'kN' } }),
-    setValue: vi.fn(), setUnit: vi.fn(), remember: vi.fn(), sent,
+    setValue: vi.fn(), setUnit: vi.fn(), candidates: [], setCandidates: vi.fn(), remember: vi.fn(), sent,
   }
   const state: FormCorrectionState = {
     derivedCorrection: { resultId, reason: { ...reason, related_inputs: relatedInputs } },
