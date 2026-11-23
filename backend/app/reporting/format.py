@@ -128,7 +128,7 @@ def latex_quantity(value: QuantityValue, rule: RoundingRule | None = None) -> st
 
 
 def check_rounding(
-    step: CheckStep, rounding: Mapping[str, RoundingRule]
+    step: CheckStep, rounding: Mapping[str, RoundingRule], default: RoundingRule | None = None,
 ) -> tuple[RoundingRule | None, RoundingRule | None]:
     """Находит правила округления, по которым печатаются стороны проверки.
 
@@ -143,7 +143,7 @@ def check_rounding(
     Returns:
         Правила левой и правой сторон или ``None`` для стороны без округления.
     """
-    left, right = (rounding.get(substitution.symbol) for substitution in step.substitutions[:2])
+    left, right = (rounding.get(substitution.symbol, default) for substitution in step.substitutions[:2])
 
     def shown(value: float, rule: RoundingRule | None) -> float:
         return value if rule is None else rule.apply(value)
@@ -175,6 +175,34 @@ def format_norm_ref(reference: NormRef, *, status: bool = True) -> str:
     return f"{text} (статус: {checked})"
 
 
+def compact_norm_refs(references: tuple[NormRef, ...], *, status: bool) -> tuple[str, ...]:
+    blocks: dict[tuple[str, str] | int, list[NormRef]] = {}
+    for index, ref in enumerate(references):
+        key = ("СП22.13330.2016", ref.edition) if "".join(ref.document.upper().split()) == "СП22.13330.2016" else index
+        blocks.setdefault(key, []).append(ref)
+    result = []
+    for refs in blocks.values():
+        first = refs[0]
+        if len(refs) == 1:
+            result.append(format_norm_ref(first, status=status))
+            continue
+        edition = UNVERIFIED_TEXT if first.edition == "unverified" else first.edition
+        locators = []
+        for ref in refs:
+            clause = UNVERIFIED_TEXT if ref.clause == "unverified" else ref.clause
+            checked = "проверено" if ref.status == "verified" else UNVERIFIED_TEXT
+            locators.append(f"{clause} (статус: {checked})" if status else clause)
+        result.append(f"{first.document}, редакция: {edition}: {'; '.join(dict.fromkeys(locators))}")
+    return tuple(result)
+
+
+def comparison_rule(operator_name: str, left: float, right: float, rule: RoundingRule | None) -> RoundingRule | None:
+    if rule is None:
+        return None
+    holds = _HOLDS[operator_name]
+    return rule if holds(left, right) == holds(rule.apply(left), rule.apply(right)) else None
+
+
 BOUND_WORDS: MappingProxyType[tuple[str, bool], str] = MappingProxyType(
     {("min", True): "не менее", ("min", False): "более", ("max", True): "не более", ("max", False): "менее"}
 )
@@ -184,7 +212,7 @@ ROUNDING_MODES: MappingProxyType[str, str] = MappingProxyType(
 )
 
 
-def format_bound(bound: MethodBound | ValidatedBound, unit: str) -> Line:
+def format_bound(bound: MethodBound | ValidatedBound, unit: str, rule: RoundingRule | None = None) -> Line:
     """Описывает, что допускает граница, в единице входа, который она ограничивает.
 
     Args:
@@ -194,7 +222,7 @@ def format_bound(bound: MethodBound | ValidatedBound, unit: str) -> Line:
     Returns:
         Строка вида «допускается не более 1 м», где предел — формула.
     """
-    limit = latex_quantity(QuantityValue(value=bound.value, unit=unit))
+    limit = latex_quantity(QuantityValue(value=bound.value, unit=unit), rule)
     return (f"допускается {BOUND_WORDS[(bound.kind, bound.inclusive)]} ", Math(limit))
 
 

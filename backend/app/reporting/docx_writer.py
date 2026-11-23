@@ -11,8 +11,11 @@ from app.reporting.format import (
     LATEX_OPERATORS,
     VERDICT_TEXTS,
     check_rounding,
+    compact_norm_refs,
+    comparison_rule,
     format_bound,
     format_norm_ref,
+    format_rounding,
     format_source,
     latex_quantity,
     parameter_source_lines,
@@ -26,7 +29,13 @@ from app.reporting.model import (
     Report,
     TraceSection,
 )
-from app.reporting.symbols import equation, named
+from app.reporting.symbols import (
+    check_expression,
+    equation,
+    math_symbol,
+    named,
+    rationale_line,
+)
 from app.reporting.title_block import add_title_blocks
 from app.schemas.calculation import (
     BoundViolation,
@@ -72,20 +81,33 @@ def _passed(passed: bool) -> str:
     return VERDICT_TEXTS["pass" if passed else "fail"][0]
 
 
-def _comparison(step: CheckStep, rounding: Mapping[str, RoundingRule]) -> Line:
-    left, right = check_rounding(step, rounding)
+def _comparison(step: CheckStep, rounding: Mapping[str, RoundingRule], default: RoundingRule | None) -> Line:
+    left, right = check_rounding(step, rounding, default)
     sides = (
         f"{latex_quantity(step.result, left)} {LATEX_OPERATORS[step.operator]} {latex_quantity(step.right, right)}"
     )
     return (Math(sides), f" — {_passed(step.passed)}")
 
 
-def _sources(references: tuple[NormRef, ...], *, status: bool) -> list[Line]:
-    return [(f"Источник: {format_norm_ref(reference, status=status)}",) for reference in references]
+def _sources(
+    references: tuple[NormRef, ...], *, status: bool, compact: bool = False, overall: bool = False,
+) -> list[Line]:
+    refs = compact_norm_refs(references, status=status) if compact else (
+        format_norm_ref(ref, status=status) for ref in references
+    )
+    heading = "Нормативные ссылки расчёта" if overall else "Источник"
+    return [(f"{heading}: {ref}",) for ref in refs]
 
 
-def _substitutions(step: TraceStep, symbols: Mapping[str, str], rounding: Mapping[str, RoundingRule]) -> Line:
-    first, *rest = (equation(item.symbol, item, symbols, rounding.get(item.symbol)) for item in step.substitutions)
+def _substitutions(
+    step: TraceStep, symbols: Mapping[str, str], rounding: Mapping[str, RoundingRule], default: RoundingRule | None,
+) -> Line:
+    if default is None:
+        items = [equation(item.symbol, item, symbols, rounding.get(item.symbol)) for item in step.substitutions]
+    else:
+        items = [(Math(f"{math_symbol(item.symbol, symbols).latex} = {latex_quantity(item, rounding.get(item.symbol, default))}"),)
+                 for item in step.substitutions]
+    first, *rest = items
     line: Line = ("Подстановка: ", *first)
     for item in rest:
         line += ("; ", *item)
@@ -93,7 +115,8 @@ def _substitutions(step: TraceStep, symbols: Mapping[str, str], rounding: Mappin
 
 
 def step_lines(
-    number: int, step: TraceStep, symbols: Mapping[str, str], rounding: Mapping[str, RoundingRule]
+    number: int, step: TraceStep, symbols: Mapping[str, str], rounding: Mapping[str, RoundingRule],
+    default: RoundingRule | None = None,
 ) -> list[Line]:
     """Собирает строки, которые печатает шаг трассы.
 
@@ -111,51 +134,76 @@ def step_lines(
     Returns:
         Строки шага по порядку.
     """
+    expression = step.expression
+    label = named(step.step_id, symbols)
+    if default is not None:
+        if isinstance(step, CheckStep):
+            expression = check_expression(step, symbols)
+            label = Math(expression)
+        else:
+            label = math_symbol(step.step_id, symbols)
+            if expression == step.step_id:
+                expression = label.latex
     lines: list[Line] = [
-        (f"{number}. {STEP_KINDS[step.kind]} ", named(step.step_id, symbols)),
-        ("Выражение: ", Math(step.expression, breakable=True)),
+        (f"{number}. {STEP_KINDS[step.kind]} ", label),
+        ("Выражение: ", Math(expression, breakable=True)),
     ]
     if step.substitutions:
-        lines.append(_substitutions(step, symbols, rounding))
+        lines.append(_substitutions(step, symbols, rounding, default))
     if isinstance(step, CheckStep):
-        lines.append(("Сравнение: ", *_comparison(step, rounding)))
+        lines.append(("Сравнение: ", *_comparison(step, rounding, default)))
     else:
-        lines.append(("Результат: ", Math(latex_quantity(step.result, rounding.get(step.step_id)))))
+        lines.append(("Результат: ", Math(latex_quantity(step.result, rounding.get(step.step_id, default)))))
     if isinstance(step, EngineerFormulaStep):
+        if default is not None:
+            return lines + [("Обоснование инженерной формулы: ", *rationale_line(step.source.rationale, symbols))]
         return lines + [(f"Источник: {format_source(step.source)}",)]
-    return lines + _sources(step.norm_refs, status=TRACE_NORM_STATUS)
+    return lines + _sources(step.norm_refs, status=TRACE_NORM_STATUS, compact=default is not None)
 
 
-def _violation_lines(violation: BoundViolation, symbols: Mapping[str, str]) -> list[Line]:
+def _violation_lines(
+    violation: BoundViolation, symbols: Mapping[str, str], default: RoundingRule | None,
+) -> list[Line]:
     bound = violation.bound
+    operator = ("ge" if bound.inclusive else "gt") if bound.kind == "min" else ("le" if bound.inclusive else "lt")
+    rule = comparison_rule(operator, violation.value.value, bound.value, default)
     return [
         (
             "Нарушенная граница: ",
-            *equation(bound.quantity, violation.value, symbols),
+            *equation(bound.quantity, violation.value, symbols, rule),
             ", ",
-            *format_bound(bound, violation.value.unit),
+            *format_bound(bound, violation.value.unit, rule),
             ".",
         ),
-        *_sources(bound.source, status=True),
+        *_sources(bound.source, status=True, compact=default is not None),
     ]
 
 
-def derived_violation_lines(violation: DerivedViolation, symbols: Mapping[str, str]) -> list[Line]:
+def derived_violation_lines(
+    violation: DerivedViolation, symbols: Mapping[str, str], default: RoundingRule | None = None,
+    norm_refs: tuple[NormRef, ...] = (),
+) -> list[Line]:
+    rule = comparison_rule(violation.operator, violation.value.value, violation.limit.value, default)
+    source = [(f"Источник: {format_source(violation.source)}",)] if default is None else [
+        (f"Основание отказа (инженерное условие): {violation.source.rationale}",),
+        *_sources(norm_refs, status=True, compact=True, overall=True),
+    ]
     return [
         ("Расчёт отклонён: условие полного контакта подошвы не выполнено. Проверки несущей способности не выполнялись.",),
         (f"Условие: {violation.check_id}; диагностический шаг: {violation.step_id}; определяющий угол: {violation.limiting_corner}.",),
         (
-            "Получено: ", *equation(violation.quantity, violation.value, symbols),
+            "Получено: ", *equation(violation.quantity, violation.value, symbols, rule),
             "; требуется ", Math(LATEX_OPERATORS[violation.operator]), " ",
-            Math(latex_quantity(violation.limit)), ".",
+            Math(latex_quantity(violation.limit, rule)), ".",
         ),
-        (f"Источник: {format_source(violation.source)}",),
+        *source,
         (f"Связанные входы: {', '.join(violation.related_inputs)}.",),
     ]
 
 
 def conclusion_lines(
-    section: ConclusionSection, symbols: Mapping[str, str], rounding: Mapping[str, RoundingRule]
+    section: ConclusionSection, symbols: Mapping[str, str], rounding: Mapping[str, RoundingRule],
+    default: RoundingRule | None = None, norm_refs: tuple[NormRef, ...] = (),
 ) -> list[Line]:
     """Собирает строки заключения: вердикт и то, что его решило.
 
@@ -168,13 +216,14 @@ def conclusion_lines(
         Строки заключения по порядку.
     """
     if section.derived_violation is not None:
-        return derived_violation_lines(section.derived_violation, symbols)
+        return derived_violation_lines(section.derived_violation, symbols, default, norm_refs)
     lines: list[Line] = [(VERDICT_TEXTS[section.verdict][1],)]
     if section.deciding_check is not None:
         check = section.deciding_check
-        lines.append(("Определяющая проверка: ", Math(check.expression), "; ", *_comparison(check, rounding), "."))
+        expression = check.expression if default is None else check_expression(check, symbols)
+        lines.append(("Определяющая проверка: ", Math(expression), "; ", *_comparison(check, rounding, default), "."))
     if section.violation is not None:
-        lines.extend(_violation_lines(section.violation, symbols))
+        lines.extend(_violation_lines(section.violation, symbols, default))
     return lines
 
 
@@ -223,6 +272,7 @@ def _write_inputs(document: DocumentObject, section: InputSection, symbols: Mapp
     fit_table(table)
     for text in section.guidance:
         document.add_paragraph(text)
+    _write_lines(document, list(section.math_guidance))
 
 
 def _write_trace(document: DocumentObject, section: TraceSection, report: Report) -> None:
@@ -231,8 +281,17 @@ def _write_trace(document: DocumentObject, section: TraceSection, report: Report
             "Диагностическая трасса до отказа по условию полного контакта."
             if section.steps else REFUSED_TRACE
         )
+    if report.norm_refs and section.steps and not section.refused:
+        _write_lines(document, _sources(report.norm_refs, status=TRACE_NORM_STATUS, compact=True, overall=True))
     for number, step in enumerate(section.steps, start=1):
-        _write_lines(document, step_lines(number, step, report.symbols, report.rounding))
+        _write_lines(document, step_lines(number, step, report.symbols, report.rounding, report.default_rounding))
+    if report.outputs:
+        document.add_heading("Выходные величины", level=2)
+        _write_lines(document, [
+            (Math(f"{math_symbol(output.quantity, report.symbols).latex} = {latex_quantity(output, output.rounding_rule)}"),
+             f"; {format_rounding(output.rounding_rule)}.")
+            for output in report.outputs
+        ])
 
 
 def render_docx(report: Report) -> bytes:
@@ -261,7 +320,7 @@ def render_docx(report: Report) -> bytes:
             _write_lines(document, accountability_lines(section, report.symbols))
             document.add_paragraph().add_run(RESPONSIBILITY).bold = True
         else:
-            _write_lines(document, conclusion_lines(section, report.symbols, report.rounding))
+            _write_lines(document, conclusion_lines(section, report.symbols, report.rounding, report.default_rounding, report.norm_refs))
             if not ACCOUNTABILITY_SECTION:
                 if section.parameter_source is not None:
                     for text in parameter_source_lines(section.parameter_source):
