@@ -6,7 +6,7 @@ import { NormRefList } from './NormRefList'
 type NormRef = components['schemas']['NormRef']
 type EngineerRule = components['schemas']['EngineerRule']
 
-export function Source({ source }: { source: readonly NormRef[] | EngineerRule }) {
+export function Source({ source, omitEngineerName = false }: { source: readonly NormRef[] | EngineerRule; omitEngineerName?: boolean }) {
   const { t } = useI18n()
   if (Array.isArray(source)) {
     return <NormRefList refs={source} />
@@ -18,9 +18,7 @@ export function Source({ source }: { source: readonly NormRef[] | EngineerRule }
         <UserCheck aria-hidden="true" size={16} />
         {t('source.engineerSet')}
       </span>
-      <p>
-        {t('source.engineer')}: {rule.engineer}
-      </p>
+      {!omitEngineerName && <p>{t('source.engineer')}: {rule.engineer}</p>}
       <p>
         {t('source.rationale')}: {rule.rationale}
       </p>

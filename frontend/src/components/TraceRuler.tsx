@@ -33,6 +33,7 @@ export function TraceRuler({
   reveal = 'none',
   symbols,
   scrollLabel,
+  onStepLink,
 }: {
   steps?: readonly Step[]
   verdict?: Envelope['verdict']
@@ -40,13 +41,15 @@ export function TraceRuler({
   reveal?: StampReveal
   symbols?: ReadonlyMap<string, string>
   scrollLabel?: string
+  onStepLink?: (id: string) => void
 }) {
   const table = useMemo(() => symbols ?? symbolTable(steps), [symbols, steps])
   const playing = playback?.phase === 'playing'
   const dense = scrollLabel !== undefined && steps.length > 16
   const follow = (event: MouseEvent<HTMLAnchorElement>, index: number) => {
     if (playing) flushSync(playback.skip)
-    jumpTo(event, `trace-step-${index}`)
+    const id = `trace-step-${index}`
+    if (jumpTo(event, id)) onStepLink?.(id)
   }
   const ruler = (
     <div

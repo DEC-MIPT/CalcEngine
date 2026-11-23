@@ -92,6 +92,9 @@ test('check explicit weights, inspect stored diagrams and download an ordinary r
   await tick.press('Enter')
   const step = page.locator('[data-step="G_sum"]')
   await expect(step).toBeFocused()
+  await expect(page).toHaveURL(new RegExp(`#trace-step-${index}$`))
+  await expect(step).toContainText("Обоснование: Явные веса")
+  await expect(step.getByText(/Инженер: Аким/)).toHaveCount(0)
   await expect(step.getByText('СП 22.13330.2016', { exact: true })).toHaveCount(1)
   await expect(step).toContainText('таблица 5.4')
   await expect(step).toContainText('формула (5.7)')
@@ -101,6 +104,21 @@ test('check explicit weights, inspect stored diagrams and download an ordinary r
   }
   await noPageOverflow(page)
   await report(page, 'report.docx')
+})
+
+test('open a demo trace fragment directly and reload with the step focused', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  const index = 30
+  const step = page.locator(`#trace-step-${index}`)
+  for (const envelope of [weightsCentralEnvelope, weightsContactRefusalEnvelope]) {
+    await page.goto(`/calculations/${envelope.result_id}#trace-step-${index}`)
+    await expect(step).toBeFocused()
+    await expect(step).toBeInViewport()
+    await expect(step).not.toHaveAttribute('inert')
+    await page.reload()
+    await expect(step).toBeFocused()
+    await expect(step).toBeInViewport()
+  }
 })
 
 test('clicking a pending demo ruler tick finishes playback and opens that step', async ({ page }) => {

@@ -69,9 +69,15 @@ export function DerivedRefusal({
         <dd>{reason.related_inputs.join(', ')}</dd>
       </dl>
       <div>
-        <h3 className="text-sm font-medium">{t(hideEngineerSource ? 'trace.resultNorms' : 'bound.source')}</h3>
-        {hideEngineerSource ? <NormRefList refs={fallbackNormRefs} /> : <Source source={reason.source} />}
+        <h3 className="text-sm font-medium">{t('bound.source')}</h3>
+        <Source source={reason.source} omitEngineerName={hideEngineerSource} />
       </div>
+      {hideEngineerSource && (
+        <div>
+          <h3 className="text-sm font-medium">{t('trace.resultNorms')}</h3>
+          <NormRefList refs={fallbackNormRefs} />
+        </div>
+      )}
       {source && (
         <dl className="grid gap-0.5 text-sm">
           <dt className="text-muted-foreground">{t('source.label')}</dt>

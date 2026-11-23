@@ -16,12 +16,12 @@ const baseKeys = ['Mx_add_base', 'My_add_base']
 const resultantKeys = ['V', 'Mx_base', 'My_base']
 const extrema = ['p', 'p_x_min', 'p_x_max', 'p_y_min', 'p_y_max', 'p_corner_min', 'p_corner_max']
 
-function EvidenceValues({ keys, values, rounding }: { keys: readonly string[]; values: Quantities; rounding?: OutputRounding }) {
+function EvidenceValues({ keys, values, rounding, preserveNegative }: { keys: readonly string[]; values: Quantities; rounding?: OutputRounding; preserveNegative?: boolean }) {
   return <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 text-sm">
     {keys.map((key) => values[key] && (
       <div className="contents" key={key}>
         <dt className="break-words font-mono">{key}</dt>
-        <dd><QuantityText {...values[key]} rounding={rounding?.get(key)} /></dd>
+        <dd><QuantityText {...values[key]} rounding={rounding?.get(key)} preserveNegative={preserveNegative} /></dd>
       </div>
     ))}
   </dl>
@@ -85,11 +85,11 @@ function PressureEvidence({ context, rounding }: { context: Context; rounding?: 
           <tbody>{context.corners.map((corner) => (
             <tr key={corner.name} data-pressure-step={corner.step_id} className="border-t border-border text-center">
               <th scope="row" className="p-1 text-left font-mono">{corner.name}</th>
-              <td><QuantityText {...corner.x} /></td><td><QuantityText {...corner.y} /></td><td><QuantityText {...corner.pressure} rounding={rounding?.get(corner.step_id)} /></td>
+              <td><QuantityText {...corner.x} /></td><td><QuantityText {...corner.y} /></td><td><QuantityText {...corner.pressure} rounding={rounding?.get(corner.step_id)} preserveNegative={diagnostic} /></td>
             </tr>
           ))}</tbody>
         </table>
-        <EvidenceValues keys={extrema} values={context.trace_values} rounding={rounding} />
+        <EvidenceValues keys={extrema} values={context.trace_values} rounding={rounding} preserveNegative={diagnostic} />
       </div>
     </div>
   </section>

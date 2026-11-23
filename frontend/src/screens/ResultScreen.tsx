@@ -1,6 +1,6 @@
 import { ArrowRight } from '@phosphor-icons/react'
-import { useCallback, useMemo } from 'react'
-import { Link, useParams } from 'react-router'
+import { useCallback, useEffect, useMemo } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { api, unwrap, type ApiError } from '@/api/client'
 import type { components } from '@/api/schema'
 import { useRequest } from '@/api/useRequest'
@@ -23,6 +23,7 @@ import { outputRounding } from '@/lib/rounding'
 import { outputLabels } from '@/lib/outputLabels'
 import { symbolTable } from '@/lib/stepSymbol'
 import { useTracePlayback, type PlaybackPhase } from '@/lib/useTracePlayback'
+import { focusAnchor, traceStepAnchor } from '@/lib/jumpTo'
 import { cn } from '@/lib/utils'
 
 type Envelope = components['schemas']['ResultEnvelope']
@@ -64,14 +65,16 @@ function CheckedResult({
   hideEngineerSource: boolean
 }) {
   const { t, language } = useI18n()
-  const playback = useTracePlayback(envelope.result_id, envelope.trace.length)
+  const { hash } = useLocation()
+  const playback = useTracePlayback(envelope.result_id, envelope.trace.length, !hideEngineerSource || !traceStepAnchor(hash, envelope.trace.length))
+  const onStepLink = useDemoStepLink(hideEngineerSource)
   const reveal = stampReveal(playback.phase, envelope)
   const symbols = useMemo(() => symbolTable(envelope.trace, types), [envelope.trace, types])
   const rounding = useMemo(() => outputRounding(envelope.outputs), [envelope.outputs])
   const labels = useMemo(() => outputLabels(types ?? [], language), [types, language])
   return (
     <>
-      <TraceRuler steps={envelope.trace} verdict={envelope.verdict} playback={playback} reveal={reveal} symbols={symbols} scrollLabel={hideEngineerSource ? t('trace.ruler') : undefined} />
+      <TraceRuler steps={envelope.trace} verdict={envelope.verdict} playback={playback} reveal={reveal} symbols={symbols} scrollLabel={hideEngineerSource ? t('trace.ruler') : undefined} onStepLink={onStepLink} />
       <VerdictStamp envelope={envelope} reason={reason} editType={editType} editExample={editExample} reveal={reveal} symbols={symbols} />
       <Outputs outputs={envelope.outputs} reveal={reveal} source={SHOW_ROUNDING_SOURCE} symbols={symbols} labels={labels} />
       <Warnings warnings={envelope.warnings} />
@@ -90,6 +93,11 @@ function CheckedResult({
   )
 }
 
+function useDemoStepLink(demo: boolean) {
+  const navigate = useNavigate()
+  return demo ? (id: string) => void navigate({ hash: `#${id}` }, { replace: true, preventScrollReset: true }) : undefined
+}
+
 function DiagnosticResult({ envelope, reason, editType, editExample, types, hideEngineerSource }: {
   envelope: Envelope
   reason: DerivedReason
@@ -99,11 +107,12 @@ function DiagnosticResult({ envelope, reason, editType, editExample, types, hide
   hideEngineerSource: boolean
 }) {
   const { t } = useI18n()
+  const onStepLink = useDemoStepLink(hideEngineerSource)
   const symbols = useMemo(() => symbolTable(envelope.trace, types), [envelope.trace, types])
   return (
     <>
       {hideEngineerSource && (
-        <TraceRuler steps={envelope.trace} verdict={envelope.verdict} symbols={symbols} scrollLabel={t('trace.ruler')} />
+        <TraceRuler steps={envelope.trace} verdict={envelope.verdict} symbols={symbols} scrollLabel={t('trace.ruler')} onStepLink={onStepLink} />
       )}
       <DerivedRefusal
         reason={reason}
@@ -146,6 +155,17 @@ export function ResultScreen() {
   const outputs = state.status === 'ok' ? state.data.outputs : undefined
   const rounding = useMemo(() => outputs && outputRounding(outputs), [outputs])
 
+  const { hash } = useLocation()
+  const envelope = state.status === 'ok' ? state.data : undefined
+  const hideEngineerSource = envelope?.trace.some((step) => step.step_id === 'G_sum') ?? false
+  const anchor = hideEngineerSource ? traceStepAnchor(hash, envelope?.trace.length ?? 0) : undefined
+  const resultId = envelope?.result_id
+  useEffect(() => {
+    if (!anchor) return
+    const frame = requestAnimationFrame(() => focusAnchor(anchor))
+    return () => cancelAnimationFrame(frame)
+  }, [anchor, resultId])
+
   if (state.status === 'error' && isMissingResult(state.error)) {
     return <NotFoundState subject="result" />
   }
@@ -153,7 +173,6 @@ export function ResultScreen() {
   const editType = submitted?.type ?? null
   const editExample = submitted?.example
   const checked = state.status === 'ok' && state.data.verdict_reason.kind === 'check'
-  const hideEngineerSource = state.status === 'ok' && state.data.trace.some((step) => step.step_id === 'G_sum')
   const showRuler = checked || (hideEngineerSource && state.status === 'ok' && state.data.verdict_reason.kind === 'derived')
   return (
     <>

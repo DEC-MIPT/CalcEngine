@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { http, HttpResponse } from 'msw'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { selectionExhausted, selectionIncomplete, selectionSelected, weightsCentralContext, weightsCentralRequest, weightsContactRefusalEnvelope, weightsCentralEnvelope } from '@/mocks/designFixtures'
+import { selectionExhausted, selectionIncomplete, selectionSelected, weightsCentralContext, weightsCentralRequest, weightsContactRefusalEnvelope, weightsContactRefusalContext, weightsCentralEnvelope } from '@/mocks/designFixtures'
 import { server } from '@/mocks/server'
 import { routes } from '@/routes'
 import { expectNoA11yViolations } from '@/test/axe'
@@ -44,6 +44,24 @@ function add() {
 afterEach(() => vi.unstubAllGlobals())
 
 describe('foundation design tools', () => {
+  it('focuses a direct demo step fragment and updates the URL on ruler activation', async () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: false }))
+    const scroll = vi.fn()
+    Object.defineProperty(Element.prototype, 'scrollIntoView', { configurable: true, value: scroll })
+    try {
+      const { router, container } = open(`/calculations/${weightsCentralEnvelope.result_id}#trace-step-30`)
+      const step = () => container.querySelector('#trace-step-30')
+      await waitFor(() => expect(step()).toHaveFocus())
+      expect(step()).not.toHaveAttribute('inert')
+      expect(scroll).toHaveBeenCalledWith({ block: 'start' })
+      fireEvent.click(screen.getByRole('link', { name: /^1\. / }))
+      await waitFor(() => expect(router.state.location.hash).toBe('#trace-step-0'))
+      expect(container.querySelector('#trace-step-0')).toHaveFocus()
+    } finally {
+      Reflect.deleteProperty(Element.prototype, 'scrollIntoView')
+    }
+  })
+
   it('prefills only the known synthetic example and submits edited quantities normally', async () => {
     vi.stubGlobal('matchMedia', () => ({ matches: true }))
     let posted: unknown
@@ -204,9 +222,22 @@ describe('foundation design tools', () => {
     server.use(http.get(`*/calculations/${weightsContactRefusalEnvelope.result_id}`, () => HttpResponse.json({
       ...weightsContactRefusalEnvelope, verdict_reason: { ...reason, value: { ...reason.value, value: -0.001 } },
     })))
+    const context = weightsContactRefusalContext.context
+    server.use(http.get('*/foundation-calculations/:id/context', () => HttpResponse.json({
+      ...weightsContactRefusalContext,
+      context: {
+        ...context,
+        corners: context.corners.map((corner) => corner.name === reason.limiting_corner
+          ? { ...corner, pressure: { ...corner.pressure, value: -0.001 } } : corner),
+        trace_values: { ...context.trace_values, p_corner_min: { value: -0.001, unit: 'kPa' } },
+      },
+    })))
     const { container } = open(`/calculations/${weightsContactRefusalEnvelope.result_id}`)
     const refusal = await screen.findByRole('region', { name: /условие полного контакта не выполнено/ })
     expect(refusal).toHaveTextContent('-0,001 кПа')
+    expect(refusal).toHaveTextContent(reason.source.rationale)
+    expect(refusal).not.toHaveTextContent(`Инженер: ${reason.source.engineer}`)
+    expect(await screen.findByRole('table', { name: 'Давления в углах' })).toHaveTextContent('-0,001 кПа')
     expect(screen.getByRole('region', { name: 'Диагностическая последовательность' })).toHaveAttribute('data-playback', 'idle')
     expect(container.querySelector('[data-ruler-verdict="refused"]')).toBeInTheDocument()
   })

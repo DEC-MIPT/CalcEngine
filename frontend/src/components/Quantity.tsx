@@ -11,19 +11,23 @@ export function QuantityText({
   unit,
   unitClassName,
   rounding,
+  preserveNegative = false,
 }: {
   value: number
   unit: string
   unitClassName?: string
   rounding?: RoundingRule | null
+  preserveNegative?: boolean
 }) {
   const { language, formatNumber } = useI18n()
   const defaultRounding = useResultRounding()
   const rule = rounding === null ? undefined : rounding ?? defaultRounding
+  const rounded = rule ? roundValue(value, rule) : value
+  const showRounded = rule && !(preserveNegative && value < 0 && rounded === 0)
   const label = unitLabel(unit, language)
   return (
     <>
-      {rule ? formatNumber(roundValue(value, rule), rule.decimals) : formatNumber(value)}
+      {showRounded ? formatNumber(rounded, rule.decimals) : formatNumber(value)}
       {label && <> {unitClassName ? <span className={unitClassName}>{label}</span> : label}</>}
     </>
   )

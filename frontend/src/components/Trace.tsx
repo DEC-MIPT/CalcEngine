@@ -189,16 +189,19 @@ function TraceStep({
             <Value quantity={step.result} rounding={rounding.get(step.step_id)} />
           </p>
         )}
-        {step.kind === 'engineer_formula' && !hideEngineerSource ? (
-          <div>
-            <h4 className="text-sm font-medium">{t('trace.engineerSource')}</h4>
-            <Source source={step.source} />
-          </div>
-        ) : step.kind === 'engineer_formula' ? (
-          <div>
-            <h4 className="text-sm font-medium">{t('trace.resultNorms')}</h4>
-            <NormRefList refs={fallbackNormRefs} showStatus={normStatus} />
-          </div>
+        {step.kind === 'engineer_formula' ? (
+          <>
+            <div>
+              <h4 className="text-sm font-medium">{t('trace.engineerSource')}</h4>
+              <Source source={step.source} omitEngineerName={hideEngineerSource} />
+            </div>
+            {hideEngineerSource && (
+              <div>
+                <h4 className="text-sm font-medium">{t('trace.resultNorms')}</h4>
+                <NormRefList refs={fallbackNormRefs} showStatus={normStatus} />
+              </div>
+            )}
+          </>
         ) : step.norm_refs.length > 0 && (
           <div>
             <h4 className="text-sm font-medium">{t('trace.norms')}</h4>
