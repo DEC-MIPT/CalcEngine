@@ -34,6 +34,46 @@ async function report(page: Page, filename: string) {
   expect((await download).suggestedFilename()).toBe(filename)
 }
 
+test('opens the editable synthetic example and submits it through the ordinary calculation API', async ({ page }) => {
+  await page.goto('/')
+  const ordinary = page.getByRole('link', { name: 'Расчет фундамента мелкого заложения (демо)', exact: true })
+  const example = page.getByRole('link', { name: /демо.*с примером/ })
+  await ordinary.press('Enter')
+  const b = page.locator('#field-b')
+  await expect(b).toHaveValue('')
+  await b.fill('1.75')
+  await page.goBack()
+
+  const submissions: unknown[] = []
+  page.on('request', (request) => {
+    if (request.method() === 'POST' && new URL(request.url()).pathname === '/calculations') submissions.push(request.postDataJSON())
+  })
+  await example.press('Enter')
+  await expect(page.getByText(/Предзаполнены редактируемые синтетические данные/)).toContainText('weights-C')
+  for (const [name, { value, unit }] of Object.entries(weightsCentralRequest.inputs)) {
+    const field = page.locator(`#field-${name}`)
+    await expect(field).toHaveValue(String(value))
+    const units = field.locator('..').locator('select')
+    if (await units.count()) await expect(units).toHaveValue(unit)
+  }
+  expect(submissions).toHaveLength(0)
+  await noPageOverflow(page)
+  await page.getByRole('button', { name: 'Рассчитать' }).press('Enter')
+  await expect(page.getByRole('heading', { name: 'Эпюра давлений' })).toBeVisible()
+  expect(submissions).toEqual([weightsCentralRequest])
+  await page.getByRole('link', { name: 'Изменить исходные данные' }).press('Enter')
+  await expect(page).toHaveURL(/example=weights-C/)
+  await expect(b).toHaveValue('2')
+  await b.fill('2.25')
+  const registry = page.getByRole('link', { name: 'Типы расчётов', exact: true })
+  await registry.press('Enter')
+  await ordinary.press('Enter')
+  await expect(b).toHaveValue('1.75')
+  await registry.press('Enter')
+  await example.press('Enter')
+  await expect(b).toHaveValue('2.25')
+})
+
 test('check explicit weights, inspect stored diagrams and download an ordinary report', async ({ page }) => {
   await page.goto(weights)
   await page.locator('#field-G_fund').waitFor()

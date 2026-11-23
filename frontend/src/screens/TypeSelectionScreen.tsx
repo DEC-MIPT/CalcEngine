@@ -1,5 +1,5 @@
 import { ArrowRight } from '@phosphor-icons/react'
-import type { ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { api, unwrap } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -10,7 +10,7 @@ import { ErrorState, LoadingState } from '@/components/RequestStates'
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n/context'
 import { unitLabel } from '@/i18n/units'
-import { LOADS_TYPE, WEIGHTS_TYPE } from '@/lib/foundationDesign'
+import { calculationFormUrl, LOADS_TYPE, WEIGHTS_EXAMPLE, WEIGHTS_TYPE } from '@/lib/foundationDesign'
 import { typeName } from '@/lib/typeName'
 
 type CalculationType = components['schemas']['CalculationTypeView']
@@ -54,16 +54,16 @@ function Notice({ children }: { children: ReactNode }) {
   )
 }
 
-function TypeRow({ type }: { type: CalculationType }) {
+function TypeRow({ type, example }: { type: CalculationType; example?: typeof WEIGHTS_EXAMPLE }) {
   const { language, t } = useI18n()
   return (
     <tr className="registry-row group relative not-last:border-b not-last:border-border">
       <td className="px-3 py-4 sm:px-4 sm:py-5">
         <Link
-          to={`/calculations/new?type=${encodeURIComponent(type.name)}`}
+          to={calculationFormUrl(type.name, example)}
           className="font-heading text-xl font-semibold text-foreground no-underline group-hover:text-primary-foreground group-has-[a:focus-visible]:text-primary-foreground after:absolute after:inset-0 focus-visible:outline-offset-[-4px] focus-visible:outline-primary-foreground sm:text-3xl"
         >
-          {type.name === WEIGHTS_TYPE ? t('types.foundationDemo') : typeName(type, language)}
+          {type.name === WEIGHTS_TYPE ? t(example ? 'types.foundationExample' : 'types.foundationDemo') : typeName(type, language)}
         </Link>
         <span
           aria-hidden="true"
@@ -139,7 +139,12 @@ export function TypeSelectionScreen() {
                 </div>
               </Notice>
             )}
-            {visibleTypes.map((type) => <TypeRow key={type.name} type={type} />)}
+            {visibleTypes.map((type) => (
+              <Fragment key={type.name}>
+                <TypeRow type={type} />
+                {type.name === WEIGHTS_TYPE && <TypeRow type={type} example={WEIGHTS_EXAMPLE} />}
+              </Fragment>
+            ))}
           </Registry>
         )}
       </div>

@@ -17,7 +17,7 @@ import { EditInputsLink } from '@/components/EditInputsLink'
 import { buttonClass, secondaryButtonClass } from '@/components/ui/button'
 import { VerdictStamp, type StampReveal } from '@/components/VerdictStamp'
 import { Warnings } from '@/components/Warnings'
-import { useDraft } from '@/form/draftContext'
+import { useDraft, type SentForm } from '@/form/draftContext'
 import { useI18n } from '@/i18n/context'
 import { outputRounding } from '@/lib/rounding'
 import { outputLabels } from '@/lib/outputLabels'
@@ -52,12 +52,14 @@ function CheckedResult({
   envelope,
   reason,
   editType,
+  editExample,
   types,
   hideEngineerSource,
 }: {
   envelope: Envelope
   reason: CheckReason
   editType: string | null
+  editExample?: SentForm['example']
   types: readonly CalculationType[] | undefined
   hideEngineerSource: boolean
 }) {
@@ -70,7 +72,7 @@ function CheckedResult({
   return (
     <>
       <TraceRuler steps={envelope.trace} verdict={envelope.verdict} playback={playback} reveal={reveal} symbols={symbols} scrollLabel={hideEngineerSource ? t('trace.ruler') : undefined} />
-      <VerdictStamp envelope={envelope} reason={reason} editType={editType} reveal={reveal} symbols={symbols} />
+      <VerdictStamp envelope={envelope} reason={reason} editType={editType} editExample={editExample} reveal={reveal} symbols={symbols} />
       <Outputs outputs={envelope.outputs} reveal={reveal} source={SHOW_ROUNDING_SOURCE} symbols={symbols} labels={labels} />
       <Warnings warnings={envelope.warnings} />
       <StoredChecks steps={envelope.trace} reason={reason} rounding={rounding} reveal={reveal} normStatus={SHOW_NORM_STATUS} labels={labels} symbols={symbols} />
@@ -88,10 +90,11 @@ function CheckedResult({
   )
 }
 
-function DiagnosticResult({ envelope, reason, editType, types, hideEngineerSource }: {
+function DiagnosticResult({ envelope, reason, editType, editExample, types, hideEngineerSource }: {
   envelope: Envelope
   reason: DerivedReason
   editType: string | null
+  editExample?: SentForm['example']
   types: readonly CalculationType[] | undefined
   hideEngineerSource: boolean
 }) {
@@ -109,7 +112,7 @@ function DiagnosticResult({ envelope, reason, editType, types, hideEngineerSourc
         fallbackNormRefs={envelope.norm_refs}
       />
       <p className="mt-4 flex flex-wrap gap-3">
-        {editType && <EditInputsLink type={editType} derivedCorrection={{ resultId: envelope.result_id, reason }} primary />}
+        {editType && <EditInputsLink type={editType} example={editExample} derivedCorrection={{ resultId: envelope.result_id, reason }} primary />}
         <Link to={`/calculations/${envelope.result_id}/report`} className={cn(buttonClass, editType && secondaryButtonClass)}>
           {t('result.toReport')}
           <ArrowRight aria-hidden="true" size={18} />
@@ -146,7 +149,9 @@ export function ResultScreen() {
   if (state.status === 'error' && isMissingResult(state.error)) {
     return <NotFoundState subject="result" />
   }
-  const editType = state.status === 'ok' && sent?.resultId === state.data.result_id ? sent.type : null
+  const submitted = state.status === 'ok' && sent?.resultId === state.data.result_id ? sent : null
+  const editType = submitted?.type ?? null
+  const editExample = submitted?.example
   const checked = state.status === 'ok' && state.data.verdict_reason.kind === 'check'
   const hideEngineerSource = state.status === 'ok' && state.data.trace.some((step) => step.step_id === 'G_sum')
   const showRuler = checked || (hideEngineerSource && state.status === 'ok' && state.data.verdict_reason.kind === 'derived')
@@ -162,7 +167,7 @@ export function ResultScreen() {
             <>
               <Refusal reason={state.data.verdict_reason} source={state.data.parameter_source} />
               <p className="mt-4 flex flex-wrap gap-3">
-                {editType && <EditInputsLink type={editType} bound={state.data.verdict_reason.bound} primary />}
+                {editType && <EditInputsLink type={editType} example={editExample} bound={state.data.verdict_reason.bound} primary />}
                 <Link
                   to={`/calculations/${state.data.result_id}/report`}
                   className={cn(buttonClass, editType && secondaryButtonClass)}
@@ -178,6 +183,7 @@ export function ResultScreen() {
               envelope={state.data}
               reason={state.data.verdict_reason}
               editType={editType}
+              editExample={editExample}
               types={typesState.status === 'ok' ? typesState.data : undefined}
               hideEngineerSource={hideEngineerSource}
             />
@@ -187,6 +193,7 @@ export function ResultScreen() {
               envelope={state.data}
               reason={state.data.verdict_reason}
               editType={editType}
+              editExample={editExample}
               types={typesState.status === 'ok' ? typesState.data : undefined}
               hideEngineerSource={hideEngineerSource}
             />

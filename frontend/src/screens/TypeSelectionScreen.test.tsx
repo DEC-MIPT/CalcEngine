@@ -25,10 +25,11 @@ describe('TypeSelectionScreen', () => {
 
     const demo = await screen.findByRole('link', { name: 'Расчет фундамента мелкого заложения (демо)' })
     const table = within(screen.getByRole('table'))
-    expect(table.getAllByRole('row')).toHaveLength(3)
+    expect(table.getAllByRole('row')).toHaveLength(4)
     expect(table.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
       '/calculations/new?type=foundations_shallow_r',
       '/calculations/new?type=foundations_shallow_weights',
+      '/calculations/new?type=foundations_shallow_weights&example=weights-C',
     ])
     expect(table.queryByText('foundations_shallow_loads')).not.toBeInTheDocument()
     await expectNoA11yViolations(container)

@@ -10,6 +10,7 @@ import { useResultRounding } from '@/lib/resultDisplay'
 import { checkPresentation } from '@/lib/checkPresentation'
 import { useFocusOnMount } from '@/lib/useFocusOnMount'
 import { Checking } from './Checking'
+import type { SentForm } from '@/form/draftContext'
 import { EditInputsLink } from './EditInputsLink'
 import { Formula } from './Formula'
 import { QuantityText } from './Quantity'
@@ -55,12 +56,14 @@ export function VerdictStamp({
   envelope,
   reason,
   editType = null,
+  editExample,
   reveal = 'none',
   symbols,
 }: {
   envelope: Envelope
   reason: CheckReason
   editType?: string | null
+  editExample?: SentForm['example']
   reveal?: StampReveal
   symbols?: ReadonlyMap<string, string>
 }) {
@@ -117,7 +120,7 @@ export function VerdictStamp({
           {t('result.toReport')}
           <ArrowRight aria-hidden="true" size={18} />
         </Link>
-        {editType && <EditInputsLink type={editType} primary={false} />}
+        {editType && <EditInputsLink type={editType} example={editExample} primary={false} />}
       </div>
       <dl className={`col-span-full grid min-w-0 border-t text-sm sm:grid-cols-3 ${tone}`}>
         {(

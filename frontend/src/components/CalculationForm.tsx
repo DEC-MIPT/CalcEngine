@@ -10,7 +10,8 @@ import { unitLabel } from '@/i18n/units'
 import { prefersReducedMotion, withMinimumDuration } from '@/lib/motion'
 import { toBaseUnit } from '@/lib/unitFactors'
 import { parseValue, type ParseError } from '@/form/parseValue'
-import { CANDIDATE_LIMIT, LOADS_TYPE, selectionPolicy, WEIGHTS_TYPE } from '@/lib/foundationDesign'
+import { CANDIDATE_LIMIT, LOADS_TYPE, selectionPolicy, WEIGHTS_EXAMPLE, WEIGHTS_TYPE } from '@/lib/foundationDesign'
+import { foundationExampleKey } from '@/form/foundationExample'
 import { useDraft } from '@/form/draftContext'
 import type { FormCorrectionState } from '@/form/correction'
 import { mapFieldErrors } from '@/form/serverErrors'
@@ -168,7 +169,7 @@ function Field({ input, value, unit, error, bound, derived, locked, index, rowCl
   )
 }
 
-export function CalculationForm({ type, searching: selectionRequested = false }: { type: CalculationType; searching?: boolean }) {
+export function CalculationForm({ type, searching: selectionRequested = false, example }: { type: CalculationType; searching?: boolean; example?: typeof WEIGHTS_EXAMPLE }) {
   const explicit = type.name === WEIGHTS_TYPE
   const foundation = explicit || type.name === LOADS_TYPE
   const rowClass = foundation ? foundationRow : row
@@ -178,7 +179,8 @@ export function CalculationForm({ type, searching: selectionRequested = false }:
   const navigate = useNavigate()
   const draft = useDraft()
   const candidateRows = draft.candidates
-  const { values, units } = draft.read(type.name)
+  const draftKey = example ? foundationExampleKey : type.name
+  const { values, units } = draft.read(draftKey)
   const location = useLocation()
   const routeState = location.state as FormCorrectionState | null
   const [bound, setBound] = useState<BoundShape | null>(
@@ -186,7 +188,7 @@ export function CalculationForm({ type, searching: selectionRequested = false }:
   )
   const [derivedCorrection, setDerivedCorrection] = useState(() => {
     const correction = routeState?.derivedCorrection
-    return correction && draft.sent?.resultId === correction.resultId && draft.sent.type === type.name ? correction : null
+    return correction && draft.sent?.resultId === correction.resultId && draft.sent.type === type.name && draft.sent.example === example ? correction : null
   })
   const correctionInput = derivedCorrection?.reason.related_inputs.find((name) => type.inputs.some((input) => input.name === name))
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -282,7 +284,7 @@ export function CalculationForm({ type, searching: selectionRequested = false }:
     inFlight.current = false
     setSubmitting(false)
     if (result.ok) {
-      draft.remember(result.data.result_id, type.name)
+      draft.remember(result.data.result_id, type.name, example)
       void navigate(`/calculations/${result.data.result_id}`)
     } else if (result.error.kind === 'api' && result.error.status === 422) {
       const mapped = mapFieldErrors(
@@ -339,7 +341,7 @@ export function CalculationForm({ type, searching: selectionRequested = false }:
   }
 
   function change(name: string, text: string) {
-    draft.setValue(type.name, name, text)
+    draft.setValue(draftKey, name, text)
     clearCorrection(name)
     setErrors((current) => Object.fromEntries(Object.entries(current).filter(([key]) => key !== name)))
   }
@@ -393,7 +395,7 @@ export function CalculationForm({ type, searching: selectionRequested = false }:
             locked={submitting}
             onValue={(event) => change(input.name, event.target.value)}
             onUnit={(event) => {
-              draft.setUnit(type.name, input.name, event.target.value)
+              draft.setUnit(draftKey, input.name, event.target.value)
               clearCorrection(input.name)
             }}
           />

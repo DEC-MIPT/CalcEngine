@@ -44,6 +44,31 @@ function add() {
 afterEach(() => vi.unstubAllGlobals())
 
 describe('foundation design tools', () => {
+  it('prefills only the known synthetic example and submits edited quantities normally', async () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: true }))
+    let posted: unknown
+    server.use(http.post('*/calculations', async ({ request }) => {
+      posted = await request.json()
+      return HttpResponse.json(weightsCentralEnvelope, { status: 201 })
+    }))
+    const { router } = open(`${explicitPath}&example=weights-C`)
+    await screen.findByText('weights-C')
+    for (const [name, quantity] of Object.entries(weightsCentralRequest.inputs)) {
+      expect(field(`field-${name}`)).toHaveValue(String(quantity.value))
+    }
+    expect(posted).toBeUndefined()
+    fillInput('field-N', '610')
+    fireEvent.click(screen.getByRole('button', { name: 'Рассчитать' }))
+    const edit = await screen.findByRole('link', { name: 'Изменить исходные данные' })
+    expect(posted).toEqual({ ...weightsCentralRequest, inputs: { ...weightsCentralRequest.inputs, N: { value: 610, unit: 'kN' } } })
+    expect(edit).toHaveAttribute('href', `${explicitPath}&example=weights-C`)
+    fireEvent.click(edit)
+    await screen.findByText('weights-C')
+    expect(field('field-N')).toHaveValue('610')
+    await act(() => router.navigate(`${explicitPath}&example=unknown`))
+    expect(field('field-N')).toHaveValue('')
+  })
+
   it('switches to explicit weights and submits the typed scalar contract', async () => {
     vi.stubGlobal('matchMedia', () => ({ matches: true }))
     let posted: unknown

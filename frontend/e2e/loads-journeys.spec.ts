@@ -168,7 +168,7 @@ test('loads type, fifteen fields, result and report request remain reachable wit
 
   await page.goto('/')
   const demo = 'a[href="/calculations/new?type=foundations_shallow_weights"]'
-  await expect(page.getByRole('link', { name: 'Расчет фундамента мелкого заложения (демо)' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Расчет фундамента мелкого заложения (демо)', exact: true })).toBeVisible()
   await expect(page.locator(`a[href="${FORM}"]`)).toHaveCount(0)
   await tabTo(demo)
   await page.keyboard.press('Enter')

@@ -131,7 +131,7 @@ test('the submitted report form to the issued stamp (8.9)', async ({ page }) => 
 test('demo type selection to the explicit-weight form uses the same p95 policy', async ({ page }) => {
   const p95 = await measure(page, async (current) => {
     await current.goto('/')
-    const demo = current.getByRole('link', { name: 'Расчет фундамента мелкого заложения (демо)' })
+    const demo = current.getByRole('link', { name: 'Расчет фундамента мелкого заложения (демо)', exact: true })
     await demo.waitFor()
     await current.evaluate(() => window.__watch('demo-form', '#field-G_fund'))
     await demo.click()

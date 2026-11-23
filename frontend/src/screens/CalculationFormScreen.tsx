@@ -4,7 +4,7 @@ import { useRequest } from '@/api/useRequest'
 import { CalculationForm } from '@/components/CalculationForm'
 import { ErrorState, LoadingState, NotFoundState } from '@/components/RequestStates'
 import { useI18n } from '@/i18n/context'
-import { LOADS_TYPE, WEIGHTS_TYPE } from '@/lib/foundationDesign'
+import { LOADS_TYPE, WEIGHTS_EXAMPLE, WEIGHTS_TYPE } from '@/lib/foundationDesign'
 import { typeName } from '@/lib/typeName'
 
 const loadTypes = () => unwrap(api.GET('/calculation-types'))
@@ -16,12 +16,13 @@ export function CalculationFormScreen() {
   const { state, retry } = useRequest(loadTypes)
 
   const type = state.status === 'ok' ? state.data.find((candidate) => candidate.name === name) : undefined
+  const example = name === WEIGHTS_TYPE && params.get('example') === WEIGHTS_EXAMPLE ? WEIGHTS_EXAMPLE : undefined
   const searching = name === LOADS_TYPE && params.get('task') === 'selection'
   const otherType = name === WEIGHTS_TYPE ? LOADS_TYPE : WEIGHTS_TYPE
   const switchable = state.status === 'ok' && (name === LOADS_TYPE || name === WEIGHTS_TYPE) && state.data.some((entry) => entry.name === otherType)
   if (state.status === 'ok' && !type) return <NotFoundState subject="type" />
 
-  const title = name === WEIGHTS_TYPE ? t('types.foundationDemo')
+  const title = name === WEIGHTS_TYPE ? t(example ? 'types.foundationExample' : 'types.foundationDemo')
     : name === LOADS_TYPE ? t(searching ? 'foundation.search' : 'foundation.averaged')
       : type && typeName(type, language)
   return (
@@ -43,7 +44,8 @@ export function CalculationFormScreen() {
             </nav>
           )}
           {name === WEIGHTS_TYPE && <p className="mb-5 text-sm">{t('foundation.searchAveraged')}</p>}
-          <CalculationForm key={`${type.name}:${String(searching)}`} type={type} searching={searching} />
+          {example && <p className="mb-5 text-sm">{t('form.foundationExample')} <code>{example}</code>.</p>}
+          <CalculationForm key={`${type.name}:${String(searching)}:${example ?? ''}`} type={type} searching={searching} example={example} />
         </>
       )}
     </>
