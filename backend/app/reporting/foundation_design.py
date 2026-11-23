@@ -14,14 +14,18 @@ from app.reporting.layout import apply_sheet, fit_table
 from app.reporting.model import ConclusionSection, Report, build_report
 from app.reporting.symbols import math_symbol
 from app.reporting.title_block import add_title_blocks
-from app.schemas.calculation import CalculationTypeContract, QuantityValue
+from app.schemas.calculation import CalculationTypeContract, QuantityValue, RoundingRule
 from app.schemas.foundation_design import FoundationContext, FoundationSelectionResult
 from app.schemas.report import ReportRequest
 
 
+def _pressure_rule(value: float, rule: RoundingRule | None) -> RoundingRule | None:
+    return None if rule is not None and value < 0 and rule.apply(value) == 0 else rule
+
+
 def _quantities(
     document: DocumentObject, values: Mapping[str, QuantityValue], *,
-    report: Report | None = None, origin: str = "",
+    report: Report | None = None, origin: str = "", diagnostic: bool = False,
 ) -> None:
     table = document.add_table(rows=1, cols=2)
     table.style = "Table Grid"
@@ -35,6 +39,8 @@ def _quantities(
         else:
             write_line(row[0].paragraphs[0], (math_symbol(name, report.symbols),))
             rule = report.rounding.get(name, report.default_rounding) if origin == "trace:" else report.default_rounding
+            if diagnostic and value.unit == "kPa":
+                rule = _pressure_rule(value.value, rule)
             write_line(row[1].paragraphs[0], (Math(latex_quantity(value, rule)),))
     fit_table(table)
 
@@ -76,7 +82,7 @@ def append_foundation_context(
     if stored_steps or report is None:
         if report is not None:
             document.add_heading("Величины по шагам расчёта", level=3)
-        _quantities(document, stored_steps, report=report, origin="trace:")
+        _quantities(document, stored_steps, report=report, origin="trace:", diagnostic=context.pressure_state == "diagnostic")
     if context.pressure_state == "unavailable":
         document.add_paragraph("Эпюра недоступна: угловые давления отсутствуют в сохранённой трассе.")
         return
@@ -94,6 +100,8 @@ def append_foundation_context(
             else:
                 rule = (report.rounding.get(corner.step_id, report.default_rounding)
                         if index == 3 else report.default_rounding)
+                if index == 3 and context.pressure_state == "diagnostic":
+                    rule = _pressure_rule(value.value, rule)
                 number = latex_quantity(value.model_copy(update={"unit": "1"}), rule)
                 write_line(cells[index].paragraphs[0], (Math(number),))
     fit_table(table)

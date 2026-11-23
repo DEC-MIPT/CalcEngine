@@ -270,6 +270,24 @@ def test_explicit_report_refusal_has_diagnostic_values_but_no_output_section(cli
     assert '0,00' in ''.join(t.text or '' for t in reason._p.iter(qn('m:t')))
 
 
+
+def test_explicit_report_keeps_small_negative_corner_pressure_in_office_math(client):
+    example = json.loads((Path(__file__).parent / 'fixtures/foundations_weights_references.json').read_text())[0]
+    inputs = example['inputs'] | {'Mx': {'value': 240.002, 'unit': 'kN*m'}}
+    result = client.post('/calculations', json={'calculation_type': 'foundations_shallow_weights', 'inputs': inputs}).json()
+    reason = result['verdict_reason']
+    assert reason['kind'] == 'derived'
+    assert -0.005 < reason['value']['value'] < 0
+    response = client.post(f"/calculations/{result['result_id']}/report", json=REPORT)
+    assert response.status_code == 200
+    document = Document(BytesIO(response.content))
+    corner = next(row for row in document.tables[-1].rows if row.cells[0].text == reason['limiting_corner'])
+    assert corner.cells[3]._tc.xpath('.//m:oMath')
+    pressure = ''.join(t.text or '' for t in corner.cells[3]._tc.iter(qn('m:t')))
+    assert float(pressure.replace('−', '-').replace(',', '.')) == reason['value']['value']
+    conclusion = next(p for p in document.paragraphs if p.text.startswith('Получено:'))
+    assert pressure in ''.join(t.text or '' for t in conclusion._p.iter(qn('m:t')))
+
 def test_historical_report_stays_usable_without_context(client, resources):
     result = client.post('/calculations', json={'calculation_type': C['calculation_type'], 'inputs': C['inputs']}).json()
     with resources[2]() as session:
