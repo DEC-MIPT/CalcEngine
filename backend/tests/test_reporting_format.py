@@ -1,8 +1,12 @@
 import pytest
+from docx import Document
+from docx.oxml.ns import qn
 
+from app.reporting.docx_writer import step_lines, write_line
 from app.reporting.format import (
     UNIT_DESIGNATIONS,
     check_rounding,
+    compact_norm_refs,
     format_norm_ref,
     format_number,
     format_parameter_source,
@@ -102,6 +106,40 @@ def test_a_check_side_that_is_an_output_follows_its_rule() -> None:
 
 def test_a_check_prints_unrounded_when_rounding_would_contradict_its_outcome() -> None:
     assert check_rounding(check(4.996, 4.999, True), {"y": HUNDREDTHS}) == (None, None)
+
+
+def test_demo_comparison_preserves_output_precedence_and_keeps_decisive_precision() -> None:
+    thousandths = RoundingRule(decimals=3, mode="half_even")
+    assert check_rounding(check(3.75, 4.25, True), {"y": thousandths}, HUNDREDTHS) == (thousandths, HUNDREDTHS)
+    assert check_rounding(check(4.001, 4, False), {}, HUNDREDTHS) == (None, None)
+
+
+@pytest.mark.parametrize(("step", "rules", "expected"), [
+    (check(2.675, 4, True), {}, "2,68 кПа≤4,00 кПа"),
+    (check(3.75, 4.25, True), {"y": RoundingRule(decimals=3, mode="half_even")}, "3,750 кПа≤4,25 кПа"),
+    (check(4.001, 4, False), {}, "4,001 кПа≤4 кПа"),
+])
+def test_demo_docx_comparison_is_office_math_with_correct_precision(
+    step: CheckStep, rules: dict[str, RoundingRule], expected: str,
+) -> None:
+    lines = step_lines(1, step, {}, rules, HUNDREDTHS)
+    paragraph = Document().add_paragraph()
+    write_line(paragraph, next(line for line in lines if line[0] == "Сравнение: "))
+    assert paragraph._p.xpath("./m:oMath")
+    math = "".join(node.text or "" for node in paragraph._p.iter(qn("m:t"))).replace("\xa0", " ")
+    assert math == expected
+
+
+def test_compact_sp22_refs_keep_distinct_editions_and_statuses() -> None:
+    table = NormRef(document="СП 22.13330.2016", edition="2016", clause="таблица 5.4",
+                    status="verified", provenance="human-verified")
+    formula = NormRef(document=table.document, edition=table.edition, clause="unverified",
+                      status="unverified", provenance="machine-extracted")
+    other_edition = formula.model_copy(update={"edition": "unverified"})
+    assert compact_norm_refs((table, formula, table, other_edition, UNVERIFIED), status=True) == (
+        "СП 22.13330.2016, редакция: 2016: таблица 5.4 (статус: проверено); не проверено (статус: не проверено)",
+        format_norm_ref(other_edition), format_norm_ref(UNVERIFIED),
+    )
 
 
 def test_every_unit_of_the_vocabulary_has_a_russian_designation() -> None:

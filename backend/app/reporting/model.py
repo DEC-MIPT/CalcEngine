@@ -4,12 +4,15 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.exceptions import InputValidationError
+from app.reporting.formula import Line, Math
 from app.reporting.symbols import symbol_table
 from app.schemas.calculation import (
     BoundViolation,
     CalculationTypeContract,
     CheckStep,
     DerivedViolation,
+    NormRef,
+    OutputValue,
     ParameterSourceInfo,
     QuantityValue,
     ResultEnvelope,
@@ -34,6 +37,7 @@ class InputSection(_Section):
     kind: Literal["inputs"] = "inputs"
     rows: tuple[InputRow, ...]
     guidance: tuple[str, ...] = ()
+    math_guidance: tuple[Line, ...] = ()
 
 
 class TraceSection(_Section):
@@ -83,6 +87,9 @@ class Report(_Section):
     body: tuple[BodySection, ...]
     symbols: Mapping[str, str]
     rounding: Mapping[str, RoundingRule]
+    default_rounding: RoundingRule | None = None
+    norm_refs: tuple[NormRef, ...] = ()
+    outputs: tuple[OutputValue, ...] = ()
 
 
 def _input_rows(
@@ -149,6 +156,7 @@ def build_report(
     Returns:
         Модель отчёта.
     """
+    explicit = contract.name == "foundations_shallow_weights"
     return Report(
         request=request,
         body=(
@@ -159,12 +167,15 @@ def build_report(
                     "Моменты на подошве: Mx+Qx*h и My+Qy*h; знаки сохраняются, вклады могут компенсироваться.",
                     "N не включает собственный вес фундамента и грунта. Этот вес учитывается один раз.",
                     "d задаёт толщину для собственного веса, h расстояние до плоскости приложения нагрузок, d_1 подготовленную глубину для R. Эти величины независимы.",
-                ) if contract.name == "foundations_shallow_loads" else (
-                    "Направления изменения давления: x=b, y=l; знаки моментов и поперечных сил сохраняются.",
-                    "Нагрузки N, Mx, My, Qx, Qy заданы на верхнем срезе; плечо до подошвы h.",
-                    "Полная вертикальная сила на подошве: N_base=N+G_fund+G_soil+G_other. N не включает эти веса; усреднённая добавка gamma_mt*d не используется.",
-                    "Mx_base=Mx+Qx*h+Mx_add_base; My_base=My+Qy*h+My_add_base. Дополнительные моменты уже приведены к подошве.",
-                    "Веса заданы для одной фиксированной геометрии; перенос на другие размеры при подборе не допускается.",
+                ) if contract.name == "foundations_shallow_loads" else (),
+                math_guidance=(
+                    ("Направления изменения давления: ", Math("x=b"), ", ", Math("y=l"), ". Знаки нагрузок сохраняются."),
+                    ("Нагрузки ", Math("N, M_x, M_y, Q_x, Q_y"), " заданы на верхнем срезе; плечо до подошвы ", Math("h"), "."),
+                    ("Полная вертикальная сила на подошве: ", Math("V=N+G_{fund}+G_{soil}+G_{other}"),
+                     ". Веса не входят в ", Math("N"), " повторно и не усредняются."),
+                    (Math("M_{x,base}=M_x+Q_x h+M_{x,add,base}"), "; ",
+                     Math("M_{y,base}=M_y+Q_y h+M_{y,add,base}"), ". Дополнительные моменты заданы на подошве."),
+                    ("Веса заданы для одной фиксированной геометрии; перенос на другие размеры при подборе не допускается.",),
                 ) if contract.name == "foundations_shallow_weights" else (),
             ),
             TraceSection(refused=envelope.verdict == "refused", steps=envelope.trace),
@@ -173,4 +184,7 @@ def build_report(
         ),
         symbols=symbol_table(contract, envelope.trace),
         rounding={output.quantity: output.rounding_rule for output in envelope.outputs},
+        default_rounding=RoundingRule(decimals=2, mode="half_up") if explicit else None,
+        norm_refs=envelope.norm_refs if explicit else (),
+        outputs=envelope.outputs if explicit else (),
     )

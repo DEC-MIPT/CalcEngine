@@ -211,9 +211,9 @@ class CalculationService:
             raise CalculationTypeNotRegisteredError(
                 f"The calculation type {stored.calculation_type!r} of this result is no longer registered."
             ) from None
-        rendered = render_docx(build_report(contract, stored.inputs, stored.envelope, report_request))
+        report = build_report(contract, stored.inputs, stored.envelope, report_request)
         context = None if self._design_results is None else self._design_results.context(result_id)
-        return rendered if context is None else render_foundation_docx(rendered, context)
+        return render_docx(report) if context is None else render_foundation_docx(report, context)
 
     def _repository(self) -> CalculationResultRepository:
         if self._results is None:

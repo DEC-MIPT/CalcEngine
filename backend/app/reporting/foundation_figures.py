@@ -64,7 +64,8 @@ def foundation_figure(context: FoundationContext) -> BytesIO:
     drawing = _Drawing()
     drawing.text(20, 12, "LOADS")
     drawing.text(430, 12, "PRESSURE KPA")
-    drawing.text(350, 32, "DIAGNOSTIC" if context.pressure_state == "diagnostic" else "FULL CONTACT" if context.pressure_state == "full_contact" else "UNAVAILABLE")
+    if context.weight_mode != "explicit" or not context.corners:
+        drawing.text(350, 32, "DIAGNOSTIC" if context.pressure_state == "diagnostic" else "FULL CONTACT" if context.pressure_state == "full_contact" else "UNAVAILABLE")
     drawing.text(45, 155, "H")
     drawing.text(145, 250, "B")
     drawing.line((15, 245), (295, 245))
@@ -116,11 +117,12 @@ def foundation_figure(context: FoundationContext) -> BytesIO:
             base[corner.name] = (x, y)
             tips[corner.name] = (x, y - height)
             drawing.line(base[corner.name], tips[corner.name])
-            label = f"{corner.name} {corner.pressure.value:+.5G}"
+            label = corner.name if context.weight_mode == "explicit" else f"{corner.name} {corner.pressure.value:+.5G}"
             label_x = max(330, min(int(x) - 35, 715 - len(label) * 12))
             label_y = max(32, min(260, round(y - height) - 18))
             drawing.text(label_x, label_y, label)
-        drawing.text(330, 280, f"MIN {context.trace_values['p_corner_min'].value:+.5G} MAX {context.trace_values['p_corner_max'].value:+.5G}")
+        if context.weight_mode != "explicit":
+            drawing.text(330, 280, f"MIN {context.trace_values['p_corner_min'].value:+.5G} MAX {context.trace_values['p_corner_max'].value:+.5G}")
         order = ("pp", "pm", "mm", "mp", "pp")
         for first, second in pairwise(order):
             drawing.line(base[first], base[second], 170)

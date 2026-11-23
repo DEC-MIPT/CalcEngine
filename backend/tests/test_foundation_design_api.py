@@ -7,6 +7,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from docx import Document
+from docx.oxml.ns import qn
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 from sqlalchemy import create_engine, func, select
@@ -244,12 +245,29 @@ def test_new_explicit_result_report_has_complete_weight_and_moment_context(clien
     response = client.post(f"/calculations/{envelope['result_id']}/report", json=REPORT)
     assert response.status_code == 200
     document = Document(BytesIO(response.content))
-    text = '\n'.join(p.text for p in document.paragraphs)
-    assert 'G_fund' in text and 'Mx_add_base' in text
-    tables = '\n'.join(cell.text for table in document.tables for row in table.rows for cell in row.cells)
-    for name in ['G_fund', 'G_soil', 'G_other', 'V', 'Mx_base', 'My_base', 'p_corner_pp']:
-        assert name in tables
+    math_nodes = document.element.body.xpath('.//m:oMath')
+    expressions = {''.join(node.text or '' for node in math.iter(qn('m:t'))) for math in math_nodes}
+    for symbol in ('Gfund', 'Gsoil', 'Gother', 'V', 'Mx,base', 'My,base', 'Mx,add,base', 'p++'):
+        assert symbol in expressions
     assert len(document.inline_shapes) == 1
+
+
+
+def test_explicit_report_refusal_has_diagnostic_values_but_no_output_section(client):
+    example = json.loads((Path(__file__).parent / 'fixtures/foundations_weights_references.json').read_text())[0]
+    inputs = example['inputs'] | {'Mx': {'value': 1000, 'unit': 'kN*m'}}
+    result = client.post('/calculations', json={'calculation_type': 'foundations_shallow_weights', 'inputs': inputs}).json()
+    assert result['verdict_reason']['kind'] == 'derived'
+    response = client.post(f"/calculations/{result['result_id']}/report", json=REPORT)
+    assert response.status_code == 200
+    document = Document(BytesIO(response.content))
+    text = '\n'.join(p.text for p in document.paragraphs)
+    assert 'Выходные величины' not in text and 'Все проверки выполнены.' not in text
+    assert 'Диагностическая эпюра:' in text
+    assert text.count('Нормативные ссылки расчёта: СП 22.13330.2016') == 1
+    reason = next(p for p in document.paragraphs if p.text.startswith('Получено:'))
+    assert len(reason._p.xpath('./m:oMath')) == 3
+    assert '0,00' in ''.join(t.text or '' for t in reason._p.iter(qn('m:t')))
 
 
 def test_historical_report_stays_usable_without_context(client, resources):
@@ -429,6 +447,20 @@ def test_method_refusal_preserves_unavailable_pressure_context_and_report(client
     report = client.post(f"/calculations/{result['result_id']}/report", json=REPORT)
     assert report.status_code == 200
     assert 'Эпюра недоступна' in '\n'.join(p.text for p in Document(BytesIO(report.content)).paragraphs)
+
+
+
+def test_explicit_method_refusal_does_not_describe_an_absent_pressure_plot(client):
+    example = json.loads((Path(__file__).parent / 'fixtures/foundations_weights_references.json').read_text())[0]
+    inputs = example['inputs'] | {'d_b': {'value': 3, 'unit': 'm'}}
+    result = client.post('/calculations', json={'calculation_type': 'foundations_shallow_weights', 'inputs': inputs}).json()
+    assert result['verdict_reason']['kind'] == 'bound' and result['trace'] == []
+    response = client.post(f"/calculations/{result['result_id']}/report", json=REPORT)
+    assert response.status_code == 200
+    document = Document(BytesIO(response.content))
+    text = '\n'.join(p.text for p in document.paragraphs)
+    assert 'Эпюра недоступна' in text and 'Величины по шагам расчёта' not in text
+    assert 'Угловые давления отсутствуют' in document.inline_shapes[0]._inline.docPr.get('descr', '')
 
 
 def test_incomplete_search_report_contains_no_fabricated_result(resources):

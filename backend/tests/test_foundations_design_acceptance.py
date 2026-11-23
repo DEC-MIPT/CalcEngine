@@ -1,5 +1,6 @@
 import json
 import platform
+import re
 from collections.abc import Iterator, Sequence
 from datetime import date
 from io import BytesIO
@@ -10,6 +11,7 @@ from unittest.mock import patch
 import pytest
 from docx import Document
 from docx.oxml.ns import qn
+from docx.table import _Cell
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -88,6 +90,12 @@ def acceptance_client() -> Iterator[TestClient]:
         engine.dispose()
 
 
+def math_text(cell: _Cell) -> str:
+    assert cell._tc.xpath(".//m:oMath")
+    assert not cell.text
+    return "".join(node.text or "" for node in cell._tc.iter(qn("m:t"))).replace("\xa0", " ").replace("−", "-")
+
+
 @pytest.mark.parametrize("reference", REFERENCES, ids=lambda reference: reference.example_id)
 def test_admitted_weights_api_stored_context_and_docx(
     acceptance_client: TestClient, reference: ReferenceExample,
@@ -124,23 +132,43 @@ def test_admitted_weights_api_stored_context_and_docx(
     assert len(document.inline_shapes) == 1
     report_text = "".join(node.text or "" for node in document.element.body.iter(qn("w:t"), qn("m:t")))
     assert f"{reference.expected_outputs['R'].value:.2f}".replace(".", ",") in report_text
-    rows = [[cell.text for cell in row.cells] for table in document.tables for row in table.rows]
-    quantities = {row[0]: row[1] for row in rows if len(row) == 2}
-    for name, expected in reference.expected_outputs.items():
-        if name == "R":
-            continue
-        number, unit = quantities[f"trace:{name}"].rsplit(" ", 1)
-        assert float(number) == pytest.approx(expected.value, abs=0.005, rel=0)
-        assert unit == expected.unit
+    inputs, loads, geometry, trace, corners = document.tables
+    assert len(inputs.rows) == len(reference.inputs) + 1
+    assert len(geometry.rows) == 6
+    quantities = {math_text(row.cells[0]): math_text(row.cells[1]) for row in trace.rows[1:]}
+    assert f"{reference.expected_outputs['p'].value:.2f}".replace(".", ",") in quantities["p"]
+    loads_text = [math_text(row.cells[1]) for row in loads.rows[1:]]
     for name in ("G_fund", "G_soil", "G_other", "Mx_add_base", "My_add_base"):
-        number, unit = quantities[f"input:{name}"].rsplit(" ", 1)
-        assert float(number) == reference.inputs[name].value
-        assert unit == reference.inputs[name].unit
-    assert "input:d" not in quantities
-    corner_rows = {row[0]: row for row in rows if len(row) == 5 and row[0] in ("pp", "pm", "mp", "mm")}
-    assert set(corner_rows) == {"pp", "pm", "mp", "mm"}
-    for name, row in corner_rows.items():
-        assert float(row[3]) == pytest.approx(reference.expected_outputs[f"p_corner_{name}"].value, abs=0.005, rel=0)
+        number = f"{reference.inputs[name].value:.2f}".replace(".", ",")
+        assert any(text.startswith(number + " ") for text in loads_text)
+    assert [row.cells[0].text for row in corners.rows[1:]] == ["pp", "pm", "mp", "mm"]
+    for row in corners.rows[1:]:
+        for cell in row.cells[1:4]:
+            assert re.fullmatch(r"[-−]?\d+,\d{2}", math_text(cell))
+        actual = math_text(row.cells[3]).replace(",", ".").replace("−", "-")
+        assert float(actual) == pytest.approx(reference.expected_outputs[f"p_corner_{row.cells[0].text}"].value, abs=0.005, rel=0)
+    formulas = [p for p in document.paragraphs if p.text.startswith("Выражение: ")]
+    assert len(formulas) == len(envelope["trace"])
+    assert all(p._p.xpath("./m:oMath") and p.text == "Выражение: " for p in formulas)
+    step_headers = [p.text for p in document.paragraphs if re.match(r"^\d+\. ", p.text)]
+    assert [int(header.split('.', 1)[0]) for header in step_headers] == list(range(1, len(formulas) + 1))
+    checks = [p for p in document.paragraphs if p.text.startswith("Сравнение:")]
+    assert len(checks) == 4 and all(p._p.xpath('./m:oMath') for p in checks)
+    assert [p.text.endswith(' — выполнено') for p in checks] == [
+        step['passed'] for step in envelope['trace'] if step['kind'] == 'check'
+    ]
+    assert "Выходные величины" in report_text
+    assert "решение инженера Аким:" not in report_text
+    rationales = [p for p in document.paragraphs if p.text.startswith("Обоснование инженерной формулы:")]
+    engineer_steps = [step for step in envelope["trace"] if step["kind"] == "engineer_formula"]
+    assert len(rationales) == len(engineer_steps)
+    for paragraph, step in zip(rationales, engineer_steps, strict=True):
+        assert step['source']['rationale'].split(":", 1)[0] in paragraph.text
+        if '=' in step['source']['rationale']:
+            assert '=' not in paragraph.text and paragraph._p.xpath('./m:oMath')
+    overall_refs = [p.text for p in document.paragraphs if p.text.startswith("Нормативные ссылки расчёта:")]
+    assert len(overall_refs) == 1 and overall_refs[0].count("СП 22.13330.2016") == 1
+    assert all("таблица 5.4" in text and "формула (5.7)" in text for text in overall_refs)
 
 
 def selection_body(sizes: Sequence[tuple[float, float]]) -> dict:
