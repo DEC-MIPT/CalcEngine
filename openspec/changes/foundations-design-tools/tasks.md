@@ -6,6 +6,7 @@
 |---|---|---|---|
 | Backend design tools | `feature/foundations-design-tools/backend` | Section 2 | Reviewed integrated loads backend; decisions and references below; current DOR |
 | Frontend design tools | `feature/foundations-design-tools/frontend` | Section 3 | Existing loads frontend accepted, reviewed and integrated; new typed backend contract accepted |
+| Demo DOCX result parity fix | `fix/foundations-design-report/backend` | Section 2A | Integrated design-tool backend and stored result presentation contract |
 | Documentation | No code branch; develop only | Sections 1 and 4 | Explicit Git consent for commit/merge/push |
 
 Every code task belongs to exactly one feature above. Backend integrates before frontend; features integrate only when all their assigned tasks, tester GO and review are complete. Do not move unfinished predecessor tasks into this change or merge their branch without explicit consent.
@@ -32,6 +33,11 @@ Every code task belongs to exactly one feature above. Backend integrates before 
 - [x] 2.9 Extend DOCX for weight assembly, stored diagram evidence and candidate decision; verify complete expressions, refusal/exhaustion meaning and unchanged historical report fixtures.
 - [x] 2.10 Execute the admitted explicit-weight references through runner/API/DOCX and recorded invariants; verify mode equivalence, sign/unit cases, contact boundaries and approved tolerance metrics without recapturing expected outputs.
 - [x] 2.11 Run backend feature acceptance, latency/limit measurements and frozen regression; verify backend/check.sh, at least 95% branch coverage, current strict validation and explicit DB/catalog checks or skips; only tester declares backend GO.
+
+## 2A. Demo DOCX result parity fix
+
+- [ ] 2A.1 Align explicit-weight DOCX references, rounding, formulas and result evidence with the stored result screen; retain the input record, source status and title block.
+- [ ] 2A.2 Verify the Office Math XML, rendered DOCX, stored-output parity, refusal and the pilot and averaged report regressions. Require a scoped tester GO with at least 95% branch coverage of the changed code and independent report review before authorized integration.
 
 ## 3. Frontend design tools feature
 
@@ -74,6 +80,6 @@ Only tester declares GO per complete feature, with UI/UX confirmation where UI c
 
 The new mode must conserve assembled vertical force and signed moments, include each contribution once, preserve unit equivalence, refuse contact loss and retain all four ordered bearing checks. Search may select only complete passing candidates under the approved finite policy; source failure, interruption and no solution cannot produce a pass. Old results retain identity, retrieval and report meaning.
 
-Both feature suites, required lint/types/import boundaries and branch coverage at least 95% must pass. Frontend requires responsive diagram/text parity, keyboard and reduced-motion behavior, applicable WCAG/browser checks and reviewed screenshots. Existing browser requirements remain unwaived; unsupported or skipped matrix checks are reported as gaps. Real DB/catalog checks and skips are distinct from mock or unit evidence. Applicable existing API/report targets remain, and bounded search is measured with named candidate counts and environment.
+All feature suites, required lint/types/import boundaries and branch coverage at least 95% must pass. Frontend requires responsive diagram/text parity, keyboard and reduced-motion behavior, applicable WCAG/browser checks and reviewed screenshots. Existing browser requirements remain unwaived; unsupported or skipped matrix checks are reported as gaps. Real DB/catalog checks and skips are distinct from mock or unit evidence. Applicable existing API/report targets remain, and bounded search is measured with named candidate counts and environment.
 
-NO-GO includes any unresolved blocker/major/security issue, unapproved methodology or source, missing independent reference, failing test, insufficient coverage, blocking UI defect, incomplete search represented as success, regression identity change, or unvalidated/currently unreviewed artifacts. DOD requires reviewed, consented, verified integration of both features, matching canonical specs and archive. No Git operation is implied by satisfying a task.
+NO-GO includes any unresolved blocker/major/security issue, unapproved methodology or source, missing independent reference, failing test, insufficient coverage, blocking UI defect, incomplete search represented as success, regression identity change, or unvalidated/currently unreviewed artifacts. DOD requires reviewed, consented, verified integration of all code features, matching canonical specs and archive. No Git operation is implied by satisfying a task.

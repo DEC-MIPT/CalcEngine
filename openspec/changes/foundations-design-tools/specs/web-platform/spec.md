@@ -14,3 +14,16 @@ The system SHALL provide distinct controls for checking dimensions and selecting
 #### Scenario: Search cannot proceed on unspecified policy
 - **WHEN** candidate bounds or an approved policy are missing
 - **THEN** the selection action is unavailable with a readable explanation and no default policy is silently inferred from competitor behavior
+
+#### Scenario: Read the demo form in any mode
+- **WHEN** a user opens the demo form in explicit-weight, averaged-weight, or size-selection mode
+- **THEN** the diagram is horizontally centered within the guidance section, below the section heading
+- **AND** the diagram-specific explanatory text is visually hidden but remains available to assistive technology; field hints stay visible
+- **AND** in all three modes, each scalar input row places the field symbol to the left of its quantity label without overlap at supported widths, including 320 px
+
+#### Scenario: Review the explicit-weight demo result
+- **WHEN** a user opens a stored explicit-weight demo result with calculation steps, including a diagnostic refusal
+- **THEN** the R result ruler shows the stored steps in order and links its ticks to the corresponding trace entries, respecting reduced motion and not causing page overflow
+- **AND** each normative reference list shows each SP 22 edition once with its distinct stored locators and retains the stored reference status where displayed
+- **AND** engineering quantities without a stored output rounding rule are displayed with two fractional digits, with halfway values rounded away from zero; stored output rules take precedence and formulas, normative locators, stored values and verdicts do not change
+- **AND** if rounding the operands under the applicable rules would make the stored operator read against an individual check’s stored `passed` flag, both operands are shown unrounded wherever that comparison appears, including the verdict stamp when applicable
