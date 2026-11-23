@@ -51,6 +51,8 @@ Every code task belongs to exactly one feature above. Backend integrates before 
 - [ ] 3.8 Run frontend automated and browser acceptance; verify frontend/check.sh, at least 95% branch coverage, keyboard/diagram/report journeys, reduced motion, all applicable browser requirements and unchanged pilot.
 - [ ] 3.9 Obtain ui-ux-tester confirmation and separate tester GO for the full reviewed frontend revision; verify no unresolved visual/control/accessibility finding and accurate check/skip evidence.
 
+- [ ] 3.10 Add a separate registry entry for the editable `weights-C` synthetic example; verify draft isolation, explicit submission, edit-return navigation and supported browser behavior.
+
 ## 4. Review, integration and closure
 
 - [x] 4.1 Review the completed backend after tester GO; verify all section-2 tasks complete, independent references, unchanged executor/pilot and no open blocker/major/security finding.

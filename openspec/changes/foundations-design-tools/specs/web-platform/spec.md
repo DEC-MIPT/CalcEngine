@@ -27,3 +27,9 @@ The system SHALL provide distinct controls for checking dimensions and selecting
 - **AND** each normative reference list shows each SP 22 edition once with its distinct stored locators and retains the stored reference status where displayed
 - **AND** engineering quantities without a stored output rounding rule are displayed with two fractional digits, with halfway values rounded away from zero; stored output rules take precedence and formulas, normative locators, stored values and verdicts do not change
 - **AND** if rounding the operands under the applicable rules would make the stored operator read against an individual check’s stored `passed` flag, both operands are shown unrounded wherever that comparison appears, including the verdict stamp when applicable
+
+#### Scenario: Open the synthetic example from the type registry
+- **WHEN** the explicit-weight demo type is available and the user opens its separate example entry by keyboard or pointer
+- **THEN** the form identifies the synthetic `weights-C` data and initially presents all 19 editable quantities and their units without issuing a calculation request
+- **AND** the example draft stays separate from the ordinary form, including when the user returns from the result to edit the submitted inputs
+- **AND** explicit submission uses the existing calculation type and validation with no mock result or new API type
