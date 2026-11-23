@@ -18,3 +18,5 @@ The system SHALL generate new design-tool DOCX reports from stored inputs and ou
 - **AND** the base report precision rules apply except that demo trace, conclusion and diagram-table quantities without a stored output rule round to two digits, with halfway values rounded away from zero (`2.675` displays as `2.68`); the original input table remains lossless. A stored failed `4.001 ≤ 4` comparison stays unrounded rather than displaying `4.00 ≤ 4.00`
 - **AND** trace expressions, check expressions, substitutions, results and diagram-table quantities are editable Office Math equations, retaining plain-text fallback for any genuinely unconvertible stored expression, including engineer-defined expressions
 - **AND** source status, title block, and the meaning of historical pilot and averaged reports are unchanged
+- **AND** the demo may omit the engineer's identity while retaining the stored rationale and distinguishing it from the normative sources; the stored result is unchanged
+- **AND** diagnostic pressure tables retain the exact negative value if display rounding would turn it into zero

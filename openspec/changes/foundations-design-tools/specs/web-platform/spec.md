@@ -27,6 +27,9 @@ The system SHALL provide distinct controls for checking dimensions and selecting
 - **AND** each normative reference list shows each SP 22 edition once with its distinct stored locators and retains the stored reference status where displayed
 - **AND** engineering quantities without a stored output rounding rule are displayed with two fractional digits, with halfway values rounded away from zero; stored output rules take precedence and formulas, normative locators, stored values and verdicts do not change
 - **AND** if rounding the operands under the applicable rules would make the stored operator read against an individual check’s stored `passed` flag, both operands are shown unrounded wherever that comparison appears, including the verdict stamp when applicable
+- **AND** opening a valid step fragment directly, including after reloading the result, focuses the corresponding rendered step
+- **AND** the demo shows the stored rationale of an engineer-defined step or contact refusal separately from result-wide normative references; the engineer's identity may be omitted from this presentation and is retained in the stored result
+- **AND** the diagnostic pressure diagram’s table and extrema retain the exact negative value if display rounding would turn it into zero
 
 #### Scenario: Open the synthetic example from the type registry
 - **WHEN** the explicit-weight demo type is available and the user opens its separate example entry by keyboard or pointer

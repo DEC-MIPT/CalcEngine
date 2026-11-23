@@ -204,3 +204,19 @@ Unavailable checks are recorded separately:
 No application database migration was run. SQLite checks do not verify PostgreSQL.
 The dependent frontend still waits for accepted integration of the preceding
 loads frontend; the change is not ready for archive.
+
+
+## Demo acceptance clarifications, 2026-11-24
+
+In the working conversation, Akim said that the displayed source of an
+engineer-defined rule may be incomplete and confirmed full browser acceptance.
+The demo may omit the engineer's name, but shows the stored rationale separately
+from result-wide normative references. Stored sources are unchanged.
+
+The browser confirmation is the developer's statement. It does not identify
+individual branded-browser versions or establish independent runs. Playwright
+at `9f68efb` recorded 151 passes and 68 configured skips across Chromium,
+Firefox and WebKit before the review fixes. Tester and UI/UX acceptance of the
+revised code is separate.
+
+The DOCX patch based on `d37fab0` passed 1,765 backend tests with 11 PostgreSQL/catalog skips and covered 57 of 58 changed branches (98.28%). The tester gave a scoped report-parity GO for the tested patch. Independent report review confirmed that near-zero negative pressures remain exact in DOCX and that the stored rationale is retained separately from normative references. Integration remains pending.

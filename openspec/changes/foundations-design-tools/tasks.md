@@ -36,8 +36,8 @@ Every code task belongs to exactly one feature above. Backend integrates before 
 
 ## 2A. Demo DOCX result parity fix
 
-- [ ] 2A.1 Align explicit-weight DOCX references, rounding, formulas and result evidence with the stored result screen; retain the input record, source status and title block.
-- [ ] 2A.2 Verify the Office Math XML, rendered DOCX, stored-output parity, refusal and the pilot and averaged report regressions. Require a scoped tester GO with at least 95% branch coverage of the changed code and independent report review before authorized integration.
+- [x] 2A.1 Align explicit-weight DOCX references, rounding, formulas and result evidence with the stored result screen; retain the input record, source status and title block.
+- [x] 2A.2 Verify the Office Math XML, rendered DOCX, stored-output parity, refusal and the pilot and averaged report regressions. Require a scoped tester GO with at least 95% branch coverage of the changed code and independent report review before authorized integration.
 
 ## 3. Frontend design tools feature
 
